@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class AsignacionEquipo extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'asignacion_equipos';
 
     protected $fillable = [

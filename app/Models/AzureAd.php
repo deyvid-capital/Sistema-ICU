@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AzureAd extends Model
 {
+    use SoftDeletes;
+
 
     protected $table = 'azure_ad';
 

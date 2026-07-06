@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AccesoSistema extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'accesos_sistemas';
 
     protected $fillable = [

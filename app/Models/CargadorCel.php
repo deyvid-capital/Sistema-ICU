@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class CargadorCel extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'cargador_cel';
 
     protected $primaryKey = 'serial';

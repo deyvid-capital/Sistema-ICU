@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AccesoInternet extends Model
 {
+    use SoftDeletes;
+
 
     protected $table = 'internet';
 

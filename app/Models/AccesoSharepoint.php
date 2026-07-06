@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AccesoSharepoint extends Model
 {
+    use SoftDeletes;
+
 
     protected $table = 'accesos_sharepoint';
 

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReciboEquipo extends Model
 {
+    use SoftDeletes;
+
 
     protected $table = 'recibo_equipo';
 

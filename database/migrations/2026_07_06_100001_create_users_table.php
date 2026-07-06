@@ -13,13 +13,13 @@ return new class extends Migration
         });
 
         Schema::table('sessions', function (Blueprint $table) {
-            $table->string('user_id', 500)->nullable()->index()->after('id');
+            $table->uuid('user_id')->nullable()->index()->after('id');
         });
 
         Schema::dropIfExists('users');
 
         Schema::create('users', function (Blueprint $table) {
-            $table->string('id', 500)->primary();
+            $table->uuid('id')->primary();
             $table->string('name', 200);
             $table->string('carnet', 50)->nullable()->index();
             $table->foreignId('id_area')->constrained('areas', 'id_area');

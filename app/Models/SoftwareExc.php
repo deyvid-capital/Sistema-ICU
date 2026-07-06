@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SoftwareExc extends Model
 {
+    use SoftDeletes;
+
 
     protected $table = 'software_exc';
 

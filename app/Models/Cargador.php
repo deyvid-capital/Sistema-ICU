@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Cargador extends Model
 {
+    use SoftDeletes;
+
     protected $primaryKey = 'serial';
 
     public $incrementing = false;

@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Equipo extends Model
 {
+    use SoftDeletes;
+
     protected $primaryKey = 'service_tag';
 
     public $incrementing = false;

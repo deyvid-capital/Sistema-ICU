@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AsigCelular extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'asig_celular';
 
     protected $fillable = [

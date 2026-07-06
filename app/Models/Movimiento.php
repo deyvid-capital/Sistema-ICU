@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Movimiento extends Model
 {
+    use SoftDeletes;
+
 
     protected $fillable = [
         'usuario_id',

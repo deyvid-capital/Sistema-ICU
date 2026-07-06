@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MantenimientoEquipo extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'mantenimiento_equipo';
 
     protected $fillable = [

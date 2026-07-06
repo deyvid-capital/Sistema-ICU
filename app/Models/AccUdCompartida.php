@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AccUdCompartida extends Model
 {
+    use SoftDeletes;
+
 
     protected $table = 'acc_ud_compartidas';
 

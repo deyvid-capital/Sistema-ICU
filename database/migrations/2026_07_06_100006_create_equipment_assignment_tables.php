@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('asignacion_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('service_tag', 50);
-            $table->string('usuario_id', 500);
+            $table->foreignUuid('usuario_id')->constrained('users');
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
             $table->text('motivo')->nullable();
@@ -19,7 +19,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('service_tag')->references('service_tag')->on('equipos');
-            $table->foreign('usuario_id')->references('id')->on('users');
         });
 
         Schema::create('entrega_equipos', function (Blueprint $table) {

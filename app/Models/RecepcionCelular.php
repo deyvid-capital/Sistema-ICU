@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class RecepcionCelular extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'recepcion_celulares';
 
     protected $fillable = [

@@ -11,13 +11,12 @@ return new class extends Migration
         Schema::create('asig_celular', function (Blueprint $table) {
             $table->id();
             $table->string('celular_id', 50);
-            $table->string('usuario_id', 500);
+            $table->foreignUuid('usuario_id')->constrained('users');
             $table->date('fecha_ini')->nullable();
             $table->date('fecha_fin')->nullable();
             $table->timestamps();
 
             $table->foreign('celular_id')->references('id')->on('celulares');
-            $table->foreign('usuario_id')->references('id')->on('users');
         });
 
         Schema::create('entrega_celulares', function (Blueprint $table) {
@@ -50,12 +49,10 @@ return new class extends Migration
 
         Schema::create('firmantes', function (Blueprint $table) {
             $table->id();
-            $table->string('usuario_id', 500);
+            $table->foreignUuid('usuario_id')->constrained('users');
             $table->date('fecha');
             $table->morphs('documento');
             $table->timestamps();
-
-            $table->foreign('usuario_id')->references('id')->on('users');
         });
     }
 

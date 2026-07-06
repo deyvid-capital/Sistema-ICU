@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class UsuarioExterno extends Model
 {
+    use SoftDeletes;
+
 
     protected $table = 'usuarios_externos';
 

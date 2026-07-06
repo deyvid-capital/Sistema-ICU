@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AsignacionCargador extends Model
 {
+    use SoftDeletes;
+
     public $incrementing = false;
 
     protected $fillable = [

@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Celular extends Model
 {
+    use SoftDeletes;
+
     protected $primaryKey = 'id';
 
     public $incrementing = false;
