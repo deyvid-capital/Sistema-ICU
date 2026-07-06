@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Celular extends Model
+{
+    protected $primaryKey = 'id';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
+    protected $fillable = [
+        'id',
+        'fecha_compra',
+        'precio',
+        'marca',
+        'modelo',
+        'imei',
+        'procesador',
+        'disco',
+        'ram',
+        'bateria',
+        'color',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'fecha_compra' => 'date',
+        ];
+    }
+
+    /**
+     * Get the assignments for the phone.
+     */
+    public function asignaciones(): HasMany
+    {
+        return $this->hasMany(AsigCelular::class, 'celular_id', 'id');
+    }
+
+    /**
+     * The chargers that belong to the phone.
+     */
+    public function cargadores(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            CargadorCel::class,
+            'asig_cargador_cel',
+            'celulares_id',
+            'cargador_serial',
+            'id',
+            'serial'
+        )->withPivot(['motivo', 'fecha'])->withTimestamps();
+    }
+}
