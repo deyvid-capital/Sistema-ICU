@@ -11,11 +11,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['id', 'name', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password'])]
+#[Fillable(['id', 'name', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -48,6 +49,14 @@ class User extends Authenticatable
     public function movimientos(): HasMany
     {
         return $this->hasMany(Movimiento::class, 'usuario_id');
+    }
+
+    /**
+     * Get the user's most recent movement.
+     */
+    public function ultimoMovimiento(): HasOne
+    {
+        return $this->hasOne(Movimiento::class, 'usuario_id')->latestOfMany('fecha');
     }
 
     /**

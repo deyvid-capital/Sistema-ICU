@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Filament\Resources\Areas;
+
+use App\Filament\Resources\Areas\Pages\ManageAreas;
+use App\Models\Area;
+use BackedEnum;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use UnitEnum;
+
+class AreaResource extends Resource
+{
+    protected static ?string $model = Area::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
+
+    protected static ?string $recordTitleAttribute = 'area';
+
+    protected static ?string $navigationLabel = 'Áreas';
+
+    protected static ?string $modelLabel = 'área';
+
+    protected static ?string $pluralModelLabel = 'áreas';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Gestion de usuarios';
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('area')
+                    ->label('Área')
+                    ->required(),
+                Textarea::make('descripcion')
+                    ->label('Descripción')
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('area')
+                    ->label('Área'),
+                TextEntry::make('descripcion')
+                    ->label('Descripción')
+                    ->placeholder('Sin descripción')
+                    ->columnSpanFull(),
+                TextEntry::make('created_at')
+                    ->label('Creado')
+                    ->dateTime('d/m/Y H:i')
+                    ->placeholder('—'),
+                TextEntry::make('updated_at')
+                    ->label('Actualizado')
+                    ->dateTime('d/m/Y H:i')
+                    ->placeholder('—'),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('area')
+            ->defaultSort('area')
+            ->striped()
+            ->paginated([10, 25, 50])
+            ->columns([
+                TextColumn::make('area')
+                    ->label('Área')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->icon(Heroicon::OutlinedBuildingOffice2),
+                TextColumn::make('descripcion')
+                    ->label('Descripción')
+                    ->limit(50)
+                    ->placeholder('Sin descripción')
+                    ->toggleable(),
+                TextColumn::make('users_count')
+                    ->label('Usuarios')
+                    ->counts('users')
+                    ->badge()
+                    ->color('info'),
+                TextColumn::make('created_at')
+                    ->label('Registrado')
+                    ->since()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Actualizado')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->recordActions([
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Ver'),
+                    EditAction::make()
+                        ->label('Editar')
+                        ->successNotificationTitle('Área actualizada correctamente'),
+                    DeleteAction::make()
+                        ->label('Eliminar')
+                        ->successNotificationTitle('Área eliminada correctamente'),
+                ])
+                    ->label('Acciones')
+                    ->icon(Heroicon::OutlinedEllipsisVertical)
+                    ->color('info')
+                    ->button()
+                    ->tooltip('Acciones'),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->label('Eliminar seleccionados')
+                        ->successNotificationTitle('Áreas eliminadas correctamente'),
+                ])
+                    ->label('Acciones masivas'),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ManageAreas::route('/'),
+        ];
+    }
+}
