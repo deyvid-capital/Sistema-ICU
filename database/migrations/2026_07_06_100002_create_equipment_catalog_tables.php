@@ -34,11 +34,11 @@ return new class extends Migration
 
         Schema::create('equipos', function (Blueprint $table) {
             $table->string('service_tag', 50)->primary();
-            $table->foreignId('modelo_id')->constrained('modelos_laptops');
-            $table->foreignId('microprocesador_id')->constrained('microprocesadores');
+            $table->foreignId('modelo_id')->constrained('modelos_laptops')->onDelete('cascade');
+            $table->foreignId('microprocesador_id')->constrained('microprocesadores')->onDelete('cascade');
             $table->string('disco_duro', 50)->nullable();
-            $table->foreignId('ram_id')->constrained('memorias_ram');
-            $table->foreignId('gpu_id')->constrained('tarjetas_video');
+            $table->foreignId('ram_id')->constrained('memorias_ram')->onDelete('cascade');
+            $table->foreignId('gpu_id')->constrained('tarjetas_video')->onDelete('cascade');
             $table->string('proveedor', 100)->nullable();
             $table->date('inicio_garantia')->nullable();
             $table->date('venc_garantia')->nullable();
@@ -51,6 +51,7 @@ return new class extends Migration
             $table->boolean('usuario_admin')->nullable();
             $table->string('estado', 50)->default('sin asignar');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('cargadores', function (Blueprint $table) {
@@ -60,6 +61,7 @@ return new class extends Migration
             $table->string('estado', 50)->nullable();
             $table->text('observaciones')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('asignacion_cargadores', function (Blueprint $table) {
@@ -68,9 +70,10 @@ return new class extends Migration
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->foreign('serial_cargador')->references('serial')->on('cargadores');
-            $table->foreign('service_tag')->references('service_tag')->on('equipos');
+            $table->foreign('serial_cargador')->references('serial')->on('cargadores')->onDelete('cascade');
+            $table->foreign('service_tag')->references('service_tag')->on('equipos')->onDelete('cascade');
         });
 
         Schema::create('recibo_equipo', function (Blueprint $table) {
@@ -80,8 +83,9 @@ return new class extends Migration
             $table->string('url', 500)->nullable();
             $table->text('observaciones')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->foreign('equipo_id')->references('service_tag')->on('equipos');
+            $table->foreign('equipo_id')->references('service_tag')->on('equipos')->onDelete('cascade');
         });
 
         Schema::create('mantenimiento_equipo', function (Blueprint $table) {
@@ -92,8 +96,9 @@ return new class extends Migration
             $table->string('cap_despues', 500)->nullable();
             $table->text('observaciones')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->foreign('service_tag')->references('service_tag')->on('equipos');
+            $table->foreign('service_tag')->references('service_tag')->on('equipos')->onDelete('cascade');
         });
     }
 

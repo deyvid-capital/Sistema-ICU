@@ -22,14 +22,15 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name', 200);
             $table->string('carnet', 50)->nullable()->index();
-            $table->foreignId('id_area')->constrained('areas', 'id_area');
-            $table->foreignId('id_cargo')->constrained('cargos', 'id_cargo');
+            $table->foreignId('id_area')->constrained('areas', 'id_area')->onDelete('cascade');
+            $table->foreignId('id_cargo')->constrained('cargos', 'id_cargo')->onDelete('cascade');
             $table->string('email', 100)->unique();
             $table->string('telefono', 30)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index('name');
         });

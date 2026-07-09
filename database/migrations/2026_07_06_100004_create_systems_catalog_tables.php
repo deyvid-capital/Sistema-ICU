@@ -52,6 +52,7 @@ return new class extends Migration
             $table->string('nombre_licencia', 150);
             $table->string('categoria', 50)->default('MICROSOFT');
             $table->text('descripcion')->nullable();
+            $table->boolean('estado')->nullable()->default(true);
             $table->timestamps();
         });
 
@@ -67,8 +68,8 @@ return new class extends Migration
 
         Schema::create('software_areas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('software_id')->nullable()->constrained('softwares', 'id_software');
-            $table->foreignId('area_id')->nullable()->constrained('areas', 'id_area');
+            $table->foreignId('software_id')->nullable()->constrained('softwares', 'id_software')->cascadeOnDelete();
+            $table->foreignId('area_id')->nullable()->constrained('areas', 'id_area')->cascadeOnDelete();
             $table->timestamps();
 
             $table->unique(['software_id', 'area_id']);
@@ -81,6 +82,7 @@ return new class extends Migration
             $table->string('empresa', 150)->nullable();
             $table->string('cargo', 150);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

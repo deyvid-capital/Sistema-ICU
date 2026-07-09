@@ -10,28 +10,30 @@ return new class extends Migration
     {
         Schema::create('movimientos', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->nullable()->constrained('users');
+            $table->foreignUuid('usuario_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('tipo', 50);
             $table->date('fecha');
-            $table->foreignId('cargo_id')->nullable()->constrained('cargos', 'id_cargo');
+            $table->foreignId('cargo_id')->nullable()->constrained('cargos', 'id_cargo')->cascadeOnDelete();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['usuario_id', 'fecha']);
         });
 
         Schema::create('accesos_sharepoint', function (Blueprint $table) {
-            $table->foreignUuid('usuario_id')->constrained('users');
-            $table->foreignId('sitio_id')->constrained('sitios_sharepoint');
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('sitio_id')->constrained('sitios_sharepoint')->cascadeOnDelete();
             $table->boolean('estado')->default(false);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->primary(['usuario_id', 'sitio_id']);
         });
 
         Schema::create('accesos_sistemas', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->constrained('users');
-            $table->foreignId('id_sistema')->constrained('sistemas', 'id_sistema');
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('id_sistema')->constrained('sistemas', 'id_sistema')->cascadeOnDelete();
             $table->string('usuario_sistema', 50);
             $table->string('nivel_acceso', 100);
             $table->boolean('estado')->default(false);
@@ -39,34 +41,37 @@ return new class extends Migration
             $table->date('fecha_fin')->nullable();
             $table->text('observaciones')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('accesos_daza', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->constrained('users');
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
             $table->string('usuario_daza', 50);
             $table->string('nivel_acceso', 50);
-            $table->foreignId('fondo_id')->constrained('fondos', 'id_fondo');
+            $table->foreignId('fondo_id')->constrained('fondos', 'id_fondo')->cascadeOnDelete();
             $table->string('ambiente', 50);
             $table->boolean('estado')->nullable();
             $table->date('fecha')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('software_exc', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->constrained('users');
-            $table->foreignId('software_id')->constrained('softwares', 'id_software');
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('software_id')->constrained('softwares', 'id_software')->cascadeOnDelete();
             $table->string('tipo_excepcion', 50)->nullable();
             $table->text('motivo');
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('internet', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->constrained('users');
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
             $table->string('usuario_red', 50);
             $table->string('nivel_acceso', 50);
             $table->string('fortitoken', 50)->nullable();
@@ -74,54 +79,60 @@ return new class extends Migration
             $table->date('fecha')->nullable();
             $table->text('observaciones')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('licencias_usuarios', function (Blueprint $table) {
-            $table->foreignUuid('usuario_id')->constrained('users');
-            $table->foreignId('licencia_id')->constrained('licencias');
+            $table->id();
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('licencia_id')->constrained('licencias')->cascadeOnDelete();
             $table->date('fecha')->nullable();
             $table->boolean('estado');
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->primary(['usuario_id', 'licencia_id']);
+            $table->unique(['usuario_id', 'licencia_id']);
         });
 
         Schema::create('software_usuarios', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->constrained('users');
-            $table->foreignId('id_software')->constrained('softwares', 'id_software');
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('id_software')->constrained('softwares', 'id_software')->cascadeOnDelete();
             $table->boolean('estado')->default(false);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['usuario_id', 'id_software']);
         });
 
         Schema::create('azure_ad', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->constrained('users');
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
             $table->string('iniciales', 10)->nullable();
             $table->string('sincronizacion', 50)->nullable();
             $table->boolean('mfa')->nullable();
             $table->boolean('estado')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('acc_ud_compartidas', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->constrained('users');
+            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
             $table->string('unidad_compartida', 100);
             $table->boolean('estado')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('accesos_virtual', function (Blueprint $table) {
-            $table->foreignId('internet_id')->constrained('internet');
+            $table->foreignId('internet_id')->constrained('internet')->cascadeOnDelete();
             $table->integer('virtual_id');
-            $table->foreignId('vpn_id')->constrained('recursos_vpn');
+            $table->foreignId('vpn_id')->constrained('recursos_vpn')->cascadeOnDelete();
             $table->timestamps();
 
             $table->primary(['internet_id', 'virtual_id', 'vpn_id']);
-            $table->foreign('virtual_id')->references('id')->on('virtuales');
+            $table->foreign('virtual_id')->references('id')->on('virtuales')->cascadeOnDelete();
         });
     }
 

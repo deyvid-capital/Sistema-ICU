@@ -108,6 +108,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the license assignments for the user.
+     */
+    public function licenciasUsuarios(): HasMany
+    {
+        return $this->hasMany(LicenciaUsuario::class, 'usuario_id');
+    }
+
+    /**
      * The licenses that belong to the user.
      */
     public function licencias(): BelongsToMany

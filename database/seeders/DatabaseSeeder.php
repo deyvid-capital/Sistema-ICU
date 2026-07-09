@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Area;
 use App\Models\Cargo;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,19 +20,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $areas = [
-        ['area' => 'Recursos Humanos'],
-        ['area' => 'Finanzas'],
-        ['area' => 'Tecnología'],
-        ['area' => 'Marketing'],
-        ['area' => 'Operaciones'],
+            ['area' => 'Recursos Humanos'],
+            ['area' => 'Finanzas'],
+            ['area' => 'Tecnología'],
+            ['area' => 'Marketing'],
+            ['area' => 'Operaciones'],
         ];
 
         $cargos = [
-        ['cargo' => 'Gerente'],
-        ['cargo' => 'Analista'],
-        ['cargo' => 'Desarrollador'],
-        ['cargo' => 'Coordinador'],
-        ['cargo' => 'Asistente'],
+            ['cargo' => 'Gerente'],
+            ['cargo' => 'Analista'],
+            ['cargo' => 'Desarrollador'],
+            ['cargo' => 'Coordinador'],
+            ['cargo' => 'Asistente'],
         ];
         // Insertar cargos
         foreach ($cargos as $cargo) {
@@ -81,20 +81,19 @@ class DatabaseSeeder extends Seeder
                 'id_cargo' => 5, // Asistente
             ],
         ];
-        
+
         foreach ($users as $user) {
             User::create($user);
         }
-
-        
-
 
         User::factory()->create([
             'name' => 'admin',
             'email' => 'admin@admin.com',
             'password' => Hash::make('12345678'),
-            'id_area' => rand(1,5),
+            'id_area' => rand(1, 5),
             'id_cargo' => rand(1, 5),
         ]);
+
+        $this->call(SoftwareLicenciasSeeder::class);
     }
 }

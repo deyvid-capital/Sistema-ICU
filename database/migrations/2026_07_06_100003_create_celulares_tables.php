@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('bateria', 50)->nullable();
             $table->string('color', 50)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('cargador_cel', function (Blueprint $table) {
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->string('modelo', 100)->nullable();
             $table->text('observacion')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('asig_cargador_cel', function (Blueprint $table) {
@@ -36,10 +38,11 @@ return new class extends Migration
             $table->text('motivo')->nullable();
             $table->date('fecha')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->primary(['celulares_id', 'cargador_serial']);
-            $table->foreign('celulares_id')->references('id')->on('celulares');
-            $table->foreign('cargador_serial')->references('serial')->on('cargador_cel');
+            $table->foreign('celulares_id')->references('id')->on('celulares')->onDelete('cascade');
+            $table->foreign('cargador_serial')->references('serial')->on('cargador_cel')->onDelete('cascade');
         });
     }
 
