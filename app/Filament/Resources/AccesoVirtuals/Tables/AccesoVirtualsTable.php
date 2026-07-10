@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Filament\Resources\AccesoVirtuals\Tables;
+
+use App\Filament\Resources\AccesoVirtuals\AccesoVirtualResource;
+use App\Models\AccesoVirtual;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
+
+class AccesoVirtualsTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->recordUrl(fn (AccesoVirtual $record): string => $record->trashed()
+                ? AccesoVirtualResource::getUrl('view', ['record' => $record])
+                : AccesoVirtualResource::getUrl('edit', ['record' => $record]))
+            ->defaultSort('created_at', 'desc')
+            ->striped()
+            ->paginated([10, 25, 50])
+            ->columns([
+                TextColumn::make('accesoInternet.usuario.name')
+                    ->label('Usuario')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->icon(Heroicon::OutlinedUser),
+                TextColumn::make('accesoInternet.usuario_red')
+                    ->label('Usuario de red')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('—'),
+                TextColumn::make('virtual.maquina_virtual')
+                    ->label('Máquina virtual')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('info'),
+                TextColumn::make('recursoVpn.nombre_vpn')
+                    ->label('Recurso VPN')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('—'),
+                TextColumn::make('created_at')
+                    ->label('Registrado')
+                    ->since()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Actualizado')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->label('Eliminado')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—'),
+            ])
+            ->filters([
+                SelectFilter::make('virtual_id')
+                    ->label('Máquina virtual')
+                    ->relationship('virtual', 'maquina_virtual')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('vpn_id')
+                    ->label('Recurso VPN')
+                    ->relationship('recursoVpn', 'nombre_vpn')
+                    ->searchable()
+                    ->preload(),
+                TrashedFilter::make()
+                    ->label('Estado del registro'),
+            ])
+            ->recordActions([
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Ver'),
+                    EditAction::make()
+                        ->label('Editar')
+                        ->visible(fn (AccesoVirtual $record): bool => ! $record->trashed()),
+                    DeleteAction::make()
+                        ->label('Eliminar')
+                        ->visible(fn (AccesoVirtual $record): bool => ! $record->trashed())
+                        ->successNotificationTitle('Asignación eliminada correctamente'),
+                    ForceDeleteAction::make()
+                        ->label('Eliminar permanentemente')
+                        ->visible(fn (AccesoVirtual $record): bool => $record->trashed())
+                        ->successNotificationTitle('Asignación eliminada permanentemente'),
+                    RestoreAction::make()
+                        ->label('Restaurar')
+                        ->visible(fn (AccesoVirtual $record): bool => $record->trashed())
+                        ->successNotificationTitle('Asignación restaurada correctamente'),
+                ])
+                    ->label('Acciones')
+                    ->icon(Heroicon::OutlinedEllipsisVertical)
+                    ->color('info')
+                    ->button()
+                    ->tooltip('Acciones'),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->label('Eliminar seleccionados')
+                        ->successNotificationTitle('Asignaciones eliminadas correctamente'),
+                    ForceDeleteBulkAction::make()
+                        ->label('Eliminar permanentemente')
+                        ->successNotificationTitle('Asignaciones eliminadas permanentemente'),
+                    RestoreBulkAction::make()
+                        ->label('Restaurar seleccionados')
+                        ->successNotificationTitle('Asignaciones restauradas correctamente'),
+                ])
+                    ->label('Acciones masivas'),
+            ]);
+    }
+}

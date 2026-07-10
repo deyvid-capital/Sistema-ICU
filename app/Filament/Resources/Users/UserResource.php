@@ -5,15 +5,17 @@ namespace App\Filament\Resources\Users;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\ManageUserAccesos;
+use App\Filament\Resources\Users\Pages\ManageUserRecursos;
+use App\Filament\Resources\Users\Pages\ManageUserSoftware;
 use App\Filament\Resources\Users\Pages\ViewUser;
-use App\Filament\Resources\Users\RelationManagers\LicenciasUsuariosRelationManager;
-use App\Filament\Resources\Users\RelationManagers\SoftwareExcepcionesRelationManager;
-use App\Filament\Resources\Users\RelationManagers\SoftwareUsuariosRelationManager;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
+use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -38,6 +40,10 @@ class UserResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Gestion de usuarios';
 
+    protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+    protected static bool $isLazy = false;
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);
@@ -55,11 +61,18 @@ class UserResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            SoftwareUsuariosRelationManager::class,
-            SoftwareExcepcionesRelationManager::class,
-            LicenciasUsuariosRelationManager::class,
-        ];
+        return [];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewUser::class,
+            EditUser::class,
+            ManageUserSoftware::class,
+            ManageUserAccesos::class,
+            ManageUserRecursos::class,
+        ]);
     }
 
     public static function getPages(): array
@@ -69,6 +82,9 @@ class UserResource extends Resource
             'create' => CreateUser::route('/create'),
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
+            'software' => ManageUserSoftware::route('/{record}/software'),
+            'accesos' => ManageUserAccesos::route('/{record}/accesos'),
+            'recursos' => ManageUserRecursos::route('/{record}/recursos'),
         ];
     }
 

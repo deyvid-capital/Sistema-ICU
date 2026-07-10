@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Virtual extends Model
 {
+    use HasFactory;
 
     protected $table = 'virtuales';
 
-    public $incrementing = false;
-
     protected $fillable = [
-        'id',
         'maquina_virtual',
         'estado',
     ];

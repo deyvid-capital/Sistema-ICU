@@ -6,10 +6,12 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -18,9 +20,6 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Navigation\NavigationGroup;
-use Filament\Support\Icons\Heroicon;
-
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -36,14 +35,23 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
-                    NavigationGroup::make()
-                        ->label('Gestion de usuarios')
-                        ->icon(Heroicon::OutlinedUser),
-                    NavigationGroup::make()
-                        ->label('Software y Licencias')
-                        ->icon(Heroicon::OutlinedComputerDesktop)
+                NavigationGroup::make()
+                    ->label('Gestion de usuarios')
+                    ->icon(Heroicon::OutlinedUserGroup),
+                NavigationGroup::make()
+                    ->label('Software y Licencias')
+                    ->icon(Heroicon::OutlinedFolder),
+                NavigationGroup::make()
+                    ->label('Laptop y Computadoras')
+                    ->icon(Heroicon::OutlinedComputerDesktop),
+                NavigationGroup::make()
+                    ->label('Fondos y Recursos Compartidos')
+                    ->icon(Heroicon::OutlinedRectangleGroup),
+                NavigationGroup::make()
+                    ->label('Accesos')
+                    ->icon(Heroicon::OutlinedShieldCheck),
 
-                ])
+            ])
             ->colors([
                 'primary' => Color::Amber,
             ])

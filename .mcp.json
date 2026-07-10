@@ -6,6 +6,9 @@
                 "artisan",
                 "boost:mcp"
             ]
+        },
+        "codebase-memory": {
+            "command": "/home/deyvid/.local/bin/codebase-memory-mcp"
         }
     }
 }

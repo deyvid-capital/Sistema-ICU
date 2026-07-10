@@ -11,6 +11,15 @@ class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected static ?string $navigationLabel = 'Ver';
+
+    protected static ?int $navigationSort = 1;
+
+    protected function getAllRelationManagers(): array
+    {
+        return [];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

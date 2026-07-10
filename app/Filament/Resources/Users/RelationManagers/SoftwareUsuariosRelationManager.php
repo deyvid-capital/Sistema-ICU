@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\RelationManagers;
 
 use App\Filament\Actions\AsignarSoftwarePorDefectoAction;
+use App\Filament\Resources\Users\RelationManagers\Concerns\HasOwnerRecordCountBadge;
 use App\Models\SoftwareUsuario;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -29,6 +30,8 @@ use Illuminate\Validation\Rules\Unique;
 
 class SoftwareUsuariosRelationManager extends RelationManager
 {
+    use HasOwnerRecordCountBadge;
+
     protected static string $relationship = 'softwareUsuarios';
 
     protected static ?string $title = 'Software';

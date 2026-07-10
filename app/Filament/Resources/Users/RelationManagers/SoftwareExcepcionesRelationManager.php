@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
+use App\Filament\Resources\Users\RelationManagers\Concerns\HasOwnerRecordCountBadge;
 use App\Models\SoftwareExc;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -26,6 +27,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SoftwareExcepcionesRelationManager extends RelationManager
 {
+    use HasOwnerRecordCountBadge;
+
     protected static string $relationship = 'softwareExcepciones';
 
     protected static ?string $title = 'Excepciones de software';

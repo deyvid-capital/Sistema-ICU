@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TogglesEstadoOnSoftDelete;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AccesoInternet extends Model
 {
+    use HasFactory;
     use SoftDeletes;
-
+    use TogglesEstadoOnSoftDelete;
 
     protected $table = 'internet';
 

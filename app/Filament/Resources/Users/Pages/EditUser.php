@@ -16,6 +16,15 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected static ?string $navigationLabel = 'Editar';
+
+    protected static ?int $navigationSort = 2;
+
+    protected function getAllRelationManagers(): array
+    {
+        return [];
+    }
+
     protected function getSavedNotification(): ?Notification
     {
         return Notification::make()

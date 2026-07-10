@@ -41,7 +41,7 @@ return new class extends Migration
         });
 
         Schema::create('virtuales', function (Blueprint $table) {
-            $table->integer('id')->primary();
+            $table->id();
             $table->string('maquina_virtual', 100);
             $table->boolean('estado')->default(false);
             $table->timestamps();

@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TogglesEstadoOnSoftDelete;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AccesoSharepoint extends Model
 {
+    use HasFactory;
     use SoftDeletes;
-
+    use TogglesEstadoOnSoftDelete;
 
     protected $table = 'accesos_sharepoint';
-
-    public $incrementing = false;
 
     protected $fillable = [
         'usuario_id',

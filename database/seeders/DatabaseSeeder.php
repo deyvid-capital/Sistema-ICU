@@ -95,5 +95,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(SoftwareLicenciasSeeder::class);
+        $this->call(AccesosSeeder::class);
     }
 }

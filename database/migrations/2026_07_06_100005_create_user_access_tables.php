@@ -21,13 +21,14 @@ return new class extends Migration
         });
 
         Schema::create('accesos_sharepoint', function (Blueprint $table) {
+            $table->id();
             $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('sitio_id')->constrained('sitios_sharepoint')->cascadeOnDelete();
             $table->boolean('estado')->default(false);
             $table->timestamps();
             $table->softDeletes();
 
-            $table->primary(['usuario_id', 'sitio_id']);
+            $table->unique(['usuario_id', 'sitio_id']);
         });
 
         Schema::create('accesos_sistemas', function (Blueprint $table) {
@@ -47,10 +48,10 @@ return new class extends Migration
         Schema::create('accesos_daza', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
-            $table->string('usuario_daza', 50);
-            $table->string('nivel_acceso', 50);
+            $table->string('usuario_daza', 50)->nullable();
+            $table->string('nivel_acceso', 50)->nullable();
             $table->foreignId('fondo_id')->constrained('fondos', 'id_fondo')->cascadeOnDelete();
-            $table->string('ambiente', 50);
+            $table->string('ambiente', 50)->nullable();
             $table->boolean('estado')->nullable();
             $table->date('fecha')->nullable();
             $table->timestamps();
@@ -126,13 +127,14 @@ return new class extends Migration
         });
 
         Schema::create('accesos_virtual', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('internet_id')->constrained('internet')->cascadeOnDelete();
-            $table->integer('virtual_id');
+            $table->foreignId('virtual_id')->constrained('virtuales')->cascadeOnDelete();
             $table->foreignId('vpn_id')->constrained('recursos_vpn')->cascadeOnDelete();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->primary(['internet_id', 'virtual_id', 'vpn_id']);
-            $table->foreign('virtual_id')->references('id')->on('virtuales')->cascadeOnDelete();
+            $table->unique(['internet_id', 'virtual_id', 'vpn_id']);
         });
     }
 

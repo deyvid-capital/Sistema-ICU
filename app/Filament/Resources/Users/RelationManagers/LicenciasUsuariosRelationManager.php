@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
+use App\Filament\Resources\Users\RelationManagers\Concerns\HasOwnerRecordCountBadge;
 use App\Models\LicenciaUsuario;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -29,6 +30,8 @@ use Illuminate\Validation\Rules\Unique;
 
 class LicenciasUsuariosRelationManager extends RelationManager
 {
+    use HasOwnerRecordCountBadge;
+
     protected static string $relationship = 'licenciasUsuarios';
 
     protected static ?string $title = 'Licencias';

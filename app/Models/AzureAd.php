@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TogglesEstadoOnSoftDelete;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AzureAd extends Model
 {
-    use SoftDeletes;
-
+    use HasFactory, SoftDeletes, TogglesEstadoOnSoftDelete;
 
     protected $table = 'azure_ad';
 
