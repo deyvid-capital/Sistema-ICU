@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\AreaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Area extends Model
 {
-    /** @use HasFactory<\Database\Factories\AreaFactory> */
+    /** @use HasFactory<AreaFactory> */
     use HasFactory;
 
     protected $primaryKey = 'id_area';
@@ -32,5 +33,13 @@ class Area extends Model
     public function softwareAreas(): HasMany
     {
         return $this->hasMany(SoftwareArea::class, 'area_id', 'id_area');
+    }
+
+    /**
+     * Get the positions that belong to the area.
+     */
+    public function cargos(): HasMany
+    {
+        return $this->hasMany(Cargo::class, 'area_id', 'id_area');
     }
 }

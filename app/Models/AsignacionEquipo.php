@@ -2,13 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUsuario;
+use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AsignacionEquipo extends Model
 {
+    use BelongsToUsuario;
+    use GuardsAgainstTrashedRelations;
     use SoftDeletes;
+
+    protected static array $trashGuardedRelations = ['usuario'];
 
     protected $table = 'asignacion_equipos';
 
@@ -35,14 +42,6 @@ class AsignacionEquipo extends Model
     public function equipo(): BelongsTo
     {
         return $this->belongsTo(Equipo::class, 'service_tag', 'service_tag');
-    }
-
-    /**
-     * Get the user for the assignment.
-     */
-    public function usuario(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     /**

@@ -27,21 +27,20 @@ class DatabaseSeeder extends Seeder
             ['area' => 'Operaciones'],
         ];
 
-        $cargos = [
-            ['cargo' => 'Gerente'],
-            ['cargo' => 'Analista'],
-            ['cargo' => 'Desarrollador'],
-            ['cargo' => 'Coordinador'],
-            ['cargo' => 'Asistente'],
-        ];
-        // Insertar cargos
-        foreach ($cargos as $cargo) {
-            Cargo::create($cargo);
-        }
-
-        // Insertar areas
+        // Insertar areas primero: los cargos dependen de un área existente.
         foreach ($areas as $area) {
             Area::create($area);
+        }
+
+        $cargos = [
+            ['cargo' => 'Gerente', 'area_id' => 2], // Finanzas
+            ['cargo' => 'Analista', 'area_id' => 1], // Recursos Humanos
+            ['cargo' => 'Desarrollador', 'area_id' => 3], // Tecnología
+            ['cargo' => 'Coordinador', 'area_id' => 4], // Marketing
+            ['cargo' => 'Asistente', 'area_id' => 5], // Operaciones
+        ];
+        foreach ($cargos as $cargo) {
+            Cargo::create($cargo);
         }
 
         $users = [
@@ -86,12 +85,14 @@ class DatabaseSeeder extends Seeder
             User::create($user);
         }
 
+        $adminCargo = Cargo::query()->inRandomOrder()->first();
+
         User::factory()->create([
             'name' => 'admin',
             'email' => 'admin@admin.com',
             'password' => Hash::make('12345678'),
-            'id_area' => rand(1, 5),
-            'id_cargo' => rand(1, 5),
+            'id_area' => $adminCargo->area_id,
+            'id_cargo' => $adminCargo->id_cargo,
         ]);
 
         $this->call(SoftwareLicenciasSeeder::class);

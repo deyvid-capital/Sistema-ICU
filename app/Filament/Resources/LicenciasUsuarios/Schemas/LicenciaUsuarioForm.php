@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\LicenciasUsuarios\Schemas;
 
 use App\Models\LicenciaUsuario;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -22,6 +24,7 @@ class LicenciaUsuarioForm
                     ->searchable()
                     ->preload()
                     ->required()
+                    ->rule(new NotTrashed(User::class))
                     ->unique(
                         ignoreRecord: true,
                         modifyRuleUsing: function (Unique $rule, Get $get, ?LicenciaUsuario $record): Unique {

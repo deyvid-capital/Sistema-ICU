@@ -18,10 +18,29 @@ class UserInfolist
         return $schema
             ->columns(1)
             ->components([
-                Section::make()
+
+                Section::make('Datos personales')
+                    ->icon(Heroicon::OutlinedIdentification)
+                    ->columnSpanFull()
                     ->schema([
                         Grid::make(['default' => 1, 'md' => 3])
                             ->schema([
+                                TextEntry::make('carnet')
+                                    ->label('Carnet')
+                                    ->icon(Heroicon::OutlinedIdentification)
+                                    ->placeholder('Sin carnet'),
+                                TextEntry::make('area.area')
+                                    ->label('Área')
+                                    ->icon(Heroicon::OutlinedBuildingOffice2)
+                                    ->badge()
+                                    ->color('info')
+                                    ->placeholder('Sin área'),
+                                TextEntry::make('cargo.cargo')
+                                    ->label('Cargo')
+                                    ->icon(Heroicon::OutlinedBriefcase)
+                                    ->badge()
+                                    ->color('gray')
+                                    ->placeholder('Sin cargo'),
                                 TextEntry::make('name')
                                     ->label('Nombre')
                                     ->icon(Heroicon::OutlinedUser)
@@ -34,49 +53,20 @@ class UserInfolist
                                     ->state(fn (User $record): ?string => $record->movimientos->last()?->tipo)
                                     ->color(fn (User $record): string => $record->movimientos->last()?->tipo === 'Alta' ? 'success' : 'danger')
                                     ->placeholder('Sin movimientos'),
+                                TextEntry::make('email')
+                                    ->label('Correo electrónico')
+                                    ->icon(Heroicon::OutlinedEnvelope)
+                                    ->copyable()
+                                    ->copyMessage('Correo copiado')
+                                    ->placeholder('—'),
+                                TextEntry::make('telefono')
+                                    ->label('Teléfono')
+                                    ->icon(Heroicon::OutlinedPhone)
+                                    ->copyable()
+                                    ->copyMessage('Teléfono copiado')
+                                    ->placeholder('Sin teléfono'),
                             ]),
                     ]),
-
-                Section::make('Datos personales')
-                    ->icon(Heroicon::OutlinedIdentification)
-                    ->columns(2)
-                    ->schema([
-                        TextEntry::make('carnet')
-                            ->label('Carnet')
-                            ->icon(Heroicon::OutlinedIdentification)
-                            ->placeholder('Sin carnet'),
-                        TextEntry::make('area.area')
-                            ->label('Área')
-                            ->icon(Heroicon::OutlinedBuildingOffice2)
-                            ->badge()
-                            ->color('info')
-                            ->placeholder('Sin área'),
-                        TextEntry::make('cargo.cargo')
-                            ->label('Cargo')
-                            ->icon(Heroicon::OutlinedBriefcase)
-                            ->badge()
-                            ->color('gray')
-                            ->placeholder('Sin cargo'),
-                    ]),
-
-                Section::make('Contacto')
-                    ->icon(Heroicon::OutlinedAtSymbol)
-                    ->columns(2)
-                    ->schema([
-                        TextEntry::make('email')
-                            ->label('Correo electrónico')
-                            ->icon(Heroicon::OutlinedEnvelope)
-                            ->copyable()
-                            ->copyMessage('Correo copiado')
-                            ->placeholder('—'),
-                        TextEntry::make('telefono')
-                            ->label('Teléfono')
-                            ->icon(Heroicon::OutlinedPhone)
-                            ->copyable()
-                            ->copyMessage('Teléfono copiado')
-                            ->placeholder('Sin teléfono'),
-                    ]),
-
                 Section::make('Historial de movimientos')
                     ->icon(Heroicon::OutlinedArrowsRightLeft)
                     ->description('Altas y bajas registradas para el usuario.')

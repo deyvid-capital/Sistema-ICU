@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Licencias\RelationManagers;
 
 use App\Models\LicenciaUsuario;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -43,6 +45,7 @@ class LicenciasUsuariosRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->required()
+                    ->rule(new NotTrashed(User::class))
                     ->unique(
                         ignoreRecord: true,
                         modifyRuleUsing: function (Unique $rule, Get $get, ?LicenciaUsuario $record): Unique {

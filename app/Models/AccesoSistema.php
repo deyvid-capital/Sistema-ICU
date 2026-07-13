@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUsuario;
+use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use App\Models\Concerns\TogglesEstadoOnSoftDelete;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,9 +12,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AccesoSistema extends Model
 {
+    use BelongsToUsuario;
+    use GuardsAgainstTrashedRelations;
     use HasFactory;
     use SoftDeletes;
     use TogglesEstadoOnSoftDelete;
+
+    protected static array $trashGuardedRelations = ['usuario'];
 
     protected $table = 'accesos_sistemas';
 
@@ -34,14 +40,6 @@ class AccesoSistema extends Model
             'fecha_inicio' => 'date',
             'fecha_fin' => 'date',
         ];
-    }
-
-    /**
-     * Get the user that owns the access.
-     */
-    public function usuario(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     /**

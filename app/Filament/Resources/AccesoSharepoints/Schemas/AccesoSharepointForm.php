@@ -4,6 +4,8 @@ namespace App\Filament\Resources\AccesoSharepoints\Schemas;
 
 use App\Filament\Resources\Users\RelationManagers\AccesosSharepointRelationManager;
 use App\Models\AccesoSharepoint;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
@@ -32,6 +34,7 @@ class AccesoSharepointForm
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->rule(new NotTrashed(User::class))
                                     ->hiddenOn(AccesosSharepointRelationManager::class)
                                     ->unique(
                                         ignoreRecord: true,

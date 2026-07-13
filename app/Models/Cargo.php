@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
+use Database\Factories\CargoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Cargo extends Model
 {
-    /** @use HasFactory<\Database\Factories\CargoFactory> */
+    /** @use HasFactory<CargoFactory> */
     use HasFactory;
 
     protected $primaryKey = 'id_cargo';
 
     protected $fillable = [
+        'area_id',
         'cargo',
         'descripcion',
     ];
@@ -24,6 +27,14 @@ class Cargo extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'id_cargo', 'id_cargo');
+    }
+
+    /**
+     * Get the area that the position belongs to.
+     */
+    public function area(): BelongsTo
+    {
+        return $this->belongsTo(Area::class, 'area_id', 'id_area');
     }
 
     /**

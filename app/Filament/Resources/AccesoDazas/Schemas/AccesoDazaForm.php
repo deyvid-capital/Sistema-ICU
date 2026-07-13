@@ -4,6 +4,8 @@ namespace App\Filament\Resources\AccesoDazas\Schemas;
 
 use App\Filament\Resources\Users\RelationManagers\AccesosDazaRelationManager;
 use App\Models\Fondo;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -32,6 +34,7 @@ class AccesoDazaForm
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->rule(new NotTrashed(User::class))
                                     ->hiddenOn(AccesosDazaRelationManager::class),
                                 TextInput::make('usuario_daza')
                                     ->label('Usuario DAZA')

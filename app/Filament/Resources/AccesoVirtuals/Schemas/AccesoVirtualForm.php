@@ -9,6 +9,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\Rules\Unique;
 
 class AccesoVirtualForm
@@ -18,6 +19,9 @@ class AccesoVirtualForm
         return $schema
             ->components([
                 Section::make('Datos del acceso virtual')
+                    ->description('Agrega a quién se le va a otorgar acceso a la VPN, y qué nivel de acceso tiene.')
+                    ->icon(Heroicon::OutlinedAtSymbol)
+                    ->columnSpanFull()
                     ->schema([
                         Grid::make(2)
                             ->schema([

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUsuario;
+use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +11,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SoftwareExc extends Model
 {
-    use HasFactory, SoftDeletes;
+    use BelongsToUsuario, GuardsAgainstTrashedRelations, HasFactory, SoftDeletes;
+
+    protected static array $trashGuardedRelations = ['usuario'];
 
     protected $table = 'software_exc';
 
@@ -28,11 +32,6 @@ class SoftwareExc extends Model
             'fecha_inicio' => 'date',
             'fecha_fin' => 'date',
         ];
-    }
-
-    public function usuario(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     public function software(): BelongsTo

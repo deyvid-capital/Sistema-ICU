@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AccesoInternets\Schemas;
 
 use App\Filament\Resources\Users\RelationManagers\AccesosInternetRelationManager;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -32,6 +34,7 @@ class AccesoInternetForm
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->rule(new NotTrashed(User::class))
                                     ->hiddenOn(AccesosInternetRelationManager::class),
                                 TextInput::make('usuario_red')
                                     ->label('Usuario de red')

@@ -2,7 +2,11 @@
 
 namespace App\Filament\Resources\Areas;
 
-use App\Filament\Resources\Areas\Pages\ManageAreas;
+use App\Filament\Resources\Areas\Pages\CreateArea;
+use App\Filament\Resources\Areas\Pages\EditArea;
+use App\Filament\Resources\Areas\Pages\ListAreas;
+use App\Filament\Resources\Areas\Pages\ViewArea;
+use App\Filament\Resources\Areas\RelationManagers\CargosRelationManager;
 use App\Models\Area;
 use BackedEnum;
 use Filament\Actions\ActionGroup;
@@ -95,6 +99,11 @@ class AreaResource extends Resource
                     ->counts('users')
                     ->badge()
                     ->color('info'),
+                TextColumn::make('cargos_count')
+                    ->label('Cargos')
+                    ->counts('cargos')
+                    ->badge()
+                    ->color('success'),
                 TextColumn::make('created_at')
                     ->label('Registrado')
                     ->since()
@@ -136,10 +145,20 @@ class AreaResource extends Resource
             ]);
     }
 
+    public static function getRelations(): array
+    {
+        return [
+            CargosRelationManager::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => ManageAreas::route('/'),
+            'index' => ListAreas::route('/'),
+            'create' => CreateArea::route('/create'),
+            'view' => ViewArea::route('/{record}'),
+            'edit' => EditArea::route('/{record}/edit'),
         ];
     }
 }

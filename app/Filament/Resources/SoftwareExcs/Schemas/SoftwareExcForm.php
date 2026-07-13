@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\SoftwareExcs\Schemas;
 
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -18,7 +20,8 @@ class SoftwareExcForm
                     ->relationship('usuario', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->rule(new NotTrashed(User::class)),
                 Select::make('software_id')
                     ->label('Software')
                     ->relationship('software', 'nombre_software')

@@ -4,9 +4,9 @@ namespace App\Filament\Resources\Areas\Pages;
 
 use App\Filament\Resources\Areas\AreaResource;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Resources\Pages\ListRecords;
 
-class ManageAreas extends ManageRecords
+class ListAreas extends ListRecords
 {
     protected static string $resource = AreaResource::class;
 
@@ -14,10 +14,7 @@ class ManageAreas extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->label('Nueva área')
-                ->modalHeading('Crear área')
-                ->createAnother(false)
-                ->successNotificationTitle('Área creada correctamente'),
+                ->label('Nueva área'),
         ];
     }
 }

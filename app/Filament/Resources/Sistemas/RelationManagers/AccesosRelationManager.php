@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Sistemas\RelationManagers;
 
 use App\Models\AccesoSistema;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -41,7 +43,8 @@ class AccesosRelationManager extends RelationManager
                     ->relationship('usuario', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->rule(new NotTrashed(User::class)),
                 TextInput::make('usuario_sistema')
                     ->label('Usuario en el sistema')
                     ->required()

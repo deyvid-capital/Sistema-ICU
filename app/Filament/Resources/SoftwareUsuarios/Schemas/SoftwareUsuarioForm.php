@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\SoftwareUsuarios\Schemas;
 
 use App\Models\SoftwareUsuario;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
@@ -21,6 +23,7 @@ class SoftwareUsuarioForm
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->rule(new NotTrashed(User::class))
                     ->unique(
                         ignoreRecord: true,
                         modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareUsuario $record): Unique {

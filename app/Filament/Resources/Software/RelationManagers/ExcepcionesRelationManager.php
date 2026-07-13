@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Software\RelationManagers;
 
 use App\Models\SoftwareExc;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -39,7 +41,8 @@ class ExcepcionesRelationManager extends RelationManager
                     ->relationship('usuario', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->rule(new NotTrashed(User::class)),
                 Select::make('tipo_excepcion')
                     ->label('Tipo de excepcion')
                     ->options([

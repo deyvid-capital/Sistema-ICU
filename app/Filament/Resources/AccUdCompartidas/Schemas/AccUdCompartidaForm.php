@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\AccUdCompartidas\Schemas;
 
 use App\Filament\Resources\Users\RelationManagers\UnidadesCompartidasRelationManager;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class AccUdCompartidaForm
 {
@@ -17,6 +19,9 @@ class AccUdCompartidaForm
         return $schema
             ->components([
                 Section::make('Datos de la unidad compartida')
+                    ->description('Unidades Compartidas del usuario para el Sistema de DAZA')
+                    ->icon(Heroicon::OutlinedUser)
+                    ->columnSpanFull()
                     ->schema([
                         Grid::make(2)
                             ->schema([
@@ -26,11 +31,20 @@ class AccUdCompartidaForm
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->rule(new NotTrashed(User::class))
                                     ->hiddenOn(UnidadesCompartidasRelationManager::class),
-                                TextInput::make('unidad_compartida')
+                                Select::make('unidad_compartida')
                                     ->label('Unidad compartida')
+                                    ->options(
+                                        [
+                                            'PRODUCCION' => 'PRODUCCION',
+                                            'CONTINGENCIA' => 'CONTINGENCIA',
+                                            'TEST' => 'TEST',
+                                        ]
+                                    )
+                                    ->native(false)
                                     ->required()
-                                    ->maxLength(100),
+                                    ->live(),
                                 Toggle::make('estado')
                                     ->label('Activo')
                                     ->default(true)

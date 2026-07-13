@@ -2,13 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUsuario;
+use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Movimiento extends Model
 {
+    use BelongsToUsuario;
+    use GuardsAgainstTrashedRelations;
     use SoftDeletes;
+
+    protected static array $trashGuardedRelations = ['usuario'];
 
     protected $fillable = [
         'usuario_id',
@@ -22,11 +28,6 @@ class Movimiento extends Model
         return [
             'fecha' => 'date',
         ];
-    }
-
-    public function usuario(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'usuario_id');
     }
 
     public function cargo(): BelongsTo

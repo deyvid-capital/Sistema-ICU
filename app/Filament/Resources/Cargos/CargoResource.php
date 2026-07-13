@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Cargos;
 
+use App\Filament\Resources\Areas\RelationManagers\CargosRelationManager;
 use App\Filament\Resources\Cargos\Pages\ManageCargos;
 use App\Models\Cargo;
 use BackedEnum;
@@ -11,6 +12,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
@@ -18,6 +20,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -41,9 +44,19 @@ class CargoResource extends Resource
     {
         return $schema
             ->components([
+                Select::make('area_id')
+                    ->label('Área')
+                    ->relationship('area', 'area')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->native(false)
+                    ->hiddenOn(CargosRelationManager::class),
                 TextInput::make('cargo')
                     ->label('Cargo')
-                    ->required(),
+                    ->required()
+                    ->maxLength(150)
+                    ->unique(Cargo::class, 'cargo', ignoreRecord: true),
                 Textarea::make('descripcion')
                     ->label('Descripción')
                     ->columnSpanFull(),
@@ -54,6 +67,9 @@ class CargoResource extends Resource
     {
         return $schema
             ->components([
+                TextEntry::make('area.area')
+                    ->label('Área')
+                    ->placeholder('Sin área asignada'),
                 TextEntry::make('cargo')
                     ->label('Cargo'),
                 TextEntry::make('descripcion')
@@ -79,6 +95,14 @@ class CargoResource extends Resource
             ->striped()
             ->paginated([10, 25, 50])
             ->columns([
+                TextColumn::make('area.area')
+                    ->label('Área')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('info')
+                    ->placeholder('Sin área asignada')
+                    ->hiddenOn(CargosRelationManager::class),
                 TextColumn::make('cargo')
                     ->label('Cargo')
                     ->searchable()
@@ -107,7 +131,11 @@ class CargoResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('area_id')
+                    ->label('Área')
+                    ->relationship('area', 'area')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 ActionGroup::make([

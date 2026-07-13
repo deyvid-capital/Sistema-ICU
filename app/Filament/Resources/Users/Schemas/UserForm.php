@@ -5,12 +5,15 @@ namespace App\Filament\Resources\Users\Schemas;
 use App\Models\Area;
 use App\Models\Cargo;
 use App\Models\User;
+use Closure;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Hash;
@@ -50,6 +53,7 @@ class UserForm
                             Select::make('id_area')
                                 ->label('Área')
                                 ->required()
+                                ->live()
                                 ->options(fn () => Area::query()->orderBy('area')->pluck('area', 'id_area'))
                                 ->createOptionForm([
                                     TextInput::make('area')
@@ -60,6 +64,7 @@ class UserForm
                                 ->createOptionUsing(function (array $data): int {
                                     return Area::create(['area' => $data['area']])->id_area;
                                 })
+                                ->afterStateUpdated(fn (Set $set) => $set('id_cargo', null))
                                 ->native(false)
                                 ->placeholder('Selecciona un área')
                                 ->searchable()
@@ -67,18 +72,37 @@ class UserForm
                             Select::make('id_cargo')
                                 ->label('Cargo')
                                 ->required()
-                                ->options(fn () => Cargo::query()->orderBy('cargo')->pluck('cargo', 'id_cargo'))
+                                ->options(fn (Get $get) => Cargo::query()
+                                    ->where('area_id', $get('id_area'))
+                                    ->orderBy('cargo')
+                                    ->pluck('cargo', 'id_cargo'))
                                 ->createOptionForm([
                                     TextInput::make('cargo')
                                         ->label('Nombre del cargo')
                                         ->required()
                                         ->maxLength(150),
                                 ])
-                                ->createOptionUsing(function (array $data): int {
-                                    return Cargo::create(['cargo' => $data['cargo']])->id_cargo;
+                                ->createOptionUsing(function (array $data, Get $get): int {
+                                    return Cargo::create([
+                                        'cargo' => $data['cargo'],
+                                        'area_id' => $get('id_area'),
+                                    ])->id_cargo;
+                                })
+                                ->rule(function (Get $get): Closure {
+                                    return function (string $attribute, $value, Closure $fail) use ($get): void {
+                                        if (blank($value)) {
+                                            return;
+                                        }
+
+                                        if (! Cargo::query()->where('id_cargo', $value)->where('area_id', $get('id_area'))->exists()) {
+                                            $fail('El cargo seleccionado no pertenece al área elegida.');
+                                        }
+                                    };
                                 })
                                 ->native(false)
-                                ->placeholder('Selecciona un cargo')
+                                ->disabled(fn (Get $get): bool => blank($get('id_area')))
+                                ->placeholder('Selecciona primero un área')
+                                ->helperText('Selecciona primero un área para ver sus cargos.')
                                 ->searchable()
                                 ->preload(),
                         ]),

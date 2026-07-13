@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Movimientos\Schemas;
 
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
@@ -17,7 +19,8 @@ class MovimientoForm
                     ->relationship('usuario', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->rule(new NotTrashed(User::class)),
                 Select::make('tipo')
                     ->label('Tipo')
                     ->options([

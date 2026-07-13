@@ -3,7 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Concerns\CascadesDependentSoftDeletes;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -18,14 +21,45 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['id', 'name', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasUuids, Notifiable, SoftDeletes;
+    use CascadesDependentSoftDeletes, HasFactory, HasUuids, Notifiable, SoftDeletes;
 
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    /**
+     * @return array<string>
+     */
+    protected function dependentSoftDeleteRelations(): array
+    {
+        return [
+            'movimientos',
+            'accesosSharepoint',
+            'accesosSistemas',
+            'accesosDaza',
+            'accesosInternet',
+            'softwareUsuarios',
+            'softwareExcepciones',
+            'licenciasUsuarios',
+            'azureAd',
+            'unidadesCompartidas',
+            'asignacionesEquipos',
+            'asignacionesCelulares',
+        ];
+    }
+
+    /**
+     * Determine if the user can access the panel.
+     *  //return str_ends_with($this->email, '@yourdomain.com') && $this->hasVerifiedEmail();
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+
+        return true;
+    }
 
     /**
      * Get the area that the user belongs to.

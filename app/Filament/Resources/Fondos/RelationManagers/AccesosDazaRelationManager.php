@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Fondos\RelationManagers;
 
 use App\Models\AccesoDaza;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -40,7 +42,8 @@ class AccesosDazaRelationManager extends RelationManager
                     ->relationship('usuario', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->rule(new NotTrashed(User::class)),
                 TextInput::make('usuario_daza')
                     ->label('Usuario DAZA')
                     ->required()
