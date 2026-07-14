@@ -22,8 +22,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name', 200);
             $table->string('carnet', 50)->nullable()->index();
-            $table->foreignId('id_area')->constrained('areas', 'id_area')->onDelete('cascade');
-            $table->foreignId('id_cargo')->constrained('cargos', 'id_cargo')->onDelete('cascade');
+            $table->foreignId('id_area')->nullable()->constrained('areas', 'id_area')->restrictOnDelete();
+            $table->foreignId('id_cargo')->nullable()->constrained('cargos', 'id_cargo')->restrictOnDelete();
             $table->string('email', 100)->unique();
             $table->string('telefono', 30)->nullable();
             $table->timestamp('email_verified_at')->nullable();

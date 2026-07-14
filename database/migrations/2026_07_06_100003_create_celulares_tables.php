@@ -41,8 +41,8 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->primary(['celulares_id', 'cargador_serial']);
-            $table->foreign('celulares_id')->references('id')->on('celulares')->onDelete('cascade');
-            $table->foreign('cargador_serial')->references('serial')->on('cargador_cel')->onDelete('cascade');
+            $table->foreign('celulares_id')->references('id')->on('celulares')->restrictOnDelete();
+            $table->foreign('cargador_serial')->references('serial')->on('cargador_cel')->restrictOnDelete();
         });
     }
 

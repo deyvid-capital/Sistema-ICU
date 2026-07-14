@@ -29,7 +29,9 @@ class DatabaseSeeder extends Seeder
 
         // Insertar areas primero: los cargos dependen de un área existente.
         foreach ($areas as $area) {
-            Area::create($area);
+            if (! Area::where('area', $area['area'])->exists()) {
+                Area::create($area);
+            }
         }
 
         $cargos = [
@@ -40,7 +42,9 @@ class DatabaseSeeder extends Seeder
             ['cargo' => 'Asistente', 'area_id' => 5], // Operaciones
         ];
         foreach ($cargos as $cargo) {
-            Cargo::create($cargo);
+            if (! Cargo::where('cargo', $cargo['cargo'])->exists()) {
+                Cargo::create($cargo);
+            }
         }
 
         $users = [
@@ -82,7 +86,9 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($users as $user) {
-            User::create($user);
+            if (! User::where('email', $user['email'])->exists()) {
+                User::create($user);
+            }
         }
 
         $adminCargo = Cargo::query()->inRandomOrder()->first();
@@ -97,5 +103,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(SoftwareLicenciasSeeder::class);
         $this->call(AccesosSeeder::class);
+        $this->call(EquiposSeeder::class);
     }
 }

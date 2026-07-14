@@ -11,13 +11,13 @@ return new class extends Migration
         Schema::create('asig_celular', function (Blueprint $table) {
             $table->id();
             $table->string('celular_id', 50);
-            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->date('fecha_ini')->nullable();
             $table->date('fecha_fin')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('celular_id')->references('id')->on('celulares')->cascadeOnDelete();
+            $table->foreign('celular_id')->references('id')->on('celulares')->restrictOnDelete();
         });
 
         Schema::create('entrega_celulares', function (Blueprint $table) {
@@ -52,7 +52,7 @@ return new class extends Migration
 
         Schema::create('firmantes', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->date('fecha');
             $table->morphs('documento');
             $table->timestamps();

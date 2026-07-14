@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Concerns\CascadesDependentSoftDeletes;
+use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -24,11 +25,35 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use CascadesDependentSoftDeletes, HasFactory, HasUuids, Notifiable, SoftDeletes;
+    use CascadesDependentSoftDeletes,
+        HasFactory, 
+        HasUuids, 
+        Notifiable, 
+        PreventsForceDeleteWithDependents, 
+        SoftDeletes;
 
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    /**
+     * @var array<int, string>
+     */
+    protected static array $forceDeleteGuardedRelations = [
+        'movimientos',
+        'accesosSharepoint',
+        'accesosSistemas',
+        'accesosDaza',
+        'accesosInternet',
+        'softwareUsuarios',
+        'softwareExcepciones',
+        'licenciasUsuarios',
+        'azureAd',
+        'unidadesCompartidas',
+        'asignacionesEquipos',
+        'asignacionesCelulares',
+        'firmantes',
+    ];
 
     /**
      * @return array<string>

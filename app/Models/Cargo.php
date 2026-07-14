@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Database\Factories\CargoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,10 @@ class Cargo extends Model
 {
     /** @use HasFactory<CargoFactory> */
     use HasFactory;
+
+    use PreventsForceDeleteWithDependents;
+
+    protected static array $forceDeleteGuardedRelations = ['users', 'movimientos'];
 
     protected $primaryKey = 'id_cargo';
 

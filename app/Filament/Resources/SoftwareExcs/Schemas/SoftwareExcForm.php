@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SoftwareExcs\Schemas;
 
+use App\Filament\Resources\Users\RelationManagers\SoftwareExcepcionesRelationManager;
 use App\Models\User;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
@@ -21,7 +22,8 @@ class SoftwareExcForm
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->rule(new NotTrashed(User::class)),
+                    ->rule(new NotTrashed(User::class))
+                    ->hiddenOn(SoftwareExcepcionesRelationManager::class),
                 Select::make('software_id')
                     ->label('Software')
                     ->relationship('software', 'nombre_software')

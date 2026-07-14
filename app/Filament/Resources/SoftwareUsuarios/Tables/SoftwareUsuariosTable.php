@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SoftwareUsuarios\Tables;
 
 use App\Filament\Resources\SoftwareUsuarios\SoftwareUsuarioResource;
+use App\Filament\Resources\Users\RelationManagers\SoftwareUsuariosRelationManager;
 use App\Models\SoftwareUsuario;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -38,7 +39,8 @@ class SoftwareUsuariosTable
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->icon(Heroicon::OutlinedUser),
+                    ->icon(Heroicon::OutlinedUser)
+                    ->hiddenOn(SoftwareUsuariosRelationManager::class),
                 TextColumn::make('software.nombre_software')
                     ->label('Software')
                     ->searchable()

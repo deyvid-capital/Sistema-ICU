@@ -68,8 +68,8 @@ return new class extends Migration
 
         Schema::create('software_areas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('software_id')->nullable()->constrained('softwares', 'id_software')->cascadeOnDelete();
-            $table->foreignId('area_id')->nullable()->constrained('areas', 'id_area')->cascadeOnDelete();
+            $table->foreignId('software_id')->nullable()->constrained('softwares', 'id_software')->restrictOnDelete();
+            $table->foreignId('area_id')->nullable()->constrained('areas', 'id_area')->restrictOnDelete();
             $table->timestamps();
 
             $table->unique(['software_id', 'area_id']);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -13,9 +14,10 @@ class AsignacionEquipo extends Model
 {
     use BelongsToUsuario;
     use GuardsAgainstTrashedRelations;
+    use HasFactory;
     use SoftDeletes;
 
-    protected static array $trashGuardedRelations = ['usuario'];
+    protected static array $trashGuardedRelations = ['usuario', 'equipo'];
 
     protected $table = 'asignacion_equipos';
 
@@ -36,25 +38,16 @@ class AsignacionEquipo extends Model
         ];
     }
 
-    /**
-     * Get the equipment for the assignment.
-     */
     public function equipo(): BelongsTo
     {
-        return $this->belongsTo(Equipo::class, 'service_tag', 'service_tag');
+        return $this->belongsTo(Equipo::class, 'service_tag', 'service_tag')->withTrashed();
     }
 
-    /**
-     * Get the delivery for the assignment.
-     */
     public function entrega(): HasOne
     {
         return $this->hasOne(EntregaEquipo::class, 'asignacion_id');
     }
 
-    /**
-     * Get the reception for the assignment.
-     */
     public function recepcion(): HasOne
     {
         return $this->hasOne(RecepcionEquipo::class, 'asignacion_id');

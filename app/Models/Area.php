@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Database\Factories\AreaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,10 @@ class Area extends Model
 {
     /** @use HasFactory<AreaFactory> */
     use HasFactory;
+
+    use PreventsForceDeleteWithDependents;
+
+    protected static array $forceDeleteGuardedRelations = ['users', 'cargos', 'softwareAreas'];
 
     protected $primaryKey = 'id_area';
 

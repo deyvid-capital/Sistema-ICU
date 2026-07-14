@@ -27,7 +27,7 @@ class UsersTable
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['area', 'cargo', 'ultimoMovimiento']))
-           
+
             ->columns([
                 TextColumn::make('name')
                     ->label('Nombre')
@@ -145,8 +145,9 @@ class UsersTable
                         ->visible(fn (User $record): bool => $record->trashed()),
                 ])
                     ->label('')
-                    ->icon(Heroicon::OutlinedBars4)
-                    ->color('primary')
+                    ->icon(Heroicon::Bars4)
+                    ->label('Acciones')
+                    ->color('info')
                     ->button()
                     ->tooltip('Acciones'),
             ])

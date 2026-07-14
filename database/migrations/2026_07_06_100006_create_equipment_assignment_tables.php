@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('asignacion_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('service_tag', 50);
-            $table->foreignUuid('usuario_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
             $table->text('motivo')->nullable();
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('service_tag')->references('service_tag')->on('equipos')->cascadeOnDelete();
+            $table->foreign('service_tag')->references('service_tag')->on('equipos')->restrictOnDelete();
         });
 
         Schema::create('entrega_equipos', function (Blueprint $table) {
@@ -58,27 +58,27 @@ return new class extends Migration
         Schema::create('nota_salida_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('equipo_id', 50);
-            $table->foreignId('usuario_externo_id')->constrained('usuarios_externos')->cascadeOnDelete();
+            $table->foreignId('usuario_externo_id')->constrained('usuarios_externos')->restrictOnDelete();
             $table->string('numero', 20);
             $table->date('fecha');
             $table->text('nota')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('equipo_id')->references('service_tag')->on('equipos')->cascadeOnDelete();
+            $table->foreign('equipo_id')->references('service_tag')->on('equipos')->restrictOnDelete();
         });
 
         Schema::create('nota_recepcion_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('equipo_id', 50);
-            $table->foreignId('usuarios_externo_id')->constrained('usuarios_externos')->cascadeOnDelete();
+            $table->foreignId('usuarios_externo_id')->constrained('usuarios_externos')->restrictOnDelete();
             $table->string('numero', 20);
             $table->date('fecha');
             $table->text('nota')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('equipo_id')->references('service_tag')->on('equipos')->cascadeOnDelete();
+            $table->foreign('equipo_id')->references('service_tag')->on('equipos')->restrictOnDelete();
         });
     }
 

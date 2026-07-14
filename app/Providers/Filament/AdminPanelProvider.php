@@ -31,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
+            // Para cambiar el tamaño de la letra, agrega una clase CSS personalizada en tu theme:
             ->font('Roboto Mono')
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
@@ -42,16 +43,20 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Software y Licencias')
                     ->icon(Heroicon::OutlinedFolder),
                 NavigationGroup::make()
-                    ->label('Laptop y Computadoras')
-                    ->icon(Heroicon::OutlinedComputerDesktop),
-                NavigationGroup::make()
                     ->label('Fondos y Recursos Compartidos')
                     ->icon(Heroicon::OutlinedRectangleGroup),
                 NavigationGroup::make()
                     ->label('Accesos')
                     ->icon(Heroicon::OutlinedShieldCheck),
+                NavigationGroup::make()
+                    ->label('Laptop y Computadoras')
+                    ->icon(Heroicon::OutlinedComputerDesktop),
+                NavigationGroup::make()
+                    ->label('Inventario Equipos y Componentes')
+                    ->icon(Heroicon::OutlinedCpuChip),
 
             ])
+
             ->colors([
                 'primary' => Color::Amber,
             ])

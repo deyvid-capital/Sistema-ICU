@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SoftwareExcs\Tables;
 
 use App\Filament\Resources\SoftwareExcs\SoftwareExcResource;
+use App\Filament\Resources\Users\RelationManagers\SoftwareExcepcionesRelationManager;
 use App\Models\SoftwareExc;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -37,7 +38,8 @@ class SoftwareExcsTable
                     ->weight('medium')
                     ->icon(Heroicon::OutlinedUser)
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->hiddenOn(SoftwareExcepcionesRelationManager::class),
                 TextColumn::make('software.nombre_software')
                     ->label('Software')
                     ->sortable()

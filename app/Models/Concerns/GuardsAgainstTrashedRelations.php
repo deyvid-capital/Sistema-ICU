@@ -34,6 +34,8 @@ trait GuardsAgainstTrashedRelations
 
             $body = match ($relation) {
                 'usuario' => 'El usuario está en la papelera de reciclaje y no se le puede asignar.',
+                'equipo' => 'El equipo está en la papelera de reciclaje y no se le puede asignar.',
+                'cargador' => 'El cargador está en la papelera de reciclaje y no se le puede asignar.',
                 default => "El registro relacionado \"{$relation}\" está en la papelera de reciclaje y no se puede asignar.",
             };
 

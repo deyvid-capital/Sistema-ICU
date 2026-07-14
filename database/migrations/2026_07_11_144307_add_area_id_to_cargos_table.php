@@ -16,7 +16,7 @@ return new class extends Migration
         }
 
         Schema::table('cargos', function (Blueprint $table) {
-            $table->foreignId('area_id')->nullable()->after('id_cargo')->constrained('areas', 'id_area')->onDelete('cascade');
+            $table->foreignId('area_id')->nullable()->after('id_cargo')->constrained('areas', 'id_area')->restrictOnDelete();
         });
     }
 

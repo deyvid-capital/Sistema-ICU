@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SoftwareUsuarios\Schemas;
 
+use App\Filament\Resources\Users\RelationManagers\SoftwareUsuariosRelationManager;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
 use App\Rules\NotTrashed;
@@ -24,6 +25,7 @@ class SoftwareUsuarioForm
                     ->searchable()
                     ->preload()
                     ->rule(new NotTrashed(User::class))
+                    ->hiddenOn(SoftwareUsuariosRelationManager::class)
                     ->unique(
                         ignoreRecord: true,
                         modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareUsuario $record): Unique {

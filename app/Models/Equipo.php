@@ -2,14 +2,28 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PreventsForceDeleteWithDependents;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Equipo extends Model
 {
+    use HasFactory;
+    use PreventsForceDeleteWithDependents;
     use SoftDeletes;
+
+    protected static array $forceDeleteGuardedRelations = [
+        'asignaciones',
+        'asignacionCargador',
+        'recibos',
+        'mantenimientos',
+        'notasSalida',
+        'notasRecepcion',
+    ];
 
     protected $primaryKey = 'service_tag';
 
@@ -48,81 +62,51 @@ class Equipo extends Model
         ];
     }
 
-    /**
-     * Get the laptop model for the equipment.
-     */
     public function modelo(): BelongsTo
     {
         return $this->belongsTo(ModeloLaptop::class, 'modelo_id');
     }
 
-    /**
-     * Get the processor for the equipment.
-     */
     public function microprocesador(): BelongsTo
     {
         return $this->belongsTo(Microprocesador::class, 'microprocesador_id');
     }
 
-    /**
-     * Get the RAM for the equipment.
-     */
     public function ram(): BelongsTo
     {
         return $this->belongsTo(MemoriaRam::class, 'ram_id');
     }
 
-    /**
-     * Get the GPU for the equipment.
-     */
     public function gpu(): BelongsTo
     {
         return $this->belongsTo(TarjetaVideo::class, 'gpu_id');
     }
 
-    /**
-     * Get the assignments for the equipment.
-     */
     public function asignaciones(): HasMany
     {
         return $this->hasMany(AsignacionEquipo::class, 'service_tag', 'service_tag');
     }
 
-    /**
-     * Get the charger assignment for the equipment.
-     */
     public function asignacionCargador(): HasOne
     {
         return $this->hasOne(AsignacionCargador::class, 'service_tag', 'service_tag');
     }
 
-    /**
-     * Get the receipts for the equipment.
-     */
     public function recibos(): HasMany
     {
         return $this->hasMany(ReciboEquipo::class, 'equipo_id', 'service_tag');
     }
 
-    /**
-     * Get the maintenance records for the equipment.
-     */
     public function mantenimientos(): HasMany
     {
         return $this->hasMany(MantenimientoEquipo::class, 'service_tag', 'service_tag');
     }
 
-    /**
-     * Get the outbound notes for the equipment.
-     */
     public function notasSalida(): HasMany
     {
         return $this->hasMany(NotaSalidaEquipo::class, 'equipo_id', 'service_tag');
     }
 
-    /**
-     * Get the inbound notes for the equipment.
-     */
     public function notasRecepcion(): HasMany
     {
         return $this->hasMany(NotaRecepcionEquipo::class, 'equipo_id', 'service_tag');

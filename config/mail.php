@@ -39,10 +39,14 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME'),
+            // smtp + auto_tls = STARTTLS (Office 365 puerto 587). smtps = SSL (465).
+            'scheme' => env('MAIL_SCHEME', 'smtp'),
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
+            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            'auto_tls' => true,
+            'require_tls' => filter_var(env('MAIL_REQUIRE_TLS', true), FILTER_VALIDATE_BOOL),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,

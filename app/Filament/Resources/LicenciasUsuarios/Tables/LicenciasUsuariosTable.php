@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\LicenciasUsuarios\Tables;
 
 use App\Filament\Resources\LicenciasUsuarios\LicenciaUsuarioResource;
+use App\Filament\Resources\Users\RelationManagers\LicenciasUsuariosRelationManager;
 use App\Models\LicenciaUsuario;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -39,7 +40,8 @@ class LicenciasUsuariosTable
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->icon(Heroicon::OutlinedUser),
+                    ->icon(Heroicon::OutlinedUser)
+                    ->hiddenOn(LicenciasUsuariosRelationManager::class),
                 TextColumn::make('licencia.nombre_licencia')
                     ->label('Licencia')
                     ->searchable()

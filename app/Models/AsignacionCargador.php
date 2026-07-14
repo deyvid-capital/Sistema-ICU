@@ -2,14 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AsignacionCargador extends Model
 {
+    use GuardsAgainstTrashedRelations;
+    use HasFactory;
     use SoftDeletes;
 
-    public $incrementing = false;
+    protected static array $trashGuardedRelations = ['equipo', 'cargador'];
+
+    protected $table = 'asignacion_cargadores';
 
     protected $fillable = [
         'serial_cargador',
@@ -26,19 +33,13 @@ class AsignacionCargador extends Model
         ];
     }
 
-    /**
-     * Get the charger for the assignment.
-     */
     public function cargador(): BelongsTo
     {
-        return $this->belongsTo(Cargador::class, 'serial_cargador', 'serial');
+        return $this->belongsTo(Cargador::class, 'serial_cargador', 'serial')->withTrashed();
     }
 
-    /**
-     * Get the equipment for the assignment.
-     */
     public function equipo(): BelongsTo
     {
-        return $this->belongsTo(Equipo::class, 'service_tag', 'service_tag');
+        return $this->belongsTo(Equipo::class, 'service_tag', 'service_tag')->withTrashed();
     }
 }

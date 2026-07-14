@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CargadorCel extends Model
 {
+    use PreventsForceDeleteWithDependents;
     use SoftDeletes;
+
+    protected static array $forceDeleteGuardedRelations = ['celulares'];
 
     protected $table = 'cargador_cel';
 

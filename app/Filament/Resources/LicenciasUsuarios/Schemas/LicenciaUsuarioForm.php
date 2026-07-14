@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\LicenciasUsuarios\Schemas;
 
+use App\Filament\Resources\Users\RelationManagers\LicenciasUsuariosRelationManager;
 use App\Models\LicenciaUsuario;
 use App\Models\User;
 use App\Rules\NotTrashed;
@@ -25,6 +26,7 @@ class LicenciaUsuarioForm
                     ->preload()
                     ->required()
                     ->rule(new NotTrashed(User::class))
+                    ->hiddenOn(LicenciasUsuariosRelationManager::class)
                     ->unique(
                         ignoreRecord: true,
                         modifyRuleUsing: function (Unique $rule, Get $get, ?LicenciaUsuario $record): Unique {
