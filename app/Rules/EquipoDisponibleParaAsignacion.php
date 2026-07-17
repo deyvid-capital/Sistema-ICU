@@ -12,6 +12,7 @@ class EquipoDisponibleParaAsignacion implements ValidationRule
 {
     public function __construct(
         protected ?int $ignoreAsignacionId = null,
+        protected bool $confirmarReasignacion = false,
     ) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
@@ -33,6 +34,17 @@ class EquipoDisponibleParaAsignacion implements ValidationRule
         $estado = $equipo->estado instanceof EstadoEquipo
             ? $equipo->estado
             : EstadoEquipo::tryFrom((string) $equipo->estado);
+
+        if ($this->confirmarReasignacion) {
+            // La reasignación ya fue confirmada: solo se rechazan estados
+            // realmente bloqueados (mantenimiento, resguardo, baja).
+            if ($estado?->estaBloqueado() ?? false) {
+                $estadoLabel = $estado->getLabel();
+                $fail("El equipo no está disponible para asignar. Estado actual: {$estadoLabel}.");
+            }
+
+            return;
+        }
 
         if ($estado === null || ! $estado->isDisponibleParaAsignacion()) {
             $estadoLabel = $estado?->getLabel() ?? (string) $equipo->getRawOriginal('estado');

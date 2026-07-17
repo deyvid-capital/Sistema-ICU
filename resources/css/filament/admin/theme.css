@@ -2,3 +2,10 @@
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
+
+.fi-ta-text {
+    @apply text-[13px];
+}
+.fi-fo-field-wrp-label {
+    @apply text-[13px];
+}

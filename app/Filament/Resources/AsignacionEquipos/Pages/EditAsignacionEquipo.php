@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\AsignacionEquipos\Pages;
 
 use App\Enums\EstadoEquipo;
+use App\Filament\Concerns\ConfirmsReasignacionEquipo;
 use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoResource;
+use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoWorkflow;
 use App\Models\AsignacionEquipo;
 use App\Models\Equipo;
 use Filament\Actions\ActionGroup;
@@ -17,6 +19,8 @@ use Filament\Support\Icons\Heroicon;
 
 class EditAsignacionEquipo extends EditRecord
 {
+    use ConfirmsReasignacionEquipo;
+
     protected static string $resource = AsignacionEquipoResource::class;
 
     protected function getSavedNotification(): ?Notification
@@ -54,24 +58,72 @@ class EditAsignacionEquipo extends EditRecord
         ];
     }
 
-    protected function afterSave(): void
+    protected function beforeSave(): void
     {
+        $serviceTag = (string) ($this->data['service_tag'] ?? '');
+        $usuarioDestino = (string) ($this->data['usuario_id'] ?? '');
+        $confirmado = (bool) ($this->data['confirmar_reasignacion'] ?? false);
+        $ignoreId = $this->record->getKey();
 
-        $equipo = Equipo::where('service_tag', $this->record->service_tag)->first();
+        $equipo = Equipo::query()->find($serviceTag);
 
-        if ($this->record->fecha_fin != null) {
-            $equipo->update([
-                'estado' => EstadoEquipo::SinAsignar,
-            ]);
-        } else {
+        if (! $equipo) {
+            Notification::make()
+                ->danger()
+                ->title('Equipo no encontrado')
+                ->body('Seleccione un equipo válido.')
+                ->send();
 
-            if ($equipo->estado != EstadoEquipo::EnMantenimiento & $equipo->estado != EstadoEquipo::Resguardo & $equipo->estado != EstadoEquipo::Baja) {
-                $equipo->update([
-                    'estado' => EstadoEquipo::Asignado,
-                ]);
-            }
-
+            $this->halt();
         }
 
+        if (AsignacionEquipoWorkflow::equipoEstaBloqueado($equipo)) {
+            $estado = $equipo->estado instanceof EstadoEquipo
+                ? $equipo->estado->getLabel()
+                : (string) $equipo->estado;
+
+            Notification::make()
+                ->danger()
+                ->title('Equipo no disponible')
+                ->body("No se puede asignar: el equipo está en estado «{$estado}».")
+                ->persistent()
+                ->send();
+
+            $this->halt();
+        }
+
+        $activa = AsignacionEquipoWorkflow::asignacionActivaDelEquipo($serviceTag, $ignoreId);
+
+        if ($activa !== null && $activa->usuario_id !== $usuarioDestino) {
+            if (! $confirmado) {
+                Notification::make()
+                    ->warning()
+                    ->title('Confirmación requerida')
+                    ->body('Este equipo ya está asignado a otro usuario. Confirme para cerrar esa asignación y reasignarlo.')
+                    ->persistent()
+                    ->send();
+
+                $this->halt();
+            }
+
+            $nota = AsignacionEquipoWorkflow::cerrarAsignacionesPreviasYAnotar(
+                $serviceTag,
+                $usuarioDestino,
+                $ignoreId,
+            );
+
+            $this->data['observaciones'] = AsignacionEquipoWorkflow::appendObservacion(
+                $this->data['observaciones'] ?? null,
+                $nota,
+            );
+        }
+    }
+
+    protected function afterSave(): void
+    {
+        AsignacionEquipoWorkflow::actualizarEstadoEquipo(
+            $this->record->service_tag,
+            cerrada: filled($this->record->fecha_fin),
+        );
     }
 }

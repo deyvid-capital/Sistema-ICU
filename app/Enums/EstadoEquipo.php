@@ -39,4 +39,9 @@ enum EstadoEquipo: string implements HasColor, HasLabel
     {
         return $this === self::SinAsignar;
     }
+
+    public function estaBloqueado(): bool
+    {
+        return in_array($this, [self::EnMantenimiento, self::Resguardo, self::Baja], true);
+    }
 }
