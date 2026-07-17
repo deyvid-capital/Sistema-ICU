@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Equipos\Schemas;
 
+use App\Enums\EstadoEquipo;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -54,14 +56,10 @@ class EquipoForm
                             Select::make('estado')
                                 ->label('Estado')
                                 ->native(false)
-                                ->options([
-                                    'sin asignar' => 'Sin asignar',
-                                    'asignado' => 'Asignado',
-                                    'en mantenimiento' => 'En mantenimiento',
-                                    'baja' => 'Baja',
-                                ])
-                                ->default('sin asignar')
-                                ->required(),
+                                ->options(EstadoEquipo::class)
+                                ->default(EstadoEquipo::SinAsignar)
+                                ->required()
+                                ->helperText('Solo los equipos en estado «Sin asignar» pueden asignarse a un usuario.'),
                         ]),
                     ]),
                 Section::make('Hardware')
@@ -131,6 +129,22 @@ class EquipoForm
                             Toggle::make('usuario_admin')
                                 ->label('Usuario administrador'),
                         ]),
+                    ]),
+                Section::make('Observaciones')
+                    ->description('Notas internas del equipo. Puede usar negritas, listas y formato enriquecido.')
+                    ->icon(Heroicon::OutlinedDocumentText)
+                    ->columnSpanFull()
+                    ->schema([
+                        RichEditor::make('observaciones')
+                            ->label('Observaciones')
+                            ->nullable()
+                            ->columnSpanFull()
+                            ->toolbarButtons([
+                                ['bold', 'italic', 'underline', 'strike', 'link'],
+                                ['h2', 'h3'],
+                                ['bulletList', 'orderedList'],
+                                ['undo', 'redo'],
+                            ]),
                     ]),
             ]);
     }

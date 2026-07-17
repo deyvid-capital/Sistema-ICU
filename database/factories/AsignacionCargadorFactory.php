@@ -21,6 +21,10 @@ class AsignacionCargadorFactory extends Factory
             'service_tag' => Equipo::query()->inRandomOrder()->value('service_tag') ?? Equipo::factory(),
             'fecha_inicio' => fake()->dateTimeBetween('-1 year', 'now'),
             'fecha_fin' => fake()->optional(0.3)->dateTimeBetween('now', '+1 year'),
+            'observaciones' => fake()->optional()->randomElement([
+                '<p>Asignación de cargador <strong>verificada</strong>.</p>',
+                null,
+            ]),
         ];
     }
 }

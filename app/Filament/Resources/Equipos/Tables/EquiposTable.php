@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Equipos\Tables;
 
+use App\Enums\EstadoEquipo;
 use App\Filament\Resources\Equipos\EquipoResource;
 use App\Models\Equipo;
 use Filament\Actions\ActionGroup;
@@ -51,13 +52,19 @@ class EquiposTable
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'asignado' => 'success',
-                        'sin asignar' => 'warning',
-                        'en mantenimiento' => 'info',
-                        'baja' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->formatStateUsing(fn (EstadoEquipo|string|null $state): string => $state instanceof EstadoEquipo
+                        ? $state->getLabel()
+                        : (string) ($state ?? '—'))
+                    ->color(fn (EstadoEquipo|string|null $state): string => $state instanceof EstadoEquipo
+                        ? (string) $state->getColor()
+                        : match ($state) {
+                            'asignado' => 'success',
+                            'sin asignar' => 'warning',
+                            'en mantenimiento' => 'info',
+                            'resguardo' => 'gray',
+                            'baja' => 'danger',
+                            default => 'gray',
+                        }),
                 TextColumn::make('codigo_activo')
                     ->label('Código activo')
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -81,12 +88,7 @@ class EquiposTable
             ->filters([
                 SelectFilter::make('estado')
                     ->label('Estado')
-                    ->options([
-                        'sin asignar' => 'Sin asignar',
-                        'asignado' => 'Asignado',
-                        'en mantenimiento' => 'En mantenimiento',
-                        'baja' => 'Baja',
-                    ])
+                    ->options(EstadoEquipo::class)
                     ->native(false),
                 SelectFilter::make('modelo_id')
                     ->label('Modelo')

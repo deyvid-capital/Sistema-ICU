@@ -6,6 +6,7 @@ use App\Filament\Resources\Cargadors\Pages\CreateCargador;
 use App\Filament\Resources\Cargadors\Pages\EditCargador;
 use App\Filament\Resources\Cargadors\Pages\ListCargadors;
 use App\Filament\Resources\Cargadors\Pages\ViewCargador;
+use App\Filament\Resources\Cargadors\RelationManagers\AsignacionesRelationManager;
 use App\Filament\Resources\Cargadors\Schemas\CargadorForm;
 use App\Filament\Resources\Cargadors\Schemas\CargadorInfolist;
 use App\Filament\Resources\Cargadors\Tables\CargadorsTable;
@@ -55,7 +56,9 @@ class CargadorResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            AsignacionesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

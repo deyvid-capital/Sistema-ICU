@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\AsignacionEquipos\Pages;
 
+use App\Enums\EstadoEquipo;
 use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoResource;
 use App\Models\AsignacionEquipo;
+use App\Models\Equipo;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -50,5 +52,26 @@ class EditAsignacionEquipo extends EditRecord
                 ->button()
                 ->tooltip('Acciones'),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+
+        $equipo = Equipo::where('service_tag', $this->record->service_tag)->first();
+
+        if ($this->record->fecha_fin != null) {
+            $equipo->update([
+                'estado' => EstadoEquipo::SinAsignar,
+            ]);
+        } else {
+
+            if ($equipo->estado != EstadoEquipo::EnMantenimiento & $equipo->estado != EstadoEquipo::Resguardo & $equipo->estado != EstadoEquipo::Baja) {
+                $equipo->update([
+                    'estado' => EstadoEquipo::Asignado,
+                ]);
+            }
+
+        }
+
     }
 }

@@ -29,6 +29,11 @@ class AsignacionCargadorInfolist
                     ->label('Fecha de fin')
                     ->date('d/m/Y')
                     ->placeholder('—'),
+                TextEntry::make('observaciones')
+                    ->label('Observaciones')
+                    ->html()
+                    ->placeholder('—')
+                    ->columnSpanFull(),
                 TextEntry::make('created_at')
                     ->label('Creado')
                     ->dateTime('d/m/Y H:i')

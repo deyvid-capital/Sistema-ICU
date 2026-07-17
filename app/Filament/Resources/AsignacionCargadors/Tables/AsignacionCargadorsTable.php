@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AsignacionCargadors\Tables;
 
 use App\Filament\Resources\AsignacionCargadors\AsignacionCargadorResource;
+use App\Filament\Resources\Cargadors\RelationManagers\AsignacionesRelationManager as CargadorAsignacionesRelationManager;
+use App\Filament\Resources\Equipos\RelationManagers\AsignacionesCargadorRelationManager;
 use App\Models\AsignacionCargador;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -37,12 +39,14 @@ class AsignacionCargadorsTable
                     ->sortable()
                     ->weight('medium')
                     ->icon(Heroicon::OutlinedBolt)
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->hiddenOn(CargadorAsignacionesRelationManager::class),
                 TextColumn::make('equipo.service_tag')
                     ->label('Equipo')
                     ->searchable()
                     ->sortable()
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->hiddenOn(AsignacionesCargadorRelationManager::class),
                 TextColumn::make('fecha_inicio')
                     ->label('Fecha de inicio')
                     ->date('d/m/Y')

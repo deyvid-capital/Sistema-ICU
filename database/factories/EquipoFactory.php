@@ -35,7 +35,12 @@ class EquipoFactory extends Factory
             'licencia_so' => fake()->optional()->bothify('XXXXX-XXXXX-XXXXX-XXXXX-XXXXX'),
             'etiquetado' => fake()->boolean(70),
             'usuario_admin' => fake()->boolean(40),
-            'estado' => fake()->randomElement(['sin asignar', 'asignado', 'en mantenimiento', 'baja']),
+            'estado' => fake()->randomElement(['sin asignar', 'asignado', 'en mantenimiento', 'resguardo', 'baja']),
+            'observaciones' => fake()->optional()->randomElement([
+                '<p><strong>Equipo revisado</strong> y listo para inventario.</p>',
+                '<p>Observación: <em>requiere limpieza</em>.</p>',
+                null,
+            ]),
         ];
     }
 }

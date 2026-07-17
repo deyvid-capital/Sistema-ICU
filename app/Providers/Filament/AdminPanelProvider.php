@@ -56,7 +56,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon(Heroicon::OutlinedCpuChip),
 
             ])
-
+            ->databaseNotifications()
             ->colors([
                 'primary' => Color::Amber,
             ])

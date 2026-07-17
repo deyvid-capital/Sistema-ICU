@@ -23,6 +23,11 @@ class EquipoInfolist
                 TextEntry::make('estado')
                     ->label('Estado')
                     ->badge(),
+                TextEntry::make('observaciones')
+                    ->label('Observaciones')
+                    ->html()
+                    ->placeholder('—')
+                    ->columnSpanFull(),
                 TextEntry::make('modelo.nombre')
                     ->label('Modelo')
                     ->placeholder('—'),

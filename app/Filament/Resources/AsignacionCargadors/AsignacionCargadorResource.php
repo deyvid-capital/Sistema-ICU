@@ -28,7 +28,7 @@ class AsignacionCargadorResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Laptop y Computadoras';
 
-    protected static ?string $navigationLabel = 'Asignaciones de cargadores';
+    protected static ?string $navigationLabel = 'Asig. Cargadores';
 
     protected static ?int $navigationSort = 2;
 

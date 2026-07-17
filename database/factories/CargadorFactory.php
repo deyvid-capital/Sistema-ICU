@@ -18,7 +18,7 @@ class CargadorFactory extends Factory
             'serial' => strtoupper(fake()->unique()->bothify('CHG-????####')),
             'marca' => fake()->randomElement(['Dell', 'HP', 'Lenovo', 'Apple', 'Generic']),
             'modelo' => fake()->bothify('AC-##W'),
-            'estado' => fake()->randomElement(['disponible', 'asignado', 'danado', 'baja']),
+            'estado' => fake()->randomElement(['disponible', 'asignado', 'temporal', 'reasignacion', 'danado', 'baja']),
             'observaciones' => fake()->optional()->sentence(),
         ];
     }

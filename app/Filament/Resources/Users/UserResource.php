@@ -6,6 +6,7 @@ use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ManageUserAccesos;
+use App\Filament\Resources\Users\Pages\ManageUserEquipos;
 use App\Filament\Resources\Users\Pages\ManageUserRecursos;
 use App\Filament\Resources\Users\Pages\ManageUserSoftware;
 use App\Filament\Resources\Users\Pages\ViewUser;
@@ -72,6 +73,7 @@ class UserResource extends Resource
             ManageUserSoftware::class,
             ManageUserAccesos::class,
             ManageUserRecursos::class,
+            ManageUserEquipos::class,
         ]);
     }
 
@@ -85,6 +87,7 @@ class UserResource extends Resource
             'software' => ManageUserSoftware::route('/{record}/software'),
             'accesos' => ManageUserAccesos::route('/{record}/accesos'),
             'recursos' => ManageUserRecursos::route('/{record}/recursos'),
+            'equipos' => ManageUserEquipos::route('/{record}/equipos'),
         ];
     }
 

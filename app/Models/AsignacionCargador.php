@@ -23,6 +23,7 @@ class AsignacionCargador extends Model
         'service_tag',
         'fecha_inicio',
         'fecha_fin',
+        'observaciones',
     ];
 
     protected function casts(): array

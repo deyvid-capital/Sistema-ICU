@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AsignacionEquipos\Tables;
 
 use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoResource;
+use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationManager;
+use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
 use App\Models\AsignacionEquipo;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -36,12 +38,14 @@ class AsignacionEquiposTable
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->icon(Heroicon::OutlinedUser),
+                    ->icon(Heroicon::OutlinedUser)
+                    ->hiddenOn(AsignacionesEquipoRelationManager::class),
                 TextColumn::make('equipo.service_tag')
                     ->label('Equipo')
                     ->searchable()
                     ->sortable()
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->hiddenOn(AsignacionesUsuarioRelationManager::class),
                 TextColumn::make('fecha_inicio')
                     ->label('Fecha de inicio')
                     ->date('d/m/Y')

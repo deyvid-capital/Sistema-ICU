@@ -28,7 +28,7 @@ class AsignacionEquipoResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Laptop y Computadoras';
 
-    protected static ?string $navigationLabel = 'Asignaciones de equipos';
+    protected static ?string $navigationLabel = 'Asig. Equipos';
 
     protected static ?int $navigationSort = 1;
 

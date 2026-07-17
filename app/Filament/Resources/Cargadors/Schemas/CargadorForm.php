@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\Cargadors\Schemas;
 
+use App\Enums\EstadoCargador;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -44,18 +45,21 @@ class CargadorForm
                             Select::make('estado')
                                 ->label('Estado')
                                 ->native(false)
-                                ->options([
-                                    'disponible' => 'Disponible',
-                                    'asignado' => 'Asignado',
-                                    'danado' => 'Dañado',
-                                    'baja' => 'Baja',
-                                ])
-                                ->default('disponible'),
-                            Textarea::make('observaciones')
-                                ->label('Observaciones')
-                                ->rows(3)
-                                ->columnSpanFull(),
+                                ->options(EstadoCargador::class)
+                                ->default(EstadoCargador::Disponible)
+                                ->required()
+                                ->helperText('Puede estar Disponible, Temporal o Reasignación. Dañado/Baja no se asignan.'),
                         ]),
+                        RichEditor::make('observaciones')
+                            ->label('Observaciones')
+                            ->nullable()
+                            ->columnSpanFull()
+                            ->toolbarButtons([
+                                ['bold', 'italic', 'underline', 'strike', 'link'],
+                                ['h2', 'h3'],
+                                ['bulletList', 'orderedList'],
+                                ['undo', 'redo'],
+                            ]),
                     ]),
             ]);
     }

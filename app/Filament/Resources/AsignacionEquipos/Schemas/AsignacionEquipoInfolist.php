@@ -35,6 +35,7 @@ class AsignacionEquipoInfolist
                     ->columnSpanFull(),
                 TextEntry::make('observaciones')
                     ->label('Observaciones')
+                    ->html()
                     ->placeholder('—')
                     ->columnSpanFull(),
                 TextEntry::make('created_at')
