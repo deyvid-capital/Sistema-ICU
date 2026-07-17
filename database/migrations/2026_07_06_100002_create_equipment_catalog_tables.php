@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -66,8 +67,8 @@ return new class extends Migration
 
         Schema::create('asignacion_cargadores', function (Blueprint $table) {
             $table->id();
-            $table->string('serial_cargador', 50)->unique();
-            $table->string('service_tag', 50)->unique();
+            $table->string('serial_cargador', 50);
+            $table->string('service_tag', 50);
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
             $table->timestamps();
@@ -76,6 +77,19 @@ return new class extends Migration
             $table->foreign('serial_cargador')->references('serial')->on('cargadores')->restrictOnDelete();
             $table->foreign('service_tag')->references('service_tag')->on('equipos')->restrictOnDelete();
         });
+
+        // Historial permitido: solo una asignación activa por cargador/equipo.
+        DB::statement('
+            CREATE UNIQUE INDEX asignacion_cargadores_serial_activo_unique
+            ON asignacion_cargadores (serial_cargador)
+            WHERE deleted_at IS NULL AND fecha_fin IS NULL
+        ');
+
+        DB::statement('
+            CREATE UNIQUE INDEX asignacion_cargadores_equipo_activo_unique
+            ON asignacion_cargadores (service_tag)
+            WHERE deleted_at IS NULL AND fecha_fin IS NULL
+        ');
 
         Schema::create('recibo_equipo', function (Blueprint $table) {
             $table->id();

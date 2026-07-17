@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EstadoEquipo;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,7 @@ class Equipo extends Model
 
     protected static array $forceDeleteGuardedRelations = [
         'asignaciones',
-        'asignacionCargador',
+        'asignacionesCargador',
         'recibos',
         'mantenimientos',
         'notasSalida',
@@ -49,6 +50,7 @@ class Equipo extends Model
         'etiquetado',
         'usuario_admin',
         'estado',
+        'observaciones',
     ];
 
     protected function casts(): array
@@ -59,7 +61,15 @@ class Equipo extends Model
             'bloqueo_bios' => 'boolean',
             'etiquetado' => 'boolean',
             'usuario_admin' => 'boolean',
+            'estado' => EstadoEquipo::class,
         ];
+    }
+
+    public function asignacionActiva(): HasOne
+    {
+        return $this->hasOne(AsignacionEquipo::class, 'service_tag', 'service_tag')
+            ->whereNull('fecha_fin')
+            ->latest('fecha_inicio');
     }
 
     public function modelo(): BelongsTo
@@ -89,7 +99,14 @@ class Equipo extends Model
 
     public function asignacionCargador(): HasOne
     {
-        return $this->hasOne(AsignacionCargador::class, 'service_tag', 'service_tag');
+        return $this->hasOne(AsignacionCargador::class, 'service_tag', 'service_tag')
+            ->whereNull('fecha_fin')
+            ->latest('fecha_inicio');
+    }
+
+    public function asignacionesCargador(): HasMany
+    {
+        return $this->hasMany(AsignacionCargador::class, 'service_tag', 'service_tag');
     }
 
     public function recibos(): HasMany

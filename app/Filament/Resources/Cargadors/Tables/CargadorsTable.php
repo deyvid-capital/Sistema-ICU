@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Cargadors\Tables;
 
+use App\Enums\EstadoCargador;
 use App\Filament\Resources\Cargadors\CargadorResource;
 use App\Models\Cargador;
 use Filament\Actions\ActionGroup;
@@ -43,13 +44,20 @@ class CargadorsTable
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'disponible' => 'success',
-                        'asignado' => 'info',
-                        'danado' => 'warning',
-                        'baja' => 'danger',
-                        default => 'gray',
-                    })
+                    ->formatStateUsing(fn (EstadoCargador|string|null $state): string => $state instanceof EstadoCargador
+                        ? $state->getLabel()
+                        : (string) ($state ?? '—'))
+                    ->color(fn (EstadoCargador|string|null $state): string => $state instanceof EstadoCargador
+                        ? (string) $state->getColor()
+                        : match ($state) {
+                            'disponible' => 'success',
+                            'asignado' => 'info',
+                            'temporal' => 'warning',
+                            'reasignacion' => 'primary',
+                            'danado' => 'danger',
+                            'baja' => 'gray',
+                            default => 'gray',
+                        })
                     ->placeholder('—'),
                 TextColumn::make('created_at')
                     ->label('Registrado')
@@ -66,12 +74,7 @@ class CargadorsTable
             ->filters([
                 SelectFilter::make('estado')
                     ->label('Estado')
-                    ->options([
-                        'disponible' => 'Disponible',
-                        'asignado' => 'Asignado',
-                        'danado' => 'Dañado',
-                        'baja' => 'Baja',
-                    ])
+                    ->options(EstadoCargador::class)
                     ->native(false),
                 TrashedFilter::make()->label('Estado del registro'),
             ])

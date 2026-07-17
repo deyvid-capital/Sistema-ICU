@@ -43,16 +43,6 @@ enum EstadoCargador: string implements HasColor, HasLabel
         return $this === self::Disponible;
     }
 
-    public function puedeReasignarseConConfirmacion(): bool
-    {
-        return in_array($this, [
-            self::Asignado,
-            self::Temporal,
-            self::Reasignacion,
-            self::Disponible,
-        ], true);
-    }
-
     public function estaBloqueado(): bool
     {
         return in_array($this, [self::Danado, self::Baja], true);
