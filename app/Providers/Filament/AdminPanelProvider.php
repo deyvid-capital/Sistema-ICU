@@ -53,6 +53,9 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Inventario Equipos y Componentes')
                     ->icon(Heroicon::OutlinedCpuChip),
+                NavigationGroup::make()
+                    ->label('Formularios Entrega-Recepcion')
+                    ->icon(Heroicon::OutlinedArrowPathRoundedSquare),
 
             ])
             ->databaseNotifications()

@@ -145,13 +145,14 @@ class UserForm
                                 ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                                 ->helperText('Mínimo 8 caracteres.'),
                             Toggle::make('tipo')
-                                ->label('Tipo')
+                                ->label(fn ($state) => $state ? 'Alta' : 'Baja')
                                 ->onIcon(Heroicon::Bolt)
                                 ->offIcon(Heroicon::BoltSlash)
                                 ->onColor('success')
                                 ->offColor('danger')
                                 ->default(true)
-                                ->helperText('Alta o baja el usuario , se creará un movimiento en el sistema.'),
+                                ->helperText('Da de alta o baja al usuario; se creará un movimiento en el sistema.'),
+                           
                         ]),
 
                     ]),
