@@ -106,13 +106,6 @@
             border-right: none;
             font-size: 10px;
         }
-        .col-main-title.red-title {
-            color: #cc0000;
-            text-align: center;
-            padding: 10px;
-            background-color: #ffffff;
-            border-right: none;
-        }
         .col-content {
             width: 75%;
             padding: 1px 4px;

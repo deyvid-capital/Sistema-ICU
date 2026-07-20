@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PdfPreviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,6 +19,13 @@ Route::get('/api/ver-form-nota-salida', function () {
     return view('PlantillasPdf.FormNotaSalida');
 });
 
-Route::get('/api/ver-form-nota-salida-equipos', function () {
+Route::get('/api/ver-form-nota-recepcion-externa', function () {
     return view('PlantillasPdf.FormRecepcionExterna');
+});
+
+Route::prefix('pdf/preview')->name('pdf.preview.')->group(function () {
+    Route::get('/entrega', [PdfPreviewController::class, 'entrega'])->name('entrega');
+    Route::get('/recepcion', [PdfPreviewController::class, 'recepcion'])->name('recepcion');
+    Route::get('/nota-salida', [PdfPreviewController::class, 'notaSalida'])->name('nota-salida');
+    Route::get('/recepcion-externa', [PdfPreviewController::class, 'recepcionExterna'])->name('recepcion-externa');
 });
