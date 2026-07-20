@@ -23,7 +23,8 @@ class ReciboEquipoInfolist
                     ->date('d/m/Y')
                     ->placeholder('—'),
                 TextEntry::make('url')
-                    ->label('URL')
+                    ->label('Documento')
+                    ->formatStateUsing(fn (?string $state): string => filled($state) ? basename($state) : '—')
                     ->placeholder('—')
                     ->columnSpanFull(),
                 TextEntry::make('observaciones')

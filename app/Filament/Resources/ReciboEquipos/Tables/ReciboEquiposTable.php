@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ReciboEquipos\Tables;
 
+use App\Filament\Resources\Equipos\RelationManagers\RecibosEquipoRelationManager;
+use App\Filament\Resources\ReciboEquipos\Actions\ReciboEquipoDocumentActions;
 use App\Filament\Resources\ReciboEquipos\ReciboEquipoResource;
 use App\Models\ReciboEquipo;
 use Filament\Actions\ActionGroup;
@@ -14,6 +16,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -37,15 +40,16 @@ class ReciboEquiposTable
                     ->sortable()
                     ->weight('medium')
                     ->icon(Heroicon::OutlinedComputerDesktop)
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->hiddenOn(RecibosEquipoRelationManager::class),
                 TextColumn::make('fecha')
                     ->label('Fecha')
                     ->date('d/m/Y')
                     ->sortable()
                     ->placeholder('—'),
                 TextColumn::make('url')
-                    ->label('URL')
-                    ->limit(40)
+                    ->label('Documento')
+                    ->formatStateUsing(fn (?string $state): string => filled($state) ? basename($state) : '—')
                     ->toggleable()
                     ->placeholder('—'),
                 TextColumn::make('created_at')
@@ -71,6 +75,7 @@ class ReciboEquiposTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ...ReciboEquipoDocumentActions::make(),
                     ViewAction::make()
                         ->label('Ver'),
                     EditAction::make()
@@ -79,11 +84,15 @@ class ReciboEquiposTable
                     DeleteAction::make()
                         ->label('Eliminar')
                         ->visible(fn (ReciboEquipo $record): bool => ! $record->trashed())
-                        ->successNotificationTitle('Recibo de equipo eliminado correctamente'),
+                        ->successNotification(
+                            fn (ReciboEquipo $record): Notification => ReciboEquipoResource::getDeletedNotification($record),
+                        ),
                     ForceDeleteAction::make()
                         ->label('Eliminar permanentemente')
                         ->visible(fn (ReciboEquipo $record): bool => $record->trashed())
-                        ->successNotificationTitle('Recibo de equipo eliminado permanentemente'),
+                        ->successNotification(
+                            fn (ReciboEquipo $record): Notification => ReciboEquipoResource::getDeletedNotification($record, force: true),
+                        ),
                     RestoreAction::make()
                         ->label('Restaurar')
                         ->visible(fn (ReciboEquipo $record): bool => $record->trashed())
@@ -99,10 +108,10 @@ class ReciboEquiposTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Eliminar seleccionados')
-                        ->successNotificationTitle('Recibos de equipo eliminados correctamente'),
+                        ->successNotificationTitle('Recibos de equipo eliminados correctamente. Los documentos se conservan por si deseas restaurarlos.'),
                     ForceDeleteBulkAction::make()
                         ->label('Eliminar permanentemente')
-                        ->successNotificationTitle('Recibos de equipo eliminados permanentemente'),
+                        ->successNotificationTitle('Recibos eliminados permanentemente. Los documentos PDF asociados también se eliminaron si existían.'),
                     RestoreBulkAction::make()
                         ->label('Restaurar seleccionados')
                         ->successNotificationTitle('Recibos de equipo restaurados correctamente'),

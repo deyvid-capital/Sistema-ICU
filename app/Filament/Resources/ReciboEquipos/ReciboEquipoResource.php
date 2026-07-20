@@ -11,6 +11,7 @@ use App\Filament\Resources\ReciboEquipos\Schemas\ReciboEquipoInfolist;
 use App\Filament\Resources\ReciboEquipos\Tables\ReciboEquiposTable;
 use App\Models\ReciboEquipo;
 use BackedEnum;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -79,5 +80,24 @@ class ReciboEquipoResource extends Resource
     public static function canEdit(Model $record): bool
     {
         return parent::canEdit($record) && ! $record->trashed();
+    }
+
+    public static function getDeletedNotification(ReciboEquipo $record, bool $force = false): Notification
+    {
+        if (! $force) {
+            return Notification::make()
+                ->success()
+                ->title('Recibo de equipo eliminado correctamente')
+                ->body('El registro se movió a la papelera. El documento PDF se conserva por si deseas restaurarlo.');
+        }
+
+        $body = $record->storedDocumentWasDeleted
+            ? 'El documento PDF asociado también se eliminó del almacenamiento.'
+            : 'No se encontró un archivo asociado para eliminar.';
+
+        return Notification::make()
+            ->success()
+            ->title('Recibo de equipo eliminado permanentemente')
+            ->body($body);
     }
 }

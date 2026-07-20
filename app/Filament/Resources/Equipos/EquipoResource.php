@@ -8,6 +8,7 @@ use App\Filament\Resources\Equipos\Pages\ListEquipos;
 use App\Filament\Resources\Equipos\Pages\ViewEquipo;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesCargadorRelationManager;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationManager;
+use App\Filament\Resources\Equipos\RelationManagers\RecibosEquipoRelationManager;
 use App\Filament\Resources\Equipos\Schemas\EquipoForm;
 use App\Filament\Resources\Equipos\Schemas\EquipoInfolist;
 use App\Filament\Resources\Equipos\Tables\EquiposTable;
@@ -60,6 +61,7 @@ class EquipoResource extends Resource
         return [
             AsignacionesUsuarioRelationManager::class,
             AsignacionesCargadorRelationManager::class,
+            RecibosEquipoRelationManager::class,
         ];
     }
 

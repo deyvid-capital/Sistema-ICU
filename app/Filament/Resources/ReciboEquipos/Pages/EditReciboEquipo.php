@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ReciboEquipos\Pages;
 
+use App\Filament\Resources\ReciboEquipos\Actions\ReciboEquipoDocumentActions;
 use App\Filament\Resources\ReciboEquipos\ReciboEquipoResource;
 use App\Models\ReciboEquipo;
 use Filament\Actions\ActionGroup;
@@ -29,16 +30,21 @@ class EditReciboEquipo extends EditRecord
     {
         return [
             ActionGroup::make([
+                ...ReciboEquipoDocumentActions::make(),
                 ViewAction::make()
                     ->label('Ver'),
                 DeleteAction::make()
                     ->label('Eliminar')
                     ->visible(fn (ReciboEquipo $record): bool => ! $record->trashed())
-                    ->successNotificationTitle('Recibo de equipo eliminado correctamente'),
+                    ->successNotification(
+                        fn (ReciboEquipo $record): Notification => ReciboEquipoResource::getDeletedNotification($record),
+                    ),
                 ForceDeleteAction::make()
                     ->label('Eliminar permanentemente')
                     ->visible(fn (ReciboEquipo $record): bool => $record->trashed())
-                    ->successNotificationTitle('Recibo de equipo eliminado permanentemente'),
+                    ->successNotification(
+                        fn (ReciboEquipo $record): Notification => ReciboEquipoResource::getDeletedNotification($record, force: true),
+                    ),
                 RestoreAction::make()
                     ->label('Restaurar')
                     ->visible(fn (ReciboEquipo $record): bool => $record->trashed())
