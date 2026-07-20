@@ -31,7 +31,6 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
-            // Para cambiar el tamaño de la letra, agrega una clase CSS personalizada en tu theme:
             ->font('Roboto Mono')
             ->topNavigation(false)
             ->sidebarCollapsibleOnDesktop()
@@ -58,7 +57,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->databaseNotifications()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Indigo,
+                'gray'    => Color::Zinc,
+                'info'    => Color::Blue,
+                'success' => Color::Emerald,
+                'warning' => Color::Amber,
+                'danger'  => Color::Rose,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

@@ -29,13 +29,13 @@ class AccesoInternetResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Accesos';
 
-    protected static ?string $navigationLabel = 'Accesos Internet';
+    protected static ?string $navigationLabel = 'Accesos Wifi';
 
     protected static ?int $navigationSort = 13;
 
-    protected static ?string $modelLabel = 'acceso a Internet';
+    protected static ?string $modelLabel = 'acceso a Wifi';
 
-    protected static ?string $pluralModelLabel = 'accesos a Internet';
+    protected static ?string $pluralModelLabel = 'accesos a Wifi';
 
     protected static ?string $recordTitleAttribute = 'usuario_red';
 

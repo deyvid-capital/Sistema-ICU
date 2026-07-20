@@ -32,7 +32,7 @@ class ReciboEquipoForm
                                     ->getOptionLabelFromRecordUsing(
                                         fn (Equipo $record): string => trim("{$record->service_tag} — {$record->nombre_equipo}")
                                     )
-                                    ->searchable()
+                                    ->searchable(['service_tag', 'nombre_equipo'])
                                     ->preload()
                                     ->required()
                                     ->rule(new NotTrashed(Equipo::class)),
