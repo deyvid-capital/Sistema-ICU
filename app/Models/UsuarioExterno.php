@@ -3,12 +3,17 @@
 namespace App\Models;
 
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
+use Database\Factories\UsuarioExternoFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class UsuarioExterno extends Model
 {
+    /** @use HasFactory<UsuarioExternoFactory> */
+    use HasFactory;
+
     use PreventsForceDeleteWithDependents;
     use SoftDeletes;
 

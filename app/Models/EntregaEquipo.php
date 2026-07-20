@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use Database\Factories\EntregaEquipoFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -9,7 +12,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EntregaEquipo extends Model
 {
+    /** @use HasFactory<EntregaEquipoFactory> */
+    use GuardsAgainstTrashedRelations;
+
+    use HasFactory;
     use SoftDeletes;
+
+    protected static array $trashGuardedRelations = ['asignacion'];
 
     protected $table = 'entrega_equipos';
 
@@ -34,25 +43,16 @@ class EntregaEquipo extends Model
         ];
     }
 
-    /**
-     * Get the assignment that owns the delivery.
-     */
     public function asignacion(): BelongsTo
     {
-        return $this->belongsTo(AsignacionEquipo::class, 'asignacion_id');
+        return $this->belongsTo(AsignacionEquipo::class, 'asignacion_id')->withTrashed();
     }
 
-    /**
-     * Get all of the delivery's PDF files.
-     */
     public function pdfs(): MorphMany
     {
         return $this->morphMany(PdfEquipo::class, 'documento');
     }
 
-    /**
-     * Get all of the delivery's signers.
-     */
     public function firmantes(): MorphMany
     {
         return $this->morphMany(Firmante::class, 'documento');

@@ -11,7 +11,7 @@
         }
         body {
             font-family: "Gisha", Arial, sans-serif;
-            font-size: 10px; /* Tamaño de fuente normal restaurado */
+            font-size: 10px;
             margin: 0;
             padding: 20px;
             background-color: #555;
@@ -22,16 +22,14 @@
             print-color-adjust: exact !important;
         }
         .container {
-            width: 816px; /* Ancho estándar de Carta (Letter) en web */
-            min-height: 1056px; /* Alto estándar de Carta en web */
+            width: 816px;
+            min-height: 1056px;
             background-color: #fff;
-            padding: 2cm 1cm 2cm 2.5cm; 
+            padding: 2cm 1cm 2cm 2.5cm;
             box-sizing: border-box;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             position: relative;
         }
-
-        /* --- ENCABEZADO --- */
         .header-table {
             width: 100%;
             border: none;
@@ -40,7 +38,7 @@
         .header-logo {
             width: 25%;
             vertical-align: top;
-            padding-top: 5px; 
+            padding-top: 5px;
         }
         .header-logo img {
             max-width: 160px;
@@ -54,8 +52,6 @@
             width: 100%;
             margin-bottom: 12px;
         }
-        
-        /* --- ESTILOS INDEPENDIENTES PARA N°, TIPO, FECHA --- */
         .header-info-table {
             width: 101.5%;
             border-collapse: collapse;
@@ -64,14 +60,14 @@
             vertical-align: middle;
         }
         .header-info-label {
-            width: 127px; 
+            width: 127px;
             color: #003366;
             font-weight: bold;
             text-align: right;
-            padding-right: 15px; 
+            padding-right: 15px;
         }
         .header-info-cell {
-            padding: 2px 5px 2px 1px; /* El 5px de la derecha es para alinearlo con las cajas de abajo */
+            padding: 2px 5px 2px 1px;
             vertical-align: middle;
         }
         .header-info-box {
@@ -83,13 +79,11 @@
             color: #000;
             font-size: 10px;
         }
-
-        /* --- TABLAS DE SECCIÓN PRINCIPAL --- */
         .section-table {
             width: 100%;
             border-collapse: collapse;
             border: 1.5px solid #003366;
-            margin-bottom: 2px; 
+            margin-bottom: 2px;
         }
         .col-main-title {
             background-color: #e6e6e6;
@@ -99,7 +93,7 @@
             text-align: left;
             padding: 10px 10px 10px 15px;
             vertical-align: middle;
-            border-right: none; /* Borde derecho eliminado (transparente) */
+            border-right: none;
             font-size: 10px;
         }
         .col-main-title-texto {
@@ -109,11 +103,9 @@
             text-align: center;
             padding: 10px 10px 10px 15px;
             vertical-align: middle;
-            border-right: none; /* Borde derecho eliminado (transparente) */
+            border-right: none;
             font-size: 10px;
         }
-        
-
         .col-main-title.red-title {
             color: #cc0000;
             text-align: center;
@@ -123,17 +115,15 @@
         }
         .col-content {
             width: 75%;
-            padding: 1px 4px; /* Este padding es clave para la alineación */
+            padding: 1px 4px;
             vertical-align: middle;
         }
-
-        /* --- CONTENIDO INTERNO (Filas de datos) --- */
         .inner-table {
             margin-left: 6px;
             width: 100%;
             border-collapse: collapse;
         }
-        .inner-table td{
+        .inner-table td {
             padding: 2.5px 6px;
             vertical-align: middle;
         }
@@ -155,8 +145,6 @@
             color: #000;
             font-size: 10px;
         }
-
-        /* --- CLASES ESPECIALES --- */
         .centered-text {
             text-align: center;
             padding: 8px;
@@ -167,11 +155,8 @@
             line-height: 1.4;
             font-size: 10px;
         }
-
-        /* --- FIRMAS --- */
         .signatures-table {
             width: 100%;
-            /* Eliminado margin-top */
             margin-bottom: 20px;
             border: none;
         }
@@ -181,21 +166,18 @@
             vertical-align: top;
         }
         .signature-box {
-            width: 220px; 
+            width: 220px;
             height: 70px;
             border: 1.5px dashed #888;
             border-radius: 10px;
             margin: 0 auto 8px auto;
         }
-
         .signature-name {
             font-weight: bold;
             font-size: 10px;
             margin: 0;
             line-height: 1.2;
         }
-
-        /* --- AJUSTES PARA PDF / IMPRESIÓN --- */
         @media print {
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -210,12 +192,11 @@
                 margin: 0;
                 width: 100%;
                 min-height: auto;
-                padding: 0; /* Se quita el padding interno para que la página gestione los márgenes */
+                padding: 0;
             }
-            /* Regla explícita para generar el PDF con los márgenes exactos */
             @page {
-                size: letter; /* Cambiado a tamaño Carta (21.59 cm x 27.94 cm) */
-                margin: 2cm 1cm 2cm 2.5cm; /* Superior 2cm, Derecha 1cm, Inferior 2cm, Izquierda 2.5cm */
+                size: letter;
+                margin: 2cm 1cm 2cm 2.5cm;
             }
         }
     </style>
@@ -228,9 +209,8 @@
         <table class="header-table">
             <tr>
                 <td class="header-logo">
-                    @{outputs('ImagenCapitalSafi')}
+                    <img src="{{ asset('images/Capital-Safi-SA-logo-.png') }}" alt="Logo Capital Safi">
                 </td>
-                <!-- Se le agregó el padding 4px 8px igual al de .col-content para alinear los bordes derechos -->
                 <td style="width: 75%; vertical-align: top; padding: 4px 8px;">
                     <div class="header-title">
                         Formulario de Entrega / Recepción
@@ -239,17 +219,20 @@
                         <tr>
                             <td class="header-info-label">N°</td>
                             <td class="header-info-cell">
-                                <div class="header-info-box">@{triggerBody()?['text_2']}</div></td>
+                                <div class="header-info-box">A-2402032</div>
+                            </td>
                         </tr>
                         <tr>
                             <td class="header-info-label">Tipo</td>
                             <td class="header-info-cell">
-                                <div class="header-info-box">Entrega</div></td>
+                                <div class="header-info-box">Entrega</div>
+                            </td>
                         </tr>
                         <tr>
                             <td class="header-info-label">Fecha</td>
                             <td class="header-info-cell">
-                                <div class="header-info-box">@{formatDateTime(triggerBody()?['date'], 'dd/MM/yyyy')}</div></td>
+                                <div class="header-info-box">18/04/2024</div>
+                            </td>
                         </tr>
                     </table>
                 </td>
@@ -264,15 +247,15 @@
                     <table class="inner-table">
                         <tr>
                             <td class="inner-label">Nombre Completo:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Usuarios')?['body/value'])?['field_0']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Juan Pérez Aguilar</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">Cargo:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Usuarios')?['body/value'])?['field_2']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Analista TI</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">Área:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Usuarios')?['body/value'])?['field_1']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Tecnología de la Información</div></td>
                         </tr>
                     </table>
                 </td>
@@ -287,33 +270,31 @@
                     <table class="inner-table">
                         <tr>
                             <td class="inner-label">Modelo:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Equipos')?['body/value'])?['field_6']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Dell Latitude 5510</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">Microprocesador:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Equipos')?['body/value'])?['field_8']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Intel Core i5-10210U</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">Disco Duro:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Equipos')?['body/value'])?['field_9']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">SSD 512 GB</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">Ram:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Equipos')?['body/value'])?['field_10']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">16 GB</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">GPU:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Equipos')?['body/value'])?['field_11']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Intel UHD Graphics</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">Service Tag:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Informacion_Equipos')?['body/value'])?['field_0']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">GH123J64</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">Garantía:</td>
-                            <td class="inner-value-container"><div class="inner-input">@{
-formatDateTime(
-first(outputs('Informacion_Equipos')?['body/value'])?['field_3'],'dd/MM/yyyy')}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">21/01/2025</div></td>
                         </tr>
                     </table>
                 </td>
@@ -328,11 +309,11 @@ first(outputs('Informacion_Equipos')?['body/value'])?['field_3'],'dd/MM/yyyy')}<
                     <table class="inner-table">
                         <tr>
                             <td class="inner-label">Modelo</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Cargadores')?['body/value'])?['field_2']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Dell 65W USB-C</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">S/N</td>
-                            <td class="inner-value-container"><div class="inner-input">@{first(outputs('Cargadores')?['body/value'])?['field_0']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">CA90028821</div></td>
                         </tr>
                     </table>
                 </td>
@@ -347,7 +328,7 @@ first(outputs('Informacion_Equipos')?['body/value'])?['field_3'],'dd/MM/yyyy')}<
                     <table class="inner-table">
                         <tr>
                             <td class="inner-label">Modelo</td>
-                            <td class="inner-value-container"><div class="inner-input">@{triggerBody()?['text_3']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Logitech M100</div></td>
                         </tr>
                         <tr>
                             <td class="inner-label">S/N</td>
@@ -366,7 +347,7 @@ first(outputs('Informacion_Equipos')?['body/value'])?['field_3'],'dd/MM/yyyy')}<
                     <table class="inner-table">
                         <tr>
                             <td class="inner-label">Modelo</td>
-                            <td class="inner-value-container"><div class="inner-input">@{triggerBody()?['text_4']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">Cooler Master Notepal</div></td>
                         </tr>
                     </table>
                 </td>
@@ -381,7 +362,7 @@ first(outputs('Informacion_Equipos')?['body/value'])?['field_3'],'dd/MM/yyyy')}<
                     <table class="inner-table">
                         <tr>
                             <td class="inner-label">Modelo</td>
-                            <td class="inner-value-container"><div class="inner-input">@{triggerBody()?['text_5']}</div></td>
+                            <td class="inner-value-container"><div class="inner-input">JBL Tune 500</div></td>
                         </tr>
                     </table>
                 </td>
@@ -395,10 +376,9 @@ first(outputs('Informacion_Equipos')?['body/value'])?['field_3'],'dd/MM/yyyy')}<
                 <td class="col-content">
                     <table class="inner-table">
                         <tr>
-                            <td class="inner-label"></td> <!-- Espacio invisible para forzar la alineación -->
-                            <!-- <td class="inner-value-container"> -->
+                            <td class="inner-label"></td>
                                 <div class="inner-input centered-text">
-                                   @{triggerBody()?['text_6']}
+                                    Todo el equipo se entrega en perfecto estado y funcionamiento. 
                                 </div>
                             </td>
                         </tr>
@@ -414,8 +394,7 @@ first(outputs('Informacion_Equipos')?['body/value'])?['field_3'],'dd/MM/yyyy')}<
                 <td class="col-content">
                     <table class="inner-table">
                         <tr>
-                            <td class="inner-label"></td> <!-- Espacio invisible para forzar la alineación -->
-                            <!-- <td class="inner-value-container"> -->
+                            <td class="inner-label"></td>
                                 <div class="inner-input nota-text">
                                     <b>1. Responsabilidad del Usuario:</b> Cada usuario es responsable de los equipos y accesorios que se les ha asignado. Esto incluye su uso adecuado y su mantenimiento en buen estado.<br>
                                     <b>2. Cuidado del Equipo:</b> Se espera que todos los usuarios manejen los equipos y accesorios con cuidado y diligencia. Eviten exponer los equipos a condiciones que puedan causar daños, como humedad, calor extremo o golpes.<br>
@@ -437,8 +416,8 @@ first(outputs('Informacion_Equipos')?['body/value'])?['field_3'],'dd/MM/yyyy')}<
                 </td>
                 <td class="signature-cell">
                     <div class="signature-box"></div>
-                    <div class="signature-name">@{first(outputs('Informacion_Usuarios')?['body/value'])?['field_0']}</div>
-                    <div class="signature-name">@{first(outputs('Informacion_Usuarios')?['body/value'])?['field_2']}</div>
+                    <div class="signature-name">Juan Pérez Aguilar</div>
+                    <div class="signature-name">Analista TI</div>
                 </td>
             </tr>
         </table>

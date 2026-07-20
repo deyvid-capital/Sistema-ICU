@@ -52,6 +52,7 @@ return new class extends Migration
             $table->morphs('documento');
             $table->date('fecha')->nullable();
             $table->string('url', 500)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
 
