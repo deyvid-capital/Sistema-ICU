@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\NotaSalidaEquipos\Tables;
 
+use App\Enums\EquipoFormularioPdfTipo;
+use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\Equipos\RelationManagers\NotasSalidaRelationManager as EquipoNotasSalidaRelationManager;
 use App\Filament\Resources\NotaSalidaEquipos\NotaSalidaEquipoResource;
 use App\Filament\Resources\UsuarioExternos\RelationManagers\NotasSalidaRelationManager as UsuarioExternoNotasSalidaRelationManager;
@@ -71,6 +73,7 @@ class NotaSalidaEquiposTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ...EquipoFormularioPdfActions::make(EquipoFormularioPdfTipo::NotaSalida),
                     ViewAction::make()->label('Ver'),
                     EditAction::make()
                         ->label('Editar')

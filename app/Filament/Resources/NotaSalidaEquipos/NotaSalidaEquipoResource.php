@@ -7,6 +7,7 @@ use App\Filament\Resources\NotaSalidaEquipos\Pages\EditNotaSalidaEquipo;
 use App\Filament\Resources\NotaSalidaEquipos\Pages\ListNotaSalidaEquipos;
 use App\Filament\Resources\NotaSalidaEquipos\Pages\ViewNotaSalidaEquipo;
 use App\Filament\Resources\NotaSalidaEquipos\RelationManagers\FirmantesRelationManager;
+use App\Filament\Resources\NotaSalidaEquipos\RelationManagers\PdfsRelationManager;
 use App\Filament\Resources\NotaSalidaEquipos\Schemas\NotaSalidaEquipoForm;
 use App\Filament\Resources\NotaSalidaEquipos\Schemas\NotaSalidaEquipoInfolist;
 use App\Filament\Resources\NotaSalidaEquipos\Tables\NotaSalidaEquiposTable;
@@ -58,6 +59,7 @@ class NotaSalidaEquipoResource extends Resource
     {
         return [
             FirmantesRelationManager::class,
+            PdfsRelationManager::class,
         ];
     }
 

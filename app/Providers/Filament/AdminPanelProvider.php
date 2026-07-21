@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -61,11 +62,11 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->colors([
                 'primary' => Color::Indigo,
-                'gray'    => Color::Zinc,
-                'info'    => Color::Blue,
+                'gray' => Color::Zinc,
+                'info' => Color::Blue,
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
-                'danger'  => Color::Rose,
+                'danger' => Color::Rose,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -87,6 +88,9 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+            ])
+            ->plugins([
+                FilamentShieldPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,

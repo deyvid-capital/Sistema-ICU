@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\EntregaEquipos\Tables;
 
+use App\Enums\EquipoFormularioPdfTipo;
+use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\EntregaEquipos\EntregaEquipoResource;
 use App\Models\EntregaEquipo;
 use Filament\Actions\ActionGroup;
@@ -78,6 +80,7 @@ class EntregaEquiposTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ...EquipoFormularioPdfActions::make(EquipoFormularioPdfTipo::Entrega),
                     ViewAction::make()->label('Ver'),
                     EditAction::make()
                         ->label('Editar')

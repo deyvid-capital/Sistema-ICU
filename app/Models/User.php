@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['id', 'name', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
@@ -26,10 +27,11 @@ class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use CascadesDependentSoftDeletes,
-        HasFactory, 
-        HasUuids, 
-        Notifiable, 
-        PreventsForceDeleteWithDependents, 
+        HasFactory,
+        HasRoles,
+        HasUuids,
+        Notifiable,
+        PreventsForceDeleteWithDependents,
         SoftDeletes;
 
     public $incrementing = false;

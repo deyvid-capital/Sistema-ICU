@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\RecepcionEquipos\Tables;
 
+use App\Enums\EquipoFormularioPdfTipo;
+use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\RecepcionEquipos\RecepcionEquipoResource;
 use App\Models\RecepcionEquipo;
 use Filament\Actions\ActionGroup;
@@ -68,6 +70,7 @@ class RecepcionEquiposTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ...EquipoFormularioPdfActions::make(EquipoFormularioPdfTipo::Recepcion),
                     ViewAction::make()->label('Ver'),
                     EditAction::make()
                         ->label('Editar')

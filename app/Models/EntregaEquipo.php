@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\EquipoFormularioPdfTipo;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\HasDocumentoOficialPdf;
 use Database\Factories\EntregaEquipoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +17,7 @@ class EntregaEquipo extends Model
     /** @use HasFactory<EntregaEquipoFactory> */
     use GuardsAgainstTrashedRelations;
 
+    use HasDocumentoOficialPdf;
     use HasFactory;
     use SoftDeletes;
 
@@ -56,5 +59,10 @@ class EntregaEquipo extends Model
     public function firmantes(): MorphMany
     {
         return $this->morphMany(Firmante::class, 'documento');
+    }
+
+    public static function formularioPdfTipo(): EquipoFormularioPdfTipo
+    {
+        return EquipoFormularioPdfTipo::Entrega;
     }
 }

@@ -1,0 +1,27 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Equipo;
+use App\Models\NotaRecepcionEquipo;
+use App\Models\UsuarioExterno;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<NotaRecepcionEquipo>
+ */
+class NotaRecepcionEquipoFactory extends Factory
+{
+    protected $model = NotaRecepcionEquipo::class;
+
+    public function definition(): array
+    {
+        return [
+            'equipo_id' => Equipo::factory(),
+            'usuarios_externo_id' => UsuarioExterno::factory(),
+            'numero' => fake()->unique()->bothify('NR-####'),
+            'fecha' => fake()->date(),
+            'nota' => fake()->optional()->sentence(),
+        ];
+    }
+}

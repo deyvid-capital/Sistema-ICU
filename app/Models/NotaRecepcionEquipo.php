@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\EquipoFormularioPdfTipo;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\HasDocumentoOficialPdf;
+use Database\Factories\NotaRecepcionEquipoFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -10,7 +14,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class NotaRecepcionEquipo extends Model
 {
+    /** @use HasFactory<NotaRecepcionEquipoFactory> */
     use GuardsAgainstTrashedRelations;
+
+    use HasDocumentoOficialPdf;
+    use HasFactory;
     use SoftDeletes;
 
     protected static array $trashGuardedRelations = ['equipo', 'usuarioExterno'];
@@ -45,5 +53,15 @@ class NotaRecepcionEquipo extends Model
     public function firmantes(): MorphMany
     {
         return $this->morphMany(Firmante::class, 'documento');
+    }
+
+    public function pdfs(): MorphMany
+    {
+        return $this->morphMany(PdfEquipo::class, 'documento');
+    }
+
+    public static function formularioPdfTipo(): EquipoFormularioPdfTipo
+    {
+        return EquipoFormularioPdfTipo::NotaRecepcion;
     }
 }

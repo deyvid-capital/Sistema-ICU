@@ -7,6 +7,7 @@ use App\Filament\Resources\NotaRecepcionEquipos\Pages\EditNotaRecepcionEquipo;
 use App\Filament\Resources\NotaRecepcionEquipos\Pages\ListNotaRecepcionEquipos;
 use App\Filament\Resources\NotaRecepcionEquipos\Pages\ViewNotaRecepcionEquipo;
 use App\Filament\Resources\NotaRecepcionEquipos\RelationManagers\FirmantesRelationManager;
+use App\Filament\Resources\NotaRecepcionEquipos\RelationManagers\PdfsRelationManager;
 use App\Filament\Resources\NotaRecepcionEquipos\Schemas\NotaRecepcionEquipoForm;
 use App\Filament\Resources\NotaRecepcionEquipos\Schemas\NotaRecepcionEquipoInfolist;
 use App\Filament\Resources\NotaRecepcionEquipos\Tables\NotaRecepcionEquiposTable;
@@ -58,6 +59,7 @@ class NotaRecepcionEquipoResource extends Resource
     {
         return [
             FirmantesRelationManager::class,
+            PdfsRelationManager::class,
         ];
     }
 

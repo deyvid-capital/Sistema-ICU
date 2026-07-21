@@ -15,13 +15,18 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Validation\Rules\Unique;
 use Livewire\Component;
 
 class AsignacionEquipoForm
@@ -30,16 +35,19 @@ class AsignacionEquipoForm
     {
         return $schema
             ->components([
-                Section::make('Asignación de equipo')
-                    ->description('Asigna un equipo disponible (sin asignar y sin asignación activa) a un usuario.')
-                    ->icon(Heroicon::OutlinedLink)
+                Tabs::make('Asignación de equipo')
                     ->columnSpanFull()
-                    ->schema([
-                        Hidden::make('confirmar_reasignacion')
-                            ->dehydrated()
-                            ->default(false),
-                        Grid::make(2)
+                    ->persistTab()
+                    ->id('asignacion-equipo-form-tabs')
+                    ->scrollable(false)
+                    ->tabs([
+                        Tab::make('Asignación')
+                            ->icon(Heroicon::OutlinedLink)
+                            ->columns(2)
                             ->schema([
+                                Hidden::make('confirmar_reasignacion')
+                                    ->dehydrated()
+                                    ->default(false),
                                 Select::make('usuario_id')
                                     ->label('Usuario')
                                     ->relationship('usuario', 'name')
@@ -132,6 +140,92 @@ class AsignacionEquipoForm
                                         ['h2', 'h3'],
                                         ['bulletList', 'orderedList'],
                                         ['undo', 'redo'],
+                                    ]),
+                            ]),
+                        Tab::make('Entrega')
+                            ->icon(Heroicon::OutlinedArrowUpTray)
+                            ->badge('Opcional')
+                            ->badgeColor('gray')
+                            ->schema([
+                                Group::make()
+                                    ->relationship(
+                                        'entrega',
+                                        condition: fn (?array $state): bool => filled($state['fecha'] ?? null),
+                                    )
+                                    ->schema([
+                                        Grid::make(5)
+                                            ->schema([
+                                                TextInput::make('numero')
+                                                    ->label('Número')
+                                                    ->maxLength(20)
+                                                    ->unique(
+                                                        table: 'entrega_equipos',
+                                                        column: 'numero',
+                                                        ignoreRecord: true,
+                                                        modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
+                                                    ),
+                                                DatePicker::make('fecha')
+                                                    ->label('Fecha')
+                                                    ->helperText('Si indica una fecha, se registrará la entrega con esta asignación.'),
+                                                Toggle::make('mouse')
+                                                    ->label('Mouse')
+                                                    ->onColor('success')
+                                                    ->offColor('danger')
+                                                    ->default(false)
+                                                    ->inline(false),
+                                                Toggle::make('cooler')
+                                                    ->label('Cooler')
+                                                    ->onColor('success')
+                                                    ->offColor('danger')
+                                                    ->default(false)
+                                                    ->inline(false),
+                                                Toggle::make('audifonos')
+                                                    ->label('Audífonos')
+                                                    ->onColor('success')
+                                                    ->offColor('danger')
+                                                    ->default(false)
+                                                    ->inline(false),
+                                                Textarea::make('observaciones')
+                                                    ->label('Observaciones')
+                                                    ->rows(3)
+                                                    ->columnSpanFull(),
+                                                Textarea::make('nota')
+                                                    ->label('Nota')
+                                                    ->rows(3)
+                                                    ->columnSpanFull(),
+                                            ]),
+                                    ]),
+                            ]),
+                        Tab::make('Recepción')
+                            ->icon(Heroicon::OutlinedArrowDownTray)
+                            ->badge('Opcional')
+                            ->badgeColor('gray')
+                            ->schema([
+                                Group::make()
+                                    ->relationship(
+                                        'recepcion',
+                                        condition: fn (?array $state): bool => filled($state['numero'] ?? null),
+                                    )
+                                    ->schema([
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('numero')
+                                                    ->label('Número')
+                                                    ->maxLength(20)
+                                                    ->helperText('Si indica un número, se registrará la recepción con esta asignación.')
+                                                    ->unique(
+                                                        table: 'recepcion_equipos',
+                                                        column: 'numero',
+                                                        ignoreRecord: true,
+                                                        modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
+                                                    ),
+                                                DatePicker::make('fecha')
+                                                    ->label('Fecha'),
+                                                Textarea::make('observaciones')
+                                                    ->label('Observaciones')
+                                                    ->rows(4)
+                                                    ->columnSpanFull(),
+                                            ]),
                                     ]),
                             ]),
                     ]),

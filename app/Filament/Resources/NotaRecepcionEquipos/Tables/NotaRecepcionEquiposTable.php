@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\NotaRecepcionEquipos\Tables;
 
+use App\Enums\EquipoFormularioPdfTipo;
+use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\Equipos\RelationManagers\NotasRecepcionRelationManager as EquipoNotasRecepcionRelationManager;
 use App\Filament\Resources\NotaRecepcionEquipos\NotaRecepcionEquipoResource;
 use App\Filament\Resources\UsuarioExternos\RelationManagers\NotasRecepcionRelationManager as UsuarioExternoNotasRecepcionRelationManager;
@@ -71,6 +73,7 @@ class NotaRecepcionEquiposTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ...EquipoFormularioPdfActions::make(EquipoFormularioPdfTipo::NotaRecepcion),
                     ViewAction::make()->label('Ver'),
                     EditAction::make()
                         ->label('Editar')
