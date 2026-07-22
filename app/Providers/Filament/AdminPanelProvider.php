@@ -57,6 +57,9 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Formularios Entrega-Recepcion')
                     ->icon(Heroicon::OutlinedArrowPathRoundedSquare),
+                NavigationGroup::make()
+                    ->label('Permisos y Roles')
+                    ->icon(Heroicon::OutlinedKey),
 
             ])
             ->databaseNotifications()
@@ -90,7 +93,8 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
-                FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make()
+                    ->navigationGroup('Permisos y Roles'),
             ])
             ->authMiddleware([
                 Authenticate::class,

@@ -11,7 +11,7 @@ enum EstadoCargador: string implements HasColor, HasLabel
     case Asignado = 'asignado';
     case Temporal = 'temporal';
     case Reasignacion = 'reasignacion';
-    case Danado = 'danado';
+    case Dañado = 'dañado';
     case Baja = 'baja';
 
     public function getLabel(): string
@@ -21,7 +21,7 @@ enum EstadoCargador: string implements HasColor, HasLabel
             self::Asignado => 'Asignado',
             self::Temporal => 'Temporal',
             self::Reasignacion => 'Reasignación',
-            self::Danado => 'Dañado',
+            self::Dañado => 'Dañado',
             self::Baja => 'Baja',
         };
     }
@@ -33,7 +33,7 @@ enum EstadoCargador: string implements HasColor, HasLabel
             self::Asignado => 'info',
             self::Temporal => 'warning',
             self::Reasignacion => 'primary',
-            self::Danado => 'danger',
+            self::Dañado => 'danger',
             self::Baja => 'gray',
         };
     }
@@ -45,6 +45,6 @@ enum EstadoCargador: string implements HasColor, HasLabel
 
     public function estaBloqueado(): bool
     {
-        return in_array($this, [self::Danado, self::Baja], true);
+        return in_array($this, [self::Dañado, self::Baja], true);
     }
 }

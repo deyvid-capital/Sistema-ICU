@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Cargadors\Pages;
 
 use App\Filament\Resources\Cargadors\CargadorResource;
 use App\Models\Cargador;
+use App\Models\AsignacionCargador;
+use App\Enums\EstadoCargador;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;

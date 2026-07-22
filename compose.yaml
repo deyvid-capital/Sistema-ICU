@@ -20,11 +20,32 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - 'sail-puppeteer:/home/sail/.cache/puppeteer'
         networks:
             - sail
         depends_on:
             - pgsql
             - redis
+    worker:
+        image: 'sail-8.5/app'
+        # Corre como root (igual que laravel.test, cuyo WWWUSER está vacío) para poder
+        # fijar el mtime de las vistas Blade compiladas (touch requiere ser dueño del archivo).
+        # HOME=/home/sail permite que BrowsershotPdfFactory encuentre Chrome vía getenv('HOME').
+        entrypoint: ["php", "/var/www/html/artisan", "queue:work", "redis", "--sleep=3", "--tries=3", "--backoff=5", "--max-time=3600", "--max-jobs=500"]
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            HOME: /home/sail
+        volumes:
+            - '.:/var/www/html'
+            - 'sail-puppeteer:/home/sail/.cache/puppeteer'
+        networks:
+            - sail
+        depends_on:
+            - pgsql
+            - redis
+        restart: unless-stopped
+        mem_limit: 768m
     pgsql:
         image: 'postgres:18-alpine'
         ports:
@@ -72,4 +93,6 @@ volumes:
     sail-pgsql:
         driver: local
     sail-redis:
+        driver: local
+    sail-puppeteer:
         driver: local

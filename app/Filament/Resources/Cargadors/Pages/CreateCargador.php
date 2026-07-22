@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Cargadors\Pages;
 
 use App\Filament\Resources\Cargadors\CargadorResource;
+use App\Models\Cargador;
+use App\Models\AsignacionCargador;
+use App\Enums\EstadoCargador;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -24,4 +27,6 @@ class CreateCargador extends CreateRecord
             ->title('Cargador registrado')
             ->body('El cargador fue registrado correctamente.');
     }
+
+   
 }

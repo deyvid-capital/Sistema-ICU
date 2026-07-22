@@ -3,9 +3,8 @@
 namespace App\Filament\Resources\Concerns;
 
 use App\Enums\EquipoFormularioPdfTipo;
-use App\Exceptions\EquipoFormularioPdfException;
+use App\Jobs\GenerateEquipoFormularioPdfJob;
 use App\Models\Concerns\HasDocumentoOficialPdf;
-use App\Services\Pdf\GenerateEquipoFormularioPdf;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Alignment;
@@ -14,7 +13,6 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
 
 class EquipoFormularioPdfActions
 {
@@ -44,29 +42,13 @@ class EquipoFormularioPdfActions
                 : 'Se generará y guardará el documento «'.$tipo->nombreOficial().'».')
             ->modalSubmitActionLabel('Generar y guardar')
             ->action(function (Model $record) use ($tipo): void {
-                try {
-                    app(GenerateEquipoFormularioPdf::class)->execute($record, $tipo);
+                GenerateEquipoFormularioPdfJob::dispatch($record, $tipo, auth()->id());
 
-                    Notification::make()
-                        ->title('PDF generado correctamente')
-                        ->body('Se guardó «'.$tipo->nombreOficial().'».')
-                        ->success()
-                        ->send();
-                } catch (EquipoFormularioPdfException $exception) {
-                    Notification::make()
-                        ->title($exception->getMessage())
-                        ->body(implode("\n", $exception->errors))
-                        ->danger()
-                        ->send();
-                } catch (Throwable $exception) {
-                    report($exception);
-
-                    Notification::make()
-                        ->title('No se pudo generar el PDF')
-                        ->body($exception->getMessage())
-                        ->danger()
-                        ->send();
-                }
+                Notification::make()
+                    ->title('Generando PDF…')
+                    ->body('El documento «'.$tipo->nombreOficial().'» se está generando en segundo plano. Se te avisará cuando esté listo.')
+                    ->info()
+                    ->send();
             });
     }
 
