@@ -8,7 +8,6 @@ use App\Models\PdfEquipo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Throwable;
 
 class GenerateEquipoFormularioPdf
@@ -23,17 +22,16 @@ class GenerateEquipoFormularioPdf
      * @throws EquipoFormularioPdfException
      * @throws Throwable
      */
-    public function execute(Model $record, EquipoFormularioPdfTipo $tipo): PdfEquipo
+    public function execute(Model $record, EquipoFormularioPdfTipo $tipo, ?string $firmanteId = null): PdfEquipo
     {
         $this->validator->validate($record, $tipo);
 
-        $viewData = $this->dataMapper->for($record, $tipo);
+        $viewData = $this->dataMapper->for($record, $tipo, $firmanteId);
         $binary = $this->pdfFactory->fromView($tipo->view(), $viewData);
 
         $numero = (string) $record->getAttribute('numero');
         $fecha = $record->getAttribute('fecha');
-        $fechaSlug = filled($fecha) ? $fecha->format('Y-m-d') : now()->format('Y-m-d');
-        $path = 'pdf-equipos/'.Str::slug($numero).'_'.$fechaSlug.'.pdf';
+        $path = $tipo->pdfRelativePath($numero);
 
         return DB::transaction(function () use ($record, $tipo, $binary, $path, $fecha): PdfEquipo {
             $disk = Storage::disk(PdfEquipo::DOCUMENT_DISK);

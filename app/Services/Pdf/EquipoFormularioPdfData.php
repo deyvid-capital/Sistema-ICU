@@ -18,13 +18,13 @@ class EquipoFormularioPdfData
     /**
      * @return array{documento: array<string, mixed>}
      */
-    public function for(Model $record, EquipoFormularioPdfTipo $tipo): array
+    public function for(Model $record, EquipoFormularioPdfTipo $tipo, ?string $firmanteId = null): array
     {
         $documento = match ($tipo) {
             EquipoFormularioPdfTipo::Entrega => $this->fromEntrega($this->require($record, EntregaEquipo::class)),
             EquipoFormularioPdfTipo::Recepcion => $this->fromRecepcion($this->require($record, RecepcionEquipo::class)),
             EquipoFormularioPdfTipo::NotaSalida => $this->fromNotaSalida($this->require($record, NotaSalidaEquipo::class)),
-            EquipoFormularioPdfTipo::NotaRecepcion => $this->fromNotaRecepcion($this->require($record, NotaRecepcionEquipo::class)),
+            EquipoFormularioPdfTipo::NotaRecepcion => $this->fromNotaRecepcion($this->require($record, NotaRecepcionEquipo::class), $firmanteId),
         };
 
         return ['documento' => $documento];
@@ -141,7 +141,7 @@ class EquipoFormularioPdfData
     /**
      * @return array<string, mixed>
      */
-    public function fromNotaRecepcion(NotaRecepcionEquipo $nota): array
+    public function fromNotaRecepcion(NotaRecepcionEquipo $nota, ?string $firmanteId = null): array
     {
         $nota->loadMissing([
             'equipo.modelo',
@@ -154,6 +154,12 @@ class EquipoFormularioPdfData
         ]);
 
         $firmas = $this->resolveFirmas($nota->firmantes, null);
+        $firmanteSeleccionado = $this->mapFirmanteSeleccionado($firmanteId);
+
+        if ($firmanteSeleccionado !== null) {
+            $firmas['derecha'] = $firmanteSeleccionado;
+        }
+
         $externo = $nota->usuarioExterno;
 
         return [
@@ -174,6 +180,30 @@ class EquipoFormularioPdfData
                 'cargo' => $externo?->cargo ?? '—',
                 'carnet' => $externo?->carnet ?? '—',
             ],
+        ];
+    }
+
+    /**
+     * Resuelve el usuario firmante elegido al momento de generar el PDF.
+     * No proviene de la base de datos de la nota; solo aplica al documento.
+     *
+     * @return array{nombre: string, cargo: ?string}|null
+     */
+    private function mapFirmanteSeleccionado(?string $firmanteId): ?array
+    {
+        if (! filled($firmanteId)) {
+            return null;
+        }
+
+        $usuario = User::with('cargo')->find($firmanteId);
+
+        if ($usuario === null) {
+            return null;
+        }
+
+        return [
+            'nombre' => $usuario->name,
+            'cargo' => $usuario->cargo?->cargo,
         ];
     }
 

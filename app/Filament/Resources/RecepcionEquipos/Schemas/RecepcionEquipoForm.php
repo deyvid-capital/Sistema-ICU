@@ -2,12 +2,13 @@
 
 namespace App\Filament\Resources\RecepcionEquipos\Schemas;
 
+use App\Filament\Resources\Concerns\ConfiguresFormularioEquipoNumeroField;
 use App\Models\AsignacionEquipo;
+use App\Models\RecepcionEquipo;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -17,6 +18,8 @@ use Illuminate\Validation\Rules\Unique;
 
 class RecepcionEquipoForm
 {
+    use ConfiguresFormularioEquipoNumeroField;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -54,20 +57,15 @@ class RecepcionEquipoForm
                                         modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
                                     )
                                     ->columnSpanFull(),
-                                TextInput::make('numero')
-                                    ->label('Número')
-                                    ->required()
-                                    ->maxLength(20)
-                                    ->unique(
-                                        table: 'recepcion_equipos',
-                                        column: 'numero',
-                                        ignoreRecord: true,
-                                        modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
-                                    ),
+                                static::formularioEquipoNumeroField(RecepcionEquipo::class, 'recepcion_equipos'),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')
                                     ->default(now())
-                                    ->required(),
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(
+                                        static::syncFormularioEquipoNumeroOnFechaChange(RecepcionEquipo::class),
+                                    ),
                                 Textarea::make('observaciones')
                                     ->label('Observaciones')
                                     ->rows(4)

@@ -17,7 +17,7 @@ class RecepcionEquipoFactory extends Factory
     {
         return [
             'asignacion_id' => AsignacionEquipo::factory(),
-            'numero' => fake()->unique()->bothify('REC-####'),
+            'numero' => sprintf('%03d-%d', fake()->unique()->numberBetween(1, 99999), (int) now()->format('Y')),
             'fecha' => fake()->date(),
             'observaciones' => fake()->optional()->sentence(),
         ];

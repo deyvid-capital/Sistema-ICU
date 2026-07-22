@@ -4,8 +4,10 @@ namespace Tests\Feature\Pdf;
 
 use App\Enums\EquipoFormularioPdfTipo;
 use App\Models\AsignacionEquipo;
+use App\Models\Cargo;
 use App\Models\EntregaEquipo;
 use App\Models\Equipo;
+use App\Models\NotaRecepcionEquipo;
 use App\Models\NotaSalidaEquipo;
 use App\Models\PdfEquipo;
 use App\Models\User;
@@ -43,7 +45,7 @@ class EquipoFormularioPdfTest extends TestCase
 
         $entrega = EntregaEquipo::factory()->create([
             'asignacion_id' => $asignacion->id,
-            'numero' => 'ENT-1001',
+            'numero' => '001-2024',
             'fecha' => '2024-04-18',
         ]);
 
@@ -51,11 +53,12 @@ class EquipoFormularioPdfTest extends TestCase
 
         $this->assertInstanceOf(PdfEquipo::class, $pdf);
         $this->assertSame(EquipoFormularioPdfTipo::Entrega->nombreOficial(), $pdf->nombre);
+        $this->assertSame('pdf-equipos/entrega/FUE-001-2024.pdf', $pdf->url);
         $this->assertTrue($entrega->fresh()->hasDocumentoOficial());
         Storage::disk('public')->assertExists($pdf->url);
     }
 
-    public function test_it_replaces_existing_oficial_pdf_on_regenerate(): void
+    public function test_it_replaces_existing_oficial_pdf_on_regenerate_when_numero_changes(): void
     {
         $asignacion = AsignacionEquipo::factory()->create([
             'service_tag' => Equipo::factory(),
@@ -65,20 +68,48 @@ class EquipoFormularioPdfTest extends TestCase
 
         $entrega = EntregaEquipo::factory()->create([
             'asignacion_id' => $asignacion->id,
-            'numero' => 'ENT-2002',
+            'numero' => '002-2024',
             'fecha' => '2024-04-18',
         ]);
 
         $first = app(GenerateEquipoFormularioPdf::class)->execute($entrega, EquipoFormularioPdfTipo::Entrega);
         $oldPath = $first->url;
 
+        $entrega->update(['numero' => '003-2024']);
+
+        $second = app(GenerateEquipoFormularioPdf::class)->execute($entrega->fresh(), EquipoFormularioPdfTipo::Entrega);
+
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame('pdf-equipos/entrega/FUE-003-2024.pdf', $second->url);
+        $this->assertNotSame($oldPath, $second->url);
+        Storage::disk('public')->assertMissing($oldPath);
+        Storage::disk('public')->assertExists($second->url);
+        $this->assertSame(1, $entrega->pdfs()->where('nombre', EquipoFormularioPdfTipo::Entrega->nombreOficial())->count());
+    }
+
+    public function test_it_overwrites_same_path_when_regenerating_without_numero_change(): void
+    {
+        $asignacion = AsignacionEquipo::factory()->create([
+            'service_tag' => Equipo::factory(),
+            'usuario_id' => User::factory(),
+            'fecha_fin' => null,
+        ]);
+
+        $entrega = EntregaEquipo::factory()->create([
+            'asignacion_id' => $asignacion->id,
+            'numero' => '010-2024',
+            'fecha' => '2024-04-18',
+        ]);
+
+        $first = app(GenerateEquipoFormularioPdf::class)->execute($entrega, EquipoFormularioPdfTipo::Entrega);
+
         $entrega->update(['fecha' => '2024-05-01']);
 
         $second = app(GenerateEquipoFormularioPdf::class)->execute($entrega->fresh(), EquipoFormularioPdfTipo::Entrega);
 
         $this->assertSame($first->id, $second->id);
-        $this->assertNotSame($oldPath, $second->url);
-        Storage::disk('public')->assertMissing($oldPath);
+        $this->assertSame($first->url, $second->url);
+        $this->assertSame('pdf-equipos/entrega/FUE-010-2024.pdf', $second->url);
         Storage::disk('public')->assertExists($second->url);
         $this->assertSame(1, $entrega->pdfs()->where('nombre', EquipoFormularioPdfTipo::Entrega->nombreOficial())->count());
     }
@@ -88,13 +119,14 @@ class EquipoFormularioPdfTest extends TestCase
         $nota = NotaSalidaEquipo::factory()->create([
             'equipo_id' => Equipo::factory(),
             'usuario_externo_id' => UsuarioExterno::factory(),
-            'numero' => 'NS-3003',
+            'numero' => '003-2024',
             'fecha' => '2024-06-01',
         ]);
 
         $pdf = app(GenerateEquipoFormularioPdf::class)->execute($nota, EquipoFormularioPdfTipo::NotaSalida);
 
         $this->assertTrue($nota->fresh()->hasDocumentoOficial());
+        $this->assertSame('pdf-equipos/nota-salida/NotaSalida-003-2024.pdf', $pdf->url);
         Storage::disk('public')->assertExists($pdf->url);
     }
 
@@ -108,7 +140,7 @@ class EquipoFormularioPdfTest extends TestCase
 
         $entrega = EntregaEquipo::factory()->create([
             'asignacion_id' => $asignacion->id,
-            'numero' => 'ENT-4004',
+            'numero' => '004-2024',
             'mouse' => true,
             'cooler' => false,
             'audifonos' => true,
@@ -117,9 +149,42 @@ class EquipoFormularioPdfTest extends TestCase
         $payload = app(EquipoFormularioPdfData::class)
             ->for($entrega, EquipoFormularioPdfTipo::Entrega);
 
-        $this->assertSame('ENT-4004', $payload['documento']['numero']);
+        $this->assertSame('004-2024', $payload['documento']['numero']);
         $this->assertSame('Entrega', $payload['documento']['tipo']);
         $this->assertTrue($payload['documento']['mouse']['incluido']);
         $this->assertFalse($payload['documento']['cooler']['incluido']);
+    }
+
+    public function test_nota_recepcion_uses_selected_firmante_as_firma_derecha(): void
+    {
+        $cargo = Cargo::factory()->create(['cargo' => 'Jefe de Sistemas']);
+        $firmante = User::factory()->create([
+            'name' => 'María Gómez',
+            'id_cargo' => $cargo->id_cargo,
+        ]);
+
+        $nota = NotaRecepcionEquipo::factory()->create([
+            'equipo_id' => Equipo::factory(),
+            'usuarios_externo_id' => UsuarioExterno::factory(),
+        ]);
+
+        $payload = app(EquipoFormularioPdfData::class)
+            ->for($nota, EquipoFormularioPdfTipo::NotaRecepcion, (string) $firmante->id);
+
+        $this->assertSame('María Gómez', $payload['documento']['firma_derecha']['nombre']);
+        $this->assertSame('Jefe de Sistemas', $payload['documento']['firma_derecha']['cargo']);
+    }
+
+    public function test_nota_recepcion_without_firmante_keeps_default_firma_derecha(): void
+    {
+        $nota = NotaRecepcionEquipo::factory()->create([
+            'equipo_id' => Equipo::factory(),
+            'usuarios_externo_id' => UsuarioExterno::factory(),
+        ]);
+
+        $payload = app(EquipoFormularioPdfData::class)
+            ->for($nota, EquipoFormularioPdfTipo::NotaRecepcion);
+
+        $this->assertSame('—', $payload['documento']['firma_derecha']['nombre']);
     }
 }

@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources\NotaSalidaEquipos\Schemas;
 
+use App\Filament\Resources\Concerns\ConfiguresFormularioEquipoNumeroField;
 use App\Filament\Resources\Equipos\RelationManagers\NotasSalidaRelationManager as EquipoNotasSalidaRelationManager;
 use App\Filament\Resources\UsuarioExternos\RelationManagers\NotasSalidaRelationManager as UsuarioExternoNotasSalidaRelationManager;
 use App\Models\Equipo;
+use App\Models\NotaSalidaEquipo;
 use App\Models\UsuarioExterno;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -18,6 +19,8 @@ use Filament\Support\Icons\Heroicon;
 
 class NotaSalidaEquipoForm
 {
+    use ConfiguresFormularioEquipoNumeroField;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -51,14 +54,15 @@ class NotaSalidaEquipoForm
                                     ->required()
                                     ->rule(new NotTrashed(UsuarioExterno::class))
                                     ->hiddenOn(UsuarioExternoNotasSalidaRelationManager::class),
-                                TextInput::make('numero')
-                                    ->label('Número')
-                                    ->required()
-                                    ->maxLength(20),
+                                static::formularioEquipoNumeroField(NotaSalidaEquipo::class, 'nota_salida_equipos'),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')
                                     ->default(now())
-                                    ->required(),
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(
+                                        static::syncFormularioEquipoNumeroOnFechaChange(NotaSalidaEquipo::class),
+                                    ),
                                 Textarea::make('nota')
                                     ->label('Nota')
                                     ->rows(4)

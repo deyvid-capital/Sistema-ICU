@@ -36,4 +36,29 @@ enum EquipoFormularioPdfTipo: string
     {
         return $this->nombreOficial();
     }
+
+    public function pdfFilenamePrefix(): string
+    {
+        return match ($this) {
+            self::Entrega => 'FUE-',
+            self::Recepcion => 'FUR-',
+            self::NotaSalida => 'NotaSalida-',
+            self::NotaRecepcion => 'NotaRecepcion-',
+        };
+    }
+
+    public function storageDirectory(): string
+    {
+        return match ($this) {
+            self::Entrega => 'pdf-equipos/entrega',
+            self::Recepcion => 'pdf-equipos/recepcion',
+            self::NotaSalida => 'pdf-equipos/nota-salida',
+            self::NotaRecepcion => 'pdf-equipos/nota-recepcion',
+        };
+    }
+
+    public function pdfRelativePath(string $numero): string
+    {
+        return $this->storageDirectory().'/'.$this->pdfFilenamePrefix().$numero.'.pdf';
+    }
 }

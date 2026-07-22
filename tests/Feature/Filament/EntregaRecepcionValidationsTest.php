@@ -35,7 +35,7 @@ class EntregaRecepcionValidationsTest extends TestCase
         Livewire::test(CreateEntregaEquipo::class)
             ->fillForm([
                 'asignacion_id' => $asignacion->id,
-                'numero' => 'ENT-1001',
+                'numero' => '001-2026',
                 'fecha' => now()->toDateString(),
                 'mouse' => false,
                 'cooler' => false,
@@ -53,7 +53,7 @@ class EntregaRecepcionValidationsTest extends TestCase
         Livewire::test(CreateEntregaEquipo::class)
             ->fillForm([
                 'asignacion_id' => $asignacion->id,
-                'numero' => 'ENT-1002',
+                'numero' => '002-2026',
                 'fecha' => now()->toDateString(),
                 'mouse' => false,
                 'cooler' => false,
@@ -70,7 +70,7 @@ class EntregaRecepcionValidationsTest extends TestCase
         Livewire::test(CreateEntregaEquipo::class)
             ->fillForm([
                 'asignacion_id' => $asignacion->id,
-                'numero' => 'ENT-1003',
+                'numero' => '003-2026',
                 'fecha' => now()->toDateString(),
                 'mouse' => true,
                 'cooler' => false,
@@ -81,7 +81,42 @@ class EntregaRecepcionValidationsTest extends TestCase
 
         $this->assertDatabaseHas('entrega_equipos', [
             'asignacion_id' => $asignacion->id,
-            'numero' => 'ENT-1003',
+            'numero' => '003-2026',
         ]);
+    }
+
+    public function test_it_rejects_invalid_numero_format(): void
+    {
+        $asignacion = AsignacionEquipo::factory()->create();
+
+        Livewire::test(CreateEntregaEquipo::class)
+            ->fillForm([
+                'asignacion_id' => $asignacion->id,
+                'numero' => 'ENT-1001',
+                'fecha' => now()->toDateString(),
+                'mouse' => false,
+                'cooler' => false,
+                'audifonos' => false,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['numero']);
+    }
+
+    public function test_it_rejects_duplicate_numero(): void
+    {
+        $asignacion = AsignacionEquipo::factory()->create();
+        EntregaEquipo::factory()->create(['numero' => '050-2026']);
+
+        Livewire::test(CreateEntregaEquipo::class)
+            ->fillForm([
+                'asignacion_id' => AsignacionEquipo::factory()->create()->id,
+                'numero' => '050-2026',
+                'fecha' => now()->toDateString(),
+                'mouse' => false,
+                'cooler' => false,
+                'audifonos' => false,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['numero']);
     }
 }

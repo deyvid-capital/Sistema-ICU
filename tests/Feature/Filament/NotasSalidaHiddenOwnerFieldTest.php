@@ -37,7 +37,7 @@ class NotasSalidaHiddenOwnerFieldTest extends TestCase
         ])
             ->callTableAction('create', data: [
                 'usuario_externo_id' => $usuarioExterno->id,
-                'numero' => 'NS-9001',
+                'numero' => '901-2026',
                 'fecha' => now()->toDateString(),
                 'nota' => 'Salida de prueba',
             ])
@@ -46,7 +46,7 @@ class NotasSalidaHiddenOwnerFieldTest extends TestCase
         $this->assertDatabaseHas('nota_salida_equipos', [
             'equipo_id' => $equipo->service_tag,
             'usuario_externo_id' => $usuarioExterno->id,
-            'numero' => 'NS-9001',
+            'numero' => '901-2026',
         ]);
     }
 }

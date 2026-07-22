@@ -17,7 +17,7 @@ class EntregaEquipoFactory extends Factory
     {
         return [
             'asignacion_id' => AsignacionEquipo::factory(),
-            'numero' => fake()->unique()->bothify('ENT-####'),
+            'numero' => sprintf('%03d-%d', fake()->unique()->numberBetween(1, 99999), (int) now()->format('Y')),
             'fecha' => fake()->date(),
             'mouse' => fake()->boolean(),
             'cooler' => fake()->boolean(),

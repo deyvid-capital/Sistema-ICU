@@ -2,12 +2,13 @@
 
 namespace App\Filament\Resources\EntregaEquipos\Schemas;
 
+use App\Filament\Resources\Concerns\ConfiguresFormularioEquipoNumeroField;
 use App\Models\AsignacionEquipo;
+use App\Models\EntregaEquipo;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Rules\Unique;
 
 class EntregaEquipoForm
 {
+    use ConfiguresFormularioEquipoNumeroField;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -55,19 +58,15 @@ class EntregaEquipoForm
                                         modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
                                     )
                                     ->columnSpanFull(),
-                                TextInput::make('numero')
-                                    ->label('Número')
-                                    ->maxLength(20)
-                                    ->unique(
-                                        table: 'entrega_equipos',
-                                        column: 'numero',
-                                        ignoreRecord: true,
-                                        modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
-                                    ),
+                                static::formularioEquipoNumeroField(EntregaEquipo::class, 'entrega_equipos'),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')
                                     ->default(now())
-                                    ->required(),
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(
+                                        static::syncFormularioEquipoNumeroOnFechaChange(EntregaEquipo::class),
+                                    ),
                                 Toggle::make('mouse')
                                     ->label('Mouse')
                                     ->default(false)
