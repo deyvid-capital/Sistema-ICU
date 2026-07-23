@@ -63,6 +63,14 @@ class RecepcionEquipoResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['numero', 'observaciones'];
+    }
+
     public static function getPages(): array
     {
         return [

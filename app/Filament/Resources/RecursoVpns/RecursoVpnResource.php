@@ -145,6 +145,14 @@ class RecursoVpnResource extends Resource
             ]);
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['nombre_vpn', 'descripcion'];
+    }
+
     public static function getPages(): array
     {
         return [

@@ -60,6 +60,14 @@ class AccesoVirtualResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['accesoInternet.usuario_red', 'virtual.maquina_virtual', 'recursoVpn.nombre_vpn'];
+    }
+
     public static function getPages(): array
     {
         return [

@@ -150,6 +150,14 @@ class ModeloLaptopResource extends Resource
             ]);
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['nombre'];
+    }
+
     public static function getPages(): array
     {
         return [

@@ -60,6 +60,14 @@ class AccesoSistemaResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['usuario_sistema', 'nivel_acceso', 'usuario.name', 'sistema.nombre_sistema'];
+    }
+
     public static function getPages(): array
     {
         return [

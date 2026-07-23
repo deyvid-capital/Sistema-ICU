@@ -60,6 +60,14 @@ class AccUdCompartidaResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['unidad_compartida', 'estado', 'usuario.name'];
+    }
+
     public static function getPages(): array
     {
         return [

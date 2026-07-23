@@ -61,6 +61,14 @@ class AccesoInternetResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['usuario_red', 'nivel_acceso', 'fortitoken', 'usuario.name'];
+    }
+
     public static function getPages(): array
     {
         return [

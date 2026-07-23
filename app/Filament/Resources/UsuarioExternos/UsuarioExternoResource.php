@@ -63,6 +63,14 @@ class UsuarioExternoResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['nombre', 'carnet', 'empresa', 'cargo'];
+    }
+
     public static function getPages(): array
     {
         return [

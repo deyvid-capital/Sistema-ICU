@@ -58,6 +58,14 @@ class SistemaResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['nombre_sistema', 'descripcion'];
+    }
+
     public static function getPages(): array
     {
         return [

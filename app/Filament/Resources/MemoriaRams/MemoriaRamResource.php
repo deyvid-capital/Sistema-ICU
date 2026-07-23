@@ -150,6 +150,14 @@ class MemoriaRamResource extends Resource
             ]);
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['tipo_ram'];
+    }
+
     public static function getPages(): array
     {
         return [

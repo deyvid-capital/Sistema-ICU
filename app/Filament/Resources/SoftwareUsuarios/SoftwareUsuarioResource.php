@@ -60,6 +60,14 @@ class SoftwareUsuarioResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['estado', 'usuario.name', 'software.nombre_software'];
+    }
+
     public static function getPages(): array
     {
         return [

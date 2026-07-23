@@ -60,6 +60,14 @@ class AccesoSharepointResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['estado', 'usuario.name', 'sitio.nombre_sitio'];
+    }
+
     public static function getPages(): array
     {
         return [

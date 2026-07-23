@@ -58,6 +58,14 @@ class AzureAdResource extends Resource
         return [];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['iniciales', 'estado', 'usuario.name'];
+    }
+
     public static function getPages(): array
     {
         return [

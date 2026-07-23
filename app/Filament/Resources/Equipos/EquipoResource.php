@@ -69,6 +69,14 @@ class EquipoResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['service_tag', 'nombre_equipo', 'codigo_activo', 'proveedor'];
+    }
+
     public static function getPages(): array
     {
         return [

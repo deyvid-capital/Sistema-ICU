@@ -57,6 +57,14 @@ class MovimientoResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['tipo', 'usuario.name', 'cargo.cargo'];
+    }
+
     public static function getPages(): array
     {
         return [

@@ -58,6 +58,14 @@ class FirmanteResource extends Resource
         return [];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['usuario.name'];
+    }
+
     public static function getPages(): array
     {
         return [

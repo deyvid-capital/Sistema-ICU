@@ -36,7 +36,7 @@ class AsignacionCargadorResource extends Resource
 
     protected static ?string $pluralModelLabel = 'asignaciones de cargadores';
 
-    protected static ?string $recordTitleAttribute = null;
+    protected static ?string $recordTitleAttribute = 'serial_cargador';
 
     public static function form(Schema $schema): Schema
     {
@@ -56,6 +56,14 @@ class AsignacionCargadorResource extends Resource
     public static function getRelations(): array
     {
         return [];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['serial_cargador', 'service_tag', 'observaciones'];
     }
 
     public static function getPages(): array

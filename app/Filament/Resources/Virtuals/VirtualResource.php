@@ -138,6 +138,14 @@ class VirtualResource extends Resource
             ]);
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['maquina_virtual'];
+    }
+
     public static function getPages(): array
     {
         return [

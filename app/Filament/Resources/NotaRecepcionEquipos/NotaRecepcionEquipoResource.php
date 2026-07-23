@@ -63,6 +63,14 @@ class NotaRecepcionEquipoResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['numero', 'nota', 'usuarioExterno.nombre'];
+    }
+
     public static function getPages(): array
     {
         return [

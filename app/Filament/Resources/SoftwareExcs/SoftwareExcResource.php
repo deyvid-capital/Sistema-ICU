@@ -24,6 +24,8 @@ class SoftwareExcResource extends Resource
 {
     protected static ?string $model = SoftwareExc::class;
 
+    protected static ?string $recordTitleAttribute = 'tipo_excepcion';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldExclamation;
 
     protected static string|UnitEnum|null $navigationGroup = 'Software y Licencias';
@@ -56,6 +58,14 @@ class SoftwareExcResource extends Resource
         return [
             //
         ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['tipo_excepcion', 'motivo', 'usuario.name', 'software.nombre_software'];
     }
 
     public static function getPages(): array

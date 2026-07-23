@@ -58,6 +58,14 @@ class SitioSharepointResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['nombre_sitio', 'url', 'descripcion'];
+    }
+
     public static function getPages(): array
     {
         return [

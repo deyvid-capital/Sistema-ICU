@@ -36,7 +36,7 @@ class AsignacionEquipoResource extends Resource
 
     protected static ?string $pluralModelLabel = 'asignaciones de equipos';
 
-    protected static ?string $recordTitleAttribute = null;
+    protected static ?string $recordTitleAttribute = 'service_tag';
 
     public static function form(Schema $schema): Schema
     {
@@ -56,6 +56,14 @@ class AsignacionEquipoResource extends Resource
     public static function getRelations(): array
     {
         return [];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['service_tag', 'motivo', 'observaciones', 'usuario.name'];
     }
 
     public static function getPages(): array

@@ -57,6 +57,14 @@ class SoftwareAreaResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['software.nombre_software', 'area.area'];
+    }
+
     public static function getPages(): array
     {
         return [

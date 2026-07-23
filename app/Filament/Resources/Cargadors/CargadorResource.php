@@ -61,6 +61,14 @@ class CargadorResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['serial', 'marca', 'modelo'];
+    }
+
     public static function getPages(): array
     {
         return [

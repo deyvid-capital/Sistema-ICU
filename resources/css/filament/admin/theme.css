@@ -9,3 +9,39 @@
 .fi-fo-field-wrp-label {
     @apply text-[13px];
 }
+
+/* Sidebar: reducir tamaño de letra */
+.fi-sidebar-item-label {
+    @apply text-[12px];
+}
+.fi-sidebar-group-label {
+    @apply text-[13px];
+}
+
+/* Dropdown: reducir tamaño de letra */
+.fi-dropdown-list-item-label {
+    @apply text-[13px];
+}
+
+/* Sidebar: ocultar la barra de scroll pero mantener el desplazamiento */
+.fi-sidebar-nav {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Edge antiguo */
+}
+.fi-sidebar-nav::-webkit-scrollbar {
+    display: none; /* Chrome, Edge, Safari */
+}
+
+/* Busqueda global: reducir tamaño del componente */
+.fi-global-search {
+    @apply max-w-xs;
+}
+.fi-global-search .fi-input {
+    @apply text-[13px];
+}
+.fi-global-search .fi-input-wrp-icon {
+    @apply size-4;
+}
+.fi-global-search .fi-input-wrp-suffix {
+    @apply text-[11px];
+}

@@ -63,6 +63,14 @@ class EntregaEquipoResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['numero', 'observaciones', 'nota'];
+    }
+
     public static function getPages(): array
     {
         return [

@@ -60,6 +60,14 @@ class AccesoDazaResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['usuario_daza', 'nivel_acceso', 'ambiente', 'usuario.name'];
+    }
+
     public static function getPages(): array
     {
         return [

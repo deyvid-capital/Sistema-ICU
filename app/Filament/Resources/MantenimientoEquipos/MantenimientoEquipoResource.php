@@ -36,7 +36,7 @@ class MantenimientoEquipoResource extends Resource
 
     protected static ?string $pluralModelLabel = 'mantenimientos de equipos';
 
-    protected static ?string $recordTitleAttribute = null;
+    protected static ?string $recordTitleAttribute = 'service_tag';
 
     public static function form(Schema $schema): Schema
     {
@@ -56,6 +56,14 @@ class MantenimientoEquipoResource extends Resource
     public static function getRelations(): array
     {
         return [];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['service_tag', 'observaciones'];
     }
 
     public static function getPages(): array

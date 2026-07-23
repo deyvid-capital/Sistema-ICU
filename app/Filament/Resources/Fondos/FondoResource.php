@@ -58,6 +58,14 @@ class FondoResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['codigo', 'nombre_completo', 'descripcion'];
+    }
+
     public static function getPages(): array
     {
         return [

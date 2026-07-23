@@ -54,6 +54,14 @@ class PdfEquipoResource extends Resource
         return [];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['nombre', 'url'];
+    }
+
     public static function getPages(): array
     {
         return [

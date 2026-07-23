@@ -152,6 +152,14 @@ class AreaResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['area', 'descripcion'];
+    }
+
     public static function getPages(): array
     {
         return [

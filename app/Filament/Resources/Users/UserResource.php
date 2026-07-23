@@ -77,6 +77,14 @@ class UserResource extends Resource
         ]);
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'carnet', 'email', 'telefono'];
+    }
+
     public static function getPages(): array
     {
         return [
