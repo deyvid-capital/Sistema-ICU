@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
+use Database\Factories\CelularFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,10 +12,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Celular extends Model
 {
+    /** @use HasFactory<CelularFactory> */
+    use HasFactory;
+
     use PreventsForceDeleteWithDependents;
     use SoftDeletes;
 
-    protected static array $forceDeleteGuardedRelations = ['asignaciones', 'cargadores'];
+    protected static array $forceDeleteGuardedRelations = ['asignaciones', 'cargadores', 'asignacionesCargador'];
+
+    protected $table = 'celulares';
 
     protected $primaryKey = 'id';
 
@@ -48,6 +55,14 @@ class Celular extends Model
     public function asignaciones(): HasMany
     {
         return $this->hasMany(AsigCelular::class, 'celular_id', 'id');
+    }
+
+    /**
+     * Get the charger assignments for the phone.
+     */
+    public function asignacionesCargador(): HasMany
+    {
+        return $this->hasMany(AsigCargadorCel::class, 'celulares_id', 'id');
     }
 
     /**

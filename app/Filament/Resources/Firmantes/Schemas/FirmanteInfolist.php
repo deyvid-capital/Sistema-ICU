@@ -16,6 +16,9 @@ class FirmanteInfolist
                     ->label('Usuario'),
                 TextEntry::make('fecha')
                     ->date(),
+                TextEntry::make('posicion')
+                    ->label('Posición')
+                    ->badge(),
                 TextEntry::make('documento_type'),
                 TextEntry::make('documento_id')
                     ->numeric(),

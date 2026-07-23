@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use Database\Factories\AsigCelularFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,11 +13,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AsigCelular extends Model
 {
+    /** @use HasFactory<AsigCelularFactory> */
     use BelongsToUsuario;
+
     use GuardsAgainstTrashedRelations;
+    use HasFactory;
     use SoftDeletes;
 
-    protected static array $trashGuardedRelations = ['usuario'];
+    protected static array $trashGuardedRelations = ['usuario', 'celular'];
 
     protected $table = 'asig_celular';
 
@@ -39,7 +44,7 @@ class AsigCelular extends Model
      */
     public function celular(): BelongsTo
     {
-        return $this->belongsTo(Celular::class, 'celular_id', 'id');
+        return $this->belongsTo(Celular::class, 'celular_id', 'id')->withTrashed();
     }
 
     /**

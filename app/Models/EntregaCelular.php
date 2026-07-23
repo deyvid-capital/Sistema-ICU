@@ -2,6 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\CelularFormularioPdfTipo;
+use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\HasDocumentoOficialCelularPdf;
+use Database\Factories\EntregaCelularFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -9,7 +14,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EntregaCelular extends Model
 {
+    /** @use HasFactory<EntregaCelularFactory> */
+    use GuardsAgainstTrashedRelations;
+
+    use HasDocumentoOficialCelularPdf;
+    use HasFactory;
     use SoftDeletes;
+
+    protected static array $trashGuardedRelations = ['asignacion'];
 
     protected $table = 'entrega_celulares';
 
@@ -33,7 +45,7 @@ class EntregaCelular extends Model
      */
     public function asignacion(): BelongsTo
     {
-        return $this->belongsTo(AsigCelular::class, 'asignacion_cel_id');
+        return $this->belongsTo(AsigCelular::class, 'asignacion_cel_id')->withTrashed();
     }
 
     /**
@@ -50,5 +62,10 @@ class EntregaCelular extends Model
     public function firmantes(): MorphMany
     {
         return $this->morphMany(Firmante::class, 'documento');
+    }
+
+    public static function formularioPdfTipo(): CelularFormularioPdfTipo
+    {
+        return CelularFormularioPdfTipo::Entrega;
     }
 }

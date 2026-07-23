@@ -72,6 +72,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Laptop y Computadoras')
                     ->icon(Heroicon::OutlinedComputerDesktop),
                 NavigationGroup::make()
+                    ->label('Celulares')
+                    ->icon(Heroicon::OutlinedDevicePhoneMobile),
+                NavigationGroup::make()
                     ->label('Inventario Equipos y Componentes')
                     ->icon(Heroicon::OutlinedCpuChip),
                 NavigationGroup::make()

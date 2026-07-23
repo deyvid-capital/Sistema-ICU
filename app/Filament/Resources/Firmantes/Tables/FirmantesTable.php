@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Firmantes\Tables;
 
+use App\Filament\Resources\EntregaCelulars\RelationManagers\FirmantesRelationManager as EntregaCelularFirmantesRelationManager;
 use App\Filament\Resources\EntregaEquipos\RelationManagers\FirmantesRelationManager as EntregaFirmantesRelationManager;
 use App\Filament\Resources\NotaRecepcionEquipos\RelationManagers\FirmantesRelationManager as NotaRecepcionFirmantesRelationManager;
 use App\Filament\Resources\NotaSalidaEquipos\RelationManagers\FirmantesRelationManager as NotaSalidaFirmantesRelationManager;
+use App\Filament\Resources\RecepcionCelulars\RelationManagers\FirmantesRelationManager as RecepcionCelularFirmantesRelationManager;
 use App\Filament\Resources\RecepcionEquipos\RelationManagers\FirmantesRelationManager as RecepcionFirmantesRelationManager;
 use App\Models\Firmante;
 use Filament\Actions\ActionGroup;
@@ -32,6 +34,8 @@ class FirmantesTable
         RecepcionFirmantesRelationManager::class,
         NotaSalidaFirmantesRelationManager::class,
         NotaRecepcionFirmantesRelationManager::class,
+        EntregaCelularFirmantesRelationManager::class,
+        RecepcionCelularFirmantesRelationManager::class,
     ];
 
     public static function configure(Table $table): Table
@@ -49,6 +53,10 @@ class FirmantesTable
                 TextColumn::make('fecha')
                     ->label('Fecha de firma')
                     ->date('d/m/Y')
+                    ->sortable(),
+                TextColumn::make('posicion')
+                    ->label('Posición')
+                    ->badge()
                     ->sortable(),
                 TextColumn::make('documento_type')
                     ->label('Tipo')

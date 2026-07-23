@@ -3,6 +3,7 @@
 namespace App\Services\Pdf;
 
 use App\Enums\EquipoFormularioPdfTipo;
+use App\Enums\FirmantePosicion;
 use App\Models\EntregaEquipo;
 use App\Models\Equipo;
 use App\Models\Firmante;
@@ -271,21 +272,26 @@ class EquipoFormularioPdfData
      */
     private function resolveFirmas(Collection $firmantes, ?User $usuarioAsignado, ?array $fallbackDerecha = null): array
     {
-        $ordered = $firmantes->sortBy('id')->values();
-        $primero = $ordered->get(0)?->usuario;
-        $segundo = $ordered->get(1)?->usuario;
+        $porPosicion = $firmantes->keyBy(
+            fn (Firmante $firmante): string => $firmante->posicion instanceof FirmantePosicion
+                ? $firmante->posicion->value
+                : (string) $firmante->posicion,
+        );
+
+        $izquierda = $porPosicion->get(FirmantePosicion::Izquierda->value)?->usuario;
+        $derecha = $porPosicion->get(FirmantePosicion::Derecha->value)?->usuario;
 
         return [
             'izquierda' => [
-                'nombre' => $primero?->name ?? 'Tecnología de la Información',
-                'cargo' => $primero?->cargo?->cargo,
+                'nombre' => $izquierda?->name ?? 'Tecnología de la Información',
+                'cargo' => $izquierda?->cargo?->cargo,
             ],
             'derecha' => [
-                'nombre' => $segundo?->name
+                'nombre' => $derecha?->name
                     ?? $fallbackDerecha['nombre']
                     ?? $usuarioAsignado?->name
                     ?? '—',
-                'cargo' => $segundo?->cargo?->cargo
+                'cargo' => $derecha?->cargo?->cargo
                     ?? $fallbackDerecha['cargo']
                     ?? $usuarioAsignado?->cargo?->cargo,
             ],

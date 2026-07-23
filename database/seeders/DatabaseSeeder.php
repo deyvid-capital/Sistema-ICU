@@ -104,5 +104,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SoftwareLicenciasSeeder::class);
         $this->call(AccesosSeeder::class);
         $this->call(EquiposSeeder::class);
+        $this->call(CelularesSeeder::class);
     }
 }
