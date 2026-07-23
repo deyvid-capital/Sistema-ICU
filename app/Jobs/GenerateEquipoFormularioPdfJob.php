@@ -54,14 +54,29 @@ class GenerateEquipoFormularioPdfJob implements ShouldQueue
             return;
         }
 
+        $url = PdfEquipoResource::getUrl('view', ['record' => $pdf]);
+        $actor = $this->actor();
+
+        // Avisa directamente al usuario que solicitó el PDF (NotifyAdmins lo excluye).
+        if ($actor !== null) {
+            $actor->notify(new CriticalEventNotification(
+                title: 'PDF listo: '.$this->tipo->nombreOficial(),
+                body: 'Se generó «'.$this->tipo->nombreOficial().'» que solicitaste.',
+                url: $url,
+                icon: 'heroicon-o-document-arrow-down',
+                color: 'success',
+                severity: CriticalEventNotification::SEVERIDAD_MEDIA,
+            ));
+        }
+
         NotifyAdmins::dispatch(
             title: 'PDF listo: '.$this->tipo->nombreOficial(),
             body: 'Se generó «'.$this->tipo->nombreOficial().'»'.$this->requeridoPor().'.',
-            url: PdfEquipoResource::getUrl('view', ['record' => $pdf]),
+            url: $url,
             icon: 'heroicon-o-document-arrow-down',
             color: 'success',
             severity: CriticalEventNotification::SEVERIDAD_MEDIA,
-            actor: $this->actor(),
+            actor: $actor,
         );
     }
 

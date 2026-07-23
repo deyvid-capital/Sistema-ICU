@@ -2,8 +2,13 @@
 
 namespace App\Filament\Resources\PdfEquipos\Actions;
 
+use App\Enums\EquipoFormularioPdfTipo;
+use App\Jobs\GenerateEquipoFormularioPdfJob;
 use App\Models\PdfEquipo;
+use App\Models\User;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
@@ -21,6 +26,54 @@ class PdfEquipoDocumentActions
             self::view(),
             self::download(),
         ];
+    }
+
+    public static function regenerate(): Action
+    {
+        return Action::make('regenerate')
+            ->label('Generar de nuevo')
+            ->icon(Heroicon::OutlinedArrowPath)
+            ->color('primary')
+            ->visible(fn (PdfEquipo $record): bool => self::resolveTipo($record) !== null
+                && $record->documento !== null)
+            ->modalIcon(Heroicon::OutlinedArrowPath)
+            ->modalHeading('Generar PDF de nuevo')
+            ->modalDescription('Se generará nuevamente el documento en segundo plano y reemplazará el archivo actual. Se te avisará cuando esté listo.')
+            ->modalSubmitActionLabel('Generar y guardar')
+            ->schema(fn (PdfEquipo $record): array => self::resolveTipo($record) === EquipoFormularioPdfTipo::NotaRecepcion
+                ? [
+                    Select::make('firmante_id')
+                        ->label('Usuario que firma')
+                        ->helperText('Aparecerá como firma derecha del documento. No se guarda en la base de datos.')
+                        ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all())
+                        ->searchable()
+                        ->preload(),
+                ]
+                : [])
+            ->action(function (PdfEquipo $record, array $data): void {
+                $tipo = self::resolveTipo($record);
+                $documento = $record->documento;
+
+                abort_if($tipo === null || $documento === null, 404);
+
+                GenerateEquipoFormularioPdfJob::dispatch(
+                    $documento,
+                    $tipo,
+                    auth()->id(),
+                    $data['firmante_id'] ?? null,
+                );
+
+                Notification::make()
+                    ->title('Generando PDF…')
+                    ->body('El documento «'.$tipo->nombreOficial().'» se está generando en segundo plano. Se te avisará cuando esté listo.')
+                    ->info()
+                    ->send();
+            });
+    }
+
+    private static function resolveTipo(PdfEquipo $record): ?EquipoFormularioPdfTipo
+    {
+        return EquipoFormularioPdfTipo::tryFromNombreOficial($record->nombre);
     }
 
     public static function view(): Action

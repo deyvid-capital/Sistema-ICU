@@ -32,6 +32,20 @@ enum EquipoFormularioPdfTipo: string
         };
     }
 
+    /**
+     * Resuelve el tipo a partir del nombre oficial guardado en el PDF.
+     */
+    public static function tryFromNombreOficial(?string $nombre): ?self
+    {
+        foreach (self::cases() as $case) {
+            if ($case->nombreOficial() === $nombre) {
+                return $case;
+            }
+        }
+
+        return null;
+    }
+
     public function label(): string
     {
         return $this->nombreOficial();

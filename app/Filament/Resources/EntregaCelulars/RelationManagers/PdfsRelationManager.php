@@ -4,7 +4,6 @@ namespace App\Filament\Resources\EntregaCelulars\RelationManagers;
 
 use App\Filament\Resources\PdfCelulars\PdfCelularResource;
 use App\Filament\Resources\Users\RelationManagers\Concerns\HasOwnerRecordCountBadge;
-use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -24,11 +23,6 @@ class PdfsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return PdfCelularResource::table($table)
-            ->headerActions([
-                CreateAction::make()
-                    ->label('Agregar PDF')
-                    ->successNotificationTitle('PDF registrado correctamente'),
-            ]);
+        return PdfCelularResource::table($table);
     }
 }

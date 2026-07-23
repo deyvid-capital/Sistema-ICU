@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\PdfEquipos;
 
-use App\Filament\Resources\PdfEquipos\Pages\CreatePdfEquipo;
-use App\Filament\Resources\PdfEquipos\Pages\EditPdfEquipo;
 use App\Filament\Resources\PdfEquipos\Pages\ListPdfEquipos;
 use App\Filament\Resources\PdfEquipos\Pages\ViewPdfEquipo;
 use App\Filament\Resources\PdfEquipos\Schemas\PdfEquipoForm;
@@ -66,9 +64,7 @@ class PdfEquipoResource extends Resource
     {
         return [
             'index' => ListPdfEquipos::route('/'),
-            'create' => CreatePdfEquipo::route('/create'),
             'view' => ViewPdfEquipo::route('/{record}'),
-            'edit' => EditPdfEquipo::route('/{record}/edit'),
         ];
     }
 
@@ -80,9 +76,14 @@ class PdfEquipoResource extends Resource
             ]);
     }
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function canEdit(Model $record): bool
     {
-        return parent::canEdit($record) && ! $record->trashed();
+        return false;
     }
 
     public static function getDeletedNotification(PdfEquipo $record, bool $force = false): Notification

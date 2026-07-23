@@ -3,12 +3,13 @@
 namespace App\Filament\Resources\PdfCelulars\Tables;
 
 use App\Filament\Resources\EntregaCelulars\RelationManagers\PdfsRelationManager as EntregaCelularPdfsRelationManager;
+use App\Filament\Resources\PdfCelulars\PdfCelularResource;
 use App\Filament\Resources\RecepcionCelulars\RelationManagers\PdfsRelationManager as RecepcionCelularPdfsRelationManager;
+use App\Models\PdfCelular;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -31,6 +32,7 @@ class PdfCelularsTable
             ->defaultSort('fecha', 'desc')
             ->striped()
             ->paginated([10, 25, 50])
+            ->recordUrl(fn (PdfCelular $record): string => PdfCelularResource::getUrl('view', ['record' => $record]))
             ->columns([
                 TextColumn::make('nombre')
                     ->label('Nombre')
@@ -64,7 +66,6 @@ class PdfCelularsTable
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()->label('Ver'),
-                    EditAction::make()->label('Editar'),
                     DeleteAction::make()
                         ->label('Eliminar')
                         ->successNotificationTitle('PDF eliminado correctamente'),

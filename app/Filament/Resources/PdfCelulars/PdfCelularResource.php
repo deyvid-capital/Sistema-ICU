@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\PdfCelulars;
 
-use App\Filament\Resources\PdfCelulars\Pages\CreatePdfCelular;
-use App\Filament\Resources\PdfCelulars\Pages\EditPdfCelular;
 use App\Filament\Resources\PdfCelulars\Pages\ListPdfCelulars;
 use App\Filament\Resources\PdfCelulars\Pages\ViewPdfCelular;
 use App\Filament\Resources\PdfCelulars\Schemas\PdfCelularForm;
@@ -15,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class PdfCelularResource extends Resource
 {
@@ -62,9 +61,17 @@ class PdfCelularResource extends Resource
     {
         return [
             'index' => ListPdfCelulars::route('/'),
-            'create' => CreatePdfCelular::route('/create'),
             'view' => ViewPdfCelular::route('/{record}'),
-            'edit' => EditPdfCelular::route('/{record}/edit'),
         ];
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return false;
     }
 }

@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\PdfCelulars\Pages;
 
+use App\Filament\Resources\PdfCelulars\Actions\PdfCelularDocumentActions;
 use App\Filament\Resources\PdfCelulars\PdfCelularResource;
-use Filament\Actions\EditAction;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Icons\Heroicon;
 
 class ViewPdfCelular extends ViewRecord
 {
@@ -13,7 +16,18 @@ class ViewPdfCelular extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            ActionGroup::make([
+                PdfCelularDocumentActions::regenerate(),
+                ...PdfCelularDocumentActions::make(),
+                DeleteAction::make()
+                    ->label('Eliminar')
+                    ->successNotificationTitle('PDF eliminado correctamente'),
+            ])
+                ->label('Acciones')
+                ->icon(Heroicon::OutlinedEllipsisVertical)
+                ->color('primary')
+                ->button()
+                ->tooltip('Acciones'),
         ];
     }
 }

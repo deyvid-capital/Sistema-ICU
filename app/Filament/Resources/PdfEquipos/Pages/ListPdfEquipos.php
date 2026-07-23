@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\PdfEquipos\Pages;
 
 use App\Filament\Resources\PdfEquipos\PdfEquipoResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListPdfEquipos extends ListRecords
@@ -12,8 +11,6 @@ class ListPdfEquipos extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            CreateAction::make(),
-        ];
+        return [];
     }
 }

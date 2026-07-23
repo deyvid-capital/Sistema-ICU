@@ -11,7 +11,6 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
@@ -39,6 +38,7 @@ class PdfEquiposTable
             ->defaultSort('fecha', 'desc')
             ->striped()
             ->paginated([10, 25, 50])
+            ->recordUrl(fn (PdfEquipo $record): string => PdfEquipoResource::getUrl('view', ['record' => $record]))
             ->columns([
                 TextColumn::make('nombre')
                     ->label('Nombre')
@@ -78,9 +78,6 @@ class PdfEquiposTable
                 ActionGroup::make([
                     ...PdfEquipoDocumentActions::make(),
                     ViewAction::make()->label('Ver'),
-                    EditAction::make()
-                        ->label('Editar')
-                        ->visible(fn (PdfEquipo $record): bool => ! $record->trashed()),
                     DeleteAction::make()
                         ->label('Eliminar')
                         ->visible(fn (PdfEquipo $record): bool => ! $record->trashed())
