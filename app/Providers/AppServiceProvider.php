@@ -16,6 +16,8 @@ use App\Observers\CargadorObserver;
 use App\Observers\EquipoObserver;
 use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,5 +42,19 @@ class AppServiceProvider extends ServiceProvider
         Equipo::observe(EquipoObserver::class);
         SoftwareExc::observe(SoftwareExcObserver::class);
         PdfEquipo::observe(PdfEquipoObserver::class);
+        DatePicker::configureUsing(function (DatePicker $component): void {
+            $component
+                ->native(false)
+                ->locale('es')
+                ->displayFormat('d/m/Y');
+        });
+
+        DateTimePicker::configureUsing(function (DateTimePicker $component): void {
+            $component
+                ->native(false)
+                ->locale('es')
+                ->displayFormat('d/m/Y H:i');
+        });
+        
     }
 }
