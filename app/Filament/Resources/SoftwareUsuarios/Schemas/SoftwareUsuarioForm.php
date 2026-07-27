@@ -8,9 +8,11 @@ use App\Models\User;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Unique;
+use Livewire\Component;
 
 class SoftwareUsuarioForm
 {
@@ -25,22 +27,31 @@ class SoftwareUsuarioForm
                     ->searchable()
                     ->preload()
                     ->rule(new NotTrashed(User::class))
-                    ->hiddenOn(SoftwareUsuariosRelationManager::class)
-                    ->unique(
-                        ignoreRecord: true,
-                        modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareUsuario $record): Unique {
-                            return $rule
-                                ->where('id_software', $get('id_software'))
-                                ->ignore($record);
-                        },
-                    ),
+                    ->hiddenOn(SoftwareUsuariosRelationManager::class),
                 Select::make('id_software')
                     ->label('Software')
                     ->relationship('software', 'nombre_software')
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->live(),
+                    ->live()
+                    ->unique(
+                        table: SoftwareUsuario::class,
+                        column: 'id_software',
+                        ignoreRecord: true,
+                        modifyRuleUsing: function (Unique $rule, Get $get, Component $livewire, ?SoftwareUsuario $record): Unique {
+                            $usuarioId = $livewire instanceof RelationManager
+                                ? $livewire->getOwnerRecord()->getKey()
+                                : $get('usuario_id');
+
+                            return $rule
+                                ->where('usuario_id', $usuarioId)
+                                ->ignore($record);
+                        },
+                    )
+                    ->validationMessages([
+                        'unique' => 'Este usuario ya tiene asignado este software.',
+                    ]),
                 Toggle::make('estado')
                     ->label('Activo')
                     ->default(false)

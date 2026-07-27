@@ -30,6 +30,6 @@ class LicenciasUsuariosRelationManager extends RelationManager
                     ->label('Asignar licencia')
                     ->successNotificationTitle('Asignación registrada correctamente'),
             ])
-            ->poll('5s');
+            ->poll('15s');
     }
 }

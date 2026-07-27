@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\RelationManagers\AzureAdRelationManager;
 use App\Filament\Resources\Users\RelationManagers\UnidadesCompartidasRelationManager;
 use Filament\Support\Icons\Heroicon;
 
@@ -17,6 +18,7 @@ class ManageUserRecursos extends ManageUserRelations
     {
         return [
             UnidadesCompartidasRelationManager::class,
+            AzureAdRelationManager::class,
         ];
     }
 
@@ -27,6 +29,7 @@ class ManageUserRecursos extends ManageUserRelations
     {
         return [
             'unidadesCompartidas',
+            'azureAd',
         ];
     }
 }

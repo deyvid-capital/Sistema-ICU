@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AccesoDazas\Schemas;
 
 use App\Filament\Resources\Users\RelationManagers\AccesosDazaRelationManager;
+use App\Models\AccesoDaza;
 use App\Models\Fondo;
 use App\Models\User;
 use App\Rules\NotTrashed;
@@ -10,10 +11,14 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Validation\Rules\Unique;
+use Livewire\Component;
 
 class AccesoDazaForm
 {
@@ -55,10 +60,30 @@ class AccesoDazaForm
                                     ->getOptionLabelFromRecordUsing(fn (Fondo $record): string => $record->nombre_completo ?? $record->codigo)
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->live()
+                                    ->unique(
+                                        table: AccesoDaza::class,
+                                        column: 'fondo_id',
+                                        ignoreRecord: true,
+                                        modifyRuleUsing: function (Unique $rule, Get $get, Component $livewire, ?AccesoDaza $record): Unique {
+                                            $usuarioId = $livewire instanceof RelationManager
+                                                ? $livewire->getOwnerRecord()->getKey()
+                                                : $get('usuario_id');
+
+                                            return $rule
+                                                ->where('usuario_id', $usuarioId)
+                                                ->where('ambiente', $get('ambiente'))
+                                                ->ignore($record);
+                                        },
+                                    )
+                                    ->validationMessages([
+                                        'unique' => 'Este usuario ya tiene asignado este fondo en el ambiente seleccionado.',
+                                    ]),
                                 Select::make('ambiente')
                                     ->label('Ambiente')
                                     ->native(false)
+                                    ->live()
                                     ->options([
                                         'Producción' => 'Producción',
                                         'Contingencia' => 'Contingencia',

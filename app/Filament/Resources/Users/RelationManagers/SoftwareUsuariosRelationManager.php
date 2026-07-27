@@ -32,6 +32,6 @@ class SoftwareUsuariosRelationManager extends RelationManager
                     ->successNotificationTitle('Asignación registrada correctamente'),
                 AsignarSoftwarePorDefectoAction::make($this),
             ])
-            ->poll('5s');
+            ->poll('15s');
     }
 }

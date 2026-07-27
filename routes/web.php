@@ -23,6 +23,10 @@ Route::get('/api/ver-form-nota-recepcion-externa', function () {
     return view('PlantillasPdf.FormRecepcionExterna');
 });
 
+Route::get('/api/ver-form-alta-baja', function () {
+    return view('PlantillasPdf.FormAltaBaja');
+});
+
 Route::prefix('pdf/preview')->name('pdf.preview.')->group(function () {
     Route::get('/entrega', [PdfPreviewController::class, 'entrega'])->name('entrega');
     Route::get('/recepcion', [PdfPreviewController::class, 'recepcion'])->name('recepcion');

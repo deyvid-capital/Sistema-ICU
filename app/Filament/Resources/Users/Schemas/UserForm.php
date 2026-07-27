@@ -146,13 +146,13 @@ class UserForm
                                 ->helperText('Mínimo 8 caracteres.'),
                             Toggle::make('tipo')
                                 ->label(fn ($state) => $state ? 'Alta' : 'Baja')
-                                ->onIcon(Heroicon::Bolt)
-                                ->offIcon(Heroicon::BoltSlash)
                                 ->onColor('success')
                                 ->offColor('danger')
-                                ->default(true)
+                                ->live()
+                                ->onIcon(Heroicon::Bolt)
+                                ->offIcon(Heroicon::BoltSlash)
                                 ->helperText('Da de alta o baja al usuario; se creará un movimiento en el sistema.'),
-                           
+
                         ]),
 
                     ]),

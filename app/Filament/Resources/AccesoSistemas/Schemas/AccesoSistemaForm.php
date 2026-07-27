@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AccesoSistemas\Schemas;
 
 use App\Filament\Resources\Users\RelationManagers\AccesosSistemasRelationManager;
+use App\Models\AccesoSistema;
 use App\Models\User;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
@@ -10,10 +11,14 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Validation\Rules\Unique;
+use Livewire\Component;
 
 class AccesoSistemaForm
 {
@@ -41,7 +46,25 @@ class AccesoSistemaForm
                                     ->relationship('sistema', 'nombre_sistema')
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->live()
+                                    ->unique(
+                                        table: AccesoSistema::class,
+                                        column: 'id_sistema',
+                                        ignoreRecord: true,
+                                        modifyRuleUsing: function (Unique $rule, Get $get, Component $livewire, ?AccesoSistema $record): Unique {
+                                            $usuarioId = $livewire instanceof RelationManager
+                                                ? $livewire->getOwnerRecord()->getKey()
+                                                : $get('usuario_id');
+
+                                            return $rule
+                                                ->where('usuario_id', $usuarioId)
+                                                ->ignore($record);
+                                        },
+                                    )
+                                    ->validationMessages([
+                                        'unique' => 'Este usuario ya tiene asignado este sistema.',
+                                    ]),
                                 TextInput::make('usuario_sistema')
                                     ->label('Usuario del sistema')
                                     ->maxLength(50),
