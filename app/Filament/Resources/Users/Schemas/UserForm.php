@@ -144,15 +144,17 @@ class UserForm
                                 ->dehydrated(fn ($state) => filled($state))
                                 ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                                 ->helperText('Mínimo 8 caracteres.'),
-                            Toggle::make('tipo')
-                                ->label(fn ($state) => $state ? 'Alta' : 'Baja')
+                            Toggle::make('movimientoActual')
+                                ->label(fn (?bool $state): string => $state ? 'Alta' : 'Baja')
                                 ->onColor('success')
                                 ->offColor('danger')
-                                ->live()
                                 ->onIcon(Heroicon::Bolt)
                                 ->offIcon(Heroicon::BoltSlash)
+                                ->default(false)
+                                ->dehydrated(false)
+                                ->live()
+                                ->hidden(fn ($livewire): bool => $livewire instanceof CreateRecord)
                                 ->helperText('Da de alta o baja al usuario; se creará un movimiento en el sistema.'),
-
                         ]),
 
                     ]),

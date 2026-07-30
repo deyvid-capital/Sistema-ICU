@@ -7,8 +7,8 @@ use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
-use Filament\Support\Icons\Heroicon;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class MovimientoForm
 {
@@ -28,6 +28,7 @@ class MovimientoForm
                             ->searchable()
                             ->preload()
                             ->required()
+                            ->live()
                             ->rule(new NotTrashed(User::class)),
                         Select::make('tipo')
                             ->label('Tipo')
@@ -36,15 +37,19 @@ class MovimientoForm
                                 'Baja' => 'Baja',
                             ])
                             ->native(false)
-                            ->required(),
+                            ->required()
+                            ->live(),
                         DatePicker::make('fecha')
                             ->label('Fecha')
-                            ->required(),
+                            ->required()
+                            ->default(now()->startOfDay())
+                            ->live(),
                         Select::make('cargo_id')
                             ->label('Cargo')
                             ->relationship('cargo', 'cargo')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->required(),
                     ])
                     ->aside(),
             ]);

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Models\Movimiento;
 use App\Models\User;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -11,6 +12,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Carbon;
 
 class EditUser extends EditRecord
 {
@@ -38,27 +40,82 @@ class EditUser extends EditRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $ultimoTipo = $this->record->movimientos()->latest('fecha')->value('tipo');
-
-        $data['tipo'] = $ultimoTipo !== 'Baja';
-
+        
+        $data['movimientoActual'] = $this->record->estaDeAlta();
         return $data;
+    }
+
+    /**
+     * Valida el cambio de estado (Alta/Baja) con las mismas reglas del historial
+     * de movimientos antes de guardar el usuario.
+     */
+    protected function beforeSave(): void
+    {
+        $movimimiento = Movimiento::where('usuario_id',$this->record->id)->orderBy('fecha','desc')->first();
+
+        if (!$movimimiento && !$this->record->movimientoActual) {
+            Notification::make()
+                ->title('No se pudo cambiar el estado del usuario')
+                ->body('El usuario no tiene un movimiento de alta. cree uno para poder cambiar el estado.')
+                ->danger()
+                ->send();
+            $this->halt();
+
+        }else {
+            $movimiento = $this->movimientoPendiente();
+        
+            if ($movimiento === null) {
+                return;
+            }
+
+            $errores = Movimiento::erroresDeValidacion($movimiento);
+
+            if ($errores !== []) {
+                Notification::make()
+                    ->title('No se pudo cambiar el estado del usuario')
+                    ->body(implode(' ', $errores))
+                    ->danger()
+                    ->send();
+
+                $this->halt();
+            }
+        }
     }
 
     protected function afterSave(): void
     {
-        $tipo = ($this->data['tipo'] ?? false) ? 'Alta' : 'Baja';
-
-        $ultimoTipo = $this->record->movimientos()->latest('fecha')->value('tipo');
+        $movimiento = $this->movimientoPendiente();
 
         // Solo registra un movimiento cuando el estado realmente cambió.
-        if ($ultimoTipo !== $tipo) {
-            $this->record->movimientos()->create([
-                'tipo' => $tipo,
-                'fecha' => now(),
-                'cargo_id' => $this->record->id_cargo,
-            ]);
+        if ($movimiento !== null) {
+            $this->record->movimientos()->create($movimiento);
         }
+    }
+
+    /**
+     * Datos del movimiento que generaría el cambio de estado del toggle,
+     * o null si el estado no cambió respecto al último movimiento.
+     *
+     * @return array{usuario_id:string,tipo:string,fecha:Carbon,cargo_id:int|null}|null
+     */
+    protected function movimientoPendiente(): ?array
+    {
+        $tipo = ($this->data['movimientoActual'] ?? false) ? 'Alta' : 'Baja';
+        $ultimo = $this->record->ultimoMovimiento;
+
+        if ($ultimo?->tipo === $tipo) {
+            return null;
+        }
+
+        // Una Baja debe cerrar con el mismo cargo de la Alta que cierra.
+        $cargoId = $tipo === 'Baja' ? $ultimo?->cargo_id : $this->record->id_cargo;
+
+        return [
+            'usuario_id' => $this->record->id,
+            'tipo' => $tipo,
+            'fecha' => now(),
+            'cargo_id' => $cargoId,
+        ];
     }
 
     protected function getHeaderActions(): array

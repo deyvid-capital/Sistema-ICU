@@ -16,6 +16,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -67,9 +68,16 @@ class MovimientosTable
                     ->placeholder('—'),
             ])
             ->filters([
+                SelectFilter::make('tipo')
+                    ->label('Tipo de movimiento')
+                    ->options([
+                        'Alta' => 'Alta',
+                        'Baja' => 'Baja',
+                    ]),
                 TrashedFilter::make()
                     ->label('Estado del registro'),
             ])
+
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()

@@ -121,6 +121,15 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Indica si el usuario está de Alta según su último movimiento.
+     * true = Alta, false = Baja o sin movimientos.
+     */
+    public function estaDeAlta(): bool
+    {
+        return $this->ultimoMovimiento?->tipo === 'Alta';
+    }
+
+    /**
      * Get the SharePoint accesses for the user.
      */
     public function accesosSharepoint(): HasMany

@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Movimientos\Pages;
 
 use App\Filament\Resources\Movimientos\MovimientoResource;
+use App\Models\Movimiento;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -11,10 +13,37 @@ use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
-use App\Models\Movimiento;
+
 class EditMovimiento extends EditRecord
 {
     protected static string $resource = MovimientoResource::class;
+
+    protected function beforeSave(): void
+    {
+        $errores = Movimiento::erroresDeValidacion($this->data, $this->record->id, esEdicion: true);
+
+        if ($errores !== []) {
+            Notification::make()
+                ->title('No se pudo actualizar el movimiento')
+                ->body(implode(' ', $errores))
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
+    }
+
+    protected function getSaveFormAction(): Action
+    {
+        // Acción "montada" (no submit) para que el modal de confirmación aparezca.
+        return parent::getSaveFormAction()
+            ->submit(null)
+            ->action(fn () => $this->save())
+            ->requiresConfirmation(fn (): bool => Movimiento::avisosDeConfirmacion($this->data, $this->record->id) !== [])
+            ->modalHeading('Confirmar movimiento')
+            ->modalDescription(fn (): string => implode(' ', Movimiento::avisosDeConfirmacion($this->data, $this->record->id)).' ¿Deseas continuar?')
+            ->modalSubmitActionLabel('Sí, guardar');
+    }
 
     protected function getSavedNotification(): ?Notification
     {
