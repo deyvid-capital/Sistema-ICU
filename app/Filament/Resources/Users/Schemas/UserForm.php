@@ -6,6 +6,7 @@ use App\Models\Area;
 use App\Models\Cargo;
 use App\Models\User;
 use Closure;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -35,17 +36,38 @@ class UserForm
                             'default' => 1,
                             'md' => 2,
                         ])->schema([
-                            TextInput::make('name')
-                                ->label('Nombre completo')
-                                ->placeholder('Ej. Juan Pérez')
+                            TextInput::make('nombres')
+                                ->label('Nombres')
+                                ->placeholder('Ej. Juan Carlos')
                                 ->required()
-                                ->maxLength(200)
-                                ->autocomplete('name'),
+                                ->maxLength(100)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::syncName($get, $set))
+                                ->autocomplete('given-name'),
+                            TextInput::make('apellidos')
+                                ->label('Apellidos')
+                                ->placeholder('Ej. Pérez López')
+                                ->required()
+                                ->maxLength(100)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (Get $get, Set $set) => static::syncName($get, $set))
+                                ->autocomplete('family-name'),
                             TextInput::make('carnet')
                                 ->label('Carnet')
                                 ->placeholder('Ej. 1234 LP')
                                 ->maxLength(50),
-                        ]),
+                            TextInput::make('email')
+                                ->label('Correo electrónico')
+                                ->placeholder('usuario@empresa.com')
+                                ->email()
+                                ->required()
+                                ->maxLength(100)
+                                ->unique(User::class, 'email', ignoreRecord: true)
+                                ->autocomplete('email')
+                                ->prefixIcon(Heroicon::OutlinedEnvelope),
+                                ]),
+                        Hidden::make('name')
+                            ->dehydrateStateUsing(fn (Get $get): string => static::fullName($get('nombres'), $get('apellidos'))),
                         Grid::make([
                             'default' => 1,
                             'md' => 2,
@@ -110,15 +132,6 @@ class UserForm
                             'default' => 1,
                             'md' => 2,
                         ])->schema([
-                            TextInput::make('email')
-                                ->label('Correo electrónico')
-                                ->placeholder('usuario@empresa.com')
-                                ->email()
-                                ->required()
-                                ->maxLength(100)
-                                ->unique(User::class, 'email', ignoreRecord: true)
-                                ->autocomplete('email')
-                                ->prefixIcon(Heroicon::OutlinedEnvelope),
                             TextInput::make('telefono')
                                 ->label('Teléfono')
                                 ->placeholder('Ej. 7123-4567')
@@ -128,17 +141,13 @@ class UserForm
                                 ->nullable()
                                 ->dehydrateStateUsing(fn ($state) => filled($state) ? $state : null)
                                 ->prefixIcon(Heroicon::OutlinedPhone),
-                        ]),
-                        Grid::make([
-                            'default' => 1,
-                            'md' => 2,
-                        ])->schema([
                             TextInput::make('password')
                                 ->label(fn ($livewire) => $livewire instanceof CreateRecord
                                     ? 'Contraseña'
                                     : 'Nueva contraseña (opcional)')
                                 ->password()
                                 ->revealable()
+                                ->required(fn ($livewire) => $livewire instanceof CreateRecord)
                                 ->live(onBlur: true)
                                 ->minLength(8)
                                 ->dehydrated(fn ($state) => filled($state))
@@ -151,13 +160,26 @@ class UserForm
                                 ->onIcon(Heroicon::Bolt)
                                 ->offIcon(Heroicon::BoltSlash)
                                 ->default(false)
-                                ->dehydrated(false)
                                 ->live()
+                                ->dehydrated(false)
                                 ->hidden(fn ($livewire): bool => $livewire instanceof CreateRecord)
                                 ->helperText('Da de alta o baja al usuario; se creará un movimiento en el sistema.'),
                         ]),
 
                     ]),
             ]);
+    }
+
+    protected static function syncName(Get $get, Set $set): void
+    {
+        $set('name', static::fullName($get('nombres'), $get('apellidos')));
+    }
+
+    protected static function fullName(?string $nombres, ?string $apellidos): string
+    {
+        return trim(implode(' ', array_filter(
+            [$nombres, $apellidos],
+            fn (?string $value): bool => filled($value),
+        )));
     }
 }

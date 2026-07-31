@@ -51,17 +51,7 @@ class EditUser extends EditRecord
      */
     protected function beforeSave(): void
     {
-        $movimimiento = Movimiento::where('usuario_id',$this->record->id)->orderBy('fecha','desc')->first();
-
-        if (!$movimimiento && !$this->record->movimientoActual) {
-            Notification::make()
-                ->title('No se pudo cambiar el estado del usuario')
-                ->body('El usuario no tiene un movimiento de alta. cree uno para poder cambiar el estado.')
-                ->danger()
-                ->send();
-            $this->halt();
-
-        }else {
+        
             $movimiento = $this->movimientoPendiente();
         
             if ($movimiento === null) {
@@ -78,8 +68,8 @@ class EditUser extends EditRecord
                     ->send();
 
                 $this->halt();
-            }
-        }
+          }
+        
     }
 
     protected function afterSave(): void

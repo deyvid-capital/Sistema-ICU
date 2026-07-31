@@ -31,7 +31,8 @@ class UserAreaCargoValidationTest extends TestCase
 
         Livewire::test(CreateUser::class)
             ->fillForm([
-                'name' => 'Test User',
+                'nombres' => 'Test',
+                'apellidos' => 'User',
                 'email' => 'test.user@example.com',
                 'password' => 'password123',
                 'id_area' => $area->id_area,
@@ -41,6 +42,9 @@ class UserAreaCargoValidationTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas(User::class, [
+            'nombres' => 'Test',
+            'apellidos' => 'User',
+            'name' => 'Test User',
             'email' => 'test.user@example.com',
             'id_area' => $area->id_area,
             'id_cargo' => $cargo->id_cargo,
@@ -55,7 +59,8 @@ class UserAreaCargoValidationTest extends TestCase
 
         Livewire::test(CreateUser::class)
             ->fillForm([
-                'name' => 'Test User',
+                'nombres' => 'Test',
+                'apellidos' => 'User',
                 'email' => 'test.user2@example.com',
                 'password' => 'password123',
                 'id_area' => $area->id_area,

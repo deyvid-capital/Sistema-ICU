@@ -21,6 +21,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 200);
+            $table->string('nombres')->nullable();
+            $table->string('apellidos')->nullable();
             $table->string('carnet', 50)->nullable()->index();
             $table->foreignId('id_area')->nullable()->constrained('areas', 'id_area')->restrictOnDelete();
             $table->foreignId('id_cargo')->nullable()->constrained('cargos', 'id_cargo')->restrictOnDelete();
