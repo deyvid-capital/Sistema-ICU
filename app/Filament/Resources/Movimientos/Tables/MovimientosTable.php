@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Movimientos\Tables;
 
+use App\Filament\Resources\Concerns\MovimientoFormularioPdfActions;
 use App\Filament\Resources\Movimientos\MovimientoResource;
 use App\Models\Movimiento;
 use Filament\Actions\ActionGroup;
@@ -80,6 +81,7 @@ class MovimientosTable
 
             ->recordActions([
                 ActionGroup::make([
+                    ...MovimientoFormularioPdfActions::make(),
                     ViewAction::make()
                         ->label('Ver'),
                     EditAction::make()

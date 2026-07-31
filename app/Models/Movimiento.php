@@ -4,15 +4,18 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\HasDocumentoOficialMovimientoPdf;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Movimiento extends Model
 {
     use BelongsToUsuario;
     use GuardsAgainstTrashedRelations;
+    use HasDocumentoOficialMovimientoPdf;
     use SoftDeletes;
 
     protected static array $trashGuardedRelations = ['usuario'];
@@ -34,6 +37,11 @@ class Movimiento extends Model
     public function cargo(): BelongsTo
     {
         return $this->belongsTo(Cargo::class, 'cargo_id', 'id_cargo');
+    }
+
+    public function pdfs(): HasMany
+    {
+        return $this->hasMany(PdfMovimiento::class, 'movimiento_id');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Movimientos\Pages;
 
+use App\Filament\Resources\Concerns\MovimientoFormularioPdfActions;
 use App\Filament\Resources\Movimientos\MovimientoResource;
 use App\Models\Movimiento;
 use Filament\Actions\Action;
@@ -57,6 +58,7 @@ class EditMovimiento extends EditRecord
     {
         return [
             ActionGroup::make([
+                ...MovimientoFormularioPdfActions::make(),
                 ViewAction::make()
                     ->label('Ver'),
                 DeleteAction::make()

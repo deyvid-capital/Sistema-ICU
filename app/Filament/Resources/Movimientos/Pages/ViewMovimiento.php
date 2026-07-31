@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Movimientos\Pages;
 
+use App\Filament\Resources\Concerns\MovimientoFormularioPdfActions;
 use App\Filament\Resources\Movimientos\MovimientoResource;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Support\Icons\Heroicon;
 
 class ViewMovimiento extends ViewRecord
 {
@@ -13,8 +16,16 @@ class ViewMovimiento extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make()
-                ->label('Editar movimiento'),
+            ActionGroup::make([
+                ...MovimientoFormularioPdfActions::make(),
+                EditAction::make()
+                    ->label('Editar movimiento'),
+            ])
+                ->label('Acciones')
+                ->icon(Heroicon::OutlinedEllipsisVertical)
+                ->color('info')
+                ->button()
+                ->tooltip('Acciones'),
         ];
     }
 }

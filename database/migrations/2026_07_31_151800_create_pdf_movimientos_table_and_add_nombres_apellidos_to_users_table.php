@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('pdf_movimientos', function (Blueprint $table) {
             $table->id();
             $table->string('tipo')->nullable();
-            $table->string('nombre', 500)->nullable();
+            $table->string('nombre', 150)->nullable();
+            $table->string('url', 500)->nullable();
             $table->foreignId('movimiento_id')->constrained('movimientos')->restrictOnDelete();
             $table->date('fecha')->nullable();
         });
