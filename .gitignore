@@ -29,5 +29,6 @@ Thumbs.db
 /.pnpm-store/*
 /.codebase-memory/*
 /.mcp.json
+.mcp.json
 /.mcp.json.bak
 #/.Doc_Laravel_13/

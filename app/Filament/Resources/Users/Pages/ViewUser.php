@@ -6,6 +6,7 @@ use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class ViewUser extends ViewRecord
 {
@@ -14,6 +15,31 @@ class ViewUser extends ViewRecord
     protected static ?string $navigationLabel = 'Ver';
 
     protected static ?int $navigationSort = 1;
+
+    /**
+     * Carga por adelantado todas las relaciones que muestra el infolist.
+     */
+    protected function resolveRecord(int|string $key): Model
+    {
+        return parent::resolveRecord($key)->load([
+            'area',
+            'cargo',
+            'movimientos.cargo',
+            'accesosInternet.accesosVirtual.virtual',
+            'accesosInternet.accesosVirtual.recursoVpn',
+            'accesosDaza.fondo',
+            'accesosSistemas.sistema',
+            'accesosSharepoint.sitio',
+            'unidadesCompartidas',
+            'azureAd',
+            'softwareUsuarios.software',
+            'softwareExcepciones.software',
+            'licenciasUsuarios.licencia',
+            'asignacionesEquipos.equipo',
+            'asignacionesCelulares.celular',
+            'firmantes',
+        ]);
+    }
 
     protected function getAllRelationManagers(): array
     {

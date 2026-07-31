@@ -32,6 +32,41 @@
     display: none; /* Chrome, Edge, Safari */
 }
 
+/* Tabs: scrollbar sutil, visible solo al hover */
+.fi-tabs {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+.fi-tabs:hover {
+    scrollbar-color: rgb(156 163 175 / 0.45) transparent;
+}
+.dark .fi-tabs:hover {
+    scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+}
+
+.fi-tabs::-webkit-scrollbar {
+    height: 3px;
+}
+.fi-tabs::-webkit-scrollbar-track {
+    background: transparent;
+}
+.fi-tabs::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+}
+.fi-tabs:hover::-webkit-scrollbar-thumb {
+    background-color: rgb(156 163 175 / 0.45);
+}
+.fi-tabs:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(107 114 128 / 0.7);
+}
+.dark .fi-tabs:hover::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.2);
+}
+.dark .fi-tabs:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(255 255 255 / 0.35);
+}
+
 /* Busqueda global: reducir tamaño del componente */
 .fi-global-search {
     @apply max-w-xs;
