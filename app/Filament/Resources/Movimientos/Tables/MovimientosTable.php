@@ -33,7 +33,7 @@ class MovimientosTable
             ->columns([
                 TextColumn::make('usuario.name')
                     ->label('Usuario')
-                    ->searchable()
+                    ->searchable(['name', 'email'])
                     ->sortable()
                     ->weight('medium')
                     ->icon(Heroicon::OutlinedUser),
@@ -50,7 +50,7 @@ class MovimientosTable
                     ->label('Cargo')
                     ->badge()
                     ->color('gray')
-                    ->searchable(),
+                    ->searchable(['cargo']),
                 TextColumn::make('created_at')
                     ->label('Registrado')
                     ->since()

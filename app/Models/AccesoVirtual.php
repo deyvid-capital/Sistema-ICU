@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\WarnsOnInactiveCatalogRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,15 @@ class AccesoVirtual extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use WarnsOnInactiveCatalogRelations;
+
+    /**
+     * @var array<string, array{label: string, attribute: string}>
+     */
+    protected static array $inactiveWarningRelations = [
+        'virtual' => ['label' => 'la máquina virtual', 'attribute' => 'maquina_virtual'],
+        'recursoVpn' => ['label' => 'el recurso VPN', 'attribute' => 'nombre_vpn'],
+    ];
 
     protected $table = 'accesos_virtual';
 

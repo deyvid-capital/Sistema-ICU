@@ -325,10 +325,12 @@
                     <td class="lbl">Fecha Alta</td>
                     <td class="val">{{ $fechaAlta }}</td>
                 </tr>
+                @if ($fechaBaja !== '-')
                 <tr>
                     <td class="lbl">Fecha Baja</td>
                     <td class="val">{{ $fechaBaja }}</td>
                 </tr>
+                @endif
             </table>
 
             <!-- SECCIÓN: DATOS DEL USUARIO -->

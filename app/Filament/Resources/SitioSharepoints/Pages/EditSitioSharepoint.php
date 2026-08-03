@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SitioSharepoints\Pages;
 
 use App\Filament\Resources\SitioSharepoints\SitioSharepointResource;
+use App\Models\AccesoSharepoint;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -39,5 +40,16 @@ class EditSitioSharepoint extends EditRecord
                 ->button()
                 ->tooltip('Acciones'),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        if (! $this->record->estado) {
+            $accesos = AccesoSharepoint::where('sitio_id', $this->record->id)->where('estado', true)->get();
+
+            foreach ($accesos as $acceso) {
+                $acceso->update(['estado' => false]);
+            }
+        }
     }
 }

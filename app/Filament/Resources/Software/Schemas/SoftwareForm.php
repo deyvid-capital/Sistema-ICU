@@ -18,6 +18,7 @@ class SoftwareForm
         return $schema
             ->components([
                 Section::make('Datos del software')
+                    ->columnSpanFull()
                     ->schema([
                         Grid::make(2)
                             ->schema([
@@ -30,7 +31,7 @@ class SoftwareForm
                                     ->label('Categoria')
                                     ->options([
                                         'Productividad' => 'Productividad',
-                                        'Diseno' => 'Diseño',
+                                        'Diseño' => 'Diseño',
                                         'Seguridad' => 'Seguridad',
                                         'Comunicacion' => 'Comunicacion',
                                         'Desarrollo' => 'Desarrollo',
