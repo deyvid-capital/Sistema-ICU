@@ -4,8 +4,11 @@ namespace App\Filament\Resources\Concerns;
 
 use App\Enums\EquipoFormularioPdfTipo;
 use App\Jobs\GenerateEquipoFormularioPdfJob;
+use App\Models\AsignacionEquipo;
 use App\Models\Concerns\HasDocumentoOficialPdf;
+use App\Models\EntregaEquipo;
 use App\Models\User;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
@@ -20,35 +23,67 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class EquipoFormularioPdfActions
 {
     /**
+     * @param  Closure(Model): (?Model)|null  $resolveDocument
      * @return array<int, Action>
      */
-    public static function make(EquipoFormularioPdfTipo $tipo): array
+    public static function make(EquipoFormularioPdfTipo $tipo, ?Closure $resolveDocument = null): array
     {
+        $resolve = $resolveDocument ?? fn (Model $record): Model => $record;
+
         return [
-            self::generate($tipo),
-            self::view($tipo),
-            self::download($tipo),
+            self::generate($tipo, $resolve),
+            self::view($tipo, $resolve),
+            self::download($tipo, $resolve),
         ];
     }
 
-    public static function generate(EquipoFormularioPdfTipo $tipo): Action
+    /**
+     * Acciones PDF del formulario de entrega asociado a una asignación.
+     *
+     * @return array<int, Action>
+     */
+    public static function makeForAsignacionEntrega(): array
     {
+        return self::make(
+            EquipoFormularioPdfTipo::Entrega,
+            fn (Model $record): ?EntregaEquipo => $record instanceof AsignacionEquipo
+                ? $record->entrega
+                : null,
+        );
+    }
+
+    /**
+     * @param  Closure(Model): (?Model)|null  $resolveDocument
+     */
+    public static function generate(EquipoFormularioPdfTipo $tipo, ?Closure $resolveDocument = null): Action
+    {
+        $resolveDocument ??= fn (Model $record): Model => $record;
         $schema = self::generateSchema($tipo);
 
         $action = Action::make('generarPdf')
-            ->label('Generar PDF')
+            ->label(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
+                ? 'Volver a generar PDF'
+                : 'Generar PDF')
             ->icon(Heroicon::OutlinedDocumentArrowDown)
             ->color('primary')
-            ->visible(fn (Model $record): bool => ! method_exists($record, 'trashed') || ! $record->trashed())
+            ->visible(fn (Model $record): bool => self::documentIsActionable($resolveDocument($record)))
             ->modalIcon(Heroicon::OutlinedDocumentArrowDown)
-            ->modalHeading('Generar PDF')
-            ->modalDescription(fn (Model $record): string => self::usesDocumentoOficial($record) && $record->hasDocumentoOficial()
+            ->modalHeading(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
+                ? 'Volver a generar PDF'
+                : 'Generar PDF')
+            ->modalDescription(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
                 ? 'Se reemplazará el PDF oficial existente ('.$tipo->nombreOficial().').'
                 : 'Se generará y guardará el documento «'.$tipo->nombreOficial().'».')
-            ->modalSubmitActionLabel('Generar y guardar')
-            ->action(function (Model $record, array $data) use ($tipo): void {
+            ->modalSubmitActionLabel(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
+                ? 'Volver a generar'
+                : 'Generar y guardar')
+            ->action(function (Model $record, array $data) use ($tipo, $resolveDocument): void {
+                $document = $resolveDocument($record);
+
+                abort_unless($document instanceof Model, 404);
+
                 GenerateEquipoFormularioPdfJob::dispatch(
-                    $record,
+                    $document,
                     $tipo,
                     auth()->id(),
                     $data['firmante_id'] ?? null,
@@ -95,42 +130,86 @@ class EquipoFormularioPdfActions
         ];
     }
 
-    public static function view(EquipoFormularioPdfTipo $tipo): Action
+    /**
+     * @param  Closure(Model): (?Model)|null  $resolveDocument
+     */
+    public static function view(EquipoFormularioPdfTipo $tipo, ?Closure $resolveDocument = null): Action
     {
+        $resolveDocument ??= fn (Model $record): Model => $record;
+
         return Action::make('viewDocument')
             ->label('Visualizar documento')
             ->icon(Heroicon::OutlinedEye)
             ->color('gray')
-            ->visible(fn (Model $record): bool => self::usesDocumentoOficial($record) && $record->hasDocumentoOficial())
+            ->visible(fn (Model $record): bool => self::documentHasOficial($resolveDocument($record)))
             ->modalHeading($tipo->nombreOficial())
-            ->modalDescription(fn (Model $record): ?string => $record->documentoOficial()?->storedDocumentFilename())
+            ->modalDescription(fn (Model $record): ?string => self::documentoOficial($resolveDocument($record))?->storedDocumentFilename())
             ->modalWidth(Width::FiveExtraLarge)
             ->modalAlignment(Alignment::Center)
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Cerrar')
-            ->modalContent(fn (Model $record): View => view(
-                'filament.recibo-equipos.view-document',
-                [
-                    'url' => $record->documentoOficial()?->storedDocumentUrl(),
-                    'filename' => $record->documentoOficial()?->storedDocumentFilename(),
-                ],
-            ));
+            ->modalContent(function (Model $record) use ($resolveDocument): View {
+                $documento = self::documentoOficial($resolveDocument($record));
+
+                return view(
+                    'filament.recibo-equipos.view-document',
+                    [
+                        'url' => $documento?->storedDocumentUrl(),
+                        'filename' => $documento?->storedDocumentFilename(),
+                    ],
+                );
+            });
     }
 
-    public static function download(EquipoFormularioPdfTipo $tipo): Action
+    /**
+     * @param  Closure(Model): (?Model)|null  $resolveDocument
+     */
+    public static function download(EquipoFormularioPdfTipo $tipo, ?Closure $resolveDocument = null): Action
     {
+        $resolveDocument ??= fn (Model $record): Model => $record;
+
         return Action::make('downloadDocument')
             ->label('Descargar documento')
             ->icon(Heroicon::OutlinedArrowDownTray)
             ->color('gray')
-            ->visible(fn (Model $record): bool => self::usesDocumentoOficial($record) && $record->hasDocumentoOficial())
-            ->action(function (Model $record): StreamedResponse {
-                $documento = $record->documentoOficial();
+            ->visible(fn (Model $record): bool => self::documentHasOficial($resolveDocument($record)))
+            ->action(function (Model $record) use ($resolveDocument): StreamedResponse {
+                $documento = self::documentoOficial($resolveDocument($record));
 
                 abort_unless($documento !== null && $documento->hasStoredDocument(), 404);
 
                 return $documento->downloadStoredDocument();
             });
+    }
+
+    private static function documentIsActionable(?Model $document): bool
+    {
+        if ($document === null) {
+            return false;
+        }
+
+        return ! method_exists($document, 'trashed') || ! $document->trashed();
+    }
+
+    /**
+     * @phpstan-assert-if-true HasDocumentoOficialPdf&Model $document
+     */
+    private static function documentHasOficial(?Model $document): bool
+    {
+        if ($document === null || ! self::usesDocumentoOficial($document)) {
+            return false;
+        }
+
+        return $document->hasDocumentoOficial();
+    }
+
+    private static function documentoOficial(?Model $document): mixed
+    {
+        if ($document === null || ! self::usesDocumentoOficial($document)) {
+            return null;
+        }
+
+        return $document->documentoOficial();
     }
 
     /**

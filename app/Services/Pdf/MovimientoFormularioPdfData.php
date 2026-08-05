@@ -26,9 +26,9 @@ class MovimientoFormularioPdfData
      */
     private const SOFTWARE_FIELD_KEYWORDS = [
         'antivirus' => ['forticlient', 'defender', 'antivirus', 'kaspersky', 'norton'],
-        'colaboracion' => ['teams', 'slack', 'colaboracion'],
+        'colaboracion' => ['teams', 'slack', 'colaboracion', 'Teams'],
         'escritorio_remoto' => ['remote desktop', 'rdp', 'escritorio remoto'],
-        'mensajeria_instantanea' => ['whatsapp', 'telegram', 'mensajeria'],
+        'mensajeria_instantanea' => ['whatsapp', 'telegram', 'mensajeria', 'Teams'],
         'pdf' => ['acrobat', 'pdfsam', 'adobe acrobat', 'foxit'],
         'vpn' => ['vpn'],
         'navegadores' => ['chrome', 'firefox', 'edge', 'brave', 'navegador'],

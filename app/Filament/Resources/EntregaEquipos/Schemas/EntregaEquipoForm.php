@@ -7,8 +7,8 @@ use App\Models\AsignacionEquipo;
 use App\Models\EntregaEquipo;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -79,13 +79,40 @@ class EntregaEquipoForm
                                     ->label('Audífonos')
                                     ->default(false)
                                     ->inline(false),
-                                Textarea::make('observaciones')
+                                RichEditor::make('observaciones')
                                     ->label('Observaciones')
-                                    ->rows(3)
+                                    ->columnSpanFull()
+                                    ->toolbarButtons([
+                                        ['bold', 'italic', 'underline', 'strike', 'link'],
+                                        ['h2', 'h3'],
+                                        ['bulletList', 'orderedList'],
+                                        ['undo', 'redo'],
+                                    ])
                                     ->columnSpanFull(),
-                                Textarea::make('nota')
+
+                                RichEditor::make('nota')
                                     ->label('Nota')
-                                    ->rows(3)
+                                    ->columnSpanFull()
+                                    ->toolbarButtons([
+                                        ['bold', 'italic', 'underline', 'strike', 'link'],
+                                        ['h2', 'h3'],
+                                        ['bulletList', 'orderedList'],
+                                        ['undo', 'redo'],
+                                    ])
+                                    ->default(
+                                        '<p><strong>1. Responsabilidad del Usuario:
+                                        </strong> Cada usuario es responsable de los
+                                        </p><p>equipos y accesorios que se les ha asignado. Esto incluye su uso
+                                        </p><p>adecuado y su mantenimiento en buen estado.
+                                        </p><p><strong>2. Cuidado del Equipo:
+                                        </strong> Se espera que todos los usuarios manejen los
+                                        </p><p>equipos y accesorios con cuidado y diligencia. Eviten exponer los equipos
+                                        </p><p>a condiciones que puedan causar daños, como humedad, calor extremo o
+                                        </p><p>golpes.</p><p><strong>3. Extravío o Deterioro:
+                                        </strong> En caso de extravío o deterioro del equipo
+                                        </p><p>debido a negligencia o mal uso, el usuario será responsable de asumir el
+                                        </p><p>costo de reparación o reemplazo del mismo</p>'
+                                    )
                                     ->columnSpanFull(),
                             ]),
                     ]),

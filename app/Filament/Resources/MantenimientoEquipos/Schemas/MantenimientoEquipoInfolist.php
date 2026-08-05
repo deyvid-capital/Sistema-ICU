@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\MantenimientoEquipos\Schemas;
 
 use App\Models\MantenimientoEquipo;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -22,11 +23,17 @@ class MantenimientoEquipoInfolist
                     ->label('Fecha de soporte')
                     ->date('d/m/Y')
                     ->placeholder('—'),
-                TextEntry::make('cap_antes')
-                    ->label('Capacidad antes')
+                ImageEntry::make('cap_antes')
+                    ->label('Captura antes')
+                    ->disk(MantenimientoEquipo::IMAGE_DISK)
+                    ->visibility('public')
+                    ->height(220)
                     ->placeholder('—'),
-                TextEntry::make('cap_despues')
-                    ->label('Capacidad después')
+                ImageEntry::make('cap_despues')
+                    ->label('Captura después')
+                    ->disk(MantenimientoEquipo::IMAGE_DISK)
+                    ->visibility('public')
+                    ->height(220)
                     ->placeholder('—'),
                 TextEntry::make('observaciones')
                     ->label('Observaciones')

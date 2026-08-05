@@ -99,7 +99,26 @@
         font-size: 10px;
     }
     .centered-text { text-align: center; padding: 8px; }
-    .nota-text { text-align: center; padding: 8px 15px; line-height: 1.4; font-size: 10px; }
+    .nota-text {
+        text-align: left;
+        padding: 3px 6px;
+        line-height: 1.1;
+        font-size: 8px;
+        letter-spacing: -0.02em;
+    }
+    .nota-text p,
+    .nota-text ul,
+    .nota-text ol,
+    .nota-text li {
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.1;
+        font-size: inherit;
+        letter-spacing: inherit;
+    }
+    .nota-text p + p {
+        margin-top: 1px !important;
+    }
     .signatures-table { width: 100%; margin-top: 10px; margin-bottom: 20px; border: none; }
     .signature-cell { width: 50%; text-align: center; vertical-align: top; }
     .signature-cell-third { width: 33.33%; text-align: center; vertical-align: top; }

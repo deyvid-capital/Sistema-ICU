@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AsignacionEquipos\Tables;
 
 use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoResource;
+use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
 use App\Models\AsignacionEquipo;
@@ -26,6 +27,7 @@ class AsignacionEquiposTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['entrega.pdfs']))
             ->recordUrl(fn (AsignacionEquipo $record): string => $record->trashed()
                 ? AsignacionEquipoResource::getUrl('view', ['record' => $record])
                 : AsignacionEquipoResource::getUrl('edit', ['record' => $record]))
@@ -84,6 +86,7 @@ class AsignacionEquiposTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ...EquipoFormularioPdfActions::makeForAsignacionEntrega(),
                     ViewAction::make()
                         ->label('Ver'),
                     EditAction::make()

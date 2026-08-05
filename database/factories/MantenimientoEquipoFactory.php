@@ -18,8 +18,8 @@ class MantenimientoEquipoFactory extends Factory
         return [
             'service_tag' => Equipo::query()->inRandomOrder()->value('service_tag') ?? Equipo::factory(),
             'fecha_soporte' => fake()->dateTimeBetween('-1 year', 'now'),
-            'cap_antes' => fake()->optional()->sentence(4),
-            'cap_despues' => fake()->optional()->sentence(4),
+            'cap_antes' => null,
+            'cap_despues' => null,
             'observaciones' => fake()->optional()->sentence(),
         ];
     }

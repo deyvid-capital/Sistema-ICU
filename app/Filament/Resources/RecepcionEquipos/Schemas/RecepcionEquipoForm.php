@@ -7,8 +7,8 @@ use App\Models\AsignacionEquipo;
 use App\Models\RecepcionEquipo;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -66,9 +66,15 @@ class RecepcionEquipoForm
                                     ->afterStateUpdated(
                                         static::syncFormularioEquipoNumeroOnFechaChange(RecepcionEquipo::class),
                                     ),
-                                Textarea::make('observaciones')
+                                RichEditor::make('observaciones')
                                     ->label('Observaciones')
-                                    ->rows(4)
+                                    ->columnSpanFull()
+                                    ->toolbarButtons([
+                                        ['bold', 'italic', 'underline', 'strike', 'link'],
+                                        ['h2', 'h3'],
+                                        ['bulletList', 'orderedList'],
+                                        ['undo', 'redo'],
+                                    ])
                                     ->columnSpanFull(),
                             ]),
                     ]),

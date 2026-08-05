@@ -170,8 +170,8 @@ class EquiposSeeder extends Seeder
                 [
                     'service_tag' => $equipo->service_tag,
                     'fecha_soporte' => now()->subDays(($index + 1) * 15)->toDateString(),
-                    'cap_antes' => 'Limpieza pendiente',
-                    'cap_despues' => 'Mantención realizada',
+                    'cap_antes' => null,
+                    'cap_despues' => null,
                     'observaciones' => 'Mantenimiento preventivo.',
                 ],
             );

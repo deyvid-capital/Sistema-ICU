@@ -3,15 +3,19 @@
 namespace App\Filament\Resources\MantenimientoEquipos\Schemas;
 
 use App\Models\Equipo;
+use App\Models\MantenimientoEquipo;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Carbon;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class MantenimientoEquipoForm
 {
@@ -20,7 +24,7 @@ class MantenimientoEquipoForm
         return $schema
             ->components([
                 Section::make('Mantenimiento de equipo')
-                    ->description('Registra el soporte y las capacidades antes y después del mantenimiento.')
+                    ->description('Registra el soporte y las capturas antes y después del mantenimiento.')
                     ->icon(Heroicon::OutlinedWrenchScrewdriver)
                     ->columnSpanFull()
                     ->schema([
@@ -35,17 +39,17 @@ class MantenimientoEquipoForm
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->live()
                                     ->rule(new NotTrashed(Equipo::class)),
                                 DatePicker::make('fecha_soporte')
                                     ->label('Fecha de soporte')
                                     ->default(now())
-                                    ->required(),
-                                TextInput::make('cap_antes')
-                                    ->label('Capacidad antes')
-                                    ->maxLength(500),
-                                TextInput::make('cap_despues')
-                                    ->label('Capacidad después')
-                                    ->maxLength(500),
+                                    ->required()
+                                    ->live(),
+                                self::capturaUpload('cap_antes', 'antes')
+                                    ->label('Captura antes del mantenimiento'),
+                                self::capturaUpload('cap_despues', 'despues')
+                                    ->label('Captura después del mantenimiento'),
                                 Textarea::make('observaciones')
                                     ->label('Observaciones')
                                     ->rows(4)
@@ -53,5 +57,57 @@ class MantenimientoEquipoForm
                             ]),
                     ]),
             ]);
+    }
+
+    /**
+     * Campo de imagen (PNG/JPG) para las capturas del mantenimiento.
+     */
+    protected static function capturaUpload(string $name, string $momento): FileUpload
+    {
+        return FileUpload::make($name)
+            ->image()
+            ->disk(MantenimientoEquipo::IMAGE_DISK)
+            ->directory(MantenimientoEquipo::IMAGE_DIRECTORY)
+            ->visibility('public')
+            ->acceptedFileTypes(MantenimientoEquipo::IMAGE_MIME_TYPES)
+            ->maxSize(MantenimientoEquipo::IMAGE_MAX_SIZE_KB)
+            ->helperText('Formatos permitidos: PNG, JPG o JPEG. Tamaño máximo: 5 MB.')
+            ->validationMessages([
+                'max' => 'La imagen no debe superar los 5 MB.',
+                'mimetypes' => 'La imagen debe ser un archivo PNG, JPG o JPEG.',
+            ])
+            ->imagePreviewHeight('180')
+            ->downloadable()
+            ->openable()
+            ->getUploadedFileNameForStorageUsing(
+                fn (TemporaryUploadedFile $file, Get $get): string => self::buildStoredImageFilename(
+                    $momento,
+                    $get('service_tag'),
+                    $get('fecha_soporte'),
+                    $file->getClientOriginalExtension(),
+                ),
+            );
+    }
+
+    /**
+     * Construye el nombre de archivo: {momento}_{service_tag}_{fecha}.{extensión}
+     */
+    public static function buildStoredImageFilename(
+        string $momento,
+        mixed $serviceTag,
+        mixed $fechaSoporte,
+        ?string $extension = null,
+    ): string {
+        $sanitizedServiceTag = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($serviceTag ?: ''));
+        $sanitizedServiceTag = filled($sanitizedServiceTag) ? $sanitizedServiceTag : 'sin-equipo';
+
+        $fechaFormateada = filled($fechaSoporte)
+            ? Carbon::parse($fechaSoporte)->format('Y-m-d')
+            : now()->format('Y-m-d');
+
+        $normalizedExtension = strtolower((string) ($extension ?: 'png'));
+        $normalizedExtension = $normalizedExtension === 'jpeg' ? 'jpg' : $normalizedExtension;
+
+        return "{$momento}_{$sanitizedServiceTag}_{$fechaFormateada}.{$normalizedExtension}";
     }
 }

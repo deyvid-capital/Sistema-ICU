@@ -15,6 +15,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -43,14 +44,20 @@ class MantenimientoEquiposTable
                     ->date('d/m/Y')
                     ->sortable()
                     ->placeholder('—'),
-                TextColumn::make('cap_antes')
-                    ->label('Capacidad antes')
-                    ->limit(30)
+                ImageColumn::make('cap_antes')
+                    ->label('Captura antes')
+                    ->disk(MantenimientoEquipo::IMAGE_DISK)
+                    ->visibility('public')
+                    ->height(40)
+                    ->square()
                     ->toggleable()
                     ->placeholder('—'),
-                TextColumn::make('cap_despues')
-                    ->label('Capacidad después')
-                    ->limit(30)
+                ImageColumn::make('cap_despues')
+                    ->label('Captura después')
+                    ->disk(MantenimientoEquipo::IMAGE_DISK)
+                    ->visibility('public')
+                    ->height(40)
+                    ->square()
                     ->toggleable()
                     ->placeholder('—'),
                 TextColumn::make('created_at')
