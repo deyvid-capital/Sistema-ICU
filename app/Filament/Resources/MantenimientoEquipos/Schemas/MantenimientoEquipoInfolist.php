@@ -12,45 +12,64 @@ class MantenimientoEquipoInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
+        ->columns(3)
             ->components([
                 TextEntry::make('equipo.service_tag')
-                    ->label('Equipo')
-                    ->placeholder('—'),
+                    ->label('👨‍💻 Equipo')
+                    ->placeholder('No especificado')
+                    ->badge()
+                    ->color('primary'),
                 TextEntry::make('equipo.nombre_equipo')
-                    ->label('Nombre del equipo')
-                    ->placeholder('—'),
+                    ->label('📝 Nombre del equipo')
+                    ->placeholder('No especificado')
+                    ->badge()
+                    ->color('secondary'),
                 TextEntry::make('fecha_soporte')
-                    ->label('Fecha de soporte')
+                    ->label('📆 Fecha de soporte')
                     ->date('d/m/Y')
-                    ->placeholder('—'),
+                    ->placeholder('Sin fecha')
+                    ->badge()
+                    ->color('info'),
                 ImageEntry::make('cap_antes')
-                    ->label('Captura antes')
+                    ->label('📸 Captura antes')
                     ->disk(MantenimientoEquipo::IMAGE_DISK)
                     ->visibility('public')
-                    ->height(220)
-                    ->placeholder('—'),
+                    ->formatStateUsing(function ($state) {
+                        return $state ?: null;
+                    })
+                    ->placeholder('Sin imagen'),
                 ImageEntry::make('cap_despues')
-                    ->label('Captura después')
+                    ->label('📸 Captura después')
                     ->disk(MantenimientoEquipo::IMAGE_DISK)
                     ->visibility('public')
-                    ->height(220)
-                    ->placeholder('—'),
+            
+                    ->formatStateUsing(function ($state) {
+                        return $state ?: null;
+                    })
+                    ->placeholder('Sin imagen'),
                 TextEntry::make('observaciones')
-                    ->label('Observaciones')
-                    ->placeholder('—')
-                    ->columnSpanFull(),
+                    ->label('🗒️ Observaciones')
+                    ->placeholder('No hay observaciones')
+                    ->columnSpanFull()
+                    ->markdown(),
                 TextEntry::make('created_at')
-                    ->label('Creado')
+                    ->label('🕒 Creado')
                     ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
+                    ->placeholder('No disponible')
+                    ->icon('heroicon-m-calendar-days')
+                    ->color('success'),
                 TextEntry::make('updated_at')
-                    ->label('Actualizado')
+                    ->label('🔄 Actualizado')
                     ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
+                    ->placeholder('No disponible')
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->color('warning'),
                 TextEntry::make('deleted_at')
-                    ->label('Eliminado')
+                    ->label('❌ Eliminado')
                     ->dateTime('d/m/Y H:i')
-                    ->visible(fn (MantenimientoEquipo $record): bool => $record->trashed()),
+                    ->visible(fn (MantenimientoEquipo $record): bool => $record->trashed())
+                    ->placeholder('No eliminado')
+                    ->color('danger'),
             ]);
     }
 }
