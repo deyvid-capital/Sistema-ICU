@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AsignacionEquipos;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\AsignacionEquipos\Pages\CreateAsignacionEquipo;
 use App\Filament\Resources\AsignacionEquipos\Pages\EditAsignacionEquipo;
 use App\Filament\Resources\AsignacionEquipos\Pages\ListAsignacionEquipos;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AsignacionEquipoResource extends Resource
 {
     protected static ?string $model = AsignacionEquipo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
+    protected static ?string $cluster = EquiposCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Laptop y Computadoras';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
     protected static ?string $navigationLabel = 'Asig. Equipos';
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\EntregaEquipos;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\EntregaEquipos\Pages\CreateEntregaEquipo;
 use App\Filament\Resources\EntregaEquipos\Pages\EditEntregaEquipo;
 use App\Filament\Resources\EntregaEquipos\Pages\ListEntregaEquipos;
@@ -20,19 +21,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class EntregaEquipoResource extends Resource
 {
     protected static ?string $model = EntregaEquipo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUpTray;
+    protected static ?string $cluster = EquiposCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Formularios Entrega-Recepcion';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentArrowUp;
 
     protected static ?string $navigationLabel = 'Entregas de equipo';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $modelLabel = 'entrega de equipo';
 

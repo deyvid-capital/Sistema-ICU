@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MantenimientoEquipos;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\MantenimientoEquipos\Pages\CreateMantenimientoEquipo;
 use App\Filament\Resources\MantenimientoEquipos\Pages\EditMantenimientoEquipo;
 use App\Filament\Resources\MantenimientoEquipos\Pages\ListMantenimientoEquipos;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class MantenimientoEquipoResource extends Resource
 {
     protected static ?string $model = MantenimientoEquipo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
+    protected static ?string $cluster = EquiposCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Laptop y Computadoras';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
 
     protected static ?string $navigationLabel = 'Mantenimientos de equipos';
 

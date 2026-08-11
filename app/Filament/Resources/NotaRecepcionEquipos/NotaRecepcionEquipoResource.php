@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\NotaRecepcionEquipos;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\NotaRecepcionEquipos\Pages\CreateNotaRecepcionEquipo;
 use App\Filament\Resources\NotaRecepcionEquipos\Pages\EditNotaRecepcionEquipo;
 use App\Filament\Resources\NotaRecepcionEquipos\Pages\ListNotaRecepcionEquipos;
@@ -20,19 +21,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class NotaRecepcionEquipoResource extends Resource
 {
     protected static ?string $model = NotaRecepcionEquipo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowLeftEndOnRectangle;
+    protected static ?string $cluster = EquiposCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Formularios Entrega-Recepcion';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowLeftEndOnRectangle;
 
     protected static ?string $navigationLabel = 'Notas de recepción';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 8;
 
     protected static ?string $modelLabel = 'nota de recepción';
 

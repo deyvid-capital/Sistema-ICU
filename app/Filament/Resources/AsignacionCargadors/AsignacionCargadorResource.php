@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AsignacionCargadors;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\AsignacionCargadors\Pages\CreateAsignacionCargador;
 use App\Filament\Resources\AsignacionCargadors\Pages\EditAsignacionCargador;
 use App\Filament\Resources\AsignacionCargadors\Pages\ListAsignacionCargadors;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AsignacionCargadorResource extends Resource
 {
     protected static ?string $model = AsignacionCargador::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
+    protected static ?string $cluster = EquiposCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Laptop y Computadoras';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 
     protected static ?string $navigationLabel = 'Asig. Cargadores';
 

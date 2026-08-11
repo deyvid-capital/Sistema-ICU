@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ReciboEquipos;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\ReciboEquipos\Pages\CreateReciboEquipo;
 use App\Filament\Resources\ReciboEquipos\Pages\EditReciboEquipo;
 use App\Filament\Resources\ReciboEquipos\Pages\ListReciboEquipos;
@@ -19,15 +20,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class ReciboEquipoResource extends Resource
 {
     protected static ?string $model = ReciboEquipo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
+    protected static ?string $cluster = EquiposCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Laptop y Computadoras';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
 
     protected static ?string $navigationLabel = 'Recibos de equipos';
 

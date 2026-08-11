@@ -80,3 +80,23 @@
 .fi-global-search .fi-input-wrp-suffix {
     @apply text-[11px];
 }
+
+/* Header de página: título y breadcrumbs más compactos */
+.fi-header {
+    @apply gap-3;
+}
+.fi-header.fi-header-has-breadcrumbs .fi-header-actions-ctn {
+    @apply sm:mt-5;
+}
+.fi-header-heading {
+    @apply text-xl sm:text-2xl;
+}
+.fi-header .fi-breadcrumbs {
+    @apply mb-1;
+}
+.fi-header .fi-breadcrumbs ol li {
+    @apply text-[12px];
+}
+.fi-header .fi-breadcrumbs .fi-icon {
+    @apply size-3.5;
+}

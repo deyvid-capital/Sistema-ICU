@@ -98,13 +98,15 @@
         color: #000;
         font-size: 10px;
     }
-    .centered-text { text-align: center; padding: 8px; }
+    .centered-text { text-align: center; padding: 8px; min-width:368px; }
     .nota-text {
         text-align: left;
         padding: 3px 6px;
-        line-height: 1.1;
-        font-size: 8px;
+        line-height: 1.3;
+        text-align: center; 
+        font-size: 10px;
         letter-spacing: -0.02em;
+        min-width:368px;
     }
     .nota-text p,
     .nota-text ul,

@@ -7,6 +7,9 @@ use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
 use App\Models\AsignacionEquipo;
+use App\Models\Equipo;
+use App\Models\User;
+use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -17,10 +20,16 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\Indicator;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AsignacionEquiposTable
 {
@@ -49,20 +58,17 @@ class AsignacionEquiposTable
                     ->placeholder('—')
                     ->hiddenOn(AsignacionesUsuarioRelationManager::class),
                 TextColumn::make('fecha_inicio')
-                    ->label('Fecha de inicio')
+                    ->label('Inicio - Fin')
+                    ->weight(FontWeight::Bold)
+                    ->description(fn ($record) => $record->fecha_fin ? 'Fin: '.Carbon::parse($record->fecha_fin)->format('d/m/Y') : 'Sin fecha de fin')
                     ->date('d/m/Y')
-                    ->sortable()
-                    ->placeholder('—'),
-                TextColumn::make('fecha_fin')
-                    ->label('Fecha de fin')
-                    ->date('d/m/Y')
-                    ->sortable()
-                    ->placeholder('—'),
+                    ->color(fn ($record) => $record->fecha_fin ? 'success' : 'warning')
+                    ->sortable(),
                 TextColumn::make('motivo')
                     ->label('Motivo')
                     ->limit(40)
-                    ->toggleable()
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Registrado')
                     ->since()
@@ -81,6 +87,91 @@ class AsignacionEquiposTable
                     ->placeholder('—'),
             ])
             ->filters([
+                SelectFilter::make('usuario_id')
+                    ->label('Usuario')
+                    ->options(User::all()->pluck('name', 'id'))
+                    ->searchable(),
+                SelectFilter::make('equipo_id')
+                    ->label('Equipo')
+                    ->options(Equipo::all()->pluck('service_tag', 'id'))
+                    ->searchable(),
+                SelectFilter::make('estado_asignacion')
+                    ->label('Estado de la asignación')
+                    ->options([
+                        'actuales' => 'Asignaciones actuales (sin fecha de fin)',
+                        'concluidas' => 'Asignaciones concluidas (con fecha de fin)',
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => match ($data['value'] ?? null) {
+                        'actuales' => $query->whereNull('fecha_fin'),
+                        'concluidas' => $query->whereNotNull('fecha_fin'),
+                        default => $query,
+                    }),
+                Filter::make('fecha_inicio')
+                    ->label('Fecha de inicio')
+                    ->schema([
+                        DatePicker::make('inicio_desde')
+                            ->label('Inicio desde'),
+                        DatePicker::make('inicio_hasta')
+                            ->label('Inicio hasta')
+                            ->afterOrEqual('inicio_desde'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['inicio_desde'] ?? null,
+                            fn (Builder $query, string $date): Builder => $query->whereDate('fecha_inicio', '>=', $date),
+                        )
+                        ->when(
+                            $data['inicio_hasta'] ?? null,
+                            fn (Builder $query, string $date): Builder => $query->whereDate('fecha_inicio', '<=', $date),
+                        ))
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($data['inicio_desde'] ?? null) {
+                            $indicators[] = Indicator::make('Inicio desde '.Carbon::parse($data['inicio_desde'])->format('d/m/Y'))
+                                ->removeField('inicio_desde');
+                        }
+
+                        if ($data['inicio_hasta'] ?? null) {
+                            $indicators[] = Indicator::make('Inicio hasta '.Carbon::parse($data['inicio_hasta'])->format('d/m/Y'))
+                                ->removeField('inicio_hasta');
+                        }
+
+                        return $indicators;
+                    }),
+                Filter::make('fecha_fin')
+                    ->label('Fecha de fin')
+                    ->schema([
+                        DatePicker::make('fin_desde')
+                            ->label('Fin desde'),
+                        DatePicker::make('fin_hasta')
+                            ->label('Fin hasta')
+                            ->afterOrEqual('fin_desde'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when(
+                            $data['fin_desde'] ?? null,
+                            fn (Builder $query, string $date): Builder => $query->whereDate('fecha_fin', '>=', $date),
+                        )
+                        ->when(
+                            $data['fin_hasta'] ?? null,
+                            fn (Builder $query, string $date): Builder => $query->whereDate('fecha_fin', '<=', $date),
+                        ))
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($data['fin_desde'] ?? null) {
+                            $indicators[] = Indicator::make('Fin desde '.Carbon::parse($data['fin_desde'])->format('d/m/Y'))
+                                ->removeField('fin_desde');
+                        }
+
+                        if ($data['fin_hasta'] ?? null) {
+                            $indicators[] = Indicator::make('Fin hasta '.Carbon::parse($data['fin_hasta'])->format('d/m/Y'))
+                                ->removeField('fin_hasta');
+                        }
+
+                        return $indicators;
+                    }),
                 TrashedFilter::make()
                     ->label('Estado del registro'),
             ])

@@ -26,7 +26,7 @@ class AzureAdResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloud;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Laptop y Computadoras';
+    protected static string|UnitEnum|null $navigationGroup = 'Accesos';
 
     protected static ?string $navigationLabel = 'Azure AD';
 

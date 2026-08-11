@@ -36,7 +36,7 @@ class EntregaEquiposTable
             ->columns([
                 TextColumn::make('asignacion.service_tag')
                     ->label('Equipo')
-                    ->searchable()
+                    ->searchable(['service_tag'])
                     ->sortable()
                     ->weight('medium')
                     ->icon(Heroicon::OutlinedComputerDesktop)
@@ -55,13 +55,16 @@ class EntregaEquiposTable
                     ->sortable(),
                 IconColumn::make('mouse')
                     ->label('Mouse')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('cooler')
                     ->label('Cooler')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('audifonos')
                     ->label('Audífonos')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Registrado')
                     ->since()

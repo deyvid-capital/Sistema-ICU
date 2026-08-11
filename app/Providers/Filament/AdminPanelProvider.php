@@ -2,7 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
+use Filament\Actions\Action;
 use Filament\Enums\UserMenuPosition;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -45,6 +48,14 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/Capital-Safi-SA-logo-.png'))
             ->brandLogoHeight('2.5rem')
             ->userMenu(position: UserMenuPosition::Sidebar)
+            ->userMenuItems([
+                Action::make('roles')
+                    ->label('Roles y permisos')
+                    ->url(fn (): string => RoleResource::getUrl())
+                    ->icon(Heroicon::OutlinedKey)
+                    ->visible(fn (): bool => RoleResource::canViewAny()),
+            ])
+            ->maxContentWidth('full')
             ->login()
             ->font('Roboto Mono')
             ->topNavigation(false)
@@ -69,9 +80,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Accesos')
                     ->icon(Heroicon::OutlinedShieldCheck),
                 NavigationGroup::make()
-                    ->label('Laptop y Computadoras')
-                    ->icon(Heroicon::OutlinedComputerDesktop),
-                NavigationGroup::make()
                     ->label('Celulares')
                     ->icon(Heroicon::OutlinedDevicePhoneMobile),
                 NavigationGroup::make()
@@ -80,10 +88,6 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Formularios Entrega-Recepcion')
                     ->icon(Heroicon::OutlinedArrowPathRoundedSquare),
-                NavigationGroup::make()
-                    ->label('Permisos y Roles')
-                    ->icon(Heroicon::OutlinedKey),
-
             ])
             ->databaseNotifications()
             ->colors([
@@ -96,8 +100,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
             ->pages([
                 Dashboard::class,
+                EquiposCluster::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
@@ -117,7 +123,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make()
-                    ->navigationGroup('Permisos y Roles'),
+                    ->registerNavigation(false),
             ])
             ->authMiddleware([
                 Authenticate::class,

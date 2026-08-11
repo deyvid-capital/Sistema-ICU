@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RecepcionEquipos;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\RecepcionEquipos\Pages\CreateRecepcionEquipo;
 use App\Filament\Resources\RecepcionEquipos\Pages\EditRecepcionEquipo;
 use App\Filament\Resources\RecepcionEquipos\Pages\ListRecepcionEquipos;
@@ -20,19 +21,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class RecepcionEquipoResource extends Resource
 {
     protected static ?string $model = RecepcionEquipo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowDownTray;
+    protected static ?string $cluster = EquiposCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Formularios Entrega-Recepcion';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentArrowDown;
 
     protected static ?string $navigationLabel = 'Recepciones de equipo';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 6;
 
     protected static ?string $modelLabel = 'recepción de equipo';
 

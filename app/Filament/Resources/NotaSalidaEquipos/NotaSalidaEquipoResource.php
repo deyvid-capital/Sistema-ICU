@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\NotaSalidaEquipos;
 
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\NotaSalidaEquipos\Pages\CreateNotaSalidaEquipo;
 use App\Filament\Resources\NotaSalidaEquipos\Pages\EditNotaSalidaEquipo;
 use App\Filament\Resources\NotaSalidaEquipos\Pages\ListNotaSalidaEquipos;
@@ -20,19 +21,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class NotaSalidaEquipoResource extends Resource
 {
     protected static ?string $model = NotaSalidaEquipo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowRightStartOnRectangle;
+    protected static ?string $cluster = EquiposCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Formularios Entrega-Recepcion';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowRightStartOnRectangle;
 
     protected static ?string $navigationLabel = 'Notas de salida';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 7;
 
     protected static ?string $modelLabel = 'nota de salida';
 
