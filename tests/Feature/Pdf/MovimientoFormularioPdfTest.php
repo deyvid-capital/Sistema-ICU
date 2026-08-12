@@ -116,6 +116,65 @@ class MovimientoFormularioPdfTest extends TestCase
         $this->assertSame('-', $documento['software']['vpn']);
     }
 
+    public function test_el_formulario_de_baja_lista_lo_que_la_cascada_acaba_de_desactivar(): void
+    {
+        $area = Area::factory()->create(['area' => 'Tecnología']);
+        $cargo = Cargo::factory()->create(['area_id' => $area->id_area]);
+        $usuario = User::factory()->create([
+            'id_area' => $area->id_area,
+            'id_cargo' => $cargo->id_cargo,
+        ]);
+
+        $sistema = Sistema::factory()->create(['nombre_sistema' => 'Bflow']);
+        AccesoSistema::factory()->create([
+            'usuario_id' => $usuario->id,
+            'id_sistema' => $sistema->id_sistema,
+            'nivel_acceso' => 'Usuario',
+            'estado' => true,
+        ]);
+        AccesoInternet::factory()->create(['usuario_id' => $usuario->id, 'estado' => true]);
+
+        $software = Software::factory()->create(['nombre_software' => 'Adobe Acrobat']);
+        SoftwareUsuario::factory()->create([
+            'usuario_id' => $usuario->id,
+            'id_software' => $software->id_software,
+            'estado' => true,
+        ]);
+
+        $equipo = Equipo::factory()->create(['nombre_equipo' => 'BOCSIA06']);
+        AsignacionEquipo::factory()->create([
+            'usuario_id' => $usuario->id,
+            'service_tag' => $equipo->service_tag,
+            'fecha_inicio' => '2026-01-10',
+            'fecha_fin' => null,
+        ]);
+
+        Movimiento::query()->create([
+            'usuario_id' => $usuario->id,
+            'tipo' => 'Alta',
+            'fecha' => '2026-01-10',
+            'cargo_id' => $cargo->id_cargo,
+        ]);
+
+        // El observer desactiva todo lo anterior al registrar la Baja.
+        $baja = Movimiento::query()->create([
+            'usuario_id' => $usuario->id,
+            'tipo' => 'Baja',
+            'fecha' => '2026-04-30',
+            'cargo_id' => $cargo->id_cargo,
+        ]);
+
+        $documento = app(MovimientoFormularioPdfData::class)->for($baja)['documento'];
+
+        $this->assertSame('Baja', $documento['tipo']);
+        $this->assertSame('30/04/2026', $documento['fecha_baja']);
+        $this->assertSame('10/01/2026', $documento['fecha_alta']);
+        $this->assertSame('Bflow - Usuario', $documento['software']['sistemas']);
+        $this->assertSame('Adobe Acrobat', $documento['software']['pdf']);
+        $this->assertSame('Tecnología (T)', $documento['software']['internet']);
+        $this->assertSame('BOCSIA06', $documento['equipo']['nombre']);
+    }
+
     public function test_it_generates_and_stores_oficial_pdf_for_movimiento(): void
     {
         $cargo = Cargo::factory()->create();

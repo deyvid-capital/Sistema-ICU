@@ -15,10 +15,12 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AccesoVirtualsTable
 {
@@ -54,6 +56,10 @@ class AccesoVirtualsTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('—'),
+                IconColumn::make('estado')
+                    ->label('Activo')
+                    ->boolean()
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Registrado')
                     ->since()
@@ -82,6 +88,22 @@ class AccesoVirtualsTable
                     ->relationship('recursoVpn', 'nombre_vpn')
                     ->searchable()
                     ->preload(),
+                SelectFilter::make('estado')
+                    ->label('Estado')
+                    ->options([
+                        '1' => 'Activo',
+                        '0' => 'Inactivo',
+                    ])
+                    ->native(false)
+                    ->query(function (Builder $query, array $data): Builder {
+                        $estado = $data['value'] ?? null;
+
+                        if ($estado === null || $estado === '') {
+                            return $query;
+                        }
+
+                        return $query->where('estado', (bool) (int) $estado);
+                    }),
                 TrashedFilter::make()
                     ->label('Estado del registro'),
             ])

@@ -7,6 +7,7 @@ use App\Models\AsignacionCargador;
 use App\Models\AsignacionEquipo;
 use App\Models\Cargador;
 use App\Models\Equipo;
+use App\Models\Movimiento;
 use App\Models\PdfEquipo;
 use App\Models\SoftwareExc;
 use App\Observers\AsigCelularObserver;
@@ -14,6 +15,7 @@ use App\Observers\AsignacionCargadorObserver;
 use App\Observers\AsignacionEquipoObserver;
 use App\Observers\CargadorObserver;
 use App\Observers\EquipoObserver;
+use App\Observers\MovimientoObserver;
 use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
 use Filament\Forms\Components\DatePicker;
@@ -42,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         Equipo::observe(EquipoObserver::class);
         SoftwareExc::observe(SoftwareExcObserver::class);
         PdfEquipo::observe(PdfEquipoObserver::class);
+        Movimiento::observe(MovimientoObserver::class);
         DatePicker::configureUsing(function (DatePicker $component): void {
             $component
                 ->native(false)
@@ -55,6 +58,6 @@ class AppServiceProvider extends ServiceProvider
                 ->locale('es')
                 ->displayFormat('d/m/Y H:i');
         });
-        
+
     }
 }

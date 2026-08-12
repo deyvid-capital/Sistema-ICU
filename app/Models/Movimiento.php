@@ -6,6 +6,7 @@ use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use App\Models\Concerns\HasDocumentoOficialMovimientoPdf;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +17,7 @@ class Movimiento extends Model
     use BelongsToUsuario;
     use GuardsAgainstTrashedRelations;
     use HasDocumentoOficialMovimientoPdf;
+    use HasFactory;
     use SoftDeletes;
 
     protected static array $trashGuardedRelations = ['usuario'];

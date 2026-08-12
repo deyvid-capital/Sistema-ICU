@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TogglesEstadoOnSoftDelete;
 use App\Models\Concerns\WarnsOnInactiveCatalogRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ class AccesoVirtual extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use TogglesEstadoOnSoftDelete;
     use WarnsOnInactiveCatalogRelations;
 
     /**
@@ -28,7 +30,15 @@ class AccesoVirtual extends Model
         'internet_id',
         'virtual_id',
         'vpn_id',
+        'estado',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'estado' => 'boolean',
+        ];
+    }
 
     public function accesoInternet(): BelongsTo
     {

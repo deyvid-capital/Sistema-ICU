@@ -15,9 +15,11 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -65,6 +67,10 @@ class AccesosVirtualRelationManager extends RelationManager
                                 ->ignore($record);
                         },
                     ),
+                Toggle::make('estado')
+                    ->label('Activo')
+                    ->default(true)
+                    ->required(),
             ]);
     }
 
@@ -84,6 +90,10 @@ class AccesosVirtualRelationManager extends RelationManager
                 TextColumn::make('recursoVpn.nombre_vpn')
                     ->label('Recurso VPN')
                     ->searchable()
+                    ->sortable(),
+                IconColumn::make('estado')
+                    ->label('Activo')
+                    ->boolean()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Registrado')

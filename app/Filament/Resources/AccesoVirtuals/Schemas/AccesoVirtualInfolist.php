@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AccesoVirtuals\Schemas;
 
 use App\Models\AccesoVirtual;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -24,6 +25,9 @@ class AccesoVirtualInfolist
                 TextEntry::make('recursoVpn.nombre_vpn')
                     ->label('Recurso VPN')
                     ->placeholder('—'),
+                IconEntry::make('estado')
+                    ->label('Activo')
+                    ->boolean(),
                 TextEntry::make('created_at')
                     ->label('Creado')
                     ->dateTime('d/m/Y H:i')

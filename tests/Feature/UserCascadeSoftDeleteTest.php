@@ -44,6 +44,7 @@ class UserCascadeSoftDeleteTest extends TestCase
         ]);
         $accesoVirtual = AccesoVirtual::factory()->create([
             'internet_id' => $accesoInternet->id,
+            'estado' => true,
         ]);
 
         $user->delete();
@@ -51,6 +52,7 @@ class UserCascadeSoftDeleteTest extends TestCase
         $this->assertSoftDeleted($accesoInternet);
         $this->assertSoftDeleted($accesoVirtual);
         $this->assertFalse($accesoInternet->fresh()->estado);
+        $this->assertFalse($accesoVirtual->fresh()->estado);
     }
 
     public function test_restoring_user_restores_cascaded_assignments_and_reactivates_them(): void

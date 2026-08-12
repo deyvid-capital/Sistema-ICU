@@ -40,6 +40,13 @@ class MovimientoFormularioPdfData
     ];
 
     /**
+     * En una Baja los accesos y asignaciones ya fueron desactivados en cascada,
+     * así que el formulario debe listar también lo inactivo: de lo contrario el
+     * documento saldría vacío justo cuando debe dejar constancia de lo retirado.
+     */
+    private bool $incluirInactivos = false;
+
+    /**
      * @return array{documento: array<string, mixed>}
      */
     public function for(Model $record, MovimientoFormularioPdfTipo $tipo = MovimientoFormularioPdfTipo::AltaBaja): array
@@ -69,6 +76,8 @@ class MovimientoFormularioPdfData
             'usuario.asignacionesEquipos.recepcion',
             'cargo',
         ]);
+
+        $this->incluirInactivos = $movimiento->tipo === 'Baja';
 
         $usuario = $movimiento->usuario;
         $fechas = $this->resolveFechas($movimiento);
@@ -148,9 +157,14 @@ class MovimientoFormularioPdfData
      */
     private function mapEquipo(?User $usuario): array
     {
+        $asignaciones = $usuario?->asignacionesEquipos;
+
         /** @var AsignacionEquipo|null $asignacion */
-        $asignacion = $usuario?->asignacionesEquipos
-            ?->first(fn (AsignacionEquipo $item): bool => $item->fecha_fin === null);
+        $asignacion = $asignaciones?->first(fn (AsignacionEquipo $item): bool => $item->fecha_fin === null);
+
+        if ($asignacion === null && $this->incluirInactivos) {
+            $asignacion = $asignaciones?->sortByDesc('fecha_inicio')->first();
+        }
 
         $equipo = $asignacion?->equipo;
 
@@ -174,7 +188,7 @@ class MovimientoFormularioPdfData
         return [
             'sistemas' => $this->joinList(
                 $usuario?->accesosSistemas
-                    ?->filter(fn (AccesoSistema $acceso): bool => (bool) $acceso->estado)
+                    ?->filter(fn (AccesoSistema $acceso): bool => $this->vigente($acceso->estado))
                     ->map(function (AccesoSistema $acceso): ?string {
                         $nombre = $acceso->sistema?->nombre_sistema;
 
@@ -192,7 +206,7 @@ class MovimientoFormularioPdfData
             ),
             'microsoft' => $this->joinList(
                 $usuario?->licenciasUsuarios
-                    ?->filter(fn (LicenciaUsuario $item): bool => (bool) $item->estado)
+                    ?->filter(fn (LicenciaUsuario $item): bool => $this->vigente($item->estado))
                     ->map(fn (LicenciaUsuario $item): ?string => $item->licencia?->nombre_licencia)
                     ->filter()
                     ->values()
@@ -200,7 +214,7 @@ class MovimientoFormularioPdfData
             ),
             'sitio_sharepoint' => $this->joinList(
                 $usuario?->accesosSharepoint
-                    ?->filter(fn (AccesoSharepoint $acceso): bool => (bool) $acceso->estado)
+                    ?->filter(fn (AccesoSharepoint $acceso): bool => $this->vigente($acceso->estado))
                     ->map(fn (AccesoSharepoint $acceso): ?string => $acceso->sitio?->nombre_sitio)
                     ->filter()
                     ->values()
@@ -213,7 +227,7 @@ class MovimientoFormularioPdfData
             'mensajeria_instantanea' => $this->softwareField($softwareNombres, 'mensajeria_instantanea'),
             'unidad_compartida' => $this->joinList(
                 $usuario?->unidadesCompartidas
-                    ?->filter(fn (AccUdCompartida $item): bool => (bool) $item->estado)
+                    ?->filter(fn (AccUdCompartida $item): bool => $this->vigente($item->estado))
                     ->map(fn (AccUdCompartida $item): ?string => $item->unidad_compartida)
                     ->filter()
                     ->values()
@@ -234,7 +248,7 @@ class MovimientoFormularioPdfData
     private function mapInternet(?User $usuario): string
     {
         $tieneInternet = $usuario?->accesosInternet
-            ?->contains(fn (AccesoInternet $acceso): bool => (bool) $acceso->estado);
+            ?->contains(fn (AccesoInternet $acceso): bool => $this->vigente($acceso->estado));
 
         if (! $tieneInternet) {
             return '-';
@@ -253,7 +267,7 @@ class MovimientoFormularioPdfData
     {
         /** @var AzureAd|null $azure */
         $azure = $usuario?->azureAd
-            ?->first(fn (AzureAd $item): bool => (bool) $item->estado);
+            ?->first(fn (AzureAd $item): bool => $this->vigente($item->estado));
 
         if ($azure === null) {
             return '-';
@@ -272,7 +286,7 @@ class MovimientoFormularioPdfData
         }
 
         $fromUsuarios = $usuario->softwareUsuarios
-            ->filter(fn (SoftwareUsuario $item): bool => (bool) $item->estado)
+            ->filter(fn (SoftwareUsuario $item): bool => $this->vigente($item->estado))
             ->map(fn (SoftwareUsuario $item): ?string => $item->software?->nombre_software);
 
         $fromExcepciones = $usuario->softwareExcepciones
@@ -340,6 +354,15 @@ class MovimientoFormularioPdfData
         }
 
         return $siglas;
+    }
+
+    /**
+     * Un registro entra al formulario si está activo, o si estamos imprimiendo
+     * una Baja (donde la cascada ya lo desactivó).
+     */
+    private function vigente(?bool $estado): bool
+    {
+        return $this->incluirInactivos || (bool) $estado;
     }
 
     private function text(?string $value): string

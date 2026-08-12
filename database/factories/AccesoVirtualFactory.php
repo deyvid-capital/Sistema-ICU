@@ -21,6 +21,7 @@ class AccesoVirtualFactory extends Factory
             'internet_id' => AccesoInternet::query()->inRandomOrder()->value('id') ?? AccesoInternet::factory(),
             'virtual_id' => Virtual::query()->inRandomOrder()->value('id') ?? Virtual::factory(),
             'vpn_id' => RecursoVpn::query()->inRandomOrder()->value('id') ?? RecursoVpn::factory(),
+            'estado' => true,
         ];
     }
 }

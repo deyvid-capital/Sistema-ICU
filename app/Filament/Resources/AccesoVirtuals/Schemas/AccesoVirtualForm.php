@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AccesoVirtuals\Schemas;
 use App\Models\AccesoInternet;
 use App\Models\AccesoVirtual;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -59,6 +60,10 @@ class AccesoVirtualForm
                                     ->preload()
                                     ->required()
                                     ->live(),
+                                Toggle::make('estado')
+                                    ->label('Activo')
+                                    ->default(true)
+                                    ->required(),
                             ]),
                     ]),
             ]);
