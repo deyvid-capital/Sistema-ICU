@@ -41,6 +41,34 @@
             'autenticacion_multifactor' => 'Microsoft Autenticator',
         ];
         $embedded = (bool) ($embedded ?? false);
+        $esBaja = $tipo === 'Baja';
+
+        /**
+         * Valor de una casilla de una sola línea (Datos del Usuario / Equipo).
+         * Si no entra en el ancho de la casilla se recorta con puntos suspensivos.
+         */
+        $casilla = fn (?string $valor): string =>
+            '<div class="celda celda-linea">'.e(filled($valor) ? $valor : '-').'</div>';
+
+        /**
+         * Valor de una casilla de software. En una Baja el listado se imprime en
+         * plomo claro —porque ya no está vigente— y debajo se rotula «Sin acceso»
+         * para que quede constancia de lo que se le retiró al colaborador.
+         */
+        $casillaSoftware = function (?string $valor) use ($esBaja): string {
+            $valor = filled($valor) ? $valor : '-';
+
+            if (! $esBaja) {
+                return '<div class="celda celda-lista">'.e($valor).'</div>';
+            }
+
+            if ($valor === '-') {
+                return '<div class="sin-acceso sin-acceso-solo">Sin acceso</div>';
+            }
+
+            return '<div class="celda celda-lista celda-revocada">'.e($valor).'</div>'
+                .'<div class="sin-acceso">Sin acceso</div>';
+        };
     @endphp
     @unless ($embedded)
     <!DOCTYPE html>
@@ -88,6 +116,8 @@
                 /* resaltado del valor "Alta" / fechas */
                 --borde: #b8b5b5;
                 --texto: #1a1a1a;
+                /* listado ya revocado en una Baja */
+                --plomo-revocado: #a3a3a3;
             }
 
             * {
@@ -272,6 +302,49 @@
                 height: 50px;
             }
 
+            /* ============ Recorte de contenido ============
+               Ninguna casilla debe desbordar su recuadro: el sobrante se corta
+               con puntos suspensivos, así el formulario no se deforma aunque a
+               futuro se sumen más sistemas, licencias o sitios. */
+            .celda {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* Una sola línea: nombres, área, service tag, fechas… */
+            .celda-linea {
+                white-space: nowrap;
+                max-width: 4.4cm;
+            }
+
+            /* Listados de software: hasta 3 renglones dentro del recuadro. */
+            .celda-lista {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 3;
+                line-clamp: 3;
+                word-break: break-word;
+            }
+
+            /* Con el rótulo «Sin acceso» debajo queda sitio para 2 renglones. */
+            .celda-revocada {
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                color: var(--plomo-revocado);
+            }
+
+            .sin-acceso {
+                margin-top: 2px;
+                font-weight: 700;
+                font-size: 8.5px;
+                letter-spacing: .3px;
+                color: var(--texto);
+            }
+
+            .sin-acceso-solo {
+                margin-top: 0;
+            }
+
             /* ============ Firmas ============ */
             .firmas {
                 display: flex;
@@ -338,21 +411,21 @@
             <table class="datos">
                 <tr>
                     <td class="lbl">Nombres:</td>
-                    <td class="val">{{ $usuario['nombres'] }}</td>
+                    <td class="val">{!! $casilla($usuario['nombres']) !!}</td>
                     <td class="lbl">&Aacute;rea:</td>
-                    <td class="val">{{ $usuario['area'] }}</td>
+                    <td class="val">{!! $casilla($usuario['area']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Apellido:</td>
-                    <td class="val">{{ $usuario['apellido'] }}</td>
+                    <td class="val">{!! $casilla($usuario['apellido']) !!}</td>
                     <td class="lbl">Cargo:</td>
-                    <td class="val">{{ $usuario['cargo'] }}</td>
+                    <td class="val">{!! $casilla($usuario['cargo']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">CI:</td>
-                    <td class="val">{{ $usuario['carnet'] }}</td>
+                    <td class="val">{!! $casilla($usuario['carnet']) !!}</td>
                     <td class="lbl">Correo Electr&oacute;nico:</td>
-                    <td class="val">{{ $usuario['email'] }}</td>
+                    <td class="val">{!! $casilla($usuario['email']) !!}</td>
                 </tr>
             </table>
 
@@ -361,21 +434,21 @@
             <table class="datos">
                 <tr>
                     <td class="lbl">Modelo:</td>
-                    <td class="val">{{ $equipo['modelo'] }}</td>
+                    <td class="val">{!! $casilla($equipo['modelo']) !!}</td>
                     <td class="lbl">Fecha de Entrega:</td>
-                    <td class="val">{{ $equipo['fecha_entrega'] }}</td>
+                    <td class="val">{!! $casilla($equipo['fecha_entrega']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Nombre del Equipo:</td>
-                    <td class="val">{{ $equipo['nombre'] }}</td>
+                    <td class="val">{!! $casilla($equipo['nombre']) !!}</td>
                     <td class="lbl">Fecha de Recepci&oacute;n:</td>
-                    <td class="val">{{ $equipo['fecha_recepcion'] }}</td>
+                    <td class="val">{!! $casilla($equipo['fecha_recepcion']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Service Tag:</td>
-                    <td class="val">{{ $equipo['service_tag'] }}</td>
+                    <td class="val">{!! $casilla($equipo['service_tag']) !!}</td>
                     <td class="lbl">Sistema Operativo:</td>
-                    <td class="val">{{ $equipo['sistema_operativo'] }}</td>
+                    <td class="val">{!! $casilla($equipo['sistema_operativo']) !!}</td>
                 </tr>
             </table>
 
@@ -383,57 +456,57 @@
             <table class="software" style="margin-top:1.5px;">
                 <tr>
                     <td class="lbl">Sistemas</td>
-                    <td class="val">{{ $software['sistemas'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['sistemas']) !!}</td>
                     <td class="lbl">Microsoft</td>
-                    <td class="val">{{ $software['microsoft'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['microsoft']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Sitio Sharepoint</td>
-                    <td class="val">{{ $software['sitio_sharepoint'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['sitio_sharepoint']) !!}</td>
                     <td class="lbl">Antivirus</td>
-                    <td class="val">{{ $software['antivirus'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['antivirus']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Internet</td>
-                    <td class="val">{{ $software['internet'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['internet']) !!}</td>
                     <td class="lbl">Colaboraci&oacute;n</td>
-                    <td class="val">{{ $software['colaboracion'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['colaboracion']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Escritorio Remoto</td>
-                    <td class="val">{{ $software['escritorio_remoto'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['escritorio_remoto']) !!}</td>
                     <td class="lbl">Mensajer&iacute;a Instant&aacute;nea</td>
-                    <td class="val">{{ $software['mensajeria_instantanea'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['mensajeria_instantanea']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Unidad Compartida</td>
-                    <td class="val">{{ $software['unidad_compartida'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['unidad_compartida']) !!}</td>
                     <td class="lbl">PDF</td>
-                    <td class="val">{{ $software['pdf'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['pdf']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">VPN</td>
-                    <td class="val">{{ $software['vpn'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['vpn']) !!}</td>
                     <td class="lbl">Navegadores</td>
-                    <td class="val">{{ $software['navegadores'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['navegadores']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Software VPN</td>
-                    <td class="val">{{ $software['software_vpn'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['software_vpn']) !!}</td>
                     <td class="lbl">Soporte Remoto</td>
-                    <td class="val">{{ $software['soporte_remoto'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['soporte_remoto']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Impresora y Scaner</td>
-                    <td class="val">{{ $software['impresora_scaner'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['impresora_scaner']) !!}</td>
                     <td class="lbl">Compresi&oacute;n</td>
-                    <td class="val">{{ $software['compresion'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['compresion']) !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Software Escaner</td>
-                    <td class="val">{{ $software['software_escaner'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['software_escaner']) !!}</td>
                     <td class="lbl">Autenticaci&oacute;n Multifactor</td>
-                    <td class="val">{{ $software['autenticacion_multifactor'] }}</td>
+                    <td class="val">{!! $casillaSoftware($software['autenticacion_multifactor']) !!}</td>
                 </tr>
             </table>
 

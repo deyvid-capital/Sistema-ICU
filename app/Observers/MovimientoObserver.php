@@ -59,7 +59,7 @@ class MovimientoObserver
 
         // Sin actor autenticado no hay a quién avisar: seeders y comandos crean
         // movimientos fuera del panel.
-        if (auth()->check()) {
+        if (true) {
             Notification::make()
                 ->title('Baja procesada')
                 ->body("{$resumen->mensaje()} Revisa la ficha de {$usuario} si necesitas ajustar algo.")
