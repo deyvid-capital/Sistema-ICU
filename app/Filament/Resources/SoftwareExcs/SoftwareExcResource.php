@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SoftwareExcs;
 
+use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Resources\SoftwareExcs\Pages\CreateSoftwareExc;
 use App\Filament\Resources\SoftwareExcs\Pages\EditSoftwareExc;
 use App\Filament\Resources\SoftwareExcs\Pages\ListSoftwareExcs;
@@ -18,17 +19,16 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class SoftwareExcResource extends Resource
 {
     protected static ?string $model = SoftwareExc::class;
 
+    protected static ?string $cluster = SoftwareCluster::class;
+
     protected static ?string $recordTitleAttribute = 'tipo_excepcion';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldExclamation;
-
-    protected static string|UnitEnum|null $navigationGroup = 'Software y Licencias';
 
     protected static ?string $navigationLabel = 'Excepciones de software';
 

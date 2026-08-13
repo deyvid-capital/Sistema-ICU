@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccUdCompartidas;
 
+use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Resources\AccUdCompartidas\Pages\CreateAccUdCompartida;
 use App\Filament\Resources\AccUdCompartidas\Pages\EditAccUdCompartida;
 use App\Filament\Resources\AccUdCompartidas\Pages\ListAccUdCompartidas;
@@ -18,19 +19,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AccUdCompartidaResource extends Resource
 {
     protected static ?string $model = AccUdCompartida::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
+    protected static ?string $cluster = AccesosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Accesos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
     protected static ?string $navigationLabel = 'Unidades compartidas';
 
-    protected static ?int $navigationSort = 15;
+    protected static ?int $navigationSort = 7;
 
     protected static ?string $modelLabel = 'unidad compartida';
 

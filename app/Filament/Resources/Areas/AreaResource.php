@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Areas;
 
+use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Resources\Areas\Pages\CreateArea;
 use App\Filament\Resources\Areas\Pages\EditArea;
 use App\Filament\Resources\Areas\Pages\ListAreas;
@@ -23,11 +24,12 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class AreaResource extends Resource
 {
     protected static ?string $model = Area::class;
+
+    protected static ?string $cluster = UsuariosCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
@@ -39,7 +41,7 @@ class AreaResource extends Resource
 
     protected static ?string $pluralModelLabel = 'áreas';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Gestion de usuarios';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Movimientos;
 
+use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Resources\Movimientos\Pages\CreateMovimiento;
 use App\Filament\Resources\Movimientos\Pages\EditMovimiento;
 use App\Filament\Resources\Movimientos\Pages\ListMovimientos;
@@ -17,15 +18,14 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class MovimientoResource extends Resource
 {
     protected static ?string $model = Movimiento::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
+    protected static ?string $cluster = UsuariosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Gestion de usuarios';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
     protected static ?string $recordTitleAttribute = 'tipo';
 
@@ -34,6 +34,8 @@ class MovimientoResource extends Resource
     protected static ?string $modelLabel = 'movimiento';
 
     protected static ?string $pluralModelLabel = 'movimientos';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Schema $schema): Schema
     {

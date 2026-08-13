@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SoftwareUsuarios;
 
+use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Resources\SoftwareUsuarios\Pages\CreateSoftwareUsuario;
 use App\Filament\Resources\SoftwareUsuarios\Pages\EditSoftwareUsuario;
 use App\Filament\Resources\SoftwareUsuarios\Pages\ListSoftwareUsuarios;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class SoftwareUsuarioResource extends Resource
 {
     protected static ?string $model = SoftwareUsuario::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
+    protected static ?string $cluster = SoftwareCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Software y Licencias';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
     protected static ?string $navigationLabel = 'Software de usuarios';
 

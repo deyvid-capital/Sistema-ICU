@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Virtuals;
 
+use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Resources\Virtuals\Pages\ManageVirtuals;
 use App\Models\Virtual;
 use BackedEnum;
@@ -23,15 +24,14 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class VirtualResource extends Resource
 {
     protected static ?string $model = Virtual::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloud;
+    protected static ?string $cluster = RecursosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Fondos y Recursos Compartidos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloud;
 
     protected static ?string $navigationLabel = 'Máquinas virtuales';
 

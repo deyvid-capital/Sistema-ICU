@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AsigCelulars;
 
+use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Resources\AsigCelulars\Pages\CreateAsigCelular;
 use App\Filament\Resources\AsigCelulars\Pages\EditAsigCelular;
 use App\Filament\Resources\AsigCelulars\Pages\ListAsigCelulars;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AsigCelularResource extends Resource
 {
     protected static ?string $model = AsigCelular::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
+    protected static ?string $cluster = CelularesCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Celulares';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
     protected static ?string $navigationLabel = 'Asignaciones de celular';
 

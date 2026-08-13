@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AsigCargadorCels;
 
+use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Resources\AsigCargadorCels\Pages\CreateAsigCargadorCel;
 use App\Filament\Resources\AsigCargadorCels\Pages\EditAsigCargadorCel;
 use App\Filament\Resources\AsigCargadorCels\Pages\ListAsigCargadorCels;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AsigCargadorCelResource extends Resource
 {
     protected static ?string $model = AsigCargadorCel::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
+    protected static ?string $cluster = CelularesCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Celulares';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 
     protected static ?string $navigationLabel = 'Asig. Cargadores de celular';
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Fondos;
 
+use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Resources\Fondos\Pages\CreateFondo;
 use App\Filament\Resources\Fondos\Pages\EditFondo;
 use App\Filament\Resources\Fondos\Pages\ListFondos;
@@ -16,15 +17,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class FondoResource extends Resource
 {
     protected static ?string $model = Fondo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+    protected static ?string $cluster = RecursosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Fondos y Recursos Compartidos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
     protected static ?string $navigationLabel = 'Fondos DAZA';
 

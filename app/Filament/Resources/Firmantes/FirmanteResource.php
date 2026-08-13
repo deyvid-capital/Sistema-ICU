@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Firmantes;
 
+use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Resources\Firmantes\Pages\CreateFirmante;
 use App\Filament\Resources\Firmantes\Pages\EditFirmante;
 use App\Filament\Resources\Firmantes\Pages\ListFirmantes;
@@ -18,11 +19,12 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class FirmanteResource extends Resource
 {
     protected static ?string $model = Firmante::class;
+
+    protected static ?string $cluster = CelularesCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
@@ -30,13 +32,11 @@ class FirmanteResource extends Resource
 
     protected static ?string $navigationLabel = 'Firmantes';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 7;
 
     protected static ?string $modelLabel = 'firmante';
 
     protected static ?string $pluralModelLabel = 'firmantes';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Formularios Entrega-Recepcion';
 
     public static function form(Schema $schema): Schema
     {

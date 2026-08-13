@@ -67,6 +67,17 @@
     background-color: rgb(255 255 255 / 0.35);
 }
 
+/* Tabs de subnavegación: reducir tamaño de letra e iconos */
+.fi-tabs-item {
+    @apply text-[13px];
+}
+.fi-tabs-item-label {
+    @apply text-[13px];
+}
+.fi-tabs-item > .fi-icon {
+    @apply size-4;
+}
+
 /* Busqueda global: reducir tamaño del componente */
 .fi-global-search {
     @apply max-w-xs;

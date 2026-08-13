@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Cargos;
 
+use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Resources\Areas\RelationManagers\CargosRelationManager;
 use App\Filament\Resources\Cargos\Pages\ManageCargos;
 use App\Models\Cargo;
@@ -22,11 +23,12 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class CargoResource extends Resource
 {
     protected static ?string $model = Cargo::class;
+
+    protected static ?string $cluster = UsuariosCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBriefcase;
 
@@ -38,7 +40,7 @@ class CargoResource extends Resource
 
     protected static ?string $pluralModelLabel = 'cargos';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Gestion de usuarios';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {

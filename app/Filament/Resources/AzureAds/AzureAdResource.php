@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AzureAds;
 
+use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Resources\AzureAds\Pages\CreateAzureAd;
 use App\Filament\Resources\AzureAds\Pages\EditAzureAd;
 use App\Filament\Resources\AzureAds\Pages\ListAzureAds;
@@ -18,19 +19,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AzureAdResource extends Resource
 {
     protected static ?string $model = AzureAd::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloud;
+    protected static ?string $cluster = AccesosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Accesos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloud;
 
     protected static ?string $navigationLabel = 'Azure AD';
 
-    protected static ?int $navigationSort = 15;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $modelLabel = 'cuenta Azure AD';
 

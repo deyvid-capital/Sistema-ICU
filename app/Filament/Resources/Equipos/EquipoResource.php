@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Equipos;
 
+use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Resources\Equipos\Pages\CreateEquipo;
 use App\Filament\Resources\Equipos\Pages\EditEquipo;
 use App\Filament\Resources\Equipos\Pages\ListEquipos;
@@ -23,15 +24,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class EquipoResource extends Resource
 {
     protected static ?string $model = Equipo::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
+    protected static ?string $cluster = InventarioCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Inventario Equipos y Componentes';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
     protected static ?string $navigationLabel = 'Equipos';
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RecursoVpns;
 
+use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Resources\RecursoVpns\Pages\ManageRecursoVpns;
 use App\Models\RecursoVpn;
 use BackedEnum;
@@ -24,15 +25,14 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class RecursoVpnResource extends Resource
 {
     protected static ?string $model = RecursoVpn::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLockClosed;
+    protected static ?string $cluster = RecursosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Fondos y Recursos Compartidos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLockClosed;
 
     protected static ?string $navigationLabel = 'Recursos VPN';
 

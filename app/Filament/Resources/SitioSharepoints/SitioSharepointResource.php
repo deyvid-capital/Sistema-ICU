@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SitioSharepoints;
 
+use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Resources\SitioSharepoints\Pages\CreateSitioSharepoint;
 use App\Filament\Resources\SitioSharepoints\Pages\EditSitioSharepoint;
 use App\Filament\Resources\SitioSharepoints\Pages\ListSitioSharepoints;
@@ -16,15 +17,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class SitioSharepointResource extends Resource
 {
     protected static ?string $model = SitioSharepoint::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
+    protected static ?string $cluster = RecursosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Fondos y Recursos Compartidos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
 
     protected static ?string $navigationLabel = 'Sitios SharePoint';
 

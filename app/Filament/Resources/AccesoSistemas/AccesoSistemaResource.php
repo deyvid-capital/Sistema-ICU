@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoSistemas;
 
+use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Resources\AccesoSistemas\Pages\CreateAccesoSistema;
 use App\Filament\Resources\AccesoSistemas\Pages\EditAccesoSistema;
 use App\Filament\Resources\AccesoSistemas\Pages\ListAccesoSistemas;
@@ -18,19 +19,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AccesoSistemaResource extends Resource
 {
     protected static ?string $model = AccesoSistema::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
+    protected static ?string $cluster = AccesosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Accesos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
     protected static ?string $navigationLabel = 'Accesos a sistemas';
 
-    protected static ?int $navigationSort = 12;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $modelLabel = 'acceso a sistema';
 

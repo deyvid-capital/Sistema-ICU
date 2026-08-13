@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ModeloLaptops;
 
+use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Resources\ModeloLaptops\Pages\ManageModeloLaptops;
 use App\Models\ModeloLaptop;
 use BackedEnum;
@@ -19,15 +20,14 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class ModeloLaptopResource extends Resource
 {
     protected static ?string $model = ModeloLaptop::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
+    protected static ?string $cluster = InventarioCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Inventario Equipos y Componentes';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
     protected static ?string $navigationLabel = 'Modelos de laptop';
 

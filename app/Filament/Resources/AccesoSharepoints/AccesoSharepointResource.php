@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoSharepoints;
 
+use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Resources\AccesoSharepoints\Pages\CreateAccesoSharepoint;
 use App\Filament\Resources\AccesoSharepoints\Pages\EditAccesoSharepoint;
 use App\Filament\Resources\AccesoSharepoints\Pages\ListAccesoSharepoints;
@@ -18,19 +19,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AccesoSharepointResource extends Resource
 {
     protected static ?string $model = AccesoSharepoint::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShare;
+    protected static ?string $cluster = AccesosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Accesos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShare;
 
     protected static ?string $navigationLabel = 'Accesos SharePoint';
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $modelLabel = 'acceso SharePoint';
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\EntregaCelulars;
 
+use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Resources\EntregaCelulars\Pages\CreateEntregaCelular;
 use App\Filament\Resources\EntregaCelulars\Pages\EditEntregaCelular;
 use App\Filament\Resources\EntregaCelulars\Pages\ListEntregaCelulars;
@@ -20,19 +21,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class EntregaCelularResource extends Resource
 {
     protected static ?string $model = EntregaCelular::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUpTray;
+    protected static ?string $cluster = CelularesCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Formularios Entrega-Recepcion';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUpTray;
 
     protected static ?string $navigationLabel = 'Entregas de celular';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $modelLabel = 'entrega de celular';
 

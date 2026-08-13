@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoInternets;
 
+use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Resources\AccesoInternets\Pages\CreateAccesoInternet;
 use App\Filament\Resources\AccesoInternets\Pages\EditAccesoInternet;
 use App\Filament\Resources\AccesoInternets\Pages\ListAccesoInternets;
@@ -19,19 +20,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AccesoInternetResource extends Resource
 {
     protected static ?string $model = AccesoInternet::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWifi;
+    protected static ?string $cluster = AccesosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Accesos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWifi;
 
     protected static ?string $navigationLabel = 'Accesos Wifi';
 
-    protected static ?int $navigationSort = 13;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $modelLabel = 'acceso a Wifi';
 

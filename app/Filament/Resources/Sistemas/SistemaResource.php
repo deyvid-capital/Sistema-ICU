@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Sistemas;
 
+use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Resources\Sistemas\Pages\CreateSistema;
 use App\Filament\Resources\Sistemas\Pages\EditSistema;
 use App\Filament\Resources\Sistemas\Pages\ListSistemas;
@@ -16,15 +17,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class SistemaResource extends Resource
 {
     protected static ?string $model = Sistema::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
+    protected static ?string $cluster = RecursosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Fondos y Recursos Compartidos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
 
     protected static ?string $navigationLabel = 'Sistemas';
 

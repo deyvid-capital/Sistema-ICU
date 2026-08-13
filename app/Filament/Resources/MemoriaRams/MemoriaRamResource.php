@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MemoriaRams;
 
+use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Resources\MemoriaRams\Pages\ManageMemoriaRams;
 use App\Models\MemoriaRam;
 use BackedEnum;
@@ -19,15 +20,14 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class MemoriaRamResource extends Resource
 {
     protected static ?string $model = MemoriaRam::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
+    protected static ?string $cluster = InventarioCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Inventario Equipos y Componentes';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
 
     protected static ?string $navigationLabel = 'Memorias RAM';
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Cargadors;
 
+use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Resources\Cargadors\Pages\CreateCargador;
 use App\Filament\Resources\Cargadors\Pages\EditCargador;
 use App\Filament\Resources\Cargadors\Pages\ListCargadors;
@@ -19,15 +20,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class CargadorResource extends Resource
 {
     protected static ?string $model = Cargador::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
+    protected static ?string $cluster = InventarioCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Inventario Equipos y Componentes';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 
     protected static ?string $navigationLabel = 'Cargadores';
 

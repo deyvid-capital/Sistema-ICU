@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RecepcionCelulars;
 
+use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Resources\RecepcionCelulars\Pages\CreateRecepcionCelular;
 use App\Filament\Resources\RecepcionCelulars\Pages\EditRecepcionCelular;
 use App\Filament\Resources\RecepcionCelulars\Pages\ListRecepcionCelulars;
@@ -20,19 +21,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class RecepcionCelularResource extends Resource
 {
     protected static ?string $model = RecepcionCelular::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowDownTray;
+    protected static ?string $cluster = CelularesCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Formularios Entrega-Recepcion';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowDownTray;
 
     protected static ?string $navigationLabel = 'Recepciones de celular';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 6;
 
     protected static ?string $modelLabel = 'recepción de celular';
 

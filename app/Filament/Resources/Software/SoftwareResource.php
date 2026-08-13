@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Software;
 
+use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Resources\Software\Pages\CreateSoftware;
 use App\Filament\Resources\Software\Pages\EditSoftware;
 use App\Filament\Resources\Software\Pages\ListSoftware;
@@ -18,15 +19,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class SoftwareResource extends Resource
 {
     protected static ?string $model = Software::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
+    protected static ?string $cluster = SoftwareCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Software y Licencias';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
     protected static ?string $navigationLabel = 'Software';
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Licencias;
 
+use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Resources\Licencias\Pages\CreateLicencia;
 use App\Filament\Resources\Licencias\Pages\EditLicencia;
 use App\Filament\Resources\Licencias\Pages\ListLicencias;
@@ -16,15 +17,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class LicenciaResource extends Resource
 {
     protected static ?string $model = Licencia::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
+    protected static ?string $cluster = SoftwareCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Software y Licencias';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
     protected static ?string $navigationLabel = 'Licencias';
 

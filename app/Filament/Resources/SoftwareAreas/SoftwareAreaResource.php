@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SoftwareAreas;
 
+use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Resources\SoftwareAreas\Pages\CreateSoftwareArea;
 use App\Filament\Resources\SoftwareAreas\Pages\EditSoftwareArea;
 use App\Filament\Resources\SoftwareAreas\Pages\ListSoftwareAreas;
@@ -15,15 +16,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class SoftwareAreaResource extends Resource
 {
     protected static ?string $model = SoftwareArea::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
+    protected static ?string $cluster = SoftwareCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Software y Licencias';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
     protected static ?string $navigationLabel = 'Software por area';
 

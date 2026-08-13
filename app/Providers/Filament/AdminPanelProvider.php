@@ -2,7 +2,13 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Clusters\Accesos\AccesosCluster;
+use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Clusters\Equipos\EquiposCluster;
+use App\Filament\Clusters\Inventario\InventarioCluster;
+use App\Filament\Clusters\Recursos\RecursosCluster;
+use App\Filament\Clusters\Software\SoftwareCluster;
+use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Actions\Action;
@@ -11,7 +17,6 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -55,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon(Heroicon::OutlinedKey)
                     ->visible(fn (): bool => RoleResource::canViewAny()),
             ])
-            ->maxContentWidth('full')
+            
             ->login()
             ->font('Roboto Mono')
             ->topNavigation(false)
@@ -65,31 +70,10 @@ class AdminPanelProvider extends PanelProvider
                 Platform::Mac => '⌘K',
                 default => null,
             })
-            ->sidebarCollapsibleOnDesktop()
-            ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Gestion de usuarios')
-                    ->icon(Heroicon::OutlinedUserGroup),
-                NavigationGroup::make()
-                    ->label('Software y Licencias')
-                    ->icon(Heroicon::OutlinedFolder),
-                NavigationGroup::make()
-                    ->label('Fondos y Recursos Compartidos')
-                    ->icon(Heroicon::OutlinedRectangleGroup),
-                NavigationGroup::make()
-                    ->label('Accesos')
-                    ->icon(Heroicon::OutlinedShieldCheck),
-                NavigationGroup::make()
-                    ->label('Celulares')
-                    ->icon(Heroicon::OutlinedDevicePhoneMobile),
-                NavigationGroup::make()
-                    ->label('Inventario Equipos y Componentes')
-                    ->icon(Heroicon::OutlinedCpuChip),
-                NavigationGroup::make()
-                    ->label('Formularios Entrega-Recepcion')
-                    ->icon(Heroicon::OutlinedArrowPathRoundedSquare),
-            ])
+            ->sidebarFullyCollapsibleOnDesktop()
+            ->sidebarWidth('15rem')
             ->databaseNotifications()
+            
             ->colors([
                 'primary' => Color::Indigo,
                 'gray' => Color::Zinc,
@@ -103,7 +87,13 @@ class AdminPanelProvider extends PanelProvider
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
             ->pages([
                 Dashboard::class,
+                UsuariosCluster::class,
+                SoftwareCluster::class,
+                AccesosCluster::class,
+                RecursosCluster::class,
                 EquiposCluster::class,
+                CelularesCluster::class,
+                InventarioCluster::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

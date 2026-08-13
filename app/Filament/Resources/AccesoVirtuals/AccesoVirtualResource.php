@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoVirtuals;
 
+use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Resources\AccesoVirtuals\Pages\CreateAccesoVirtual;
 use App\Filament\Resources\AccesoVirtuals\Pages\EditAccesoVirtual;
 use App\Filament\Resources\AccesoVirtuals\Pages\ListAccesoVirtuals;
@@ -18,19 +19,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AccesoVirtualResource extends Resource
 {
     protected static ?string $model = AccesoVirtual::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServer;
+    protected static ?string $cluster = AccesosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Accesos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServer;
 
     protected static ?string $navigationLabel = 'Accesos virtuales';
 
-    protected static ?int $navigationSort = 14;
+    protected static ?int $navigationSort = 6;
 
     protected static ?string $modelLabel = 'acceso virtual';
 

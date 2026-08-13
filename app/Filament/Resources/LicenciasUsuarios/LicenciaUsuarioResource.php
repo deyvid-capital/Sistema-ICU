@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\LicenciasUsuarios;
 
+use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Resources\LicenciasUsuarios\Pages\CreateLicenciaUsuario;
 use App\Filament\Resources\LicenciasUsuarios\Pages\EditLicenciaUsuario;
 use App\Filament\Resources\LicenciasUsuarios\Pages\ListLicenciasUsuarios;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class LicenciaUsuarioResource extends Resource
 {
     protected static ?string $model = LicenciaUsuario::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
+    protected static ?string $cluster = SoftwareCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Software y Licencias';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
     protected static ?string $navigationLabel = 'Licencias de usuarios';
 

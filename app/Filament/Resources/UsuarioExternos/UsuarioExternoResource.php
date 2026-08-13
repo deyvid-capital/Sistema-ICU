@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UsuarioExternos;
 
+use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Resources\UsuarioExternos\Pages\CreateUsuarioExterno;
 use App\Filament\Resources\UsuarioExternos\Pages\EditUsuarioExterno;
 use App\Filament\Resources\UsuarioExternos\Pages\ListUsuarioExternos;
@@ -20,15 +21,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class UsuarioExternoResource extends Resource
 {
     protected static ?string $model = UsuarioExterno::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUser;
+    protected static ?string $cluster = UsuariosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Formularios Entrega-Recepcion';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUser;
 
     protected static ?string $navigationLabel = 'Usuarios externos';
 

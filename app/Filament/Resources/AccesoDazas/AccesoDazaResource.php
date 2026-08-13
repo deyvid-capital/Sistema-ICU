@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoDazas;
 
+use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Resources\AccesoDazas\Pages\CreateAccesoDaza;
 use App\Filament\Resources\AccesoDazas\Pages\EditAccesoDaza;
 use App\Filament\Resources\AccesoDazas\Pages\ListAccesoDazas;
@@ -18,19 +19,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class AccesoDazaResource extends Resource
 {
     protected static ?string $model = AccesoDaza::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
+    protected static ?string $cluster = AccesosCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Accesos';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCircleStack;
 
     protected static ?string $navigationLabel = 'Accesos DAZA';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $modelLabel = 'acceso DAZA';
 

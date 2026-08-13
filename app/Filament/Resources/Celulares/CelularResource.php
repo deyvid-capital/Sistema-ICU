@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Celulares;
 
+use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Resources\Celulares\Pages\CreateCelular;
 use App\Filament\Resources\Celulares\Pages\EditCelular;
 use App\Filament\Resources\Celulares\Pages\ListCelulars;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class CelularResource extends Resource
 {
     protected static ?string $model = Celular::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDevicePhoneMobile;
+    protected static ?string $cluster = CelularesCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Celulares';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDevicePhoneMobile;
 
     protected static ?string $navigationLabel = 'Celulares';
 

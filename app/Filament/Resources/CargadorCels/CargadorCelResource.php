@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CargadorCels;
 
+use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Resources\CargadorCels\Pages\CreateCargadorCel;
 use App\Filament\Resources\CargadorCels\Pages\EditCargadorCel;
 use App\Filament\Resources\CargadorCels\Pages\ListCargadorCels;
@@ -18,15 +19,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class CargadorCelResource extends Resource
 {
     protected static ?string $model = CargadorCel::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
+    protected static ?string $cluster = CelularesCluster::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Celulares';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 
     protected static ?string $navigationLabel = 'Cargadores de celular';
 
