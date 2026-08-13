@@ -128,6 +128,14 @@ class EquipoForm
                                 ->required(),
                             Toggle::make('usuario_admin')
                                 ->label('Usuario administrador'),
+                            Toggle::make('litigation_hold')
+                                ->label('Litigation Hold')
+                                ->default(false)
+                                ->required(),
+                            Toggle::make('bitlocker')
+                                ->label('BitLocker')
+                                ->default(false)
+                                ->required(),
                         ]),
                     ]),
                 Section::make('Observaciones')

@@ -49,6 +49,8 @@ class Equipo extends Model
         'licencia_so',
         'etiquetado',
         'usuario_admin',
+        'litigation_hold',
+        'bitlocker',
         'estado',
         'observaciones',
     ];
@@ -61,6 +63,8 @@ class Equipo extends Model
             'bloqueo_bios' => 'boolean',
             'etiquetado' => 'boolean',
             'usuario_admin' => 'boolean',
+            'litigation_hold' => 'boolean',
+            'bitlocker' => 'boolean',
             'estado' => EstadoEquipo::class,
         ];
     }

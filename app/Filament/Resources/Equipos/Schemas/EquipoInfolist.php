@@ -6,6 +6,7 @@ use App\Models\Equipo;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class EquipoInfolist
 {
@@ -68,6 +69,20 @@ class EquipoInfolist
                 IconEntry::make('usuario_admin')
                     ->label('Usuario administrador')
                     ->boolean(),
+                IconEntry::make('litigation_hold')
+                    ->label('Litigation Hold')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedCheckCircle)
+                    ->falseIcon(Heroicon::OutlinedXCircle)
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+                IconEntry::make('bitlocker')
+                    ->label('BitLocker')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedCheckCircle)
+                    ->falseIcon(Heroicon::OutlinedXCircle)
+                    ->trueColor('success')
+                    ->falseColor('danger'),
                 TextEntry::make('created_at')
                     ->label('Creado')
                     ->dateTime('d/m/Y H:i')

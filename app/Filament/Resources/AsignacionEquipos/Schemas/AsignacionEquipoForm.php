@@ -147,7 +147,6 @@ class AsignacionEquipoForm
                             ]),
                         Tab::make('Entrega')
                             ->icon(Heroicon::OutlinedArrowUpTray)
-                            ->badge('Opcional')
                             ->badgeColor('gray')
                             ->schema([
                                 Group::make()
@@ -223,40 +222,7 @@ class AsignacionEquipoForm
                                             ]),
                                     ]),
                             ]),
-                        Tab::make('Recepción')
-                            ->icon(Heroicon::OutlinedArrowDownTray)
-                            ->badge('Opcional')
-                            ->badgeColor('gray')
-                            ->schema([
-                                Group::make()
-                                    ->relationship(
-                                        'recepcion',
-                                        condition: fn (?array $state): bool => filled($state['fecha'] ?? null),
-                                    )
-                                    ->schema([
-                                        Grid::make(2)
-                                            ->schema([
-                                                static::formularioEquipoNumeroField(RecepcionEquipo::class, 'recepcion_equipos')
-                                                    ->required(fn (Get $get): bool => filled($get('fecha'))),
-                                                DatePicker::make('fecha')
-                                                    ->label('Fecha')
-                                                    ->helperText('Si indica una fecha, se registrará la recepción con esta asignación.')
-                                                    ->live()
-                                                    ->afterStateUpdated(
-                                                        static::syncFormularioEquipoNumeroOnFechaChange(RecepcionEquipo::class),
-                                                    ),
-                                                RichEditor::make('observaciones')
-                                                    ->label('Observaciones')
-                                                    ->columnSpanFull()
-                                                    ->toolbarButtons([
-                                                        ['bold', 'italic', 'underline', 'strike', 'link'],
-                                                        ['h2', 'h3'],
-                                                        ['bulletList', 'orderedList'],
-                                                        ['undo', 'redo'],
-                                                    ]),
-                                            ]),
-                                    ]),
-                            ]),
+                        
                     ]),
             ]);
     }
