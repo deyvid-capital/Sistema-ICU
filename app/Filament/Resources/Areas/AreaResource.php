@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Areas;
 
 use App\Filament\Clusters\Usuarios\UsuariosCluster;
+use App\Filament\Imports\AreaImporter;
 use App\Filament\Resources\Areas\Pages\CreateArea;
 use App\Filament\Resources\Areas\Pages\EditArea;
 use App\Filament\Resources\Areas\Pages\ListAreas;
@@ -15,6 +16,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -84,6 +86,12 @@ class AreaResource extends Resource
             ->defaultSort('area')
             ->striped()
             ->paginated([10, 25, 50])
+            ->headerActions([
+                ImportAction::make()
+                    ->importer(AreaImporter::class)
+                    ->maxRows(200)
+                    ->label('Importar'),
+            ])
             ->columns([
                 TextColumn::make('area')
                     ->label('Área')

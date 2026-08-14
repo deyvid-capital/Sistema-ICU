@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('email', 100)->unique();
             $table->string('telefono', 30)->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

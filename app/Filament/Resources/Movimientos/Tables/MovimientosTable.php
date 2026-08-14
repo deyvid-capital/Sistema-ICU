@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Movimientos\Tables;
 
+use App\Filament\Imports\MovimientoImporter;
 use App\Filament\Resources\Concerns\MovimientoFormularioPdfActions;
 use App\Filament\Resources\Movimientos\MovimientoResource;
 use App\Models\Movimiento;
@@ -12,6 +13,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
@@ -30,6 +32,13 @@ class MovimientosTable
             ->defaultSort('fecha', 'desc')
             ->striped()
             ->paginated([10, 25, 50])
+            ->headerActions([
+                ImportAction::make()
+                    ->importer(MovimientoImporter::class)
+                    ->maxRows(200)
+                    ->chunkSize(200)
+                    ->label('Importar'),
+            ])
             ->columns([
                 TextColumn::make('usuario.name')
                     ->label('Usuario')

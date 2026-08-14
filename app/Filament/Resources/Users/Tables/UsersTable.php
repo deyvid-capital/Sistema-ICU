@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Actions\ActionGroup;
@@ -11,6 +12,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
@@ -87,6 +89,12 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
+            ])
+            ->headerActions([
+                ImportAction::make()
+                    ->importer(UserImporter::class)
+                    ->maxRows(200)
+                    ->label('Importar'),
             ])
             ->filters([
                 TrashedFilter::make()
