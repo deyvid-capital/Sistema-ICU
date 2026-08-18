@@ -21,6 +21,7 @@ use App\Observers\SoftwareExcObserver;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -59,5 +60,15 @@ class AppServiceProvider extends ServiceProvider
                 ->displayFormat('d/m/Y H:i');
         });
 
+        Password::defaults(function (): Password {
+            return Password::min(8)
+                ->mixedCase()
+                ->letters()
+                ->numbers()
+                ->when(
+                    ! app()->environment('testing'),
+                    fn (Password $rule): Password => $rule->uncompromised(3),
+                );
+        });
     }
 }

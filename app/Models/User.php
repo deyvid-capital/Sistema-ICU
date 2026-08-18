@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
+use Livewire\Livewire;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['id', 'name', 'nombres', 'apellidos', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at'])]
@@ -32,11 +34,27 @@ class User extends Authenticatable implements FilamentUser
         HasUuids,
         Notifiable,
         PreventsForceDeleteWithDependents,
-        SoftDeletes;
+        SoftDeletes,
+        TwoFactorAuthenticatable;
 
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    protected static function booted(): void
+    {
+        static::updating(function (User $user): void {
+            if (! $user->isDirty('email')) {
+                return;
+            }
+
+            $component = Livewire::current();
+
+            if ($component && $component::class === 'App\\Livewire\\Profile\\PersonalInfo') {
+                $user->email = $user->getOriginal('email');
+            }
+        });
+    }
 
     /**
      * @var array<int, string>

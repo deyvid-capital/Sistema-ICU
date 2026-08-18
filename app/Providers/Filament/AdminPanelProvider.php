@@ -9,6 +9,8 @@ use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Clusters\Usuarios\UsuariosCluster;
+use App\Livewire\Profile\PersonalInfo;
+use App\Livewire\Profile\UpdatePassword as ProfileUpdatePassword;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Actions\Action;
@@ -31,7 +33,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -60,7 +64,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon(Heroicon::OutlinedKey)
                     ->visible(fn (): bool => RoleResource::canViewAny()),
             ])
-            
+
             ->login()
             ->font('Roboto Mono')
             ->topNavigation(false)
@@ -73,7 +77,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarFullyCollapsibleOnDesktop()
             ->sidebarWidth('15rem')
             ->databaseNotifications()
-            
+
             ->colors([
                 'primary' => Color::Indigo,
                 'gray' => Color::Zinc,
@@ -114,6 +118,25 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->registerNavigation(false),
+                BreezyCore::make()
+                    ->myProfile(
+                        shouldRegisterUserMenu: true,
+                        userMenuLabel: 'Mi perfil',
+                        shouldRegisterNavigation: false,
+                        navigationGroup: 'Configuración',
+                        hasAvatars: false,
+                        slug: 'mi-perfil'
+                    )
+                    ->passwordUpdateRules(
+                        rules: [Password::default()],
+                        requiresCurrentPassword: true,
+                    )
+                    ->enableTwoFactorAuthentication()
+                    ->enableBrowserSessions()
+                    ->myProfileComponents([
+                        'personal_info' => PersonalInfo::class,
+                        'update_password' => ProfileUpdatePassword::class,
+                    ]),
             ])
             ->authMiddleware([
                 Authenticate::class,
