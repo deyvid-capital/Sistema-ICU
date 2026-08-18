@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\ReciboEquipo;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class ReciboEquipoPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:ReciboEquipo');
@@ -71,4 +71,5 @@ class ReciboEquipoPolicy
     {
         return $authUser->can('Reorder:ReciboEquipo');
     }
+
 }

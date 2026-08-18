@@ -23,7 +23,7 @@ class NotaSalidaEquipo extends Model
 
     protected static array $trashGuardedRelations = ['equipo', 'usuarioExterno'];
 
-    protected $table = 'nota_salida_equipos';
+    protected $table = 'notas_salida_equipos';
 
     protected $fillable = [
         'equipo_id',

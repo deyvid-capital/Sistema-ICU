@@ -18,7 +18,7 @@ class NotaRecepcionEquipoFactory extends Factory
     {
         return [
             'equipo_id' => Equipo::factory(),
-            'usuarios_externo_id' => UsuarioExterno::factory(),
+            'usuario_externo_id' => UsuarioExterno::factory(),
             'numero' => sprintf('%03d-%d', fake()->unique()->numberBetween(1, 99999), (int) now()->format('Y')),
             'fecha' => fake()->date(),
             'nota' => fake()->optional()->sentence(),

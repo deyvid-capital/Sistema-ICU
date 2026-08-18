@@ -45,7 +45,7 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
 
         Storage::disk('public')->assertMissing($antes);
         Storage::disk('public')->assertMissing($despues);
-        $this->assertDatabaseMissing('mantenimiento_equipo', ['id' => $mantenimiento->id]);
+        $this->assertDatabaseMissing('mantenimientos_equipos', ['id' => $mantenimiento->id]);
     }
 
     public function test_force_deleting_without_files_does_not_fail(): void
@@ -60,7 +60,7 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
         $mantenimiento->forceDelete();
 
         $this->assertSame([], $mantenimiento->deleteStoredImages());
-        $this->assertDatabaseMissing('mantenimiento_equipo', ['id' => $mantenimiento->id]);
+        $this->assertDatabaseMissing('mantenimientos_equipos', ['id' => $mantenimiento->id]);
     }
 
     public function test_replacing_an_image_deletes_the_previous_file(): void

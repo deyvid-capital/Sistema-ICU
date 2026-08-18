@@ -36,7 +36,7 @@ class AzureAdForm
                                     ->rule(new NotTrashed(User::class))
                                     ->hiddenOn(AzureAdRelationManager::class)
                                     ->unique(
-                                        table: 'azure_ad',
+                                        table: 'cuentas_azure_ad',
                                         column: 'usuario_id',
                                         ignoreRecord: true,
                                         modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
@@ -50,7 +50,7 @@ class AzureAdForm
                                     ->maxLength(10)
                                     ->required()
                                     ->unique(
-                                        table: 'azure_ad',
+                                        table: 'cuentas_azure_ad',
                                         column: 'iniciales',
                                         ignoreRecord: true,
                                         modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),

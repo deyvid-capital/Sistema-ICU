@@ -39,6 +39,6 @@ class TogglesEstadoOnSoftDeleteTest extends TestCase
 
         $azureAd->forceDelete();
 
-        $this->assertDatabaseMissing('azure_ad', ['id' => $azureAd->id]);
+        $this->assertDatabaseMissing('cuentas_azure_ad', ['id' => $azureAd->id]);
     }
 }

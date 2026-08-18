@@ -49,7 +49,7 @@ class RecibosEquipoRelationManagerTest extends TestCase
             ])
             ->assertHasNoTableActionErrors();
 
-        $this->assertDatabaseHas('recibo_equipo', [
+        $this->assertDatabaseHas('recibos_equipos', [
             'equipo_id' => $equipo->service_tag,
         ]);
     }

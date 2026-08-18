@@ -23,7 +23,7 @@ class RecepcionEquipo extends Model
 
     protected static array $trashGuardedRelations = ['asignacion'];
 
-    protected $table = 'recepcion_equipos';
+    protected $table = 'recepciones_equipos';
 
     protected $fillable = [
         'asignacion_id',

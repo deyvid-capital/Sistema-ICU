@@ -79,7 +79,7 @@ class EntregaRecepcionValidationsTest extends TestCase
             ->call('create')
             ->assertHasNoFormErrors();
 
-        $this->assertDatabaseHas('entrega_equipos', [
+        $this->assertDatabaseHas('entregas_equipos', [
             'asignacion_id' => $asignacion->id,
             'numero' => '003-2026',
         ]);

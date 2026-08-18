@@ -15,7 +15,7 @@ class AzureAd extends Model
 
     protected static array $trashGuardedRelations = ['usuario'];
 
-    protected $table = 'azure_ad';
+    protected $table = 'cuentas_azure_ad';
 
     protected $fillable = [
         'usuario_id',

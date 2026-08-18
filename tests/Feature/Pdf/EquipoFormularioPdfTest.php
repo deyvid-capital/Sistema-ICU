@@ -165,7 +165,7 @@ class EquipoFormularioPdfTest extends TestCase
 
         $nota = NotaRecepcionEquipo::factory()->create([
             'equipo_id' => Equipo::factory(),
-            'usuarios_externo_id' => UsuarioExterno::factory(),
+            'usuario_externo_id' => UsuarioExterno::factory(),
         ]);
 
         $payload = app(EquipoFormularioPdfData::class)
@@ -179,7 +179,7 @@ class EquipoFormularioPdfTest extends TestCase
     {
         $nota = NotaRecepcionEquipo::factory()->create([
             'equipo_id' => Equipo::factory(),
-            'usuarios_externo_id' => UsuarioExterno::factory(),
+            'usuario_externo_id' => UsuarioExterno::factory(),
         ]);
 
         $payload = app(EquipoFormularioPdfData::class)

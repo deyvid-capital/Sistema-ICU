@@ -58,7 +58,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('software_exc', function (Blueprint $table) {
+        Schema::create('software_excepciones', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->foreignId('software_id')->constrained('softwares', 'id_software')->restrictOnDelete();
@@ -70,7 +70,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('internet', function (Blueprint $table) {
+        Schema::create('accesos_wifi', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->string('usuario_red', 50);
@@ -106,7 +106,7 @@ return new class extends Migration
             $table->unique(['usuario_id', 'id_software']);
         });
 
-        Schema::create('azure_ad', function (Blueprint $table) {
+        Schema::create('cuentas_azure_ad', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->string('iniciales', 10)->nullable();
@@ -117,7 +117,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('acc_ud_compartidas', function (Blueprint $table) {
+        Schema::create('accesos_unidades_compartidas', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->string('unidad_compartida', 100);
@@ -126,11 +126,12 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('accesos_virtual', function (Blueprint $table) {
+        Schema::create('accesos_virtuales', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('internet_id')->constrained('internet')->cascadeOnDelete();
+            $table->foreignId('internet_id')->constrained('accesos_wifi')->cascadeOnDelete();
             $table->foreignId('virtual_id')->constrained('virtuales')->restrictOnDelete();
             $table->foreignId('vpn_id')->constrained('recursos_vpn')->restrictOnDelete();
+            $table->boolean('estado')->default(true);
             $table->timestamps();
             $table->softDeletes();
 
@@ -140,13 +141,13 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('accesos_virtual');
-        Schema::dropIfExists('acc_ud_compartidas');
-        Schema::dropIfExists('azure_ad');
+        Schema::dropIfExists('accesos_virtuales');
+        Schema::dropIfExists('accesos_unidades_compartidas');
+        Schema::dropIfExists('cuentas_azure_ad');
         Schema::dropIfExists('software_usuarios');
         Schema::dropIfExists('licencias_usuarios');
-        Schema::dropIfExists('internet');
-        Schema::dropIfExists('software_exc');
+        Schema::dropIfExists('accesos_wifi');
+        Schema::dropIfExists('software_excepciones');
         Schema::dropIfExists('accesos_daza');
         Schema::dropIfExists('accesos_sistemas');
         Schema::dropIfExists('accesos_sharepoint');

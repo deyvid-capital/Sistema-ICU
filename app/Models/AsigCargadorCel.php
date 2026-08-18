@@ -19,7 +19,7 @@ class AsigCargadorCel extends Model
 
     protected static array $trashGuardedRelations = ['celular', 'cargador'];
 
-    protected $table = 'asig_cargador_cel';
+    protected $table = 'asignaciones_cargadores_celulares';
 
     protected $fillable = [
         'celulares_id',

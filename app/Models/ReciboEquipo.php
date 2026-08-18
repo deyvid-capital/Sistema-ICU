@@ -20,7 +20,7 @@ class ReciboEquipo extends Model
 
     protected static array $trashGuardedRelations = ['equipo'];
 
-    protected $table = 'recibo_equipo';
+    protected $table = 'recibos_equipos';
 
     protected $fillable = [
         'equipo_id',

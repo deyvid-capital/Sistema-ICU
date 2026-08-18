@@ -15,7 +15,7 @@ class SoftwareExc extends Model
 
     protected static array $trashGuardedRelations = ['usuario'];
 
-    protected $table = 'software_exc';
+    protected $table = 'software_excepciones';
 
     protected $fillable = [
         'usuario_id',

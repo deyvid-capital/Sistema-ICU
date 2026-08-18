@@ -23,11 +23,11 @@ class NotaRecepcionEquipo extends Model
 
     protected static array $trashGuardedRelations = ['equipo', 'usuarioExterno'];
 
-    protected $table = 'nota_recepcion_equipos';
+    protected $table = 'notas_recepcion_equipos';
 
     protected $fillable = [
         'equipo_id',
-        'usuarios_externo_id',
+        'usuario_externo_id',
         'numero',
         'fecha',
         'nota',
@@ -47,7 +47,7 @@ class NotaRecepcionEquipo extends Model
 
     public function usuarioExterno(): BelongsTo
     {
-        return $this->belongsTo(UsuarioExterno::class, 'usuarios_externo_id')->withTrashed();
+        return $this->belongsTo(UsuarioExterno::class, 'usuario_externo_id')->withTrashed();
     }
 
     public function firmantes(): MorphMany

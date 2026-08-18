@@ -35,6 +35,6 @@ class UsuarioExterno extends Model
 
     public function notasRecepcion(): HasMany
     {
-        return $this->hasMany(NotaRecepcionEquipo::class, 'usuarios_externo_id');
+        return $this->hasMany(NotaRecepcionEquipo::class, 'usuario_externo_id');
     }
 }

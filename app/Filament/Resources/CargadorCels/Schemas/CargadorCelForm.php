@@ -27,7 +27,7 @@ class CargadorCelForm
                                 ->required()
                                 ->maxLength(50)
                                 ->unique(
-                                    table: 'cargador_cel',
+                                    table: 'cargadores_celulares',
                                     column: 'serial',
                                     ignoreRecord: true,
                                     modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),

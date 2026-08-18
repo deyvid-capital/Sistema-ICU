@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('asignacion_equipos', function (Blueprint $table) {
+        Schema::create('asignaciones_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('service_tag', 50);
             $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
@@ -22,9 +22,9 @@ return new class extends Migration
             $table->foreign('service_tag')->references('service_tag')->on('equipos')->restrictOnDelete();
         });
 
-        Schema::create('entrega_equipos', function (Blueprint $table) {
+        Schema::create('entregas_equipos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('asignacion_id')->constrained('asignacion_equipos')->cascadeOnDelete();
+            $table->foreignId('asignacion_id')->constrained('asignaciones_equipos')->cascadeOnDelete();
             $table->string('numero', 20)->nullable()->unique();
             $table->date('fecha');
             $table->boolean('mouse')->default(false);
@@ -36,9 +36,9 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('recepcion_equipos', function (Blueprint $table) {
+        Schema::create('recepciones_equipos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('asignacion_id')->constrained('asignacion_equipos')->cascadeOnDelete();
+            $table->foreignId('asignacion_id')->constrained('asignaciones_equipos')->cascadeOnDelete();
             $table->string('numero', 20)->unique();
             $table->date('fecha');
             $table->text('observaciones')->nullable();
@@ -56,11 +56,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('nota_salida_equipos', function (Blueprint $table) {
+        Schema::create('notas_salida_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('equipo_id', 50);
             $table->foreignId('usuario_externo_id')->constrained('usuarios_externos')->restrictOnDelete();
-            $table->string('numero', 20);
+            $table->string('numero', 20)->unique();
             $table->date('fecha');
             $table->text('nota')->nullable();
             $table->timestamps();
@@ -69,11 +69,11 @@ return new class extends Migration
             $table->foreign('equipo_id')->references('service_tag')->on('equipos')->restrictOnDelete();
         });
 
-        Schema::create('nota_recepcion_equipos', function (Blueprint $table) {
+        Schema::create('notas_recepcion_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('equipo_id', 50);
-            $table->foreignId('usuarios_externo_id')->constrained('usuarios_externos')->restrictOnDelete();
-            $table->string('numero', 20);
+            $table->foreignId('usuario_externo_id')->constrained('usuarios_externos')->restrictOnDelete();
+            $table->string('numero', 20)->unique();
             $table->date('fecha');
             $table->text('nota')->nullable();
             $table->timestamps();
@@ -85,11 +85,11 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('nota_recepcion_equipos');
-        Schema::dropIfExists('nota_salida_equipos');
+        Schema::dropIfExists('notas_recepcion_equipos');
+        Schema::dropIfExists('notas_salida_equipos');
         Schema::dropIfExists('pdf_equipos');
-        Schema::dropIfExists('recepcion_equipos');
-        Schema::dropIfExists('entrega_equipos');
-        Schema::dropIfExists('asignacion_equipos');
+        Schema::dropIfExists('recepciones_equipos');
+        Schema::dropIfExists('entregas_equipos');
+        Schema::dropIfExists('asignaciones_equipos');
     }
 };

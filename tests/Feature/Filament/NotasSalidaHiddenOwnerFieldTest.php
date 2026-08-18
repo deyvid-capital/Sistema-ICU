@@ -43,7 +43,7 @@ class NotasSalidaHiddenOwnerFieldTest extends TestCase
             ])
             ->assertHasNoTableActionErrors();
 
-        $this->assertDatabaseHas('nota_salida_equipos', [
+        $this->assertDatabaseHas('notas_salida_equipos', [
             'equipo_id' => $equipo->service_tag,
             'usuario_externo_id' => $usuarioExterno->id,
             'numero' => '901-2026',

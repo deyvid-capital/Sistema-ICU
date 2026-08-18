@@ -10,7 +10,6 @@ use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationMana
 use App\Models\AsignacionEquipo;
 use App\Models\EntregaEquipo;
 use App\Models\Equipo;
-use App\Models\RecepcionEquipo;
 use App\Models\User;
 use App\Rules\EquipoDisponibleParaAsignacion;
 use App\Rules\NotTrashed;
@@ -157,7 +156,7 @@ class AsignacionEquipoForm
                                     ->schema([
                                         Grid::make(5)
                                             ->schema([
-                                                static::formularioEquipoNumeroField(EntregaEquipo::class, 'entrega_equipos'),
+                                                static::formularioEquipoNumeroField(EntregaEquipo::class, 'entregas_equipos'),
                                                 DatePicker::make('fecha')
                                                     ->label('Fecha')
                                                     ->default(now())
@@ -222,7 +221,7 @@ class AsignacionEquipoForm
                                             ]),
                                     ]),
                             ]),
-                        
+
                     ]),
             ]);
     }

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('cargador_cel', function (Blueprint $table) {
+        Schema::create('cargadores_celulares', function (Blueprint $table) {
             $table->string('serial', 50)->primary();
             $table->string('modelo', 100)->nullable();
             $table->text('observacion')->nullable();
@@ -32,7 +32,8 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('asig_cargador_cel', function (Blueprint $table) {
+        Schema::create('asignaciones_cargadores_celulares', function (Blueprint $table) {
+            $table->id();
             $table->string('celulares_id', 50);
             $table->string('cargador_serial', 50);
             $table->text('motivo')->nullable();
@@ -40,16 +41,16 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->primary(['celulares_id', 'cargador_serial']);
+            $table->unique(['celulares_id', 'cargador_serial'], 'asignaciones_cargadores_celulares_par_unique');
             $table->foreign('celulares_id')->references('id')->on('celulares')->restrictOnDelete();
-            $table->foreign('cargador_serial')->references('serial')->on('cargador_cel')->restrictOnDelete();
+            $table->foreign('cargador_serial')->references('serial')->on('cargadores_celulares')->restrictOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('asig_cargador_cel');
-        Schema::dropIfExists('cargador_cel');
+        Schema::dropIfExists('asignaciones_cargadores_celulares');
+        Schema::dropIfExists('cargadores_celulares');
         Schema::dropIfExists('celulares');
     }
 };

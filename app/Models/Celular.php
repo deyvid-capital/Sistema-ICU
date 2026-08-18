@@ -72,7 +72,7 @@ class Celular extends Model
     {
         return $this->belongsToMany(
             CargadorCel::class,
-            'asig_cargador_cel',
+            'asignaciones_cargadores_celulares',
             'celulares_id',
             'cargador_serial',
             'id',

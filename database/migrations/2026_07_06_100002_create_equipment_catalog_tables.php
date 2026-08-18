@@ -50,7 +50,10 @@ return new class extends Migration
             $table->string('licencia_so', 50)->nullable();
             $table->boolean('etiquetado')->default(false);
             $table->boolean('usuario_admin')->nullable();
+            $table->boolean('litigation_hold')->default(false);
+            $table->boolean('bitlocker')->default(false);
             $table->string('estado', 50)->default('sin asignar');
+            $table->text('observaciones')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -65,12 +68,13 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('asignacion_cargadores', function (Blueprint $table) {
+        Schema::create('asignaciones_cargadores', function (Blueprint $table) {
             $table->id();
             $table->string('serial_cargador', 50);
             $table->string('service_tag', 50);
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();
+            $table->text('observaciones')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
@@ -80,18 +84,18 @@ return new class extends Migration
 
         // Historial permitido: solo una asignación activa por cargador/equipo.
         DB::statement('
-            CREATE UNIQUE INDEX asignacion_cargadores_serial_activo_unique
-            ON asignacion_cargadores (serial_cargador)
+            CREATE UNIQUE INDEX asignaciones_cargadores_serial_activo_unique
+            ON asignaciones_cargadores (serial_cargador)
             WHERE deleted_at IS NULL AND fecha_fin IS NULL
         ');
 
         DB::statement('
-            CREATE UNIQUE INDEX asignacion_cargadores_equipo_activo_unique
-            ON asignacion_cargadores (service_tag)
+            CREATE UNIQUE INDEX asignaciones_cargadores_equipo_activo_unique
+            ON asignaciones_cargadores (service_tag)
             WHERE deleted_at IS NULL AND fecha_fin IS NULL
         ');
 
-        Schema::create('recibo_equipo', function (Blueprint $table) {
+        Schema::create('recibos_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('equipo_id', 50);
             $table->date('fecha');
@@ -103,7 +107,7 @@ return new class extends Migration
             $table->foreign('equipo_id')->references('service_tag')->on('equipos')->restrictOnDelete();
         });
 
-        Schema::create('mantenimiento_equipo', function (Blueprint $table) {
+        Schema::create('mantenimientos_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('service_tag', 50)->index();
             $table->date('fecha_soporte');
@@ -119,9 +123,9 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('mantenimiento_equipo');
-        Schema::dropIfExists('recibo_equipo');
-        Schema::dropIfExists('asignacion_cargadores');
+        Schema::dropIfExists('mantenimientos_equipos');
+        Schema::dropIfExists('recibos_equipos');
+        Schema::dropIfExists('asignaciones_cargadores');
         Schema::dropIfExists('cargadores');
         Schema::dropIfExists('equipos');
         Schema::dropIfExists('tarjetas_video');

@@ -14,7 +14,7 @@ class NotaRecepcionEquipoInfolist
             ->components([
                 TextEntry::make('equipo.service_tag')
                     ->label('Equipo'),
-                TextEntry::make('usuarios_externo_id')
+                TextEntry::make('usuario_externo_id')
                     ->numeric(),
                 TextEntry::make('numero'),
                 TextEntry::make('fecha')

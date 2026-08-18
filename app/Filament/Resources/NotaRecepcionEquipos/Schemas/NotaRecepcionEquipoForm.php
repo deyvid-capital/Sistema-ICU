@@ -43,7 +43,7 @@ class NotaRecepcionEquipoForm
                                     ->required()
                                     ->rule(new NotTrashed(Equipo::class))
                                     ->hiddenOn(EquipoNotasRecepcionRelationManager::class),
-                                Select::make('usuarios_externo_id')
+                                Select::make('usuario_externo_id')
                                     ->label('Usuario externo')
                                     ->relationship('usuarioExterno', 'nombre')
                                     ->getOptionLabelFromRecordUsing(
@@ -54,7 +54,7 @@ class NotaRecepcionEquipoForm
                                     ->required()
                                     ->rule(new NotTrashed(UsuarioExterno::class))
                                     ->hiddenOn(UsuarioExternoNotasRecepcionRelationManager::class),
-                                static::formularioEquipoNumeroField(NotaRecepcionEquipo::class, 'nota_recepcion_equipos'),
+                                static::formularioEquipoNumeroField(NotaRecepcionEquipo::class, 'notas_recepcion_equipos'),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')
                                     ->default(now())

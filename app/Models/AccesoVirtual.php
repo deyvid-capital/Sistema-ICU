@@ -24,7 +24,7 @@ class AccesoVirtual extends Model
         'recursoVpn' => ['label' => 'el recurso VPN', 'attribute' => 'nombre_vpn'],
     ];
 
-    protected $table = 'accesos_virtual';
+    protected $table = 'accesos_virtuales';
 
     protected $fillable = [
         'internet_id',

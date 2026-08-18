@@ -54,7 +54,7 @@ class FormularioEquipoForceDeletesPdfDocumentsTest extends TestCase
 
         Storage::disk('public')->assertMissing($path);
         $this->assertDatabaseMissing('pdf_equipos', ['id' => $pdf->id]);
-        $this->assertDatabaseMissing('entrega_equipos', ['id' => $entrega->id]);
+        $this->assertDatabaseMissing('entregas_equipos', ['id' => $entrega->id]);
     }
 
     public function test_force_deleting_nota_salida_removes_soft_deleted_pdfs_too(): void
@@ -79,6 +79,6 @@ class FormularioEquipoForceDeletesPdfDocumentsTest extends TestCase
 
         Storage::disk('public')->assertMissing($path);
         $this->assertDatabaseMissing('pdf_equipos', ['id' => $pdf->id]);
-        $this->assertDatabaseMissing('nota_salida_equipos', ['id' => $nota->id]);
+        $this->assertDatabaseMissing('notas_salida_equipos', ['id' => $nota->id]);
     }
 }

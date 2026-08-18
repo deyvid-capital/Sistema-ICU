@@ -84,7 +84,7 @@ class CelularResourcesSmokeTest extends TestCase
             ->call('create')
             ->assertHasNoFormErrors();
 
-        $this->assertDatabaseHas('entrega_celulares', [
+        $this->assertDatabaseHas('entregas_celulares', [
             'asignacion_cel_id' => $otraAsignacion->id,
             'numero' => '011-2026',
         ]);

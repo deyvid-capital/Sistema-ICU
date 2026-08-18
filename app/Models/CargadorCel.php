@@ -20,7 +20,7 @@ class CargadorCel extends Model
 
     protected static array $forceDeleteGuardedRelations = ['celulares', 'asignaciones'];
 
-    protected $table = 'cargador_cel';
+    protected $table = 'cargadores_celulares';
 
     protected $primaryKey = 'serial';
 
@@ -41,7 +41,7 @@ class CargadorCel extends Model
     {
         return $this->belongsToMany(
             Celular::class,
-            'asig_cargador_cel',
+            'asignaciones_cargadores_celulares',
             'cargador_serial',
             'celulares_id',
             'serial',

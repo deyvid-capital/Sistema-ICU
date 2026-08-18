@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\AsigCargadorCel;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class AsigCargadorCelPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:AsigCargadorCel');
@@ -71,4 +71,5 @@ class AsigCargadorCelPolicy
     {
         return $authUser->can('Reorder:AsigCargadorCel');
     }
+
 }

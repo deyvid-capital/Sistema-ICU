@@ -22,7 +22,7 @@ class AccesoInternet extends Model
 
     protected static array $trashGuardedRelations = ['usuario'];
 
-    protected $table = 'internet';
+    protected $table = 'accesos_wifi';
 
     protected $fillable = [
         'usuario_id',

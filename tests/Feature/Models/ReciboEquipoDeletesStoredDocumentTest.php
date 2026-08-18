@@ -55,7 +55,7 @@ class ReciboEquipoDeletesStoredDocumentTest extends TestCase
 
         $this->assertTrue($recibo->storedDocumentWasDeleted);
         Storage::disk('public')->assertMissing($path);
-        $this->assertDatabaseMissing('recibo_equipo', ['id' => $recibo->id]);
+        $this->assertDatabaseMissing('recibos_equipos', ['id' => $recibo->id]);
     }
 
     public function test_force_deleting_without_file_does_not_flag_document_as_deleted(): void
@@ -69,6 +69,6 @@ class ReciboEquipoDeletesStoredDocumentTest extends TestCase
         $recibo->forceDelete();
 
         $this->assertFalse($recibo->storedDocumentWasDeleted);
-        $this->assertDatabaseMissing('recibo_equipo', ['id' => $recibo->id]);
+        $this->assertDatabaseMissing('recibos_equipos', ['id' => $recibo->id]);
     }
 }

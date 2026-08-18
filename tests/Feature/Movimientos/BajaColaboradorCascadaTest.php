@@ -187,7 +187,7 @@ class BajaColaboradorCascadaTest extends TestCase
 
         $this->servicio()->ejecutar($user->id, Carbon::parse('2026-08-12'));
 
-        $this->assertDatabaseHas('asig_cargador_cel', [
+        $this->assertDatabaseHas('asignaciones_cargadores_celulares', [
             'id' => $asignacionCargadorCel->id,
             'deleted_at' => null,
         ]);

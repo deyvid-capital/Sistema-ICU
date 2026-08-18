@@ -54,7 +54,7 @@ class EquipoCargadorRelationManagersTest extends TestCase
             ])
             ->assertHasNoTableActionErrors();
 
-        $this->assertDatabaseHas('asignacion_equipos', [
+        $this->assertDatabaseHas('asignaciones_equipos', [
             'service_tag' => $equipo->service_tag,
             'usuario_id' => $user->id,
         ]);
@@ -77,7 +77,7 @@ class EquipoCargadorRelationManagersTest extends TestCase
             ])
             ->assertHasNoTableActionErrors();
 
-        $this->assertDatabaseHas('asignacion_cargadores', [
+        $this->assertDatabaseHas('asignaciones_cargadores', [
             'service_tag' => $equipo->service_tag,
             'serial_cargador' => $cargador->serial,
         ]);
@@ -100,7 +100,7 @@ class EquipoCargadorRelationManagersTest extends TestCase
             ])
             ->assertHasNoTableActionErrors();
 
-        $this->assertDatabaseHas('asignacion_cargadores', [
+        $this->assertDatabaseHas('asignaciones_cargadores', [
             'serial_cargador' => $cargador->serial,
             'service_tag' => $equipo->service_tag,
         ]);
@@ -123,7 +123,7 @@ class EquipoCargadorRelationManagersTest extends TestCase
             ])
             ->assertHasNoTableActionErrors();
 
-        $this->assertDatabaseHas('asignacion_equipos', [
+        $this->assertDatabaseHas('asignaciones_equipos', [
             'usuario_id' => $user->id,
             'service_tag' => $equipo->service_tag,
         ]);

@@ -54,7 +54,7 @@ class NotaSalidaEquipoForm
                                     ->required()
                                     ->rule(new NotTrashed(UsuarioExterno::class))
                                     ->hiddenOn(UsuarioExternoNotasSalidaRelationManager::class),
-                                static::formularioEquipoNumeroField(NotaSalidaEquipo::class, 'nota_salida_equipos'),
+                                static::formularioEquipoNumeroField(NotaSalidaEquipo::class, 'notas_salida_equipos'),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')
                                     ->default(now())

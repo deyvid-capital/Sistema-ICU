@@ -16,7 +16,7 @@ class AsignacionCargador extends Model
 
     protected static array $trashGuardedRelations = ['equipo', 'cargador'];
 
-    protected $table = 'asignacion_cargadores';
+    protected $table = 'asignaciones_cargadores';
 
     protected $fillable = [
         'serial_cargador',

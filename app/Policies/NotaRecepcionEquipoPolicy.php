@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\NotaRecepcionEquipo;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class NotaRecepcionEquipoPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:NotaRecepcionEquipo');
@@ -71,4 +71,5 @@ class NotaRecepcionEquipoPolicy
     {
         return $authUser->can('Reorder:NotaRecepcionEquipo');
     }
+
 }

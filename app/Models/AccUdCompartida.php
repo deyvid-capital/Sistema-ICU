@@ -19,7 +19,7 @@ class AccUdCompartida extends Model
 
     protected static array $trashGuardedRelations = ['usuario'];
 
-    protected $table = 'acc_ud_compartidas';
+    protected $table = 'accesos_unidades_compartidas';
 
     protected $fillable = [
         'usuario_id',

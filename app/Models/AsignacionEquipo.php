@@ -23,7 +23,7 @@ class AsignacionEquipo extends Model
 
     protected static array $forceDeleteGuardedRelations = ['entrega', 'recepcion'];
 
-    protected $table = 'asignacion_equipos';
+    protected $table = 'asignaciones_equipos';
 
     protected $fillable = [
         'service_tag',

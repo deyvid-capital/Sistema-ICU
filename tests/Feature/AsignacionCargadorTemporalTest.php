@@ -101,7 +101,7 @@ class AsignacionCargadorTemporalTest extends TestCase
 
     public function test_rejects_blocked_charger(): void
     {
-        $cargador = Cargador::factory()->create(['estado' => EstadoCargador::Danado]);
+        $cargador = Cargador::factory()->create(['estado' => EstadoCargador::Dañado]);
 
         $this->assertTrue(AsignacionCargadorWorkflow::cargadorEstaBloqueado($cargador));
     }

@@ -35,7 +35,7 @@ class MantenimientoEquipo extends Model
 
     protected static array $trashGuardedRelations = ['equipo'];
 
-    protected $table = 'mantenimiento_equipo';
+    protected $table = 'mantenimientos_equipos';
 
     protected $fillable = [
         'service_tag',

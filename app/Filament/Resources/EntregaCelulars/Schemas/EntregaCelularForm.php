@@ -51,13 +51,13 @@ class EntregaCelularForm
                                     ->required()
                                     ->rule(new NotTrashed(AsigCelular::class))
                                     ->unique(
-                                        table: 'entrega_celulares',
+                                        table: 'entregas_celulares',
                                         column: 'asignacion_cel_id',
                                         ignoreRecord: true,
                                         modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
                                     )
                                     ->columnSpanFull(),
-                                static::formularioEquipoNumeroField(EntregaCelular::class, 'entrega_celulares'),
+                                static::formularioEquipoNumeroField(EntregaCelular::class, 'entregas_celulares'),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')
                                     ->default(now())
