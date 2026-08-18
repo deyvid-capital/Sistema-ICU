@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports;
 
+use App\Filament\Imports\Concerns\HasImportGuide;
 use App\Models\Area;
 use App\Models\Cargo;
 use Filament\Actions\Imports\ImportColumn;
@@ -11,7 +12,14 @@ use Illuminate\Support\Number;
 
 class CargoImporter extends Importer
 {
+    use HasImportGuide;
+
     protected static ?string $model = Cargo::class;
+
+    public static function getImportGuideSummary(): ?string
+    {
+        return 'CSV con coma (,). Máximo 200 filas. Importa áreas antes. El área debe existir; no se crea desde este archivo.';
+    }
 
     public static function getColumns(): array
     {
@@ -21,11 +29,13 @@ class CargoImporter extends Importer
                 ->relationship(resolveUsing: 'area')
                 ->requiredMapping()
                 ->rules(['required'])
+                ->helperText('Debe coincidir con el nombre de un área ya cargada.')
                 ->example('Tecnología'),
             ImportColumn::make('cargo')
                 ->label('Cargo')
                 ->requiredMapping()
                 ->rules(['required', 'max:150'])
+                ->helperText('Si el cargo ya existe en esa área se actualiza; si no, se crea.')
                 ->example('Analista'),
             ImportColumn::make('descripcion')
                 ->label('Descripción')

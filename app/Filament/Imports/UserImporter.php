@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports;
 
+use App\Filament\Imports\Concerns\HasImportGuide;
 use App\Models\Area;
 use App\Models\Cargo;
 use App\Models\User;
@@ -14,7 +15,14 @@ use Illuminate\Support\Str;
 
 class UserImporter extends Importer
 {
+    use HasImportGuide;
+
     protected static ?string $model = User::class;
+
+    public static function getImportGuideSummary(): ?string
+    {
+        return 'CSV con coma (,). Máximo 200 filas.';
+    }
 
     public static function getColumns(): array
     {
@@ -33,6 +41,7 @@ class UserImporter extends Importer
                 ->label('Correo')
                 ->requiredMapping()
                 ->rules(['required', 'email', 'max:100'])
+                ->helperText('Clave de upsert: si el correo ya existe se actualiza el usuario.')
                 ->example('jperez@empresa.com'),
             ImportColumn::make('carnet')
                 ->label('Carnet')
@@ -47,6 +56,7 @@ class UserImporter extends Importer
                 ->relationship(resolveUsing: 'area')
                 ->requiredMapping()
                 ->rules(['required'])
+                ->helperText('Debe coincidir con el nombre de un área ya cargada.')
                 ->example('Tecnología'),
             ImportColumn::make('cargo')
                 ->label('Cargo')
@@ -66,12 +76,14 @@ class UserImporter extends Importer
                 })
                 ->requiredMapping()
                 ->rules(['required'])
+                ->helperText('Debe existir y pertenecer al área de esta misma fila.')
                 ->example('Analista'),
             ImportColumn::make('password')
                 ->label('Contraseña')
                 ->sensitive()
                 ->ignoreBlankState()
                 ->rules(['nullable', 'min:8'])
+                ->helperText('Opcional. Vacío en alta deja la contraseña vacía; en actualización no se cambia.')
                 ->example('password123'),
         ];
     }

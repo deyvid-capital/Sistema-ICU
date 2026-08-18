@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports;
 
+use App\Filament\Imports\Concerns\HasImportGuide;
 use App\Models\Area;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -10,7 +11,14 @@ use Illuminate\Support\Number;
 
 class AreaImporter extends Importer
 {
+    use HasImportGuide;
+
     protected static ?string $model = Area::class;
+
+    public static function getImportGuideSummary(): ?string
+    {
+        return 'CSV con coma (,). Máximo 200 filas. Si el nombre de área ya existe se actualiza; si no, se crea.';
+    }
 
     public static function getColumns(): array
     {
@@ -19,6 +27,7 @@ class AreaImporter extends Importer
                 ->label('Área')
                 ->requiredMapping()
                 ->rules(['required', 'max:100'])
+                ->helperText('Clave de upsert: si el nombre ya existe se actualiza.')
                 ->example('Tecnología'),
             ImportColumn::make('descripcion')
                 ->label('Descripción')

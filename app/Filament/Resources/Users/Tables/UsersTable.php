@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
@@ -12,7 +13,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\ImportAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
@@ -31,10 +31,10 @@ class UsersTable
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['area', 'cargo', 'ultimoMovimiento']))
 
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('nombres')
                     ->label('Nombre')
-                    ->description(fn (User $record): ?string => $record->carnet ? "Carnet: {$record->carnet}" : null)
-                    ->searchable(['name', 'carnet'])
+                    ->description(fn (User $record): ?string => $record->apellidos ? $record->apellidos : null)
+                    ->searchable(['name', 'carnet', 'apellidos'])
                     ->sortable()
                     ->weight('medium')
                     ->icon(Heroicon::OutlinedUser),
@@ -91,10 +91,11 @@ class UsersTable
                     ->placeholder('—'),
             ])
             ->headerActions([
-                ImportAction::make()
+                GuiaImportAction::make()
                     ->importer(UserImporter::class)
                     ->maxRows(200)
-                    ->label('Importar'),
+                    ->label('Importar')
+                    ->modalHeading('Importar usuarios'),
             ])
             ->filters([
                 TrashedFilter::make()

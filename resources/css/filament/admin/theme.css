@@ -3,12 +3,132 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
-.fi-ta-text {
+.fi-fo-field-wrp-label,
+.fi-fo-field-label,
+.fi-fo-field-label-content {
     @apply text-[13px];
 }
-.fi-fo-field-wrp-label {
+
+/* Tablas: tamaño de letra compacto en todo el componente */
+.fi-ta-header-cell,
+.fi-ta-header-cell-sort-btn,
+.fi-ta-header-group-cell,
+.fi-ta-cell.fi-ta-summary-row-heading-cell,
+.fi-ta-cell.fi-ta-summary-header-cell {
     @apply text-[13px];
 }
+
+.fi-ta-text-item.fi-size-xs {
+    @apply text-[11px] leading-4;
+}
+.fi-ta-text-item.fi-size-sm,
+.fi-ta-text-item.fi-size-md {
+    @apply text-[13px] leading-5;
+}
+.fi-ta-text-item.fi-size-lg {
+    @apply text-[14px] leading-5;
+}
+
+.fi-ta-text > .fi-ta-text-description,
+.fi-ta-text > .fi-ta-text-list-limited-message {
+    @apply text-[12px] leading-4;
+}
+
+.fi-ta-cell .fi-ta-placeholder {
+    @apply text-[13px] leading-5;
+}
+
+.fi-ta-header-heading,
+.fi-ta-filters-heading,
+.fi-ta-col-manager-heading {
+    @apply text-[13px] leading-5;
+}
+.fi-ta-header-description {
+    @apply text-[12px];
+}
+.fi-ta-col-manager-label {
+    @apply text-[13px];
+}
+
+.fi-ta-filter-indicators-label,
+.fi-ta-reorder-indicator,
+.fi-ta-selection-indicator > :nth-child(1) {
+    @apply text-[13px] leading-5;
+}
+
+.fi-ta-search-field .fi-input,
+.fi-ta-filters .fi-input,
+.fi-ta-filters .fi-select-input,
+.fi-ta-filters .fi-select-input-value-label,
+.fi-ta-filters .fi-select-input-placeholder {
+    @apply text-[13px];
+}
+
+.fi-ta-ctn .fi-btn,
+.fi-ta-ctn .fi-link {
+    @apply text-[13px];
+}
+
+/* Badges: más compactos en todo el panel 
+.fi-badge {
+    @apply min-w-5 px-1.5 py-0.5 text-[11px] leading-4;
+}
+.fi-badge.fi-size-xs {
+    @apply min-w-4 px-0.5 py-0 text-[10px] leading-3 tracking-tighter;
+}
+.fi-badge.fi-size-sm {
+    @apply min-w-5 px-1 py-0.5 text-[11px] leading-4 tracking-tight;
+}
+.fi-badge.fi-size-md,
+.fi-badge.fi-size-lg {
+    @apply px-1.5 py-0.5 text-[11px] leading-4;
+}
+.fi-badge-label {
+    @apply text-[11px];
+}
+.fi-badge.fi-size-xs .fi-badge-label {
+    @apply text-[10px];
+}
+.fi-badge > .fi-icon.fi-size-sm,
+.fi-badge > .fi-icon.fi-size-md {
+    @apply size-3;
+}
+.fi-badge > .fi-icon.fi-size-xs {
+    @apply size-2.5;
+}
+
+.fi-ta-ctn .fi-pagination-overview,
+.fi-ta-ctn .fi-pagination-item-label,
+.fi-ta-ctn .fi-pagination .fi-select-input,
+.fi-ta-ctn .fi-pagination .fi-input-wrp-label {
+    @apply text-[13px];
+}
+*/
+
+/* Secciones: título, descripción e iconos más compactos */
+.fi-section-header-heading {
+    @apply text-[15px] leading-5;
+}
+.fi-section-header-description {
+    @apply text-[13px] leading-4;
+}
+.fi-section-header > .fi-icon {
+    @apply size-5.5;
+}
+/*
+.fi-section-collapse-btn .fi-icon {
+    @apply size-5;
+}
+.fi-section:not(.fi-aside) > .fi-section-header {
+    @apply px-5 py-4
+}
+.fi-section.fi-compact:not(.fi-aside) > .fi-section-header {
+    @apply px-5 py-3;
+}
+.fi-section:not(.fi-section-not-contained):not(.fi-divided) > .fi-section-content-ctn > .fi-section-content {
+    @apply p-4;
+}
+*/
 
 /* Sidebar: reducir tamaño de letra */
 .fi-sidebar-item-label {

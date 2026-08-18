@@ -1,42 +1,28 @@
+[Saltar al contenido principal](https://filamentphp.com/docs/5.x/actions/modals#content-area)## ​Introducción
 
----
+Las acciones pueden requerir confirmación adicional o entrada por parte del usuario antes de ejecutarse. Puedes abrir un modal antes de que se ejecute una acción para hacer esto.## ​Modales de confirmación
 
-```markdown
-# Modales
-
----
-
-## Introducción
-Las acciones pueden requerir confirmación adicional o entrada por parte del usuario antes de ejecutarse. Puedes abrir un **modal** antes de que se ejecute una acción para manejar esto.
-
----
-
-## Modales de confirmación
-Puedes necesitar confirmación antes de ejecutar una acción usando el método `requiresConfirmation()`. Esto es útil para acciones destructivas, como eliminar registros.
-
-### Ejemplo básico:
-```php
+```
 use App\Models\Post;
 use Filament\Actions\Action;
 
 Action::make('delete')
     ->action(fn (Post $record) => $record->delete())
-    ->requiresConfirmation();
+    ->requiresConfirmation()
+
 ```
-**Nota:**
-- El modal de confirmación **no está disponible** si usas `url()` en lugar de `action()`.
-- Los modales de confirmación usan el rol ARIA `alertdialog` (no `dialog`), por lo que los lectores de pantalla los anuncian como alertas y leen automáticamente la descripción del modal al abrirse.
 
----
+Vista previa de carga![Confirmation modal](./Modales - Filamento_files/confirmation.jpg)
 
-## Control del contenido del modal
+![Modal de confirmación](./Modales - Filamento_files/confirmation(1).jpg)
 
----
+## ​Control del contenido modal
 
-### Personalización del encabezado, descripción y etiqueta de acción
-Puedes personalizar el encabezado, descripción y etiqueta del botón de envío en el modal:
 
-```php
+
+### ​Personalización del encabezado, descripción y etiqueta de acción de envío del modal
+
+Puedes personalizar el encabezado, la descripción y la etiqueta del botón de enviar en el modal:```
 use App\Models\Post;
 use Filament\Actions\Action;
 
@@ -44,24 +30,25 @@ Action::make('delete')
     ->action(fn (Post $record) => $record->delete())
     ->requiresConfirmation()
     ->modalHeading('Delete post')
-    ->modalDescription('Are you sure you\'d like to delete this post? This cannot be undone.')
-    ->modalSubmitActionLabel('Yes, delete it');
+    ->modalDescription('Are you sure youd like to delete this post? This cannot be undone.')
+    ->modalSubmitActionLabel('Yes, delete it')
+
 ```
 
----
+Vista previa de carga![Confirmation modal with custom text](./Modales - Filamento_files/confirmation-custom-text.jpg)
 
-### Renderizado de un esquema en el modal
-Filament permite renderizar un **esquema** en el modal, lo que te permite usar cualquier componente disponible para construir una interfaz de usuario. Útil para formularios que recopilen información adicional antes de ejecutar la acción.
+![Modal de confirmación con texto personalizado](./Modales - Filamento_files/confirmation-custom-text(1).jpg)
 
-#### Ejemplo con `Grid` y `Section`:
-```php
+### ​Renderizado de un esquema en modal
+
+```
+
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
 
 Action::make('viewUser')
     ->schema([
@@ -85,17 +72,18 @@ Action::make('viewUser')
                             ->dateTime(),
                     ]),
             ]),
-    ]);
+    ])
+
 ```
-**Nota:** El método `schema()` también acepta una **función** para calcular el valor dinámicamente.
 
----
+Vista previa de carga![Modal with schema layout](./Modales - Filamento_files/schema.jpg)
 
-### Renderizado de un formulario en el modal
-Puedes usar campos de formulario para crear modales con acciones. Los datos del formulario están disponibles en el array `$data` del cierre `action()`.
+![Modal con disposición de esquemas](./Modales - Filamento_files/schema(1).jpg)
 
-#### Ejemplo:
-```php
+#### ​Renderización de una forma en modal
+
+```
+
 use App\Models\Post;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -111,12 +99,23 @@ Action::make('updateAuthor')
     ->action(function (array $data, Post $record): void {
         $record->author()->associate($data['authorId']);
         $record->save();
-    });
+    })
+
 ```
 
-#### Rellenar el formulario con datos existentes
-Usa el método `fillForm()` para prellenar el formulario:
-```php
+Vista previa de carga![Modal with form](./Modales - Filamento_files/form.jpg)
+
+![Modal con forma](./Modales - Filamento_files/form(1).jpg)
+
+##### Relleno del formulario con datos existentes
+
+```
+
+use App\Models\Post;
+use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+
 Action::make('updateAuthor')
     ->fillForm(fn (Post $record): array => [
         'authorId' => $record->author->id,
@@ -130,14 +129,15 @@ Action::make('updateAuthor')
     ->action(function (array $data, Post $record): void {
         $record->author()->associate($data['authorId']);
         $record->save();
-    });
+    })
+
 ```
 
----
+##### Deshabilitando todos los campos de forma
 
-### Deshabilitar todos los campos del formulario
-Usa `disabledForm()` para desactivar todos los campos del formulario en el modal:
-```php
+```
+
+use App\Models\Post;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -150,14 +150,18 @@ Action::make('approvePost')
     ->disabledForm()
     ->action(function (Post $record): void {
         $record->approve();
-    });
+    })
+
 ```
 
----
+Vista previa de carga![Modal with disabled form fields](./Modales - Filamento_files/disabled-form.jpg)
 
-### Renderizado de un asistente (Wizard) en el modal
-Puedes crear un **asistente de formularios multipaso** dentro de un modal usando `steps()` en lugar de `schema()`:
-```php
+![Modal con campos de forma deshabilitados](./Modales - Filamento_files/disabled-form(1).jpg)
+
+#### ​Renderizado de un asistente en modal
+
+```
+
 use Filament\Actions\Action;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\TextInput;
@@ -191,290 +195,728 @@ Action::make('create')
                     ->label('Visible to customers.')
                     ->default(true),
             ]),
-    ]);
+    ])
+
 ```
 
----
+Vista previa de carga![Modal with wizard](./Modales - Filamento_files/wizard.jpg)
 
-## Personalización visual del modal
+![Modal con asistente](./Modales - Filamento_files/wizard(1).jpg)
 
----
+### ​Añadir un icono dentro del modal
 
-### Añadir un icono al modal
-Usa `modalIcon()` para añadir un icono:
-```php
+```
+
+use App\Models\Post;
+use Filament\Actions\Action;
+
 Action::make('delete')
     ->action(fn (Post $record) => $record->delete())
     ->requiresConfirmation()
-    ->modalIcon('heroicon-o-trash');
+    ->modalIcon('heroicon-o-trash')
+
 ```
 
-#### Personalizar el color del icono
-Usa `modalIconColor()`:
-```php
+Vista previa de carga![Confirmation modal with icon](./Modales - Filamento_files/icon.jpg)
+
+![Modal de confirmación con icono](./Modales - Filamento_files/icon(1).jpg)
+
+```
+
+use App\Models\Post;
+use Filament\Actions\Action;
+
 Action::make('delete')
     ->action(fn (Post $record) => $record->delete())
     ->requiresConfirmation()
     ->color('danger')
     ->modalIcon('heroicon-o-trash')
-    ->modalIconColor('warning');
+    ->modalIconColor('warning')
+
 ```
 
----
+Vista previa de carga![Confirmation modal with custom icon color](./Modales - Filamento_files/icon-color.jpg)
 
-### Personalizar la alineación del contenido
-Usa `modalAlignment()` para cambiar la alineación del contenido (`Alignment::Start` o `Alignment::Center`):
-```php
+![Modal de confirmación con color de icono personalizado](./Modales - Filamento_files/icon-color(1).jpg)
+
+### ​Personalización de la alineación del contenido modal
+
+```
+
+use Filament\Actions\Action;
 use Filament\Support\Enums\Alignment;
 
 Action::make('updateAuthor')
-    ->modalAlignment(Alignment::Center);
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->modalAlignment(Alignment::Center)
+
 ```
 
----
+Loading preview![Modal with centered content alignment](./Modales - Filamento_files/alignment.jpg)
 
-### Hacer que el encabezado o pie de página sean pegajosos
-- **Encabezado pegajoso**: `stickyModalHeader()`
-- **Pie de página pegajoso**: `stickyModalFooter()`
+![Modal with centered content alignment](./Modales - Filamento_files/alignment(1).jpg)
 
-```php
+### ​Making the modal header sticky
+
+```
+
+use Filament\Actions\Action;
+
 Action::make('updateAuthor')
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
     ->stickyModalHeader()
-    ->stickyModalFooter();
+
 ```
 
----
+### ​Making the modal footer sticky
 
-## Contenido modal personalizado
+```
 
----
+use Filament\Actions\Action;
 
-### Definir contenido personalizado
-Usa `modalContent()` para renderizar una vista Blade:
-```php
+Action::make('updateAuthor')
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->stickyModalFooter()
+
+```
+
+Loading preview![Modal with sticky header and footer](./Modales - Filamento_files/sticky-header.jpg)
+
+![Modal with sticky header and footer](./Modales - Filamento_files/sticky-header(1).jpg)
+
+### ​Custom modal content
+
+```
+
+use App\Models\Post;
+use Filament\Actions\Action;
+
 Action::make('advance')
     ->action(fn (Post $record) => $record->advance())
-    ->modalContent(view('filament.pages.actions.advance'));
+    ->modalContent(view('filament.pages.actions.advance'))
+
 ```
 
-#### Pasar datos a la vista:
-```php
+#### ​Passing data to the custom modal content
+
+```
+
+use Filament\Actions\Action;
+use Illuminate\Contracts\View\View;
+
 Action::make('advance')
-    ->modalContent(fn (Post $record): View => view(
+    ->action(fn (Contract $record) => $record->advance())
+    ->modalContent(fn (Contract $record): View => view(
         'filament.pages.actions.advance',
         ['record' => $record],
-    ));
+    ))
+
 ```
 
-#### Añadir contenido debajo del formulario:
-Usa `modalContentFooter()`:
-```php
+#### ​Adding custom modal content below the form
+
+```
+
+use App\Models\Post;
+use Filament\Actions\Action;
+
 Action::make('advance')
-    ->modalContentFooter(view('filament.pages.actions.advance'));
+    ->action(fn (Post $record) => $record->advance())
+    ->modalContentFooter(view('filament.pages.actions.advance'))
+
 ```
 
----
+#### ​Adding an action to custom modal content
 
-### Añadir acciones adicionales al pie del modal
-Usa `extraModalFooterActions()` para añadir botones adicionales:
-```php
+```
+
+use App\Models\Post;
+use Filament\Actions\Action;
+use Illuminate\Contracts\View\View;
+
+Action::make('advance')
+    ->registerModalActions([
+        Action::make('report')
+            ->requiresConfirmation()
+            ->action(fn (Post $record) => $record->report()),
+    ])
+    ->action(fn (Post $record) => $record->advance())
+    ->modalContent(fn (Action $action): View => view(
+        'filament.pages.actions.advance',
+        ['action' => $action],
+    ))
+
+```
+as
+```
+
+{{ $action->getModalAction('report') }}
+
+```
+
+## ​Using a slide-over instead of a modal
+
+```
+
+use Filament\Actions\Action;
+
+Action::make('updateAuthor')
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->slideOver()
+
+```
+
+Loading preview![Slide over with form](./Modales - Filamento_files/slide-over.jpg)
+
+![Slide over with form](./Modales - Filamento_files/slide-over(1).jpg)
+
+Instead of opening in the center of the screen, the modal content will now slide in from the right and consume the entire height of the browser.### ​Changing the slide-over position
+
+```
+
+use Filament\Actions\Action;
+use Filament\Support\Enums\SlideOverPosition;
+
+Action::make('updateAuthor')
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->slideOver()
+    ->slideOverPosition(SlideOverPosition::Start)
+
+```
+
+Loading preview![Slide over from the start of the screen](./Modales - Filamento_files/slide-over-start.jpg)
+
+![Slide over from the start of the screen](./Modales - Filamento_files/slide-over-start(1).jpg)
+
+This is useful when the action trigger sits near the start of the viewport — for example, a row action at the beginning of a table row — so the slide-over opens adjacent to its trigger instead of across the screen.## ​Changing the modal width
+
+```
+
+use Filament\Actions\Action;
+use Filament\Support\Enums\Width;
+
+Action::make('updateAuthor')
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->modalWidth(Width::FiveExtraLarge)
+
+```
+
+Loading preview![Modal with custom width](./Modales - Filamento_files/wide.jpg)
+
+![Modal with custom width](./Modales - Filamento_files/wide(1).jpg)
+
+## ​Executing code when the modal opens
+
+```
+
+use Filament\Actions\Action;
+use Filament\Schemas\Schema;
+
 Action::make('create')
+    ->mountUsing(function (Schema $form) {
+        $form->fill();
+
+```
+    // ...
+})
+```
+
+```
+
+## ​Customizing the action buttons in the footer of the modal
+
+### ​Modifying the default modal footer action button
+
+```
+
+use Filament\Actions\Action;
+
+Action::make('help')
+    ->modalContent(view('actions.help'))
+    ->modalCancelAction(fn (Action $action) => $action->label('Close'))
+
+```
+
+### ​Removing a default modal footer action button
+
+```
+
+use Filament\Actions\Action;
+
+Action::make('help')
+    ->modalContent(view('actions.help'))
+    ->modalSubmitAction(false)
+
+```
+
+### ​Adding an extra modal action button to the footer
+
+```
+
+use Filament\Actions\Action;
+
+Action::make('create')
+    ->schema([
+        // ...
+    ])
+    // ...
+    ->extraModalFooterActions(fn (Action $action): array => [
+        $action->makeModalSubmitAction('createAnother', arguments: ['another' => true]),
+    ])
+
+```
+
+Vista previa de carga![Modal with extra footer action buttons](./Modales - Filamento_files/extra-footer-actions.jpg)
+
+![Modal con botones de acción extra en el pie de página](./Modales - Filamento_files/extra-footer-actions(1).jpg)
+
+```
+
+use Filament\Actions\Action;
+
+Action::make('create')
+    ->schema([
+        // ...
+    ])
+    // ...
     ->extraModalFooterActions(fn (Action $action): array => [
         $action->makeModalSubmitAction('createAnother', arguments: ['another' => true]),
     ])
     ->action(function (array $data, array $arguments): void {
-        if ($arguments['another'] ?? false) {
-            // Reiniciar el formulario y no cerrar el modal
-        }
-    });
+        // Create
+
+```
+    if ($arguments['another'] ?? false) {
+        // Reset the form and don't close the modal
+    }
+})
 ```
 
-#### Abrir otro modal desde una acción adicional:
-```php
+```
+
+#### ​Abrir otro modal a partir de una acción extra de pie
+
+Puedes anidar acciones entre sí, permitiéndote abrir un nuevo modal a partir de una acción extra en el pie de página:```
+use Filament\Actions\Action;
+
 Action::make('edit')
+    // ...
     ->extraModalFooterActions([
         Action::make('delete')
             ->requiresConfirmation()
-            ->action(function () { /* ... */ })
-            ->cancelParentActions(), // Cancela la acción padre si se ejecuta
-    ]);
+            ->action(function () {
+                // ...
+            }),
+    ])
+
 ```
 
----
+```
+use Filament\Actions\Action;
 
-## Comportamiento del modal
+Action::make('delete')
+    ->requiresConfirmation()
+    ->action(function () {
+        // ...
+    })
+    ->cancelParentActions()
 
----
+```
 
-### Usar un deslizamiento (`slideOver`) en lugar de un modal
-```php
+```
+use Filament\Actions\Action;
+
+Action::make('first')
+    ->requiresConfirmation()
+    ->action(function () {
+        // ...
+    })
+    ->extraModalFooterActions([
+        Action::make('second')
+            ->requiresConfirmation()
+            ->action(function () {
+                // ...
+            })
+            ->extraModalFooterActions([
+                Action::make('third')
+                    ->requiresConfirmation()
+                    ->action(function () {
+                        // ...
+                    })
+                    ->extraModalFooterActions([
+                        Action::make('fourth')
+                            ->requiresConfirmation()
+                            ->action(function () {
+                                // ...
+                            })
+                            ->cancelParentActions('second'),
+                    ]),
+            ]),
+    ])
+
+```
+
+
+
+## ​Acceder a información sobre las acciones de los padres desde un niño
+
+```
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+
+Action::make('first')
+    ->schema([
+        TextInput::make('foo'),
+    ])
+    ->action(function () {
+        // ...
+    })
+    ->extraModalFooterActions([
+        Action::make('second')
+            ->requiresConfirmation()
+            ->action(function (array $mountedActions) {
+                dd($mountedActions[0]->getRawData());
+            
+                // ...
+            }),
+    ])
+
+```
+
+```
+use Filament\Actions\Action;
+
+Action::make('first')
+    ->schema([
+        TextInput::make('foo'),
+    ])
+    ->action(function () {
+        // ...
+    })
+    ->extraModalFooterActions([
+        Action::make('second')
+            ->schema([
+                TextInput::make('bar'),
+            ])
+            ->arguments(['number' => 2])
+            ->action(function () {
+                // ...
+            })
+            ->extraModalFooterActions([
+                Action::make('third')
+                    ->schema([
+                        TextInput::make('baz'),
+                    ])
+                    ->arguments(['number' => 3])
+                    ->action(function () {
+                        // ...
+                    })
+                    ->extraModalFooterActions([
+                        Action::make('fourth')
+                            ->requiresConfirmation()
+                            ->action(function (array $mountedActions) {
+                                dd(
+                                    $mountedActions[0]->getRawData(),
+                                    $mountedActions[0]->getArguments(),
+                                    $mountedActions[1]->getRawData(),
+                                    $mountedActions[1]->getArguments(),
+                                    $mountedActions[2]->getRawData(),
+                                    $mountedActions[2]->getArguments(),
+                                );
+                                // ...
+                            }),
+                    ]),
+            ]),
+    ])
+
+```
+
+
+
+## ​Cierre del modal
+
+
+
+### ​Cerrar el modal haciendo clic para alejar
+
+```
+use Filament\Actions\Action;
+
 Action::make('updateAuthor')
-    ->slideOver();
-```
-**Nota:** El contenido se desliza desde la derecha y ocupa toda la altura del navegador.
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->closeModalByClickingAway(false)
 
-#### Cambiar la posición del deslizamiento:
-```php
-use Filament\Support\Enums\SlideOverPosition;
+```
+
+```
+use Filament\Support\View\Components\ModalComponent;
+
+ModalComponent::closedByClickingAway(false);
+
+```
+
+
+
+### ​Cerrar el modal escapando
+
+```
+use Filament\Actions\Action;
 
 Action::make('updateAuthor')
-    ->slideOver()
-    ->slideOverPosition(SlideOverPosition::Start); // Desde la izquierda
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->closeModalByEscaping(false)
+
 ```
 
----
+```
+use Filament\Support\View\Components\ModalComponent;
 
-### Cambiar el ancho del modal
-Usa `modalWidth()` con las opciones de `Width`:
-```php
-use Filament\Support\Enums\Width;
+ModalComponent::closedByEscaping(false);
+
+```
+
+
+
+### ​Hiding the modal close button
+
+```
+use Filament\Actions\Action;
 
 Action::make('updateAuthor')
-    ->modalWidth(Width::FiveExtraLarge);
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->modalCloseButton(false)
+
 ```
 
----
+```
+use Filament\Support\View\Components\ModalComponent;
 
-### Ejecutar código al abrir el modal
-Usa `mountUsing()`:
-```php
-Action::make('create')
-    ->mountUsing(function (Schema $form) {
-        $form->fill();
-    });
+ModalComponent::closeButton(false);
+
 ```
 
----
+Vista previa de carga![Modal without a close button](./Modales - Filamento_files/no-close-button.jpg)
 
-### Personalizar botones del pie del modal
-- **Modificar el botón de envío o cancelar**:
-  ```php
-  Action::make('help')
-      ->modalCancelAction(fn (Action $action) => $action->label('Close'));
-  ```
-- **Eliminar un botón**:
-  ```php
-  Action::make('help')
-      ->modalSubmitAction(false); // Elimina el botón de envío
-  ```
-- **Añadir botones adicionales**:
-  ```php
-  Action::make('create')
-      ->extraModalFooterActions([ /* ... */ ]);
-  ```
+![Modal sin botón de cierre](./Modales - Filamento_files/no-close-button(1).jpg)
 
----
+## ​Realizando el clic modal
 
-### Cierre del modal
-- **Desactivar cierre al hacer clic fuera**:
-  ```php
-  Action::make('updateAuthor')
-      ->closeModalByClickingAway(false);
-  ```
-- **Desactivar cierre con la tecla `Escape`**:
-  ```php
-  Action::make('updateAuthor')
-      ->closeModalByEscaping(false);
-  ```
-- **Ocultar el botón de cierre**:
-  ```php
-  Action::make('updateAuthor')
-      ->modalCloseButton(false);
-  ```
-- **Hacer el modal "click-through"** (permitir interacción con la página detrás):
-  ```php
-  Action::make('updateAuthor')
-      ->modalClickThrough();
-  ```
-- **Desactivar enfoque automático**:
-  ```php
-  Action::make('updateAuthor')
-      ->modalAutofocus(false);
-  ```
+```
+use Filament\Actions\Action;
 
----
+Action::make('updateAuthor')
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->modalClickThrough()
 
-### Superponer modales hijos sobre modales padres
-Usa `overlayParentActions()` para que el modal hijo aparezca encima del padre:
-```php
+```
+
+Cuando un modal es click-through, se elimina su fondo, los clics fuera de la ventana modal pasan a la página inferior y la página permanece desplazable. El modal aún puede cerrarse usando su botón de cierre o pulsando la tecla escape.## ​Evitar que el modal se enfoque automáticamente
+
+```
+use Filament\Actions\Action;
+
+Action::make('updateAuthor')
+    ->schema([
+        // ...
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+    ->modalAutofocus(false)
+
+```
+
+```
+use Filament\Support\View\Components\ModalComponent;
+
+ModalComponent::autofocus(false);
+
+```
+
+
+
+## ​Superponer modales de acción hijo sobre modales de acción padre
+
+```
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Repeater;
+
 Action::make('editItems')
     ->slideOver()
-    ->schema([ /* ... */ ])
-    ->deleteAction(
-        fn (Action $action) => $action
-            ->requiresConfirmation()
-            ->overlayParentActions(),
-    );
+    ->schema([
+        Repeater::make('items')
+            ->schema([
+                // ...
+            ])
+            ->deleteAction(
+                fn (Action $action) => $action
+                    ->requiresConfirmation()
+                    ->overlayParentActions(),
+            ),
+    ])
+    ->action(function () {
+        // ...
+    })
+
 ```
 
-#### Cancelar acciones padres al cerrar el modal hijo:
-```php
+En este ejemplo, cuando el usuario pulsa el botón de eliminar en un elemento repetidor, el cuadro de confirmación aparece encima del deslizamiento en lugar de que el deslizamiento se cierre primero. Esto crea una experiencia más fluida, especialmente para acciones dentro de deslizamientos o formas complejas donde cerrar y volver a abrir el padre sería desorientador.Vista previa de carga![Child confirmation modal overlaying a parent slide-over](./Modales - Filamento_files/overlaying-child.jpg)
+
+![Modal de confirmación hijo superpuesto a un deslizamiento parental](./Modales - Filamento_files/overlaying-child(1).jpg)
+
+## ​Cancelación de acciones parentales cuando un modal está cerrado
+
+```
+use Filament\Actions\Action;
+
 Action::make('createPost')
+    ->schema([
+        // ...
+    ])
     ->extraModalFooterActions([
         Action::make('saveAsDraft')
+            ->schema([
+                // ...
+            ])
             ->cancelParentActionsOnClose()
-            ->action(function () { /* ... */ }),
-    ]);
+            ->action(function (): void {
+                // ...
+            }),
+    ])
+    ->action(function (array $data): void {
+        // ...
+    })
+
 ```
 
----
+```
+use Filament\Actions\Action;
 
-## Optimización y configuración avanzada
+Action::make('editPostMetadata')
+    ->schema([
+        // ...
+    ])
+    ->cancelParentActionsOnClose('createPost')
+    ->action(function (): void {
+        // ...
+    })
 
----
+```
 
-### Forzar la existencia del modal
-Usa `modal()` para indicar a Filament que el modal existe sin necesidad de comprobaciones adicionales:
-```php
+
+
+## ​Optimizing modal configuration methods
+
+```
+use Filament\Actions\Action;
+
 Action::make('updateAuthor')
-    ->modal();
+    ->modal()
+
 ```
 
----
 
-### Ocultar el modal condicionalmente
-Usa `modalHidden()`:
-```php
+
+## ​Ocultar condicionalmente el modal
+
+```
+use Filament\Actions\Action;
+
 Action::make('create')
+    ->action(function (array $data): void {
+        // ...
+    })
     ->modalHidden($this->role !== 'admin')
-    ->modalContent(view('filament.pages.actions.create'));
+    ->modalContent(view('filament.pages.actions.create'))
+
 ```
 
----
 
-### Añadir atributos HTML adicionales
-- **Atributos para la ventana modal**:
-  ```php
-  Action::make('updateAuthor')
-      ->extraModalWindowAttributes(['class' => 'update-author-modal']);
-  ```
-- **Atributos para la superposición**:
-  ```php
-  Action::make('updateAuthor')
-      ->extraModalOverlayAttributes(['class' => 'update-author-overlay']);
-  ```
-**Nota:** Usa `merge: true` para fusionar atributos en lugar de sobrescribirlos.
 
----
+## ​Añadir atributos adicionales a la ventana modal
 
-## Inyección de dependencias en métodos
-Los métodos como `schema()`, `fillForm()`, `modalIcon()`, etc., aceptan **funciones** donde puedes inyectar utilidades como:
-- `$action`: Instancia actual de la acción.
-- `$arguments`: Argumentos pasados a la acción.
-- `$data`: Datos enviados desde el formulario.
-- `$livewire`: Instancia del componente Livewire.
-- `$record`: Registro Eloquent asociado.
-- `$mountedActions`: Array de acciones montadas actualmente.
-- `$schema`, `$schemaComponent`, `$schemaState`, etc. (solo para acciones en esquemas).
+```
+use Filament\Actions\Action;
 
-#### Ejemplo de acceso a datos de acciones padre:
-```php
-Action::make('second')
-    ->action(function (array $mountedActions) {
-        dd($mountedActions[0]->getRawData()); // Datos del padre
-    });
+Action::make('updateAuthor')
+    ->extraModalWindowAttributes(['class' => 'update-author-modal'])
+
 ```
 
----
+
+
+## ​Añadir atributos extra a la superposición modal
+
+```
+use Filament\Actions\Action;
+
+Action::make('updateAuthor')
+    ->extraModalOverlayAttributes(['class' => 'update-author-overlay'])
+
 ```
 
+[Edita esta página en GitHub](https://github.com/filamentphp/filament/edit/5.x/packages/actions/docs/02-modals.md)## Patrocinado por
+
+[Tu logo aquí](https://github.com/sponsors/danharrin)Ctrl+IModales - Filamento[Patrones CSS y JavaScript listos para copiar y pegar con accesibilidad integrada.anuncios vía Carbon](https://srv.carbonads.net/ads/click/x/GTND427YCAYDVKQYCE7LYKQUFTSIK53WF6AICZ3JCAAD553JF6SIP27KCVYI6KQWC6AIE2QLCA7D45QWCVBIVZ3JCAAD5K3NC6SDTK3K2JWNABY)![ads via Carbon](./Modales - Filamento_files/cnv)
+
+![ads via Carbon](./Modales - Filamento_files/associate-segment)
+
+![ads via Carbon](./Modales - Filamento_files/px)
+
+![ads via Carbon](./Modales - Filamento_files/seg)
+
+![ads via Carbon](./Modales - Filamento_files/spp.pl.download)
+
+![ads via Carbon](./Modales - Filamento_files/src=15643656)
+
+![ads via Carbon](./Modales - Filamento_files/saved_resource)

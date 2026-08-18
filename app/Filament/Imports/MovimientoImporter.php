@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports;
 
+use App\Filament\Imports\Concerns\HasImportGuide;
 use App\Models\Cargo;
 use App\Models\Movimiento;
 use App\Models\User;
@@ -14,7 +15,14 @@ use Illuminate\Validation\Rule;
 
 class MovimientoImporter extends Importer
 {
+    use HasImportGuide;
+
     protected static ?string $model = Movimiento::class;
+
+    public static function getImportGuideSummary(): ?string
+    {
+        return 'CSV con coma (,). Máximo 200 filas. Solo crea movimientos (no actualiza). Respeta el orden del archivo: Alta antes de Baja. Importa usuarios y cargos antes.';
+    }
 
     public static function getColumns(): array
     {
@@ -25,11 +33,13 @@ class MovimientoImporter extends Importer
                 ->relationship(resolveUsing: 'email')
                 ->requiredMapping()
                 ->rules(['required', 'email'])
+                ->helperText('Debe ser el correo de un usuario ya existente.')
                 ->example('jperez@empresa.com'),
             ImportColumn::make('tipo')
                 ->label('Tipo')
                 ->requiredMapping()
                 ->rules(['required', Rule::in(['Alta', 'Baja'])])
+                ->helperText('Solo Alta o Baja. Una segunda Alta sin Baja intermedia falla.')
                 ->example('Alta'),
             ImportColumn::make('fecha')
                 ->label('Fecha')
@@ -53,6 +63,7 @@ class MovimientoImporter extends Importer
                 })
                 ->requiredMapping()
                 ->rules(['required'])
+                ->helperText('Debe existir y ser coherente con el historial del usuario (misma área; la Baja cierra el cargo de la Alta abierta).')
                 ->example('Analista'),
         ];
     }

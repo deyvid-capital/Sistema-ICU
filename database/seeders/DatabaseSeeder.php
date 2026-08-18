@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Area;
 use App\Models\Cargo;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,92 +16,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-        $areas = [
-            ['area' => 'Recursos Humanos'],
-            ['area' => 'Finanzas'],
-            ['area' => 'Tecnología'],
-            ['area' => 'Marketing'],
-            ['area' => 'Operaciones'],
-        ];
+        $this->call(CatalogoPersonalSeeder::class);
 
-        // Insertar areas primero: los cargos dependen de un área existente.
-        foreach ($areas as $area) {
-            if (! Area::where('area', $area['area'])->exists()) {
-                Area::create($area);
-            }
-        }
+        $adminCargo = Cargo::query()->where('cargo', 'Pasante IT')->first()
+            ?? Cargo::query()->first();
 
-        $cargos = [
-            ['cargo' => 'Gerente', 'area_id' => 2], // Finanzas
-            ['cargo' => 'Analista', 'area_id' => 1], // Recursos Humanos
-            ['cargo' => 'Desarrollador', 'area_id' => 3], // Tecnología
-            ['cargo' => 'Coordinador', 'area_id' => 4], // Marketing
-            ['cargo' => 'Asistente', 'area_id' => 5], // Operaciones
-        ];
-        foreach ($cargos as $cargo) {
-            if (! Cargo::where('cargo', $cargo['cargo'])->exists()) {
-                Cargo::create($cargo);
-            }
-        }
-
-        $users = [
+        User::query()->firstOrCreate(
+            ['email' => 'admin@admin.com'],
             [
-                'name' => 'Ana López',
-                'email' => 'ana.lopez@example.com',
-                'password' => Hash::make('password'),
-                'id_area' => 1, // Recursos Humanos
-                'id_cargo' => 2, // Analista
+                'name' => 'admin',
+                'nombres' => 'Admin',
+                'apellidos' => 'ICU',
+                'password' => '12345678',
+                'id_area' => $adminCargo?->area_id,
+                'id_cargo' => $adminCargo?->id_cargo,
             ],
-            [
-                'name' => 'Carlos Martínez',
-                'email' => 'carlos.martinez@example.com',
-                'password' => Hash::make('password'),
-                'id_area' => 2, // Finanzas
-                'id_cargo' => 1, // Gerente
-            ],
-            [
-                'name' => 'Lucía García',
-                'email' => 'lucia.garcia@example.com',
-                'password' => Hash::make('password'),
-                'id_area' => 3, // Tecnología
-                'id_cargo' => 3, // Desarrollador
-            ],
-            [
-                'name' => 'Jorge Rodríguez',
-                'email' => 'jorge.rodriguez@example.com',
-                'password' => Hash::make('password'),
-                'id_area' => 4, // Marketing
-                'id_cargo' => 4, // Coordinador
-            ],
-            [
-                'name' => 'María González',
-                'email' => 'maria.gonzalez@example.com',
-                'password' => Hash::make('password'),
-                'id_area' => 5, // Operaciones
-                'id_cargo' => 5, // Asistente
-            ],
-        ];
+        );
 
-        foreach ($users as $user) {
-            if (! User::where('email', $user['email'])->exists()) {
-                User::create($user);
-            }
-        }
-
-        $adminCargo = Cargo::query()->inRandomOrder()->first();
-
-        User::factory()->create([
-            'name' => 'admin',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('12345678'),
-            'id_area' => $adminCargo->area_id,
-            'id_cargo' => $adminCargo->id_cargo,
+        $this->call([
+            SoftwareLicenciasSeeder::class,
+            AccesosSeeder::class,
+            EquiposSeeder::class,
+            CelularesSeeder::class,
         ]);
-
-        $this->call(SoftwareLicenciasSeeder::class);
-        $this->call(AccesosSeeder::class);
-        $this->call(EquiposSeeder::class);
-        $this->call(CelularesSeeder::class);
     }
 }

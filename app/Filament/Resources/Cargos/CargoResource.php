@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Cargos;
 
+use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Imports\CargoImporter;
 use App\Filament\Resources\Areas\RelationManagers\CargosRelationManager;
@@ -13,7 +14,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -99,10 +99,11 @@ class CargoResource extends Resource
             ->striped()
             ->paginated([10, 25, 50])
             ->headerActions([
-                ImportAction::make()
+                GuiaImportAction::make()
                     ->importer(CargoImporter::class)
                     ->maxRows(200)
-                    ->label('Importar'),
+                    ->label('Importar')
+                    ->modalHeading('Importar cargos'),
             ])
             ->columns([
                 TextColumn::make('area.area')
