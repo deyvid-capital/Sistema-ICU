@@ -3,13 +3,13 @@
 namespace Tests\Feature\Filament;
 
 use App\Livewire\Profile\PersonalInfo;
+use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Livewire\Profile\UpdatePassword;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Jeffgreco13\FilamentBreezy\Livewire\BrowserSessions;
-use Jeffgreco13\FilamentBreezy\Livewire\TwoFactorAuthentication;
 use Jeffgreco13\FilamentBreezy\Pages\MyProfilePage;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -160,6 +160,30 @@ class BreezyProfileSecurityTest extends TestCase
         Livewire::test(TwoFactorAuthentication::class)
             ->assertSuccessful()
             ->assertSee('Aún no ha activado la verificación en dos pasos');
+    }
+
+    public function test_usuario_sin_rol_admin_no_puede_desactivar_2fa_en_perfil(): void
+    {
+        $user = User::factory()->conRol('operador')->create();
+        $user->enableTwoFactorAuthentication();
+        $user->confirmTwoFactorAuthentication();
+
+        $this->actingAs($user);
+
+        Livewire::test(TwoFactorAuthentication::class)
+            ->assertSuccessful()
+            ->assertActionHidden('disable');
+    }
+
+    public function test_super_admin_puede_desactivar_2fa_en_perfil(): void
+    {
+        $user = auth()->user();
+        $user->enableTwoFactorAuthentication();
+        $user->confirmTwoFactorAuthentication();
+
+        Livewire::test(TwoFactorAuthentication::class)
+            ->assertSuccessful()
+            ->assertActionVisible('disable');
     }
 
     public function test_browser_sessions_section_is_visible(): void

@@ -10,8 +10,10 @@ use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\SetupTwoFactor;
 use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
+use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Livewire\Profile\UpdatePassword as ProfileUpdatePassword;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
@@ -35,6 +37,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
@@ -68,6 +71,10 @@ class AdminPanelProvider extends PanelProvider
             ])
 
             ->login(Login::class)
+            ->authenticatedRoutes(function (): void {
+                Route::get('/configurar-2fa', SetupTwoFactor::class)
+                    ->name('auth.setup-two-factor');
+            })
             ->font('Roboto Mono')
             ->topNavigation(false)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
@@ -137,10 +144,11 @@ class AdminPanelProvider extends PanelProvider
                         force: false,
                         scopeToPanel: true,
                     )
-                    ->enableBrowserSessions()
+                    ->enableBrowserSessions(condition: true)
                     ->myProfileComponents([
                         'personal_info' => PersonalInfo::class,
                         'update_password' => ProfileUpdatePassword::class,
+                        'two_factor_authentication' => TwoFactorAuthentication::class,
                     ]),
             ])
             ->authMiddleware([

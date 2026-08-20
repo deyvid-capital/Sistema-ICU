@@ -234,3 +234,138 @@
 .fi-header .fi-breadcrumbs .fi-icon {
     @apply size-3.5;
 }
+
+/* Enrolamiento 2FA forzado (estilo Microsoft Authenticator) */
+.icu-2fa-setup {
+    @apply w-full;
+}
+
+.icu-2fa-setup__card {
+    @apply mx-auto flex w-full max-w-2xl flex-col gap-8 px-1 py-2 sm:px-2;
+}
+
+.icu-2fa-setup__brand {
+    @apply flex justify-center;
+}
+
+.icu-2fa-setup__capital-logo {
+    @apply h-12 w-auto object-contain sm:h-14;
+}
+
+.icu-2fa-setup__intro {
+    @apply space-y-2 text-center;
+}
+
+.icu-2fa-setup__title {
+    @apply text-2xl font-semibold tracking-tight text-gray-950 dark:text-white sm:text-3xl;
+}
+
+.icu-2fa-setup__lead {
+    @apply text-sm leading-6 text-gray-600 dark:text-gray-300 sm:text-[15px];
+}
+
+.icu-2fa-setup__step {
+    @apply space-y-4 rounded-2xl border border-gray-200 bg-white/80 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900/60 sm:p-6;
+}
+
+.icu-2fa-setup__step-badge {
+    @apply inline-flex rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-700 ring-1 ring-inset ring-primary-600/15 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/20;
+}
+
+.icu-2fa-setup__step-badge--next {
+    @apply mt-4;
+}
+
+.icu-2fa-setup__step-title {
+    @apply text-lg font-semibold text-gray-950 dark:text-white;
+}
+
+.icu-2fa-setup__step-text {
+    @apply text-sm leading-6 text-gray-600 dark:text-gray-300;
+}
+
+.icu-2fa-setup__auth-brand {
+    @apply flex justify-center py-1;
+}
+
+/*
+ * El logo viene como JPG con fondo blanco: lo enmarcamos en una tarjeta blanca
+ * para que el fondo se lea como intencional también en modo oscuro.
+ */
+.icu-2fa-setup__auth-card {
+    @apply flex items-center justify-center rounded-2xl bg-white p-3 shadow-sm ring-1 ring-gray-200 dark:ring-gray-600 sm:p-4;
+}
+
+.icu-2fa-setup__ms-logo {
+    @apply h-32 w-auto object-contain sm:h-40;
+}
+
+.icu-2fa-setup__stores {
+    @apply flex flex-wrap items-center justify-center gap-3 sm:gap-4;
+}
+
+/*
+ * Cajas de tamaño idéntico con recorte: cada insignia se escala dentro para que
+ * la parte visible mida lo mismo, pese a que los PNG originales tienen relaciones
+ * de aspecto y márgenes transparentes muy distintos (App Store es cuadrado con
+ * ~70% de espacio vacío; Play Store es panorámico y casi sin margen).
+ */
+.icu-2fa-setup__store-link {
+    @apply inline-flex h-10 w-36 items-center justify-center overflow-hidden transition opacity-90 hover:opacity-100 sm:h-11 sm:w-40;
+}
+
+.icu-2fa-setup__store-badge {
+    @apply w-auto max-w-none shrink-0 object-contain;
+}
+
+.icu-2fa-setup__store-badge--app-store {
+    @apply h-[8.75rem] sm:h-[9.5rem];
+}
+
+.icu-2fa-setup__store-badge--play-store {
+    @apply h-11 sm:h-[3.125rem];
+}
+
+.icu-2fa-setup__qr-row {
+    @apply flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-center sm:gap-8;
+}
+
+.icu-2fa-setup__qr {
+    @apply rounded-xl bg-white p-3 ring-1 ring-gray-200 dark:ring-gray-600;
+}
+
+.icu-2fa-setup__qr svg {
+    @apply block h-36 w-36;
+}
+
+.icu-2fa-setup__secret {
+    @apply max-w-xs space-y-2 text-center sm:text-left;
+}
+
+.icu-2fa-setup__secret-label {
+    @apply text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400;
+}
+
+.icu-2fa-setup__secret-value {
+    @apply block break-all rounded-lg bg-gray-50 px-3 py-2 font-mono text-sm text-gray-900 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600;
+}
+
+.icu-2fa-setup__actions {
+    @apply flex justify-center pt-2;
+}
+
+.icu-2fa-setup__recovery-list {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
+}
+
+.icu-2fa-setup__recovery-list code {
+    @apply block rounded-lg bg-gray-50 px-3 py-2 text-center font-mono text-sm text-gray-900 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600;
+}
+
+.icu-2fa-setup__footer {
+    @apply flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700;
+}
+
+.icu-2fa-setup__logout {
+    @apply text-sm font-medium text-gray-500 underline-offset-2 hover:text-gray-800 hover:underline dark:text-gray-400 dark:hover:text-gray-200;
+}
