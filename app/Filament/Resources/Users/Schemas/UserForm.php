@@ -29,6 +29,7 @@ class UserForm
                 Section::make('Datos personales')
                     ->description('Información básica del usuario.')
                     ->icon(Heroicon::OutlinedUser)
+                    ->collapsible()
                     ->secondary()
                     ->columns(1)
                     ->schema([
@@ -65,7 +66,7 @@ class UserForm
                                 ->unique(User::class, 'email', ignoreRecord: true)
                                 ->autocomplete('email')
                                 ->prefixIcon(Heroicon::OutlinedEnvelope),
-                                ]),
+                        ]),
                         Hidden::make('name')
                             ->dehydrateStateUsing(fn (Get $get): string => static::fullName($get('nombres'), $get('apellidos'))),
                         Grid::make([

@@ -2,23 +2,25 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AzureAdRelationManager;
 use App\Filament\Resources\Users\RelationManagers\UnidadesCompartidasRelationManager;
 use Filament\Support\Icons\Heroicon;
 
 class ManageUserRecursos extends ManageUserRelations
 {
-    protected static ?string $navigationLabel = 'Recursos compartidos';
+    protected static ?string $navigationLabel = 'Carpetas, AD y equipos';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 6;
 
-    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
 
     protected function relationManagers(): array
     {
         return [
             UnidadesCompartidasRelationManager::class,
             AzureAdRelationManager::class,
+            AsignacionesEquipoRelationManager::class,
         ];
     }
 
@@ -30,6 +32,7 @@ class ManageUserRecursos extends ManageUserRelations
         return [
             'unidadesCompartidas',
             'azureAd',
+            'asignacionesEquipos',
         ];
     }
 }

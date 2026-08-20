@@ -9,6 +9,8 @@ use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Clusters\Usuarios\UsuariosCluster;
+use App\Filament\Pages\Auth\Login;
+use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
 use App\Livewire\Profile\UpdatePassword as ProfileUpdatePassword;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -65,7 +67,7 @@ class AdminPanelProvider extends PanelProvider
                     ->visible(fn (): bool => RoleResource::canViewAny()),
             ])
 
-            ->login()
+            ->login(Login::class)
             ->font('Roboto Mono')
             ->topNavigation(false)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
@@ -131,7 +133,10 @@ class AdminPanelProvider extends PanelProvider
                         rules: [Password::default()],
                         requiresCurrentPassword: true,
                     )
-                    ->enableTwoFactorAuthentication()
+                    ->enableTwoFactorAuthentication(
+                        force: false,
+                        scopeToPanel: true,
+                    )
                     ->enableBrowserSessions()
                     ->myProfileComponents([
                         'personal_info' => PersonalInfo::class,
@@ -140,6 +145,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsureTwoFactorWhenRequired::class,
             ]);
     }
 }

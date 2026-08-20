@@ -11,7 +11,7 @@ use App\Filament\Resources\Equipos\EquipoResource;
 use App\Filament\Resources\Equipos\Pages\EditEquipo;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesCargadorRelationManager;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationManager;
-use App\Filament\Resources\Users\Pages\ManageUserEquipos;
+use App\Filament\Resources\Users\Pages\ManageUserRecursos;
 use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Cargador;
@@ -115,7 +115,7 @@ class EquipoCargadorRelationManagersTest extends TestCase
 
         Livewire::test(AsignacionesEquipoRelationManager::class, [
             'ownerRecord' => $user,
-            'pageClass' => ManageUserEquipos::class,
+            'pageClass' => ManageUserRecursos::class,
         ])
             ->callTableAction('create', data: [
                 'service_tag' => $equipo->service_tag,

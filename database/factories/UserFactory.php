@@ -6,8 +6,10 @@ use App\Models\Area;
 use App\Models\Cargo;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends Factory<User>
@@ -46,6 +48,48 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Asigna un rol al usuario, creándolo si no existe (guard web).
+     */
+    public function conRol(string $rol = 'super_admin'): static
+    {
+        return $this->afterCreating(function (User $user) use ($rol): void {
+            $role = Role::firstOrCreate(['name' => $rol, 'guard_name' => 'web']);
+            $user->assignRole($role);
+        });
+    }
+
+    /**
+     * Usuario bloqueado por intentos fallidos.
+     */
+    public function bloqueado(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'intentos_fallidos' => (int) config('acceso.max_intentos_fallidos', 5),
+            'bloqueado_at' => now(),
+        ]);
+    }
+
+    /**
+     * Usuario con el acceso al panel deshabilitado.
+     */
+    public function sinAcceso(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'acceso_habilitado' => false,
+        ]);
+    }
+
+    /**
+     * Usuario con acceso hasta una fecha (por defecto, dentro de un mes).
+     */
+    public function accesoDefinido(?Carbon $hasta = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'acceso_expira_at' => $hasta ?? now()->addMonth(),
         ]);
     }
 }

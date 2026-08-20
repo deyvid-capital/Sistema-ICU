@@ -6,7 +6,10 @@ use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use App\Support\Sessions\UserSessions;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -16,12 +19,15 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class UsersTable
 {
@@ -75,7 +81,23 @@ class UsersTable
                     ->label('Tipo')
                     ->badge()
                     ->color(fn (User $record): string => $record->ultimoMovimiento?->tipo === 'Alta' ? 'success' : 'danger')
-                    ->placeholder('Sin movimiento'),
+                    ->placeholder('-'),
+
+                TextColumn::make('estado_acceso')
+                    ->label('Acceso')
+                    ->badge()
+                    ->state(fn (User $record): string => match (true) {
+                        $record->estaBloqueado() => 'Bloqueado',
+                        ! $record->acceso_habilitado => 'Deshabilitado',
+                        $record->acceso_expira_at !== null && ! $record->acceso_expira_at->isFuture() => 'Vencido',
+                        default => 'Vigente',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'Vigente' => 'success',
+                        'Vencido' => 'warning',
+                        default => 'danger',
+                    })
+                    ->icon(fn (string $state): Heroicon => $state === 'Vigente' ? Heroicon::OutlinedLockOpen : Heroicon::OutlinedLockClosed),
 
                 TextColumn::make('created_at')
                     ->label('Registrado')
@@ -134,6 +156,16 @@ class UsersTable
                             fn (Builder $movimientoQuery): Builder => $movimientoQuery->where('tipo', $tipo),
                         );
                     }),
+
+                Filter::make('bloqueados')
+                    ->label('Solo bloqueados')
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('bloqueado_at'))
+                    ->toggle(),
+
+                Filter::make('acceso_deshabilitado')
+                    ->label('Acceso deshabilitado')
+                    ->query(fn (Builder $query): Builder => $query->where('acceso_habilitado', false))
+                    ->toggle(),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -142,6 +174,41 @@ class UsersTable
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (User $record): bool => ! $record->trashed()),
+                    Action::make('seguridad')
+                        ->label('Seguridad')
+                        ->icon(Heroicon::OutlinedShieldCheck)
+                        ->color('info')
+                        ->url(fn (User $record): string => UserResource::getUrl('seguridad', ['record' => $record]))
+                        ->visible(fn (User $record): bool => ! $record->trashed()
+                            && (bool) auth()->user()?->can('manageSecurity', User::class)),
+                    Action::make('toggleAcceso')
+                        ->label(fn (User $record): string => $record->acceso_habilitado ? 'Deshabilitar acceso' : 'Habilitar acceso')
+                        ->icon(fn (User $record): Heroicon => $record->acceso_habilitado ? Heroicon::OutlinedLockClosed : Heroicon::OutlinedLockOpen)
+                        ->color(fn (User $record): string => $record->acceso_habilitado ? 'danger' : 'success')
+                        ->requiresConfirmation()
+                        ->visible(fn (User $record): bool => ! $record->trashed()
+                            && (bool) auth()->user()?->can('manageSecurity', User::class))
+                        ->action(function (User $record): void {
+                            $record->forceFill(['acceso_habilitado' => ! $record->acceso_habilitado])->save();
+
+                            if (! $record->acceso_habilitado) {
+                                UserSessions::terminate($record);
+                            }
+
+                            Notification::make()->success()->title('Acceso actualizado')->send();
+                        }),
+                    Action::make('desbloquear')
+                        ->label('Desbloquear')
+                        ->icon(Heroicon::OutlinedLockOpen)
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->visible(fn (User $record): bool => $record->estaBloqueado()
+                            && (bool) auth()->user()?->can('manageSecurity', User::class))
+                        ->action(function (User $record): void {
+                            $record->desbloquear();
+
+                            Notification::make()->success()->title('Usuario desbloqueado')->send();
+                        }),
                     DeleteAction::make()
                         ->label('Eliminar')
                         ->visible(fn (User $record): bool => ! $record->trashed()
@@ -154,14 +221,53 @@ class UsersTable
                         ->visible(fn (User $record): bool => $record->trashed()),
                 ])
                     ->label('')
-                    ->icon(Heroicon::Bars4)
-                    ->label('Acciones')
-                    ->color('info')
+                    ->icon(Heroicon::EllipsisVertical)
+                    ->label('')
+                    ->color('primary')
                     ->button()
                     ->tooltip('Acciones'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('habilitarAcceso')
+                        ->label('Habilitar acceso')
+                        ->icon(Heroicon::OutlinedLockOpen)
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('manageSecurity', User::class))
+                        ->action(function (Collection $records): void {
+                            $records->each(fn (User $user): bool => $user->forceFill(['acceso_habilitado' => true])->save());
+
+                            Notification::make()->success()->title('Acceso habilitado a los seleccionados')->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    BulkAction::make('deshabilitarAcceso')
+                        ->label('Deshabilitar acceso')
+                        ->icon(Heroicon::OutlinedLockClosed)
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('manageSecurity', User::class))
+                        ->action(function (Collection $records): void {
+                            $records->each(function (User $user): void {
+                                $user->forceFill(['acceso_habilitado' => false])->save();
+                                UserSessions::terminate($user);
+                            });
+
+                            Notification::make()->success()->title('Acceso deshabilitado a los seleccionados')->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    BulkAction::make('cerrarSesiones')
+                        ->label('Cerrar sesiones')
+                        ->icon(Heroicon::OutlinedArrowRightStartOnRectangle)
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->visible(fn (): bool => (bool) auth()->user()?->can('manageSecurity', User::class))
+                        ->action(function (Collection $records): void {
+                            $records->each(fn (User $user): int => UserSessions::terminate($user));
+
+                            Notification::make()->success()->title('Sesiones cerradas para los seleccionados')->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
                     DeleteBulkAction::make()
                         ->label('Eliminar seleccionados'),
                     ForceDeleteBulkAction::make()

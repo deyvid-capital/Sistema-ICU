@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\ResetearIntentosAlIniciarSesion;
 use App\Models\AsigCelular;
 use App\Models\AsignacionCargador;
 use App\Models\AsignacionEquipo;
@@ -20,6 +21,8 @@ use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -46,6 +49,9 @@ class AppServiceProvider extends ServiceProvider
         SoftwareExc::observe(SoftwareExcObserver::class);
         PdfEquipo::observe(PdfEquipoObserver::class);
         Movimiento::observe(MovimientoObserver::class);
+
+        Event::listen(Login::class, ResetearIntentosAlIniciarSesion::class);
+
         DatePicker::configureUsing(function (DatePicker $component): void {
             $component
                 ->native(false)

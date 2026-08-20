@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Enums\TipoEventoNotificacion;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -41,9 +43,20 @@ class CriticalEventNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return $this->severity === self::SEVERIDAD_ALTA
+        $canales = $this->severity === self::SEVERIDAD_ALTA
             ? ['database', 'mail']
             : ['database'];
+
+        if (! $notifiable instanceof User) {
+            return $canales;
+        }
+
+        $tipoEvento = TipoEventoNotificacion::EventoCritico->value;
+
+        return array_values(array_filter(
+            $canales,
+            fn (string $canal): bool => $notifiable->debeRecibir($tipoEvento, $canal),
+        ));
     }
 
     /**

@@ -7,8 +7,8 @@ use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ManageUserAccesos;
-use App\Filament\Resources\Users\Pages\ManageUserEquipos;
 use App\Filament\Resources\Users\Pages\ManageUserRecursos;
+use App\Filament\Resources\Users\Pages\ManageUserSeguridad;
 use App\Filament\Resources\Users\Pages\ManageUserSoftware;
 use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\Schemas\UserForm;
@@ -16,7 +16,6 @@ use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
-use Filament\Pages\Enums\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -70,10 +69,10 @@ class UserResource extends Resource
         return $page->generateNavigationItems([
             ViewUser::class,
             EditUser::class,
+            ManageUserSeguridad::class,
             ManageUserSoftware::class,
             ManageUserAccesos::class,
             ManageUserRecursos::class,
-            ManageUserEquipos::class,
         ]);
     }
 
@@ -92,10 +91,10 @@ class UserResource extends Resource
             'create' => CreateUser::route('/create'),
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
+            'seguridad' => ManageUserSeguridad::route('/{record}/seguridad'),
             'software' => ManageUserSoftware::route('/{record}/software'),
             'accesos' => ManageUserAccesos::route('/{record}/accesos'),
             'recursos' => ManageUserRecursos::route('/{record}/recursos'),
-            'equipos' => ManageUserEquipos::route('/{record}/equipos'),
         ];
     }
 

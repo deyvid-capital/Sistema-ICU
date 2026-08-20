@@ -40,8 +40,9 @@ class EditUser extends EditRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        
+
         $data['movimientoActual'] = $this->record->estaDeAlta();
+
         return $data;
     }
 
@@ -51,25 +52,25 @@ class EditUser extends EditRecord
      */
     protected function beforeSave(): void
     {
-        
-            $movimiento = $this->movimientoPendiente();
-        
-            if ($movimiento === null) {
-                return;
-            }
 
-            $errores = Movimiento::erroresDeValidacion($movimiento);
+        $movimiento = $this->movimientoPendiente();
 
-            if ($errores !== []) {
-                Notification::make()
-                    ->title('No se pudo cambiar el estado del usuario')
-                    ->body(implode(' ', $errores))
-                    ->danger()
-                    ->send();
+        if ($movimiento === null) {
+            return;
+        }
 
-                $this->halt();
-          }
-        
+        $errores = Movimiento::erroresDeValidacion($movimiento);
+
+        if ($errores !== []) {
+            Notification::make()
+                ->title('No se pudo cambiar el estado del usuario')
+                ->body(implode(' ', $errores))
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
+
     }
 
     protected function afterSave(): void

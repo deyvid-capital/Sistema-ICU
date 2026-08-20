@@ -27,7 +27,7 @@ class AreaCargoRelationTest extends TestCase
         config(['app.env' => 'local']);
         Gate::before(fn () => true);
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->conRol()->create());
     }
 
     public function test_area_has_many_cargos(): void

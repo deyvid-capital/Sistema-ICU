@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Concerns\CascadesDependentSoftDeletes;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
+use App\Support\Sessions\UserSessions;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -23,7 +24,7 @@ use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
 use Livewire\Livewire;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['id', 'name', 'nombres', 'apellidos', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at'])]
+#[Fillable(['id', 'name', 'nombres', 'apellidos', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at', 'acceso_habilitado', 'acceso_expira_at', 'requiere_2fa'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -40,6 +41,15 @@ class User extends Authenticatable implements FilamentUser
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'acceso_habilitado' => true,
+        'requiere_2fa' => false,
+        'intentos_fallidos' => 0,
+    ];
 
     protected static function booted(): void
     {
@@ -97,13 +107,101 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Determine if the user can access the panel.
-     *  //return str_ends_with($this->email, '@yourdomain.com') && $this->hasVerifiedEmail();
+     * Determina si el usuario puede entrar al panel.
+     *
+     * Requiere: acceso habilitado y vigente, no estar bloqueado por intentos
+     * fallidos, tener al menos un rol asignado y no estar eliminado.
      */
     public function canAccessPanel(Panel $panel): bool
     {
+        return $this->motivoAccesoDenegado() === null;
+    }
 
-        return true;
+    /**
+     * Motivo por el que el usuario no puede entrar al panel, o null si puede.
+     * Se usa tanto para gatear el acceso como para mostrar un mensaje claro en el login.
+     */
+    public function motivoAccesoDenegado(): ?string
+    {
+        if ($this->trashed()) {
+            return 'Tu usuario fue eliminado. Contacta a un administrador.';
+        }
+
+        if (! $this->acceso_habilitado) {
+            return 'Tu acceso al sistema está deshabilitado. Contacta a un administrador.';
+        }
+
+        if ($this->acceso_expira_at !== null && ! $this->acceso_expira_at->isFuture()) {
+            return 'Tu acceso venció el '.$this->acceso_expira_at->format('d/m/Y H:i').'. Contacta a un administrador.';
+        }
+
+        if ($this->estaBloqueado()) {
+            return 'Tu cuenta está bloqueada por intentos fallidos. Contacta a un administrador.';
+        }
+
+        if (! $this->roles()->exists()) {
+            return 'Tu usuario no tiene un rol asignado. Contacta a un administrador.';
+        }
+
+        return null;
+    }
+
+    /**
+     * El acceso está habilitado y, si tiene vencimiento, aún no expira.
+     * (No contempla bloqueo ni rol; eso lo evalúa canAccessPanel).
+     */
+    public function tieneAccesoVigente(): bool
+    {
+        return $this->acceso_habilitado
+            && ($this->acceso_expira_at === null || $this->acceso_expira_at->isFuture());
+    }
+
+    /**
+     * El usuario está bloqueado por intentos de inicio de sesión fallidos.
+     */
+    public function estaBloqueado(): bool
+    {
+        return $this->bloqueado_at !== null;
+    }
+
+    /**
+     * Registra un intento de inicio de sesión fallido; al alcanzar el máximo
+     * configurado, bloquea la cuenta y cierra sus sesiones activas.
+     */
+    public function registrarIntentoFallido(): void
+    {
+        $this->increment('intentos_fallidos');
+
+        if ($this->intentos_fallidos >= (int) config('acceso.max_intentos_fallidos', 5) && ! $this->estaBloqueado()) {
+            $this->forceFill(['bloqueado_at' => now()])->save();
+            UserSessions::terminate($this);
+        }
+    }
+
+    /**
+     * Desbloqueo manual por un administrador.
+     */
+    public function desbloquear(): void
+    {
+        $this->forceFill([
+            'intentos_fallidos' => 0,
+            'bloqueado_at' => null,
+        ])->save();
+    }
+
+    /**
+     * Reinicia el contador tras un inicio de sesión exitoso.
+     */
+    public function resetearIntentosFallidos(): void
+    {
+        if ($this->intentos_fallidos === 0 && $this->bloqueado_at === null) {
+            return;
+        }
+
+        $this->forceFill([
+            'intentos_fallidos' => 0,
+            'bloqueado_at' => null,
+        ])->save();
     }
 
     /**
@@ -259,6 +357,30 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Preferencias de notificación (por tipo de evento y canal).
+     */
+    public function notificationPreferences(): HasMany
+    {
+        return $this->hasMany(NotificationPreference::class, 'usuario_id');
+    }
+
+    /**
+     * Indica si el usuario debe recibir un tipo de evento por un canal dado.
+     * Por defecto true (opt-out): sólo una preferencia explícita lo desactiva.
+     */
+    public function debeRecibir(string $tipoEvento, string $canal): bool
+    {
+        if (! $this->exists) {
+            return true;
+        }
+
+        return $this->notificationPreferences()
+            ->where('tipo_evento', $tipoEvento)
+            ->where('canal', $canal)
+            ->value('habilitado') ?? true;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -268,6 +390,10 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'acceso_habilitado' => 'boolean',
+            'requiere_2fa' => 'boolean',
+            'acceso_expira_at' => 'datetime',
+            'bloqueado_at' => 'datetime',
         ];
     }
 }

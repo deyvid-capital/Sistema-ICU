@@ -22,7 +22,7 @@ class BreezyProfileSecurityTest extends TestCase
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->conRol()->create());
 
         Filament::setCurrentPanel(Filament::getPanel('admin'));
         Filament::bootCurrentPanel();
@@ -44,7 +44,7 @@ class BreezyProfileSecurityTest extends TestCase
             ->assertSee('Contraseña')
             ->assertSee('Autenticación de dos factores')
             ->assertSee('Sesiones del navegador')
-            ->assertSee('El correo institucional no se modifica aquí.');
+            ->assertSee('El correo no se puede modificar.');
     }
 
     public function test_personal_info_shows_email_disabled(): void

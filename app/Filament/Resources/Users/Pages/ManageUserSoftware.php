@@ -11,7 +11,7 @@ class ManageUserSoftware extends ManageUserRelations
 {
     protected static ?string $navigationLabel = 'Software y licencias';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 

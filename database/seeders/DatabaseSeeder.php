@@ -33,6 +33,9 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
+        // Roles/permisos y asignación de super_admin al admin (después de crearlo).
+        $this->call(RolesPermissionsSeeder::class);
+
         $this->call([
             SoftwareLicenciasSeeder::class,
             AccesosSeeder::class,
