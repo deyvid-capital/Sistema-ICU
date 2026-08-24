@@ -28,7 +28,7 @@ class AsigCargadorCelResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 
-    protected static ?string $navigationLabel = 'Asig. Cargadores de celular';
+    protected static ?string $navigationLabel = 'Asig. carg. de celular';
 
     protected static ?int $navigationSort = 4;
 

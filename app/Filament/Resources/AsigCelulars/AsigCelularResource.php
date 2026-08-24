@@ -28,7 +28,7 @@ class AsigCelularResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
-    protected static ?string $navigationLabel = 'Asignaciones de celular';
+    protected static ?string $navigationLabel = 'Asig. celular';
 
     protected static ?int $navigationSort = 3;
 
