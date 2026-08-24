@@ -29,7 +29,6 @@
                 <li>Pulse <strong>Habilitar</strong> e ingrese su contraseña.</li>
                 <li>Escanee el código QR o copie la llave de configuración en la app.</li>
                 <li>Escriba el código de 6 dígitos para confirmar.</li>
-                <li>Guarde los códigos de recuperación en un lugar seguro.</li>
             </ol>
         </div>
 
@@ -43,23 +42,9 @@
                 La verificación en dos pasos está activa
             </h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-                En cada inicio de sesión se le pedirá el código de 6 dígitos de su app. Si pierde el teléfono, use un código de recuperación.
+                En cada inicio de sesión se le pedirá el código de 6 dígitos de su app. Si pierde el teléfono, un administrador puede restablecer la verificación en dos pasos desde Seguridad.
             </p>
-            @if ($showRecoveryCodes)
-                <div class="px-4 space-y-3">
-                    <p class="text-xs">{{ __('filament-breezy::default.profile.2fa.enabled.store_codes') }}</p>
-                    <div>
-                        @foreach ($this->recoveryCodes->toArray() as $code)
-                            <span class="inline-flex items-center p-1 text-xs font-medium text-gray-800 dark:text-gray-400 bg-gray-100 rounded-full dark:bg-gray-900">{{ $code }}</span>
-                        @endforeach
-                    </div>
-                    <div class="inline-block text-xs">
-                        <x-filament-breezy::clipboard-link :data="$this->recoveryCodes->join(',')" />
-                    </div>
-                </div>
-            @endif
             <div class="flex justify-between mt-3">
-                {{ $this->regenerateCodesAction }}
                 {{ $this->disableAction }}
             </div>
         @else
@@ -68,7 +53,7 @@
                 Confirme la configuración para terminar
             </h3>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-                Escanee el código QR con su app autenticadora. Si no puede escanear, copie la llave de configuración. Luego ingrese el código de 6 dígitos y pulse confirmar. Guarde los códigos de recuperación antes de continuar.
+                Escanee el código QR con su app autenticadora. Si no puede escanear, copie la llave de configuración. Luego ingrese el código de 6 dígitos y pulse confirmar.
             </p>
             <div class="flex mt-3 space-x-4">
                 <div>
@@ -77,17 +62,6 @@
                         {{ __('filament-breezy::default.profile.2fa.setup_key') }}
                         {{ $this->two_factor_secret }}
                     </p>
-                </div>
-                <div class="px-4 space-y-3">
-                    <p class="text-xs">{{ __('filament-breezy::default.profile.2fa.enabled.store_codes') }}</p>
-                    <div>
-                        @foreach ($this->recoveryCodes->toArray() as $code)
-                            <span class="inline-flex items-center p-1 text-xs font-medium text-gray-800 dark:text-gray-400 bg-gray-100 rounded-full dark:bg-gray-900">{{ $code }}</span>
-                        @endforeach
-                    </div>
-                    <div class="inline-block text-xs">
-                        <x-filament-breezy::clipboard-link :data="$this->recoveryCodes->join(',')" />
-                    </div>
                 </div>
             </div>
 

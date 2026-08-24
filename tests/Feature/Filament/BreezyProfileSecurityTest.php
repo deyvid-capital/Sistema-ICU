@@ -149,6 +149,7 @@ class BreezyProfileSecurityTest extends TestCase
         $this->assertTrue($user->hasEnabledTwoFactor());
         $this->assertFalse($user->hasConfirmedTwoFactor());
         $this->assertNotNull($user->breezySession);
+        $this->assertNull($user->breezySession->getRawOriginal('two_factor_recovery_codes'));
         $this->assertDatabaseHas('breezy_sessions', [
             'authenticatable_id' => $user->id,
             'authenticatable_type' => $user->getMorphClass(),

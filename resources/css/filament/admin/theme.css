@@ -354,14 +354,6 @@
     @apply flex justify-center pt-2;
 }
 
-.icu-2fa-setup__recovery-list {
-    @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
-}
-
-.icu-2fa-setup__recovery-list code {
-    @apply block rounded-lg bg-gray-50 px-3 py-2 text-center font-mono text-sm text-gray-900 ring-1 ring-inset ring-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-600;
-}
-
 .icu-2fa-setup__footer {
     @apply flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700;
 }

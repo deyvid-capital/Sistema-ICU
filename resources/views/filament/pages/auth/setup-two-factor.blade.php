@@ -99,32 +99,11 @@
                         {{ $this->form }}
 
                         <div class="icu-2fa-setup__actions">
-                            <x-filament::button type="submit" color="primary" size="lg" class="w-full sm:w-auto">
+                            <x-filament::button type="submit" color="primary" size="sm" class="w-full sm:w-auto">
                                 Verificar y activar
                             </x-filament::button>
                         </div>
                     </form>
-                </section>
-            @else
-                <section class="icu-2fa-setup__step" aria-labelledby="paso-4">
-                    <div class="icu-2fa-setup__step-badge">Paso 4</div>
-                    <h2 id="paso-4" class="icu-2fa-setup__step-title">Guarda tus códigos de recuperación</h2>
-                    <p class="icu-2fa-setup__step-text">
-                        Si pierdes el acceso a la app, estos códigos te permitirán entrar.
-                        Guárdalos en un lugar seguro; solo se muestran ahora.
-                    </p>
-
-                    <ul class="icu-2fa-setup__recovery-list">
-                        @foreach ($this->recoveryCodes as $code)
-                            <li><code>{{ $code }}</code></li>
-                        @endforeach
-                    </ul>
-
-                    <div class="icu-2fa-setup__actions">
-                        <x-filament::button wire:click="continuarAlPanel" color="primary" size="lg" class="w-full sm:w-auto">
-                            Ir al sistema
-                        </x-filament::button>
-                    </div>
                 </section>
             @endif
 

@@ -15,8 +15,8 @@ use Filament\Pages\SimplePage;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Collection;
 use Livewire\Features\SupportRedirects\Redirector;
 
 /**
@@ -36,7 +36,7 @@ class SetupTwoFactor extends SimplePage implements HasForms
     protected Width|string|null $maxWidth = Width::ThreeExtraLarge;
 
     /**
-     * install | setup | recovery
+     * install | setup
      */
     public string $step = 'install';
 
@@ -45,7 +45,7 @@ class SetupTwoFactor extends SimplePage implements HasForms
      */
     public array $data = [];
 
-    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?\Illuminate\Database\Eloquent\Model $tenant = null, bool $shouldGuessMissingParameters = false): string
+    public static function getUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false): string
     {
         return Filament::getPanel($panel ?? 'admin')->route('auth.setup-two-factor', $parameters, $isAbsolute);
     }
@@ -146,31 +146,12 @@ class SetupTwoFactor extends SimplePage implements HasForms
         $user->setTwoFactorSession();
         $user->refresh();
 
-        $this->step = 'recovery';
-        $this->data = ['code' => null];
-
         Notification::make()
             ->success()
             ->title('Verificación en dos pasos activada')
             ->send();
 
-        return null;
-    }
-
-    public function continuarAlPanel(): RedirectResponse|Redirector
-    {
         return redirect()->to(Filament::getHomeUrl());
-    }
-
-    /**
-     * @return Collection<int, string>
-     */
-    public function getRecoveryCodesProperty(): Collection
-    {
-        /** @var User $user */
-        $user = Filament::auth()->user();
-
-        return collect($user->breezySession?->two_factor_recovery_codes ?? []);
     }
 
     public function getTwoFactorSecretProperty(): string

@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Filament\Pages\Auth\TwoFactorChallenge;
 use App\Listeners\ResetearIntentosAlIniciarSesion;
+use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Models\AsigCelular;
 use App\Models\AsignacionCargador;
 use App\Models\AsignacionEquipo;
@@ -14,6 +16,7 @@ use App\Models\SoftwareExc;
 use App\Observers\AsigCelularObserver;
 use App\Observers\AsignacionCargadorObserver;
 use App\Observers\AsignacionEquipoObserver;
+use App\Observers\BreezySessionObserver;
 use App\Observers\CargadorObserver;
 use App\Observers\EquipoObserver;
 use App\Observers\MovimientoObserver;
@@ -25,6 +28,8 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Jeffgreco13\FilamentBreezy\Models\BreezySession;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        BreezySession::observe(BreezySessionObserver::class);
         AsignacionEquipo::observe(AsignacionEquipoObserver::class);
         AsignacionCargador::observe(AsignacionCargadorObserver::class);
         AsigCelular::observe(AsigCelularObserver::class);
@@ -49,6 +55,9 @@ class AppServiceProvider extends ServiceProvider
         SoftwareExc::observe(SoftwareExcObserver::class);
         PdfEquipo::observe(PdfEquipoObserver::class);
         Movimiento::observe(MovimientoObserver::class);
+
+        Livewire::component('two-factor-page', TwoFactorChallenge::class);
+        Livewire::component('two_factor_authentication', TwoFactorAuthentication::class);
 
         Event::listen(Login::class, ResetearIntentosAlIniciarSesion::class);
 

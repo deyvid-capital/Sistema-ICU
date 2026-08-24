@@ -33,7 +33,8 @@ class DosFactoresMiddlewareTest extends TestCase
             ->assertSuccessful()
             ->assertSee('Protege tu cuenta')
             ->assertSee('Microsoft Authenticator')
-            ->assertSee('Ya la instalé');
+            ->assertSee('Ya la instalé')
+            ->assertDontSee('códigos de recuperación');
     }
 
     public function test_usuario_forzado_no_puede_escapar_por_mi_perfil(): void
@@ -74,5 +75,6 @@ class DosFactoresMiddlewareTest extends TestCase
 
         $this->assertTrue($user->hasEnabledTwoFactor());
         $this->assertFalse($user->hasConfirmedTwoFactor());
+        $this->assertNull($user->breezySession->getRawOriginal('two_factor_recovery_codes'));
     }
 }

@@ -381,6 +381,46 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Activa TOTP sin generar ni guardar códigos de recuperación.
+     */
+    public function enableTwoFactorAuthentication(): void
+    {
+        $twoFactorData = [
+            'two_factor_secret' => filament('filament-breezy')->getEngine()->generateSecretKey(),
+            'two_factor_recovery_codes' => null,
+        ];
+
+        if ($this->breezySession) {
+            $this->disableTwoFactorAuthentication();
+        }
+
+        $this->breezySessions()->create($twoFactorData);
+        $this->load(['breezySessions', 'breezySession']);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function generateRecoveryCodes(): array
+    {
+        return [];
+    }
+
+    public function reGenerateRecoveryCodes(): void
+    {
+        $this->breezySession?->forceFill([
+            'two_factor_recovery_codes' => null,
+        ])->save();
+    }
+
+    public function destroyRecoveryCode(string $recoveryCode): void
+    {
+        $this->breezySession?->forceFill([
+            'two_factor_recovery_codes' => null,
+        ])->save();
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

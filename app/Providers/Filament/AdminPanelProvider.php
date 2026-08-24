@@ -11,6 +11,7 @@ use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\SetupTwoFactor;
+use App\Filament\Pages\Auth\TwoFactorChallenge;
 use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
 use App\Livewire\Profile\TwoFactorAuthentication;
@@ -142,6 +143,7 @@ class AdminPanelProvider extends PanelProvider
                     )
                     ->enableTwoFactorAuthentication(
                         force: false,
+                        action: TwoFactorChallenge::class,
                         scopeToPanel: true,
                     )
                     ->enableBrowserSessions(condition: true)
