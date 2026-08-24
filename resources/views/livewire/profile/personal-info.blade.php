@@ -1,7 +1,8 @@
 <x-filament::section
     :aside="true"
+    icon="heroicon-o-user"
     heading="Información personal"
-    description="Actualice sus datos de contacto. El correo y el carnet no pueden modificarse desde aquí."
+    description="Correo y carnet no se editan aquí."
 >
     <form wire:submit.prevent="submit" class="space-y-6">
         {{ $this->form }}

@@ -44,7 +44,7 @@ class BreezyProfileSecurityTest extends TestCase
             ->assertSee('Contraseña')
             ->assertSee('Autenticación de dos factores')
             ->assertSee('Sesiones del navegador')
-            ->assertSee('El correo no se puede modificar.');
+            ->assertSee('Correo y carnet no se editan aquí.');
     }
 
     public function test_personal_info_shows_email_disabled(): void
@@ -160,7 +160,7 @@ class BreezyProfileSecurityTest extends TestCase
     {
         Livewire::test(TwoFactorAuthentication::class)
             ->assertSuccessful()
-            ->assertSee('Aún no ha activado la verificación en dos pasos');
+            ->assertSee('No activada');
     }
 
     public function test_usuario_sin_rol_admin_no_puede_desactivar_2fa_en_perfil(): void

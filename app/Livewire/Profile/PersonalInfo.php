@@ -76,15 +76,15 @@ class PersonalInfo extends BreezyPersonalInfo
             TextInput::make('carnet')
                 ->label('Carnet')
                 ->disabled()
-                ->dehydrated(false)
-                ->helperText('El carnet lo administra el área de sistemas. Si necesita corregirlo, solicite el cambio.'),
+                ->helperText('Si necesita corregirlo, solicite el cambio.')
+                ->dehydrated(false),
             TextInput::make('email')
                 ->label('Correo electrónico')
                 ->email()
                 ->disabled()
                 ->dehydrated(false)
-                ->prefixIcon(Heroicon::OutlinedEnvelope)
-                ->helperText('El correo no se puede modificar. Si necesita uno distinto, solicítelo al administrador.'),
+                ->helperText('Si necesita uno distinto, solicítelo al administrador.')
+                ->prefixIcon(Heroicon::OutlinedEnvelope),
             TextInput::make('telefono')
                 ->label('Teléfono')
                 ->placeholder('Ej. 7123-4567')
@@ -94,7 +94,6 @@ class PersonalInfo extends BreezyPersonalInfo
                 ->nullable()
                 ->dehydrateStateUsing(fn (mixed $state): ?string => filled($state) ? $state : null)
                 ->prefixIcon(Heroicon::OutlinedPhone)
-                ->helperText('Use un número de contacto vigente para notificaciones internas.')
                 ->columnSpanFull(),
         ];
     }

@@ -27,22 +27,19 @@ class UpdatePassword extends BreezyUpdatePassword
                     ->password()
                     ->revealable()
                     ->rule('current_password')
-                    ->helperText('Confirme que es usted antes de establecer una contraseña nueva.')
                     ->visible(filament('filament-breezy')->getPasswordUpdateRequiresCurrent()),
                 TextInput::make('new_password')
                     ->label(__('filament-breezy::default.fields.new_password'))
                     ->password()
                     ->revealable()
                     ->rules(filament('filament-breezy')->getPasswordUpdateRules())
-                    ->required()
-                    ->helperText('Mínimo 8 caracteres, con mayúsculas, minúsculas y al menos un número.'),
+                    ->required(),
                 TextInput::make('new_password_confirmation')
                     ->label(__('filament-breezy::default.fields.new_password_confirmation'))
                     ->password()
                     ->revealable()
                     ->same('new_password')
-                    ->required()
-                    ->helperText('Repita la nueva contraseña para evitar errores de tipeo.'),
+                    ->required(),
             ])
             ->statePath('data');
     }
