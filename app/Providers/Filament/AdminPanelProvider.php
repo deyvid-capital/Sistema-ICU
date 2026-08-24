@@ -38,10 +38,13 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+use Rmsramos\Activitylog\ActivitylogPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -128,6 +131,26 @@ class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make()
                     ->registerNavigation(false),
+                ActivitylogPlugin::make()
+                    ->label('Registro de actividad')
+                    ->pluralLabel('Registros de actividad')
+                    ->navigationGroup('Auditoría')
+                    ->navigationIcon('heroicon-o-clipboard-document-list')
+                    ->navigationSort(99)
+                    ->navigationCountBadge(true)
+                    ->resourceActionLabel('Ver recurso')
+                    ->isRestoreModelActionHidden(false)
+                    ->dateFormat('d/m/Y')
+                    ->datetimeFormat('d/m/Y H:i:s')
+                    ->dateParser(fn (mixed $date): Carbon => Carbon::parse($date)->timezone(config('app.display_timezone')))
+                    ->customizeDatetimeColumn(fn ($column) => $column->timezone(config('app.display_timezone')))
+                    ->translateSubject(fn (string $label): string => trans()->has('activity.subjects.'.$label)
+                        ? __('activity.subjects.'.$label)
+                        : Str::headline($label))
+                    ->translateLogKey(fn (string $label): string => trans()->has('activity.keys.'.$label)
+                        ? __('activity.keys.'.$label)
+                        : Str::headline(str_replace('_', ' ', $label)))
+                    ->authorize(fn (): bool => (bool) auth()->user()?->can('ViewAny:Activity')),
                 BreezyCore::make()
                     ->myProfile(
                         shouldRegisterUserMenu: true,

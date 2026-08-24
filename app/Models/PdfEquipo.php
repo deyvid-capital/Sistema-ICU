@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsIcuActivity;
 use Database\Factories\PdfEquipoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ class PdfEquipo extends Model
     /** @use HasFactory<PdfEquipoFactory> */
     use HasFactory;
 
+    use LogsIcuActivity;
     use SoftDeletes;
 
     public const DOCUMENT_DISK = 'public';

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Celulares\Tables;
 
+use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Resources\Celulares\CelularResource;
 use App\Models\Celular;
 use Filament\Actions\ActionGroup;
@@ -78,6 +79,7 @@ class CelularsTable
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()->label('Ver'),
+                    ActivityTimelineAction::make(),
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (Celular $record): bool => ! $record->trashed()),

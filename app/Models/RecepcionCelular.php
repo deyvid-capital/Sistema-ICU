@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CelularFormularioPdfTipo;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use App\Models\Concerns\HasDocumentoOficialCelularPdf;
+use App\Models\Concerns\LogsIcuActivity;
 use Database\Factories\RecepcionCelularFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,7 @@ class RecepcionCelular extends Model
 
     use HasDocumentoOficialCelularPdf;
     use HasFactory;
+    use LogsIcuActivity;
     use SoftDeletes;
 
     protected static array $trashGuardedRelations = ['asignacion'];

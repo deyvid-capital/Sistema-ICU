@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AsignacionEquipos\Tables;
 
+use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoResource;
 use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationManager;
@@ -180,6 +181,7 @@ class AsignacionEquiposTable
                     ...EquipoFormularioPdfActions::makeForAsignacionEntrega(),
                     ViewAction::make()
                         ->label('Ver'),
+                    ActivityTimelineAction::make(),
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (AsignacionEquipo $record): bool => ! $record->trashed()),

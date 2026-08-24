@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsIcuActivity;
 use Database\Factories\PdfCelularFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,8 @@ class PdfCelular extends Model
 {
     /** @use HasFactory<PdfCelularFactory> */
     use HasFactory;
+
+    use LogsIcuActivity;
 
     public const DOCUMENT_DISK = 'public';
 

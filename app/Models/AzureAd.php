@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\TogglesEstadoOnSoftDelete;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AzureAd extends Model
 {
-    use BelongsToUsuario, GuardsAgainstTrashedRelations, HasFactory, SoftDeletes, TogglesEstadoOnSoftDelete;
+    use BelongsToUsuario, GuardsAgainstTrashedRelations, HasFactory, LogsIcuActivity, SoftDeletes, TogglesEstadoOnSoftDelete;
 
     protected static array $trashGuardedRelations = ['usuario'];
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Database\Factories\UsuarioExternoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,7 @@ class UsuarioExterno extends Model
     /** @use HasFactory<UsuarioExternoFactory> */
     use HasFactory;
 
+    use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
     use SoftDeletes;
 

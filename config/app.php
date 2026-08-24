@@ -63,9 +63,14 @@ return [
     | will be used by the PHP date and date-time functions. The timezone
     | is set to "UTC" by default as it is suitable for most use cases.
     |
+    | Keep storage in UTC. The Filament panel displays datetimes in
+    | `display_timezone` (Bolivia, GMT-4, no daylight saving).
+    |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
+
+    'display_timezone' => env('APP_DISPLAY_TIMEZONE', 'America/La_Paz'),
 
     /*
     |--------------------------------------------------------------------------

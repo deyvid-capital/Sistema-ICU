@@ -24,6 +24,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class EquipoResource extends Resource
 {
@@ -66,6 +67,7 @@ class EquipoResource extends Resource
             RecibosEquipoRelationManager::class,
             NotasSalidaRelationManager::class,
             NotasRecepcionRelationManager::class,
+            ActivitylogRelationManager::class,
         ];
     }
 

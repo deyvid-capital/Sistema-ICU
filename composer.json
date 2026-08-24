@@ -12,6 +12,7 @@
         "jeffgreco13/filament-breezy": "^3.2",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
+        "rmsramos/activitylog": "^4.0",
         "spatie/browsershot": "^5.4"
     },
     "require-dev": {

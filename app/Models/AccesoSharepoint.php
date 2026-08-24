@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\TogglesEstadoOnSoftDelete;
 use App\Models\Concerns\WarnsOnInactiveCatalogRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,7 @@ class AccesoSharepoint extends Model
     use BelongsToUsuario;
     use GuardsAgainstTrashedRelations;
     use HasFactory;
+    use LogsIcuActivity;
     use SoftDeletes;
     use TogglesEstadoOnSoftDelete;
     use WarnsOnInactiveCatalogRelations;

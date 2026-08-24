@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\UserResource;
@@ -171,6 +172,7 @@ class UsersTable
                 ActionGroup::make([
                     ViewAction::make()
                         ->label('Ver'),
+                    ActivityTimelineAction::make(),
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (User $record): bool => ! $record->trashed()),

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\TogglesEstadoOnSoftDelete;
 use App\Models\Concerns\WarnsOnInactiveCatalogRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SoftwareUsuario extends Model
 {
-    use BelongsToUsuario, GuardsAgainstTrashedRelations, HasFactory, SoftDeletes, TogglesEstadoOnSoftDelete, WarnsOnInactiveCatalogRelations;
+    use BelongsToUsuario, GuardsAgainstTrashedRelations, HasFactory, LogsIcuActivity, SoftDeletes, TogglesEstadoOnSoftDelete, WarnsOnInactiveCatalogRelations;
 
     protected static array $trashGuardedRelations = ['usuario'];
 

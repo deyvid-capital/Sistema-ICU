@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ class AsignacionEquipo extends Model
     use BelongsToUsuario;
     use GuardsAgainstTrashedRelations;
     use HasFactory;
+    use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
     use SoftDeletes;
 

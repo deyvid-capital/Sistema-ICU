@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Database\Factories\AreaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +14,7 @@ class Area extends Model
     /** @use HasFactory<AreaFactory> */
     use HasFactory;
 
+    use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
 
     protected static array $forceDeleteGuardedRelations = ['users', 'cargos', 'softwareAreas'];

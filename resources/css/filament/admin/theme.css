@@ -1,6 +1,7 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
 
 @source '../../../../vendor/jeffgreco13/filament-breezy/resources/**/*';
+@source '../../../../vendor/rmsramos/activitylog/resources/**/*';
 
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';

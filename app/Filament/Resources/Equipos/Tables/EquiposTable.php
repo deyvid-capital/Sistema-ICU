@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Equipos\Tables;
 
 use App\Enums\EstadoEquipo;
+use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Resources\Equipos\EquipoResource;
 use App\Models\Equipo;
 use Filament\Actions\ActionGroup;
@@ -115,6 +116,7 @@ class EquiposTable
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()->label('Ver'),
+                    ActivityTimelineAction::make(),
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (Equipo $record): bool => ! $record->trashed()),

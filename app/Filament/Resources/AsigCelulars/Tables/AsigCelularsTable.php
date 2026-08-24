@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AsigCelulars\Tables;
 
+use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Resources\AsigCelulars\AsigCelularResource;
 use App\Models\AsigCelular;
 use Filament\Actions\ActionGroup;
@@ -71,6 +72,7 @@ class AsigCelularsTable
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()->label('Ver'),
+                    ActivityTimelineAction::make(),
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (AsigCelular $record): bool => ! $record->trashed()),

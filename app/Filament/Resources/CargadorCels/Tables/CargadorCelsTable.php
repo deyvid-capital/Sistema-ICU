@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CargadorCels\Tables;
 
+use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Resources\CargadorCels\CargadorCelResource;
 use App\Models\CargadorCel;
 use Filament\Actions\ActionGroup;
@@ -56,6 +57,7 @@ class CargadorCelsTable
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make()->label('Ver'),
+                    ActivityTimelineAction::make(),
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (CargadorCel $record): bool => ! $record->trashed()),

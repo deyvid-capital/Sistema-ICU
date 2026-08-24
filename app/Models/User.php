@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Concerns\CascadesDependentSoftDeletes;
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use App\Support\Sessions\UserSessions;
 use Database\Factories\UserFactory;
@@ -22,6 +23,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
 use Livewire\Livewire;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['id', 'name', 'nombres', 'apellidos', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at', 'acceso_habilitado', 'acceso_expira_at', 'requiere_2fa'])]
@@ -30,9 +32,11 @@ class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use CascadesDependentSoftDeletes,
+        CausesActivity,
         HasFactory,
         HasRoles,
         HasUuids,
+        LogsIcuActivity,
         Notifiable,
         PreventsForceDeleteWithDependents,
         SoftDeletes,

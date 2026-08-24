@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Database\Factories\CargadorCelFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,7 @@ class CargadorCel extends Model
     /** @use HasFactory<CargadorCelFactory> */
     use HasFactory;
 
+    use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
     use SoftDeletes;
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Database\Factories\CargoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,7 @@ class Cargo extends Model
     /** @use HasFactory<CargoFactory> */
     use HasFactory;
 
+    use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
 
     protected static array $forceDeleteGuardedRelations = ['users', 'movimientos'];

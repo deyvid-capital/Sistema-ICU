@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsIcuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
@@ -9,6 +10,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PdfMovimiento extends Model
 {
+    use LogsIcuActivity;
+
     public const DOCUMENT_DISK = 'public';
 
     public $timestamps = false;

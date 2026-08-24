@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\LogsIcuActivity;
 use Database\Factories\AsigCelularFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ class AsigCelular extends Model
 
     use GuardsAgainstTrashedRelations;
     use HasFactory;
+    use LogsIcuActivity;
     use SoftDeletes;
 
     protected static array $trashGuardedRelations = ['usuario', 'celular'];

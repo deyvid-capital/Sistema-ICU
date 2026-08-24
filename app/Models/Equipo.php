@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EstadoEquipo;
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Equipo extends Model
 {
     use HasFactory;
+    use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
     use SoftDeletes;
 

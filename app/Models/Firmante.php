@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\FirmantePosicion;
 use App\Models\Concerns\BelongsToUsuario;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\LogsIcuActivity;
 use App\Support\FirmanteDocumentoConfig;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -15,6 +16,7 @@ class Firmante extends Model
 {
     use BelongsToUsuario;
     use GuardsAgainstTrashedRelations;
+    use LogsIcuActivity;
     use SoftDeletes;
 
     protected static array $trashGuardedRelations = ['usuario'];

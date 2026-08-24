@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EstadoCargador;
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Cargador extends Model
 {
     use HasFactory;
+    use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
     use SoftDeletes;
 

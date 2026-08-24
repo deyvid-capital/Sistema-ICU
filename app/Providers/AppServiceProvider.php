@@ -22,14 +22,18 @@ use App\Observers\EquipoObserver;
 use App\Observers\MovimientoObserver;
 use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
+use App\Policies\ActivityPolicy;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Jeffgreco13\FilamentBreezy\Models\BreezySession;
 use Livewire\Livewire;
+use Spatie\Activitylog\Models\Activity;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,6 +50,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        FilamentTimezone::set(config('app.display_timezone'));
+
+        Gate::policy(Activity::class, ActivityPolicy::class);
+
         BreezySession::observe(BreezySessionObserver::class);
         AsignacionEquipo::observe(AsignacionEquipoObserver::class);
         AsignacionCargador::observe(AsignacionCargadorObserver::class);

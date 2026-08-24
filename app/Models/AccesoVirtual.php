@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\TogglesEstadoOnSoftDelete;
 use App\Models\Concerns\WarnsOnInactiveCatalogRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class AccesoVirtual extends Model
 {
     use HasFactory;
+    use LogsIcuActivity;
     use SoftDeletes;
     use TogglesEstadoOnSoftDelete;
     use WarnsOnInactiveCatalogRelations;

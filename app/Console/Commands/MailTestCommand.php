@@ -101,6 +101,6 @@ class MailTestCommand extends Command
 
     private function now(): string
     {
-        return now()->timezone(config('app.timezone'))->format('d/m/Y H:i:s');
+        return now()->timezone(config('app.display_timezone'))->format('d/m/Y H:i:s');
     }
 }

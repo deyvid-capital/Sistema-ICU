@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EquipoFormularioPdfTipo;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use App\Models\Concerns\HasDocumentoOficialPdf;
+use App\Models\Concerns\LogsIcuActivity;
 use Database\Factories\NotaSalidaEquipoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,7 @@ class NotaSalidaEquipo extends Model
 
     use HasDocumentoOficialPdf;
     use HasFactory;
+    use LogsIcuActivity;
     use SoftDeletes;
 
     protected static array $trashGuardedRelations = ['equipo', 'usuarioExterno'];

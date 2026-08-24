@@ -19,6 +19,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class CelularResource extends Resource
 {
@@ -55,7 +56,9 @@ class CelularResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            ActivitylogRelationManager::class,
+        ];
     }
 
     /**
