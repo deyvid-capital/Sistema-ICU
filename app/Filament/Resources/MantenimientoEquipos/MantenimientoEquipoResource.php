@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\MantenimientoEquipos;
 
-use App\Filament\Clusters\Equipos\EquiposCluster;
+use App\Filament\Clusters\Asignacion\AsignacionCluster;
 use App\Filament\Resources\MantenimientoEquipos\Pages\CreateMantenimientoEquipo;
 use App\Filament\Resources\MantenimientoEquipos\Pages\EditMantenimientoEquipo;
 use App\Filament\Resources\MantenimientoEquipos\Pages\ListMantenimientoEquipos;
@@ -24,13 +24,13 @@ class MantenimientoEquipoResource extends Resource
 {
     protected static ?string $model = MantenimientoEquipo::class;
 
-    protected static ?string $cluster = EquiposCluster::class;
+    protected static ?string $cluster = AsignacionCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWrenchScrewdriver;
 
     protected static ?string $navigationLabel = 'Mantenimientos de equipos';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $modelLabel = 'mantenimiento de equipo';
 

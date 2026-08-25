@@ -32,7 +32,7 @@ class NotaSalidaEquipoResource extends Resource
 
     protected static ?string $navigationLabel = 'Notas de salida';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $modelLabel = 'nota de salida';
 

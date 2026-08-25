@@ -4,8 +4,9 @@ namespace App\Filament\Clusters\Inventario;
 
 use BackedEnum;
 use Filament\Clusters\Cluster;
-use Filament\Support\Icons\Heroicon;
 use Filament\Pages\Enums\SubNavigationPosition;
+use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class InventarioCluster extends Cluster
 {
@@ -15,9 +16,11 @@ class InventarioCluster extends Cluster
 
     protected static ?SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Equipos';
+
     protected static ?string $navigationLabel = 'Inventario';
 
     protected static ?string $clusterBreadcrumb = 'Inventario';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 1;
 }

@@ -32,7 +32,7 @@ class NotaRecepcionEquipoResource extends Resource
 
     protected static ?string $navigationLabel = 'Notas de recepción';
 
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $modelLabel = 'nota de recepción';
 

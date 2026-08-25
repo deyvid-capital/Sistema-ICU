@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\AsignacionCargadors;
 
-use App\Filament\Clusters\Equipos\EquiposCluster;
+use App\Filament\Clusters\Asignacion\AsignacionCluster;
 use App\Filament\Resources\AsignacionCargadors\Pages\CreateAsignacionCargador;
 use App\Filament\Resources\AsignacionCargadors\Pages\EditAsignacionCargador;
 use App\Filament\Resources\AsignacionCargadors\Pages\ListAsignacionCargadors;
@@ -24,7 +24,7 @@ class AsignacionCargadorResource extends Resource
 {
     protected static ?string $model = AsignacionCargador::class;
 
-    protected static ?string $cluster = EquiposCluster::class;
+    protected static ?string $cluster = AsignacionCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 

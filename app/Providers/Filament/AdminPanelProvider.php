@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Clusters\Accesos\AccesosCluster;
+use App\Filament\Clusters\Asignacion\AsignacionCluster;
 use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Clusters\Inventario\InventarioCluster;
@@ -24,6 +25,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -89,6 +91,12 @@ class AdminPanelProvider extends PanelProvider
             })
             ->sidebarFullyCollapsibleOnDesktop()
             ->sidebarWidth('15rem')
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Equipos'),
+                NavigationGroup::make()
+                    ->label('Auditoría'),
+            ])
             ->databaseNotifications()
 
             ->colors([
@@ -108,9 +116,10 @@ class AdminPanelProvider extends PanelProvider
                 SoftwareCluster::class,
                 AccesosCluster::class,
                 RecursosCluster::class,
-                EquiposCluster::class,
-                CelularesCluster::class,
                 InventarioCluster::class,
+                EquiposCluster::class,
+                AsignacionCluster::class,
+                CelularesCluster::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

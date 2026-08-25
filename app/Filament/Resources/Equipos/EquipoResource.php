@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Equipos;
 
-use App\Filament\Clusters\Inventario\InventarioCluster;
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\Equipos\Pages\CreateEquipo;
 use App\Filament\Resources\Equipos\Pages\EditEquipo;
 use App\Filament\Resources\Equipos\Pages\ListEquipos;
@@ -30,13 +30,13 @@ class EquipoResource extends Resource
 {
     protected static ?string $model = Equipo::class;
 
-    protected static ?string $cluster = InventarioCluster::class;
+    protected static ?string $cluster = EquiposCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
     protected static ?string $navigationLabel = 'Equipos';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $modelLabel = 'equipo';
 

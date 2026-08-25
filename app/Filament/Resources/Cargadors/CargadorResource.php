@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Cargadors;
 
-use App\Filament\Clusters\Inventario\InventarioCluster;
+use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Resources\Cargadors\Pages\CreateCargador;
 use App\Filament\Resources\Cargadors\Pages\EditCargador;
 use App\Filament\Resources\Cargadors\Pages\ListCargadors;
@@ -25,13 +25,13 @@ class CargadorResource extends Resource
 {
     protected static ?string $model = Cargador::class;
 
-    protected static ?string $cluster = InventarioCluster::class;
+    protected static ?string $cluster = EquiposCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBolt;
 
     protected static ?string $navigationLabel = 'Cargadores';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $modelLabel = 'cargador';
 

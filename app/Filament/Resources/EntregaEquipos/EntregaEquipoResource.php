@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\EntregaEquipos;
 
-use App\Filament\Clusters\Equipos\EquiposCluster;
+use App\Filament\Clusters\Asignacion\AsignacionCluster;
 use App\Filament\Resources\EntregaEquipos\Pages\CreateEntregaEquipo;
 use App\Filament\Resources\EntregaEquipos\Pages\EditEntregaEquipo;
 use App\Filament\Resources\EntregaEquipos\Pages\ListEntregaEquipos;
@@ -26,13 +26,13 @@ class EntregaEquipoResource extends Resource
 {
     protected static ?string $model = EntregaEquipo::class;
 
-    protected static ?string $cluster = EquiposCluster::class;
+    protected static ?string $cluster = AsignacionCluster::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentArrowUp;
 
     protected static ?string $navigationLabel = 'Entregas de equipo';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $modelLabel = 'entrega de equipo';
 
