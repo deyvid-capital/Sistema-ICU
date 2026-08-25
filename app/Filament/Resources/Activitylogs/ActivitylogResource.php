@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Activitylogs;
 
+use App\Enums\DominioActividad;
 use App\Filament\Resources\Activitylogs\Pages\ListActivitylogs;
 use App\Filament\Resources\Activitylogs\Pages\ViewActivitylog;
 use App\Models\User;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Rmsramos\Activitylog\Resources\Activitylog\ActivitylogResource as BaseActivitylogResource;
 
 class ActivitylogResource extends BaseActivitylogResource
@@ -36,10 +38,38 @@ class ActivitylogResource extends BaseActivitylogResource
             });
     }
 
+    public static function getLogNameColumnComponent(): Column
+    {
+        return parent::getLogNameColumnComponent()
+            ->formatStateUsing(fn (?string $state): string => static::etiquetaDeDominio($state))
+            ->color(fn (?string $state): string => DominioActividad::tryFrom((string) $state)?->getColor() ?? 'gray');
+    }
+
     public static function getLogNameFilterComponent(): SelectFilter
     {
         return parent::getLogNameFilterComponent()
-            ->label(__('activitylog::tables.columns.log_name.label'));
+            ->label(__('activitylog::tables.columns.log_name.label'))
+            ->options(fn (): array => static::getModel()::query()
+                ->distinct()
+                ->pluck('log_name')
+                ->filter()
+                ->mapWithKeys(fn (string $logName): array => [$logName => static::etiquetaDeDominio($logName)])
+                ->sort()
+                ->all());
+    }
+
+    /**
+     * Etiqueta legible de un `log_name`. Los valores no mapeados (por ejemplo
+     * registros históricos) se muestran tal cual, en formato de título.
+     */
+    protected static function etiquetaDeDominio(?string $logName): string
+    {
+        if (blank($logName)) {
+            return '-';
+        }
+
+        return DominioActividad::tryFrom($logName)?->getLabel()
+            ?? Str::headline($logName);
     }
 
     public static function getPages(): array

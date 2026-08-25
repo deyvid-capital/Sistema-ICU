@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Activitylogs\ActivitylogResource;
+use App\Filament\Resources\Activitylogs\Pages\ListActivitylogs;
 use App\Models\CargadorCel;
 use App\Models\User;
 use Filament\Support\Facades\FilamentTimezone;
@@ -9,8 +11,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Livewire;
-use Rmsramos\Activitylog\Resources\Activitylog\ActivitylogResource;
-use Rmsramos\Activitylog\Resources\Activitylog\Pages\ListActivitylog;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -101,7 +101,7 @@ class ActivityLogTest extends TestCase
         $this->get(ActivitylogResource::getUrl('index', panel: 'admin'))
             ->assertSuccessful();
 
-        Livewire::test(ListActivitylog::class)
+        Livewire::test(ListActivitylogs::class)
             ->assertSuccessful();
     }
 
