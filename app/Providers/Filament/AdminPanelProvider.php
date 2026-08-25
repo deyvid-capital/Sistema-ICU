@@ -14,6 +14,7 @@ use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\SetupTwoFactor;
 use App\Filament\Pages\Auth\TwoFactorChallenge;
+use App\Filament\Resources\Activitylogs\ActivitylogResource;
 use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
 use App\Livewire\Profile\TwoFactorAuthentication;
@@ -148,6 +149,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make()
                     ->registerNavigation(false),
                 ActivitylogPlugin::make()
+                    ->resource(ActivitylogResource::class)
                     ->label('Registro de actividad')
                     ->pluralLabel('Registros de actividad')
                     ->navigationGroup('Auditoría')

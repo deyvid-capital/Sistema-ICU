@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Celulares;
 
 use App\Filament\Clusters\Celulares\CelularesCluster;
+use App\Filament\Resources\Activitylogs\RelationManagers\ActivitylogRelationManager;
 use App\Filament\Resources\Celulares\Pages\CreateCelular;
 use App\Filament\Resources\Celulares\Pages\EditCelular;
 use App\Filament\Resources\Celulares\Pages\ListCelulars;
@@ -19,7 +20,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class CelularResource extends Resource
 {

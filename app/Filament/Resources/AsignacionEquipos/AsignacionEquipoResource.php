@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AsignacionEquipos;
 
 use App\Filament\Clusters\Asignacion\AsignacionCluster;
+use App\Filament\Resources\Activitylogs\RelationManagers\ActivitylogRelationManager;
 use App\Filament\Resources\AsignacionEquipos\Pages\CreateAsignacionEquipo;
 use App\Filament\Resources\AsignacionEquipos\Pages\EditAsignacionEquipo;
 use App\Filament\Resources\AsignacionEquipos\Pages\ListAsignacionEquipos;
@@ -19,7 +20,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class AsignacionEquipoResource extends Resource
 {

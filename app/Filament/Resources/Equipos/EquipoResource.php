@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Equipos;
 
 use App\Filament\Clusters\Equipos\EquiposCluster;
+use App\Filament\Resources\Activitylogs\RelationManagers\ActivitylogRelationManager;
 use App\Filament\Resources\Equipos\Pages\CreateEquipo;
 use App\Filament\Resources\Equipos\Pages\EditEquipo;
 use App\Filament\Resources\Equipos\Pages\ListEquipos;
@@ -24,7 +25,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class EquipoResource extends Resource
 {

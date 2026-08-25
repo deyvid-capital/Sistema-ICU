@@ -1,6 +1,6 @@
 <?php
 
-use Rmsramos\Activitylog\Resources\Activitylog\ActivitylogResource;
+use App\Filament\Resources\Activitylogs\ActivitylogResource;
 
 return [
     'resources' => [

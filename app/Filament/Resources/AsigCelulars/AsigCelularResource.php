@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AsigCelulars;
 
 use App\Filament\Clusters\Celulares\CelularesCluster;
+use App\Filament\Resources\Activitylogs\RelationManagers\ActivitylogRelationManager;
 use App\Filament\Resources\AsigCelulars\Pages\CreateAsigCelular;
 use App\Filament\Resources\AsigCelulars\Pages\EditAsigCelular;
 use App\Filament\Resources\AsigCelulars\Pages\ListAsigCelulars;
@@ -19,7 +20,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class AsigCelularResource extends Resource
 {

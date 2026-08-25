@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CargadorCels;
 
 use App\Filament\Clusters\Celulares\CelularesCluster;
+use App\Filament\Resources\Activitylogs\RelationManagers\ActivitylogRelationManager;
 use App\Filament\Resources\CargadorCels\Pages\CreateCargadorCel;
 use App\Filament\Resources\CargadorCels\Pages\EditCargadorCel;
 use App\Filament\Resources\CargadorCels\Pages\ListCargadorCels;
@@ -19,7 +20,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class CargadorCelResource extends Resource
 {
