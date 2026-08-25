@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Filament\Pages\Auth\TwoFactorChallenge;
 use App\Listeners\ResetearIntentosAlIniciarSesion;
 use App\Livewire\Profile\TwoFactorAuthentication;
+use App\Models\AppearanceSetting;
 use App\Models\AsigCelular;
 use App\Models\AsignacionCargador;
 use App\Models\AsignacionEquipo;
@@ -13,6 +14,7 @@ use App\Models\Equipo;
 use App\Models\Movimiento;
 use App\Models\PdfEquipo;
 use App\Models\SoftwareExc;
+use App\Observers\AppearanceSettingObserver;
 use App\Observers\AsigCelularObserver;
 use App\Observers\AsignacionCargadorObserver;
 use App\Observers\AsignacionEquipoObserver;
@@ -23,6 +25,7 @@ use App\Observers\MovimientoObserver;
 use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
 use App\Policies\ActivityPolicy;
+use App\Services\Apariencia\AparienciaService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Facades\FilamentTimezone;
@@ -42,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(AparienciaService::class);
     }
 
     /**
@@ -54,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Activity::class, ActivityPolicy::class);
 
+        AppearanceSetting::observe(AppearanceSettingObserver::class);
         BreezySession::observe(BreezySessionObserver::class);
         AsignacionEquipo::observe(AsignacionEquipoObserver::class);
         AsignacionCargador::observe(AsignacionCargadorObserver::class);

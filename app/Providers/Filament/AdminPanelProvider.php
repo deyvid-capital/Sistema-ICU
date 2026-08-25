@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Clusters\Asignacion\AsignacionCluster;
 use App\Filament\Clusters\Celulares\CelularesCluster;
+use App\Filament\Clusters\Configuracion\Pages\Apariencia;
 use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Clusters\Recursos\RecursosCluster;
@@ -17,6 +18,7 @@ use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
 use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Livewire\Profile\UpdatePassword as ProfileUpdatePassword;
+use App\Services\Apariencia\AparienciaService;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Actions\Action;
@@ -29,12 +31,13 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Platform;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -65,10 +68,17 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->brandLogo(asset('images/Capital-Safi-SA-logo-.png'))
-            ->brandLogoHeight('2.5rem')
+            ->brandLogo(fn (): ?string => app(AparienciaService::class)->logoClaro())
+            ->darkModeBrandLogo(fn (): ?string => app(AparienciaService::class)->logoOscuro())
+            ->brandLogoHeight(fn (): string => app(AparienciaService::class)->altoLogo())
+            ->favicon(fn (): ?string => app(AparienciaService::class)->favicon())
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->userMenuItems([
+                Action::make('apariencia')
+                    ->label('Apariencia')
+                    ->url(fn (): string => Apariencia::getUrl())
+                    ->icon(Heroicon::OutlinedSwatch)
+                    ->visible(fn (): bool => Apariencia::canAccess()),
                 Action::make('roles')
                     ->label('Roles y permisos')
                     ->url(fn (): string => RoleResource::getUrl())
@@ -99,14 +109,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->databaseNotifications()
 
-            ->colors([
-                'primary' => Color::Indigo,
-                'gray' => Color::Zinc,
-                'info' => Color::Blue,
-                'success' => Color::Emerald,
-                'warning' => Color::Amber,
-                'danger' => Color::Rose,
-            ])
+            ->colors(fn (): array => app(AparienciaService::class)->coloresDelPanel())
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn (): View => view('filament.apariencia.estilos', app(AparienciaService::class)->variablesCss()),
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
