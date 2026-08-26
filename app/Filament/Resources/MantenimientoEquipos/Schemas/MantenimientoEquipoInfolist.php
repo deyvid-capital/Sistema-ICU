@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\MantenimientoEquipos\Schemas;
 
 use App\Models\MantenimientoEquipo;
-use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -12,7 +12,7 @@ class MantenimientoEquipoInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
-        ->columns(3)
+            ->columns(3)
             ->components([
                 TextEntry::make('equipo.service_tag')
                     ->label('👨‍💻 Equipo')
@@ -30,22 +30,15 @@ class MantenimientoEquipoInfolist
                     ->placeholder('Sin fecha')
                     ->badge()
                     ->color('info'),
-                ImageEntry::make('cap_antes')
+                SpatieMediaLibraryImageEntry::make('cap_antes')
                     ->label('📸 Captura antes')
-                    ->disk(MantenimientoEquipo::IMAGE_DISK)
-                    ->visibility('public')
-                    ->formatStateUsing(function ($state) {
-                        return $state ?: null;
-                    })
+                    ->collection('cap_antes')
+                    ->conversion('thumb')
                     ->placeholder('Sin imagen'),
-                ImageEntry::make('cap_despues')
+                SpatieMediaLibraryImageEntry::make('cap_despues')
                     ->label('📸 Captura después')
-                    ->disk(MantenimientoEquipo::IMAGE_DISK)
-                    ->visibility('public')
-            
-                    ->formatStateUsing(function ($state) {
-                        return $state ?: null;
-                    })
+                    ->collection('cap_despues')
+                    ->conversion('thumb')
                     ->placeholder('Sin imagen'),
                 TextEntry::make('observaciones')
                     ->label('🗒️ Observaciones')

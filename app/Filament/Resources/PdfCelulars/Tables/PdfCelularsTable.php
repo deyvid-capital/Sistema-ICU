@@ -56,7 +56,7 @@ class PdfCelularsTable
                 TextColumn::make('url')
                     ->label('Archivo')
                     ->formatStateUsing(fn (?string $state): string => filled($state) ? basename($state) : '—')
-                    ->url(fn (?string $state): ?string => filled($state) ? Storage::disk('public')->url($state) : null)
+                    ->url(fn (?string $state): ?string => filled($state) ? Storage::disk(PdfCelular::documentDisk())->url($state) : null)
                     ->openUrlInNewTab()
                     ->placeholder('—'),
             ])

@@ -25,6 +25,8 @@ implementado en ICU**.
 | `resources/views/filament/apariencia/estilos.blade.php` | El **único** CSS acoplado a clases `.fi-*`, inyectado en `panels::styles.after` |
 | `ConfiguracionCluster` | Cluster oculto del sidebar, con sub-navegación a la izquierda |
 | Páginas `Apariencia` y `Marca` | Formularios de tema/colores y de logo/favicon |
+| `AppearanceSetting::registerMediaCollections()` | Colecciones `singleFile()` de logo claro, logo oscuro y favicon |
+| `App\Models\Concerns\HasIcuMedia` | URLs, conversiones y purga de rutas heredadas |
 | Ítem **Apariencia** en `userMenuItems` | Única vía de acceso (no aparece en el sidebar) |
 
 Flujo de una petición:
@@ -52,17 +54,19 @@ participa: los colores nunca pasan por el build.
 Acceso: **menú de usuario → Apariencia** (visible solo si `Apariencia::canAccess()`).
 La página vive en el cluster `Configuración`, que **no se registra en el sidebar**
 (`$shouldRegisterNavigation = false`) y usa `SubNavigationPosition::Start`, de modo que la columna
-izquierda lista sus dos páginas:
+izquierda lista sus páginas:
 
 | Página | Ruta | Contenido |
 |---|---|---|
 | **Tema y colores** | `/admin/configuracion/apariencia` | Radio de temas con descripción, vista previa en vivo (modo claro y oscuro), colores personalizados y paleta corporativa de referencia |
 | **Marca e identidad** | `/admin/configuracion/marca` | Logo claro/oscuro, fondo detrás del logo, alto del logo y favicon |
+| **Archivos** | `/admin/configuracion/archivos` | Disco, prefijo, optimización y límites ([guía](../Archivos-y-Media-Library/README.md)) |
 
 Ambas tienen **Guardar cambios** y una acción de restaurar con confirmación:
 
 - En *Tema y colores*, restaurar vuelve al tema por defecto y **conserva** logo y favicon.
-- En *Marca e identidad*, restaurar quita los archivos subidos y **conserva** el tema.
+- En *Marca e identidad*, restaurar quita los archivos subidos —borrándolos del disco— y
+  **conserva** el tema.
 
 Al guardar se recarga la página (`$this->redirect(static::getUrl())`) para que los colores nuevos
 se apliquen de inmediato.
@@ -255,7 +259,7 @@ appearance_settings   (una sola fila)
 ├─ color_primario, color_gris             solo se usan con tema = personalizado
 ├─ color_sidebar_claro / _oscuro
 ├─ color_topbar_claro  / _oscuro
-├─ logo_claro, logo_oscuro, favicon       rutas en el disco `public`, directorio `apariencia/`
+├─ logo_claro, logo_oscuro, favicon       rutas heredadas (pre Media Library); ver §8.1
 ├─ alto_logo                              valor CSS (`2.5rem`, `40px`…), validado por regex
 └─ fondo_logo                             auto | claro | ninguno
 ```
@@ -269,9 +273,51 @@ Octane) seguiría sirviendo los colores anteriores.
 existir todavía: `leerFila()` comprueba `Schema::hasTable()` y captura cualquier `Throwable`,
 devolviendo el tema del config. Es lo que permite migrar desde cero sin romper el panel.
 
-Los archivos se suben con el mismo patrón que el resto del sistema: disco `public`,
-`->visibility('public')`, nombre aleatorio y `deleteUploadedFileUsing()` para que quitar un archivo
-en la UI lo borre del disco.
+### 8.1 Archivos: Media Library
+
+El logo y el favicon **no** se guardan en las columnas: viven en **Spatie Media Library**, en tres
+colecciones declaradas en `AppearanceSetting::registerMediaCollections()`, todas `->singleFile()`:
+
+| Colección | Tipos aceptados | Límite | Conversiones |
+|---|---|---|---|
+| `logo_claro` | png, jpeg, webp, svg | `ArchivosService::maxLogoKb()` | `thumb`, y `webp` si supera el umbral |
+| `logo_oscuro` | png, jpeg, webp, svg | `ArchivosService::maxLogoKb()` | `thumb`, y `webp` si supera el umbral |
+| `favicon` | ico, png, svg | `ArchivosService::maxFaviconKb()` | ninguna (no se convierten svg/ico) |
+
+El disco, el prefijo de rutas y los límites los resuelve `App\Services\Archivos\ArchivosService`
+(config `config/archivos.php` + fila opcional en `media_settings`, configurable en
+**Configuración → Archivos**). Documentación completa del subsistema de archivos:
+[`../Archivos-y-Media-Library/README.md`](../Archivos-y-Media-Library/README.md).
+
+Las rutas las construye `App\Media\IcuPathGenerator`:
+
+```text
+{prefijo}/{coleccion}/{Modelo}/{id}/{media_id}/archivo.png
+{prefijo}/{coleccion}/{Modelo}/{id}/{media_id}/conversions/archivo-thumb.png
+```
+
+Las **columnas heredadas** `logo_claro`, `logo_oscuro` y `favicon` son de la primera versión de esta
+página (subida directa con `FileUpload` a `apariencia/`). `HasIcuMedia::storedImageUrl()` y
+`AparienciaService` prefieren la media y solo caen a la columna si la colección está vacía, de modo
+que una instalación sin migrar sigue mostrando su logo. El comando
+`icu:migrar-imagenes-a-media` pasa esos archivos a Media Library con `preservingOriginal()`, así que
+tras migrar **la ruta y el archivo antiguo siguen existiendo** hasta que se purguen (ver §8.2).
+
+### 8.2 Ciclo de vida de los archivos: sin residuos
+
+Garantías al reemplazar logo claro, logo oscuro o favicon:
+
+| Situación | Qué pasa con el archivo anterior |
+|---|---|
+| Se sube un archivo nuevo en una colección | Media Library lo reemplaza: `singleFile()` es `collectionSizeLimit = 1`, así que `FileAdder` llama a `clearMediaCollectionExcept()`, se borra la fila de `media` y `MediaObserver::deleted` borra del disco **el original, sus conversiones y la carpeta** |
+| Se quita el archivo con la **X** de la interfaz y se guarda | Filament elimina esa media al guardar relaciones, con el mismo borrado en disco |
+| La colección ya tiene media y además hay una **ruta heredada** | `Marca::purgarArchivosHeredados()` borra el archivo del disco y pone la columna a `null` |
+| No hay media pero sí ruta heredada | **No se toca**: ese archivo es el que el panel está usando |
+| **Quitar personalización** | `clearBrandMedia()` borra las tres colecciones y se purgan las tres rutas heredadas: no queda nada en disco ni en `media` |
+
+La purga heredada vive en `HasIcuMedia::purgarArchivoHeredado()` —reutilizable por cualquier modelo
+con el trait— y se ejecuta en `guardar()` **después** de `saveRelationships()`, para que solo se
+borre cuando ya existe el archivo nuevo que la sustituye.
 
 ---
 
@@ -341,6 +387,8 @@ Va **solo** en `estilos.blade.php`, siempre acotado (`.fi-sidebar …`, `.fi-top
 - No recolorea el modo oscuro de forma independiente por elemento: cada barra tiene un color para
   modo claro y otro para modo oscuro, y el resto se deriva por contraste.
 - No toca la pantalla de login más allá del logo, el favicon y los colores registrados.
+- Cambiar el disco o el prefijo en **Configuración → Archivos** no mueve los archivos ya subidos:
+  las rutas guardadas en `media` siguen apuntando al disco anterior.
 
 ---
 
@@ -372,10 +420,17 @@ tests/Feature/Filament/MarcaPageTest.php
 **Modificados (puntos de enganche)**
 
 ```text
-app/Providers/AppServiceProvider.php            # singleton del servicio + observer
+app/Providers/AppServiceProvider.php            # singleton del servicio + observer + path generator
 app/Providers/Filament/AdminPanelProvider.php   # colors()/brandLogo()/favicon() como closures,
                                                 # renderHook(STYLES_AFTER), ítem "Apariencia" en userMenuItems
+app/Models/Concerns/HasIcuMedia.php             # purgarArchivoHeredado()
+app/Models/AppearanceSetting.php                # colecciones de media + clearBrandMedia()
 ```
+
+Piezas compartidas con el subsistema de archivos (no exclusivas de apariencia): ver
+[`../Archivos-y-Media-Library/README.md`](../Archivos-y-Media-Library/README.md)
+(`ArchivosService`, `IcuPathGenerator`, `MediaSetting`, `config/archivos.php`,
+`icu:migrar-imagenes-a-media`, página **Configuración → Archivos**).
 
 `resources/css/filament/admin/theme.css` **no se modificó**. Las utilidades Tailwind de la vista
 previa se compilan por el `@source '../../../../resources/views/filament/**/*'` que ya existía; hizo
@@ -407,6 +462,10 @@ vendor/bin/sail artisan test --compact tests/Unit/Services/AparienciaServiceTest
   colores.
 - **Marca**: subida de logo con `Storage::fake`, alto de logo inválido rechazado, restaurar vuelve a
   los archivos de la aplicación.
+- **Sin residuos** (`MarcaPageTest`): reemplazar logo claro, logo oscuro o favicon borra del disco el
+  archivo anterior y su fila en `media` (queda exactamente uno); quitar el archivo con la X lo borra;
+  subir uno nuevo purga la ruta heredada; una ruta heredada **sin** media no se toca porque es la que
+  el panel usa; y *Quitar personalización* no deja ningún archivo ni fila.
 - **Render**: el panel inyecta los tokens del tema guardado, renderiza sin fila en la tabla, resuelve
   aunque la tabla no exista, **las reglas del menú están acotadas a `.fi-sidebar`**, y solo quien
   tiene el permiso de Shield entra (403 en caso contrario).

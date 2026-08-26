@@ -6,6 +6,7 @@ use App\Filament\Resources\Equipos\RelationManagers\RecibosEquipoRelationManager
 use App\Models\Equipo;
 use App\Models\ReciboEquipo;
 use App\Rules\NotTrashed;
+use App\Services\Archivos\ArchivosService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -52,11 +53,11 @@ class ReciboEquipoForm
                                     ->live(),
                                 FileUpload::make('url')
                                     ->label('Documento Recibo')
-                                    ->disk('public')
-                                    ->directory('recibo-equipos')
-                                    ->visibility('public')
+                                    ->disk(fn (): string => ReciboEquipo::documentDisk())
+                                    ->directory(fn (): string => ReciboEquipo::documentDirectory())
+                                    ->visibility(fn (): string => app(ArchivosService::class)->visibilidad())
                                     ->acceptedFileTypes(['application/pdf'])
-                                    ->maxSize(10240)
+                                    ->maxSize(fn (): int => app(ArchivosService::class)->maxPdfKb())
                                     ->downloadable()
                                     ->openable()
                                     ->getUploadedFileNameForStorageUsing(

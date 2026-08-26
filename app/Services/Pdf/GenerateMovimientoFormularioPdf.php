@@ -37,7 +37,7 @@ class GenerateMovimientoFormularioPdf
         $fecha = $movimiento->fecha;
 
         return DB::transaction(function () use ($movimiento, $tipo, $binary, $path, $fecha): PdfMovimiento {
-            $disk = Storage::disk(PdfMovimiento::DOCUMENT_DISK);
+            $disk = Storage::disk(PdfMovimiento::documentDisk());
 
             /** @var PdfMovimiento|null $existing */
             $existing = $movimiento->pdfs()

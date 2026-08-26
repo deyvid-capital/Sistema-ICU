@@ -49,7 +49,7 @@ class MantenimientoEquipoCapturaUploadTest extends TestCase
         );
     }
 
-    public function test_it_stores_captures_as_images_named_by_moment_and_service_tag(): void
+    public function test_it_stores_captures_in_media_library_named_by_moment_and_service_tag(): void
     {
         Storage::fake('public');
 
@@ -67,13 +67,15 @@ class MantenimientoEquipoCapturaUploadTest extends TestCase
 
         $mantenimiento = MantenimientoEquipo::query()->latest('id')->firstOrFail();
 
-        $this->assertSame('mantenimiento-equipos/antes_ST100001_2026-07-20.png', $mantenimiento->cap_antes);
-        $this->assertSame('mantenimiento-equipos/despues_ST100001_2026-07-20.jpg', $mantenimiento->cap_despues);
-        Storage::disk('public')->assertExists($mantenimiento->cap_antes);
-        Storage::disk('public')->assertExists($mantenimiento->cap_despues);
+        $this->assertTrue($mantenimiento->hasMedia('cap_antes'));
+        $this->assertTrue($mantenimiento->hasMedia('cap_despues'));
+        $this->assertSame('antes_ST100001_2026-07-20.png', $mantenimiento->getFirstMedia('cap_antes')?->file_name);
+        $this->assertSame('despues_ST100001_2026-07-20.jpg', $mantenimiento->getFirstMedia('cap_despues')?->file_name);
+        $this->assertTrue($mantenimiento->hasStoredImage('cap_antes'));
+        $this->assertTrue($mantenimiento->hasStoredImage('cap_despues'));
     }
 
-    public function test_it_rejects_images_over_five_megabytes(): void
+    public function test_it_rejects_images_over_configured_max(): void
     {
         Storage::fake('public');
 

@@ -3,22 +3,32 @@
 namespace App\Models;
 
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
+use App\Models\Concerns\HasIcuMedia;
 use App\Models\Concerns\LogsIcuActivity;
+use App\Services\Archivos\ArchivosService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\HasMedia;
 
-class MantenimientoEquipo extends Model
+class MantenimientoEquipo extends Model implements HasMedia
 {
     use GuardsAgainstTrashedRelations;
     use HasFactory;
+    use HasIcuMedia;
     use LogsIcuActivity;
     use SoftDeletes;
 
+    /**
+     * @deprecated Usa ArchivosService::disco()
+     */
     public const IMAGE_DISK = 'public';
 
+    /**
+     * @deprecated Usa colecciones Media Library
+     */
     public const IMAGE_DIRECTORY = 'mantenimiento-equipos';
 
     public const IMAGE_MAX_SIZE_KB = 5120;
@@ -29,7 +39,7 @@ class MantenimientoEquipo extends Model
     public const IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'];
 
     /**
-     * Atributos que almacenan la ruta de una imagen en el disco público.
+     * Colecciones / atributos legacy de captura.
      *
      * @var list<string>
      */
@@ -54,51 +64,62 @@ class MantenimientoEquipo extends Model
         ];
     }
 
-    protected static function booted(): void
+    public function registerMediaCollections(): void
     {
-        static::updated(function (MantenimientoEquipo $mantenimiento): void {
-            $mantenimiento->deleteReplacedStoredImages();
-        });
+        $disk = $this->discoMedia();
 
-        static::forceDeleting(function (MantenimientoEquipo $mantenimiento): void {
-            $mantenimiento->deleteStoredImages();
-        });
-    }
+        $this->addMediaCollection('cap_antes')
+            ->useDisk($disk)
+            ->singleFile()
+            ->acceptsMimeTypes(self::IMAGE_MIME_TYPES);
 
-    public function hasStoredImage(string $attribute): bool
-    {
-        return filled($this->{$attribute})
-            && Storage::disk(self::IMAGE_DISK)->exists($this->{$attribute});
-    }
-
-    public function storedImageUrl(string $attribute): ?string
-    {
-        if (! $this->hasStoredImage($attribute)) {
-            return null;
-        }
-
-        return Storage::disk(self::IMAGE_DISK)->url($this->{$attribute});
-    }
-
-    public function storedImageFilename(string $attribute): ?string
-    {
-        if (! filled($this->{$attribute})) {
-            return null;
-        }
-
-        return basename((string) $this->{$attribute});
+        $this->addMediaCollection('cap_despues')
+            ->useDisk($disk)
+            ->singleFile()
+            ->acceptsMimeTypes(self::IMAGE_MIME_TYPES);
     }
 
     /**
-     * Elimina del disco público las imágenes de captura del registro.
+     * @return list<string>
+     */
+    protected function coleccionesConConversion(): array
+    {
+        return ['cap_antes', 'cap_despues'];
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(function (MantenimientoEquipo $mantenimiento): void {
+            $mantenimiento->deleteReplacedLegacyImages();
+        });
+
+        static::forceDeleting(function (MantenimientoEquipo $mantenimiento): void {
+            $mantenimiento->deleteLegacyStoredImages();
+        });
+    }
+
+    /**
+     * Elimina rutas legacy en columnas (fallback previo a Media Library).
      *
-     * @return list<string> Rutas efectivamente eliminadas.
+     * @return list<string>
      */
     public function deleteStoredImages(): array
+    {
+        return $this->deleteLegacyStoredImages();
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function deleteLegacyStoredImages(): array
     {
         $deleted = [];
 
         foreach (self::IMAGE_ATTRIBUTES as $attribute) {
+            if ($this->hasMedia($attribute)) {
+                continue;
+            }
+
             if ($this->deleteStoredImage($this->{$attribute})) {
                 $deleted[] = (string) $this->{$attribute};
             }
@@ -107,10 +128,7 @@ class MantenimientoEquipo extends Model
         return $deleted;
     }
 
-    /**
-     * Elimina las imágenes que fueron reemplazadas o vaciadas en la última actualización.
-     */
-    protected function deleteReplacedStoredImages(): void
+    protected function deleteReplacedLegacyImages(): void
     {
         foreach (self::IMAGE_ATTRIBUTES as $attribute) {
             if (! $this->wasChanged($attribute)) {
@@ -133,7 +151,7 @@ class MantenimientoEquipo extends Model
             return false;
         }
 
-        $disk = Storage::disk(self::IMAGE_DISK);
+        $disk = Storage::disk(app(ArchivosService::class)->disco());
 
         if (! $disk->exists($path)) {
             return false;

@@ -5,11 +5,12 @@ namespace App\Filament\Clusters\Configuracion\Pages;
 use App\Filament\Clusters\Configuracion\ConfiguracionCluster;
 use App\Models\AppearanceSetting;
 use App\Services\Apariencia\AparienciaService;
+use App\Services\Archivos\ArchivosService;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -19,8 +20,8 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 /**
  * Logo, favicon y alto del logo del panel.
@@ -45,20 +46,28 @@ class Marca extends Page implements HasForms
     protected static ?int $navigationSort = 2;
 
     /**
-     * @var array<string, string|null>
+     * Colecciones de Media Library que gestiona esta página.
+     *
+     * @var list<string>
+     */
+    public const COLECCIONES = ['logo_claro', 'logo_oscuro', 'favicon'];
+
+    public ?AppearanceSetting $record = null;
+
+    /**
+     * @var array<string, mixed>
      */
     public ?array $data = [];
 
     public function mount(): void
     {
-        $configuracion = AppearanceSetting::actual();
+        $this->record = AppearanceSetting::query()->first() ?? AppearanceSetting::query()->create([
+            'tema' => config('apariencia.tema_por_defecto'),
+        ]);
 
         $this->form->fill([
-            'logo_claro' => $configuracion->logo_claro,
-            'logo_oscuro' => $configuracion->logo_oscuro,
-            'favicon' => $configuracion->favicon,
-            'alto_logo' => $configuracion->alto_logo ?: config('apariencia.logo.alto_por_defecto'),
-            'fondo_logo' => $configuracion->fondo_logo ?: 'auto',
+            'alto_logo' => $this->record->alto_logo ?: config('apariencia.logo.alto_por_defecto'),
+            'fondo_logo' => $this->record->fondo_logo ?: 'auto',
         ]);
     }
 
@@ -101,22 +110,22 @@ class Marca extends Page implements HasForms
                     ->description('Icono que aparece en la pestaña del navegador.')
                     ->icon(Heroicon::OutlinedGlobeAlt)
                     ->schema([
-                        FileUpload::make('favicon')
+                        SpatieMediaLibraryFileUpload::make('favicon')
                             ->label('Archivo')
-                            ->disk(config('apariencia.logo.disco'))
-                            ->directory(config('apariencia.logo.directorio'))
-                            ->visibility('public')
+                            ->collection('favicon')
+                            ->disk(fn (): string => app(ArchivosService::class)->disco())
+                            ->visibility(fn (): string => app(ArchivosService::class)->visibilidad())
                             ->acceptedFileTypes(['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/svg+xml'])
-                            ->maxSize(config('apariencia.favicon.max_kb'))
+                            ->maxSize(fn (): int => app(ArchivosService::class)->maxFaviconKb())
                             ->getUploadedFileNameForStorageUsing(
-                                fn ($file): string => 'favicon-'.Str::random(8).'.'.$file->getClientOriginalExtension(),
+                                fn (TemporaryUploadedFile $file): string => 'favicon-'.Str::random(8).'.'.$file->getClientOriginalExtension(),
                             )
-                            ->deleteUploadedFileUsing($this->eliminarArchivo())
                             ->validationMessages([
                                 'max' => 'El archivo no debe superar los :max KB.',
                             ]),
                     ]),
             ])
+            ->model($this->record)
             ->statePath('data');
     }
 
@@ -145,10 +154,16 @@ class Marca extends Page implements HasForms
     {
         $datos = $this->form->getState();
 
-        $configuracion = AppearanceSetting::query()->first() ?? new AppearanceSetting([
-            'tema' => config('apariencia.tema_por_defecto'),
-        ]);
-        $configuracion->fill($datos)->save();
+        $this->record->fill([
+            'alto_logo' => $datos['alto_logo'] ?? null,
+            'fondo_logo' => $datos['fondo_logo'] ?? null,
+        ])->save();
+
+        // Aplica subidas y eliminaciones: Media Library borra del disco el
+        // archivo anterior de cada colección `singleFile()`.
+        $this->form->model($this->record)->saveRelationships();
+
+        $this->purgarArchivosHeredados();
 
         app(AparienciaService::class)->olvidar();
 
@@ -164,13 +179,18 @@ class Marca extends Page implements HasForms
     {
         $configuracion = AppearanceSetting::query()->first();
 
-        $configuracion?->update([
-            'logo_claro' => null,
-            'logo_oscuro' => null,
-            'favicon' => null,
-            'alto_logo' => null,
-            'fondo_logo' => null,
-        ]);
+        if ($configuracion !== null) {
+            $configuracion->clearBrandMedia();
+
+            foreach (self::COLECCIONES as $coleccion) {
+                $configuracion->purgarArchivoHeredado($coleccion);
+            }
+
+            $configuracion->fill([
+                'alto_logo' => null,
+                'fondo_logo' => null,
+            ])->save();
+        }
 
         app(AparienciaService::class)->olvidar();
 
@@ -182,32 +202,47 @@ class Marca extends Page implements HasForms
         $this->redirect(static::getUrl());
     }
 
-    protected function campoDeImagen(string $nombre, string $etiqueta): FileUpload
+    /**
+     * Cuando una colección ya tiene su archivo en Media Library, la ruta de la
+     * columna heredada queda obsoleta: se borra del disco para no acumular
+     * logos ni favicons huérfanos.
+     */
+    protected function purgarArchivosHeredados(): void
     {
-        return FileUpload::make($nombre)
+        $this->record->refresh();
+
+        $purgados = false;
+
+        foreach (self::COLECCIONES as $coleccion) {
+            if (! $this->record->hasMedia($coleccion)) {
+                continue;
+            }
+
+            $purgados = $this->record->purgarArchivoHeredado($coleccion) || $purgados;
+        }
+
+        if ($purgados) {
+            $this->record->save();
+        }
+    }
+
+    protected function campoDeImagen(string $nombre, string $etiqueta): SpatieMediaLibraryFileUpload
+    {
+        return SpatieMediaLibraryFileUpload::make($nombre)
             ->label($etiqueta)
+            ->collection($nombre)
             ->image()
-            ->disk(config('apariencia.logo.disco'))
-            ->directory(config('apariencia.logo.directorio'))
-            ->visibility('public')
+            ->disk(fn (): string => app(ArchivosService::class)->disco())
+            ->visibility(fn (): string => app(ArchivosService::class)->visibilidad())
             ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'])
-            ->maxSize(config('apariencia.logo.max_kb'))
+            ->maxSize(fn (): int => app(ArchivosService::class)->maxLogoKb())
             ->imagePreviewHeight('120')
+            ->conversion('thumb')
             ->getUploadedFileNameForStorageUsing(
-                fn ($file): string => Str::slug($nombre).'-'.Str::random(8).'.'.$file->getClientOriginalExtension(),
+                fn (TemporaryUploadedFile $file): string => Str::slug($nombre).'-'.Str::random(8).'.'.$file->getClientOriginalExtension(),
             )
-            ->deleteUploadedFileUsing($this->eliminarArchivo())
             ->validationMessages([
                 'max' => 'La imagen no debe superar los :max KB.',
             ]);
-    }
-
-    protected function eliminarArchivo(): \Closure
-    {
-        return function (?string $file): void {
-            if (filled($file)) {
-                Storage::disk(config('apariencia.logo.disco'))->delete($file);
-            }
-        };
     }
 }

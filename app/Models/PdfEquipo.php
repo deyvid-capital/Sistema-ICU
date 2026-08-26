@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsIcuActivity;
+use App\Services\Archivos\ArchivosService;
 use Database\Factories\PdfEquipoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,16 @@ class PdfEquipo extends Model
     use SoftDeletes;
 
     public const DOCUMENT_DISK = 'public';
+
+    public static function documentDisk(): string
+    {
+        return app(ArchivosService::class)->disco();
+    }
+
+    public static function documentDirectory(): string
+    {
+        return app(ArchivosService::class)->directorioPdf('pdf_equipos');
+    }
 
     protected $table = 'pdf_equipos';
 
@@ -50,7 +61,7 @@ class PdfEquipo extends Model
     public function hasStoredDocument(): bool
     {
         return filled($this->url)
-            && Storage::disk(self::DOCUMENT_DISK)->exists($this->url);
+            && Storage::disk(self::documentDisk())->exists($this->url);
     }
 
     public function storedDocumentUrl(): ?string
@@ -59,7 +70,7 @@ class PdfEquipo extends Model
             return null;
         }
 
-        return Storage::disk(self::DOCUMENT_DISK)->url($this->url);
+        return Storage::disk(self::documentDisk())->url($this->url);
     }
 
     public function storedDocumentFilename(): ?string
@@ -73,7 +84,7 @@ class PdfEquipo extends Model
 
     public function downloadStoredDocument(): StreamedResponse
     {
-        return Storage::disk(self::DOCUMENT_DISK)->download(
+        return Storage::disk(self::documentDisk())->download(
             $this->url,
             $this->storedDocumentFilename(),
         );
@@ -85,7 +96,7 @@ class PdfEquipo extends Model
             return false;
         }
 
-        return Storage::disk(self::DOCUMENT_DISK)->delete($this->url);
+        return Storage::disk(self::documentDisk())->delete($this->url);
     }
 
     public function documento(): MorphTo

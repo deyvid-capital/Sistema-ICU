@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PdfEquipos\Schemas;
 use App\Filament\Resources\EntregaEquipos\RelationManagers\PdfsRelationManager as EntregaPdfsRelationManager;
 use App\Filament\Resources\RecepcionEquipos\RelationManagers\PdfsRelationManager as RecepcionPdfsRelationManager;
 use App\Models\PdfEquipo;
+use App\Services\Archivos\ArchivosService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
@@ -57,11 +58,11 @@ class PdfEquipoForm
                                     ->hiddenOn(self::OWNER_RELATION_MANAGERS),
                                 FileUpload::make('url')
                                     ->label('Archivo PDF')
-                                    ->disk(PdfEquipo::DOCUMENT_DISK)
-                                    ->directory('pdf-equipos')
-                                    ->visibility('public')
+                                    ->disk(fn (): string => PdfEquipo::documentDisk())
+                                    ->directory(fn (): string => PdfEquipo::documentDirectory())
+                                    ->visibility(fn (): string => app(ArchivosService::class)->visibilidad())
                                     ->acceptedFileTypes(['application/pdf'])
-                                    ->maxSize(10240)
+                                    ->maxSize(fn (): int => app(ArchivosService::class)->maxPdfKb())
                                     ->downloadable()
                                     ->openable()
                                     ->getUploadedFileNameForStorageUsing(

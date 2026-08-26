@@ -4,6 +4,7 @@ namespace Tests\Feature\Models;
 
 use App\Models\MantenimientoEquipo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -15,36 +16,28 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
     {
         Storage::fake('public');
 
-        [$antes, $despues] = $this->fakeStoredImages();
-
-        $mantenimiento = MantenimientoEquipo::factory()->create([
-            'cap_antes' => $antes,
-            'cap_despues' => $despues,
-        ]);
+        $mantenimiento = $this->mantenimientoConMedia();
 
         $mantenimiento->delete();
 
         $this->assertTrue($mantenimiento->trashed());
-        Storage::disk('public')->assertExists($antes);
-        Storage::disk('public')->assertExists($despues);
+        $this->assertTrue($mantenimiento->hasMedia('cap_antes'));
+        $this->assertTrue($mantenimiento->hasMedia('cap_despues'));
     }
 
-    public function test_force_deleting_removes_both_stored_images(): void
+    public function test_force_deleting_removes_media(): void
     {
         Storage::fake('public');
 
-        [$antes, $despues] = $this->fakeStoredImages();
-
-        $mantenimiento = MantenimientoEquipo::factory()->create([
-            'cap_antes' => $antes,
-            'cap_despues' => $despues,
-        ]);
+        $mantenimiento = $this->mantenimientoConMedia();
+        $antesId = $mantenimiento->getFirstMedia('cap_antes')?->id;
+        $despuesId = $mantenimiento->getFirstMedia('cap_despues')?->id;
 
         $mantenimiento->delete();
         $mantenimiento->forceDelete();
 
-        Storage::disk('public')->assertMissing($antes);
-        Storage::disk('public')->assertMissing($despues);
+        $this->assertDatabaseMissing('media', ['id' => $antesId]);
+        $this->assertDatabaseMissing('media', ['id' => $despuesId]);
         $this->assertDatabaseMissing('mantenimientos_equipos', ['id' => $mantenimiento->id]);
     }
 
@@ -59,50 +52,61 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
 
         $mantenimiento->forceDelete();
 
-        $this->assertSame([], $mantenimiento->deleteStoredImages());
         $this->assertDatabaseMissing('mantenimientos_equipos', ['id' => $mantenimiento->id]);
     }
 
-    public function test_replacing_an_image_deletes_the_previous_file(): void
+    public function test_replacing_media_keeps_single_file_in_collection(): void
     {
         Storage::fake('public');
 
-        [$antes] = $this->fakeStoredImages();
-        $nueva = 'mantenimiento-equipos/antes_ST100001_2026-08-05.jpg';
-        Storage::disk('public')->put($nueva, 'imagen-nueva');
+        $mantenimiento = $this->mantenimientoConMedia();
+        $oldId = $mantenimiento->getFirstMedia('cap_antes')?->id;
 
-        $mantenimiento = MantenimientoEquipo::factory()->create(['cap_antes' => $antes]);
+        $mantenimiento
+            ->addMedia(UploadedFile::fake()->image('nueva.png'))
+            ->usingFileName('antes_ST100001_2026-08-05.png')
+            ->toMediaCollection('cap_antes');
 
-        $mantenimiento->update(['cap_antes' => $nueva]);
+        $mantenimiento->refresh();
 
-        Storage::disk('public')->assertMissing($antes);
-        Storage::disk('public')->assertExists($nueva);
+        $this->assertSame(1, $mantenimiento->getMedia('cap_antes')->count());
+        $this->assertNotSame($oldId, $mantenimiento->getFirstMedia('cap_antes')?->id);
+        $this->assertDatabaseMissing('media', ['id' => $oldId]);
     }
 
-    public function test_clearing_an_image_deletes_the_previous_file(): void
+    public function test_legacy_column_fallback_still_reports_stored_image(): void
     {
         Storage::fake('public');
 
-        [$antes] = $this->fakeStoredImages();
+        $path = 'mantenimiento-equipos/antes_ST100001_2026-08-01.png';
+        Storage::disk('public')->put($path, 'imagen-antes');
 
-        $mantenimiento = MantenimientoEquipo::factory()->create(['cap_antes' => $antes]);
+        $mantenimiento = MantenimientoEquipo::factory()->create([
+            'cap_antes' => $path,
+            'cap_despues' => null,
+        ]);
 
-        $mantenimiento->update(['cap_antes' => null]);
-
-        Storage::disk('public')->assertMissing($antes);
+        $this->assertTrue($mantenimiento->hasStoredImage('cap_antes'));
+        $this->assertStringContainsString($path, (string) $mantenimiento->storedImageUrl('cap_antes'));
     }
 
-    /**
-     * @return array{0: string, 1: string}
-     */
-    private function fakeStoredImages(): array
+    private function mantenimientoConMedia(): MantenimientoEquipo
     {
-        $antes = 'mantenimiento-equipos/antes_ST100001_2026-08-01.png';
-        $despues = 'mantenimiento-equipos/despues_ST100001_2026-08-01.png';
+        $mantenimiento = MantenimientoEquipo::factory()->create([
+            'cap_antes' => null,
+            'cap_despues' => null,
+        ]);
 
-        Storage::disk('public')->put($antes, 'imagen-antes');
-        Storage::disk('public')->put($despues, 'imagen-despues');
+        $mantenimiento
+            ->addMedia(UploadedFile::fake()->image('antes.png'))
+            ->usingFileName('antes_ST100001_2026-08-01.png')
+            ->toMediaCollection('cap_antes');
 
-        return [$antes, $despues];
+        $mantenimiento
+            ->addMedia(UploadedFile::fake()->image('despues.png'))
+            ->usingFileName('despues_ST100001_2026-08-01.png')
+            ->toMediaCollection('cap_despues');
+
+        return $mantenimiento->refresh();
     }
 }

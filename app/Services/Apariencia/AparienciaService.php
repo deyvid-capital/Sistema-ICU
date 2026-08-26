@@ -3,6 +3,7 @@
 namespace App\Services\Apariencia;
 
 use App\Models\AppearanceSetting;
+use App\Services\Archivos\ArchivosService;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -89,6 +90,13 @@ class AparienciaService
 
     public function logoClaro(): ?string
     {
+        $fila = $this->leerFila();
+        $url = $this->mediaUrl($fila, 'logo_claro');
+
+        if ($url !== null) {
+            return $url;
+        }
+
         $archivo = $this->resolver()['logo_claro'];
 
         return filled($archivo)
@@ -98,6 +106,13 @@ class AparienciaService
 
     public function logoOscuro(): ?string
     {
+        $fila = $this->leerFila();
+        $url = $this->mediaUrl($fila, 'logo_oscuro');
+
+        if ($url !== null) {
+            return $url;
+        }
+
         $archivo = $this->resolver()['logo_oscuro'];
 
         return filled($archivo) ? $this->url($archivo) : null;
@@ -110,6 +125,13 @@ class AparienciaService
 
     public function favicon(): ?string
     {
+        $fila = $this->leerFila();
+        $url = $this->mediaUrl($fila, 'favicon');
+
+        if ($url !== null) {
+            return $url;
+        }
+
         $archivo = $this->resolver()['favicon'];
 
         return filled($archivo)
@@ -240,7 +262,7 @@ class AparienciaService
 
     protected function url(string $archivo): string
     {
-        return Storage::disk(config('apariencia.logo.disco'))->url($archivo);
+        return Storage::disk(app(ArchivosService::class)->disco())->url($archivo);
     }
 
     /**
@@ -272,12 +294,59 @@ class AparienciaService
                 'claro' => $valor($fila?->color_topbar_claro, $base['topbar']['claro']),
                 'oscuro' => $valor($fila?->color_topbar_oscuro, $base['topbar']['oscuro']),
             ],
-            'logo_claro' => $fila?->logo_claro,
-            'logo_oscuro' => $fila?->logo_oscuro,
-            'favicon' => $fila?->favicon,
+            'logo_claro' => $this->rutaMarca($fila, 'logo_claro'),
+            'logo_oscuro' => $this->rutaMarca($fila, 'logo_oscuro'),
+            'favicon' => $this->rutaMarca($fila, 'favicon'),
             'alto_logo' => $fila?->alto_logo ?: config('apariencia.logo.alto_por_defecto'),
             'fondo_logo' => $fila?->fondo_logo ?: 'auto',
         ];
+    }
+
+    protected function mediaUrl(?AppearanceSetting $fila, string $coleccion): ?string
+    {
+        if ($fila === null || ! $this->tablaMediaDisponible()) {
+            return null;
+        }
+
+        try {
+            if (! $fila->hasMedia($coleccion)) {
+                return null;
+            }
+
+            $url = $fila->getFirstMediaUrl($coleccion);
+
+            return filled($url) ? $url : null;
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    protected function rutaMarca(?AppearanceSetting $fila, string $coleccion): ?string
+    {
+        if ($fila === null) {
+            return null;
+        }
+
+        if ($this->tablaMediaDisponible()) {
+            try {
+                if ($fila->hasMedia($coleccion)) {
+                    return 'media:'.$coleccion;
+                }
+            } catch (Throwable) {
+                // fallback a columna
+            }
+        }
+
+        return $fila->{$coleccion};
+    }
+
+    protected function tablaMediaDisponible(): bool
+    {
+        try {
+            return Schema::hasTable('media');
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     /**

@@ -5,9 +5,10 @@ namespace App\Filament\Resources\MantenimientoEquipos\Schemas;
 use App\Models\Equipo;
 use App\Models\MantenimientoEquipo;
 use App\Rules\NotTrashed;
+use App\Services\Archivos\ArchivosService;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -62,23 +63,26 @@ class MantenimientoEquipoForm
     /**
      * Campo de imagen (PNG/JPG) para las capturas del mantenimiento.
      */
-    protected static function capturaUpload(string $name, string $momento): FileUpload
+    protected static function capturaUpload(string $name, string $momento): SpatieMediaLibraryFileUpload
     {
-        return FileUpload::make($name)
+        $archivos = app(ArchivosService::class);
+
+        return SpatieMediaLibraryFileUpload::make($name)
+            ->collection($name)
             ->image()
-            ->disk(MantenimientoEquipo::IMAGE_DISK)
-            ->directory(MantenimientoEquipo::IMAGE_DIRECTORY)
-            ->visibility('public')
+            ->disk($archivos->disco())
+            ->visibility($archivos->visibilidad())
             ->acceptedFileTypes(MantenimientoEquipo::IMAGE_MIME_TYPES)
-            ->maxSize(MantenimientoEquipo::IMAGE_MAX_SIZE_KB)
-            ->helperText('Formatos permitidos: PNG, JPG o JPEG. Tamaño máximo: 5 MB.')
+            ->maxSize($archivos->maxImagenKb())
+            ->helperText('Formatos permitidos: PNG, JPG o JPEG. Tamaño máximo: '.number_format($archivos->maxImagenKb() / 1024, 0).' MB.')
             ->validationMessages([
-                'max' => 'La imagen no debe superar los 5 MB.',
+                'max' => 'La imagen no debe superar los :max KB.',
                 'mimetypes' => 'La imagen debe ser un archivo PNG, JPG o JPEG.',
             ])
             ->imagePreviewHeight('180')
             ->downloadable()
             ->openable()
+            ->conversion('thumb')
             ->getUploadedFileNameForStorageUsing(
                 fn (TemporaryUploadedFile $file, Get $get): string => self::buildStoredImageFilename(
                     $momento,

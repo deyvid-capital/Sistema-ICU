@@ -4,6 +4,8 @@ namespace App\Filament\Resources\PdfCelulars\Schemas;
 
 use App\Filament\Resources\EntregaCelulars\RelationManagers\PdfsRelationManager as EntregaCelularPdfsRelationManager;
 use App\Filament\Resources\RecepcionCelulars\RelationManagers\PdfsRelationManager as RecepcionCelularPdfsRelationManager;
+use App\Models\PdfCelular;
+use App\Services\Archivos\ArchivosService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
@@ -56,11 +58,11 @@ class PdfCelularForm
                                     ->hiddenOn(self::OWNER_RELATION_MANAGERS),
                                 FileUpload::make('url')
                                     ->label('Archivo PDF')
-                                    ->disk('public')
-                                    ->directory('pdf-celulares')
-                                    ->visibility('public')
+                                    ->disk(fn (): string => PdfCelular::documentDisk())
+                                    ->directory(fn (): string => PdfCelular::documentDirectory())
+                                    ->visibility(fn (): string => app(ArchivosService::class)->visibilidad())
                                     ->acceptedFileTypes(['application/pdf'])
-                                    ->maxSize(10240)
+                                    ->maxSize(fn (): int => app(ArchivosService::class)->maxPdfKb())
                                     ->downloadable()
                                     ->openable()
                                     ->getUploadedFileNameForStorageUsing(

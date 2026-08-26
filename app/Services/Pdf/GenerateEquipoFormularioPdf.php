@@ -34,7 +34,7 @@ class GenerateEquipoFormularioPdf
         $path = $tipo->pdfRelativePath($numero);
 
         return DB::transaction(function () use ($record, $tipo, $binary, $path, $fecha): PdfEquipo {
-            $disk = Storage::disk(PdfEquipo::DOCUMENT_DISK);
+            $disk = Storage::disk(PdfEquipo::documentDisk());
 
             /** @var PdfEquipo|null $existing */
             $existing = $record->pdfs()

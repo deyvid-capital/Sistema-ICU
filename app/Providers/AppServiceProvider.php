@@ -5,12 +5,14 @@ namespace App\Providers;
 use App\Filament\Pages\Auth\TwoFactorChallenge;
 use App\Listeners\ResetearIntentosAlIniciarSesion;
 use App\Livewire\Profile\TwoFactorAuthentication;
+use App\Media\IcuPathGenerator;
 use App\Models\AppearanceSetting;
 use App\Models\AsigCelular;
 use App\Models\AsignacionCargador;
 use App\Models\AsignacionEquipo;
 use App\Models\Cargador;
 use App\Models\Equipo;
+use App\Models\MediaSetting;
 use App\Models\Movimiento;
 use App\Models\PdfEquipo;
 use App\Models\SoftwareExc;
@@ -21,11 +23,13 @@ use App\Observers\AsignacionEquipoObserver;
 use App\Observers\BreezySessionObserver;
 use App\Observers\CargadorObserver;
 use App\Observers\EquipoObserver;
+use App\Observers\MediaSettingObserver;
 use App\Observers\MovimientoObserver;
 use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
 use App\Policies\ActivityPolicy;
 use App\Services\Apariencia\AparienciaService;
+use App\Services\Archivos\ArchivosService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Facades\FilamentTimezone;
@@ -46,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(AparienciaService::class);
+        $this->app->singleton(ArchivosService::class);
     }
 
     /**
@@ -55,9 +60,15 @@ class AppServiceProvider extends ServiceProvider
     {
         FilamentTimezone::set(config('app.display_timezone'));
 
+        config([
+            'media-library.path_generator' => IcuPathGenerator::class,
+            'media-library.disk_name' => config('archivos.disco', env('ARCHIVOS_DISK', 'public')),
+        ]);
+
         Gate::policy(Activity::class, ActivityPolicy::class);
 
         AppearanceSetting::observe(AppearanceSettingObserver::class);
+        MediaSetting::observe(MediaSettingObserver::class);
         BreezySession::observe(BreezySessionObserver::class);
         AsignacionEquipo::observe(AsignacionEquipoObserver::class);
         AsignacionCargador::observe(AsignacionCargadorObserver::class);

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasIcuMedia;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
 
-class AppearanceSetting extends Model
+class AppearanceSetting extends Model implements HasMedia
 {
+    use HasIcuMedia;
+
     protected $fillable = [
         'tema',
         'color_primario',
@@ -30,5 +34,40 @@ class AppearanceSetting extends Model
         return static::query()->first() ?? new static([
             'tema' => config('apariencia.tema_por_defecto'),
         ]);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $disk = $this->discoMedia();
+
+        $this->addMediaCollection('logo_claro')
+            ->useDisk($disk)
+            ->singleFile()
+            ->acceptsMimeTypes(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']);
+
+        $this->addMediaCollection('logo_oscuro')
+            ->useDisk($disk)
+            ->singleFile()
+            ->acceptsMimeTypes(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']);
+
+        $this->addMediaCollection('favicon')
+            ->useDisk($disk)
+            ->singleFile()
+            ->acceptsMimeTypes(['image/x-icon', 'image/vnd.microsoft.icon', 'image/png', 'image/svg+xml']);
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function coleccionesConConversion(): array
+    {
+        return ['logo_claro', 'logo_oscuro'];
+    }
+
+    public function clearBrandMedia(): void
+    {
+        $this->clearMediaCollection('logo_claro');
+        $this->clearMediaCollection('logo_oscuro');
+        $this->clearMediaCollection('favicon');
     }
 }

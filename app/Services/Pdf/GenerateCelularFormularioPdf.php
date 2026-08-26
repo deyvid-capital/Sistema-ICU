@@ -34,7 +34,7 @@ class GenerateCelularFormularioPdf
         $path = $tipo->pdfRelativePath($numero);
 
         return DB::transaction(function () use ($record, $tipo, $binary, $path, $fecha): PdfCelular {
-            $disk = Storage::disk(PdfCelular::DOCUMENT_DISK);
+            $disk = Storage::disk(PdfCelular::documentDisk());
 
             /** @var PdfCelular|null $existing */
             $existing = $record->pdfs()
