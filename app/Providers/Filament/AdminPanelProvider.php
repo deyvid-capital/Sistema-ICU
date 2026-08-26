@@ -5,7 +5,9 @@ namespace App\Providers\Filament;
 use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Clusters\Asignacion\AsignacionCluster;
 use App\Filament\Clusters\Celulares\CelularesCluster;
-use App\Filament\Clusters\Configuracion\Pages\Apariencia;
+use App\Filament\Clusters\Configuracion\Pages\Archivos;
+use App\Filament\Clusters\Configuracion\Pages\Marca;
+use App\Filament\Clusters\Configuracion\Pages\TemaColores;
 use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Clusters\Recursos\RecursosCluster;
@@ -19,7 +21,7 @@ use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
 use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Livewire\Profile\UpdatePassword as ProfileUpdatePassword;
-use App\Services\Apariencia\AparienciaService;
+use App\Services\Configuracion\TemaService;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Actions\Action;
@@ -69,17 +71,25 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->brandLogo(fn (): ?string => app(AparienciaService::class)->logoClaro())
-            ->darkModeBrandLogo(fn (): ?string => app(AparienciaService::class)->logoOscuro())
-            ->brandLogoHeight(fn (): string => app(AparienciaService::class)->altoLogo())
-            ->favicon(fn (): ?string => app(AparienciaService::class)->favicon())
+            ->brandLogo(fn (): ?string => app(TemaService::class)->logoClaro())
+            ->darkModeBrandLogo(fn (): ?string => app(TemaService::class)->logoOscuro())
+            ->brandLogoHeight(fn (): string => app(TemaService::class)->altoLogo())
+            ->favicon(fn (): ?string => app(TemaService::class)->favicon())
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->userMenuItems([
-                Action::make('apariencia')
-                    ->label('Apariencia')
-                    ->url(fn (): string => Apariencia::getUrl())
-                    ->icon(Heroicon::OutlinedSwatch)
-                    ->visible(fn (): bool => Apariencia::canAccess()),
+                Action::make('configuraciones')
+                    ->label('Configuraciones')
+                    ->url(function (): string {
+                        foreach ([TemaColores::class, Marca::class, Archivos::class] as $pagina) {
+                            if ($pagina::canAccess()) {
+                                return $pagina::getUrl();
+                            }
+                        }
+
+                        return TemaColores::getUrl();
+                    })
+                    ->icon(Heroicon::OutlinedCog6Tooth)
+                    ->visible(fn (): bool => TemaColores::canAccess() || Marca::canAccess() || Archivos::canAccess()),
                 Action::make('roles')
                     ->label('Roles y permisos')
                     ->url(fn (): string => RoleResource::getUrl())
@@ -110,10 +120,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->databaseNotifications()
 
-            ->colors(fn (): array => app(AparienciaService::class)->coloresDelPanel())
+            ->colors(fn (): array => app(TemaService::class)->coloresDelPanel())
             ->renderHook(
                 PanelsRenderHook::STYLES_AFTER,
-                fn (): View => view('filament.apariencia.estilos', app(AparienciaService::class)->variablesCss()),
+                fn (): View => view('filament.configuracion.estilos', app(TemaService::class)->variablesCss()),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

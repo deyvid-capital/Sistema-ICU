@@ -4,7 +4,7 @@ namespace App\Filament\Clusters\Configuracion\Pages;
 
 use App\Filament\Clusters\Configuracion\ConfiguracionCluster;
 use App\Models\AppearanceSetting;
-use App\Services\Apariencia\AparienciaService;
+use App\Services\Configuracion\TemaService;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
@@ -26,12 +26,12 @@ use Filament\Support\Icons\Heroicon;
 /**
  * Tema y colores del panel: sidebar, barra superior, color primario y gris.
  */
-class Apariencia extends Page implements HasForms
+class TemaColores extends Page implements HasForms
 {
     use HasPageShield;
     use InteractsWithForms;
 
-    protected string $view = 'filament.clusters.configuracion.pages.apariencia';
+    protected string $view = 'filament.clusters.configuracion.pages.tema-colores';
 
     protected static ?string $cluster = ConfiguracionCluster::class;
 
@@ -41,7 +41,7 @@ class Apariencia extends Page implements HasForms
 
     protected static ?string $title = 'Tema y colores';
 
-    protected static ?string $slug = 'apariencia';
+    protected static ?string $slug = 'tema-colores';
 
     protected static ?int $navigationSort = 1;
 
@@ -52,16 +52,16 @@ class Apariencia extends Page implements HasForms
 
     public function mount(): void
     {
-        $apariencia = app(AparienciaService::class)->resolver();
+        $resolucion = app(TemaService::class)->resolver();
 
         $this->form->fill([
-            'tema' => $apariencia['tema'],
-            'color_primario' => $apariencia['primario'],
-            'color_gris' => $apariencia['gris'],
-            'color_sidebar_claro' => $apariencia['sidebar']['claro'],
-            'color_sidebar_oscuro' => $apariencia['sidebar']['oscuro'],
-            'color_topbar_claro' => $apariencia['topbar']['claro'],
-            'color_topbar_oscuro' => $apariencia['topbar']['oscuro'],
+            'tema' => $resolucion['tema'],
+            'color_primario' => $resolucion['primario'],
+            'color_gris' => $resolucion['gris'],
+            'color_sidebar_claro' => $resolucion['sidebar']['claro'],
+            'color_sidebar_oscuro' => $resolucion['sidebar']['oscuro'],
+            'color_topbar_claro' => $resolucion['topbar']['claro'],
+            'color_topbar_oscuro' => $resolucion['topbar']['oscuro'],
         ]);
     }
 
@@ -80,7 +80,7 @@ class Apariencia extends Page implements HasForms
                             ->required()
                             ->live()
                             ->afterStateUpdated(function (Set $set, ?string $state): void {
-                                $tema = config("apariencia.temas.{$state}");
+                                $tema = config("tema.temas.{$state}");
 
                                 if (! is_array($tema)) {
                                     return;
@@ -99,14 +99,14 @@ class Apariencia extends Page implements HasForms
                     ->description('Simulación del panel con los colores seleccionados, antes de guardar.')
                     ->icon(Heroicon::OutlinedEye)
                     ->schema([
-                        View::make('filament.apariencia.vista-previa')
+                        View::make('filament.configuracion.vista-previa')
                             ->columnSpanFull(),
                     ]),
 
                 Section::make('Colores personalizados')
                     ->description('Se recomienda usar los hexadecimales de la paleta corporativa.')
                     ->icon(Heroicon::OutlinedPaintBrush)
-                    ->visible(fn (Get $get): bool => $get('tema') === AparienciaService::TEMA_PERSONALIZADO)
+                    ->visible(fn (Get $get): bool => $get('tema') === TemaService::TEMA_PERSONALIZADO)
                     ->schema([
                         Grid::make(2)->schema([
                             ColorPicker::make('color_sidebar_claro')
@@ -143,12 +143,12 @@ class Apariencia extends Page implements HasForms
                             Select::make('color_gris')
                                 ->label('Paleta gris')
                                 ->helperText('Afecta a fondos, bordes y textos de toda la interfaz, no solo a las barras.')
-                                ->options(config('apariencia.grises_disponibles'))
+                                ->options(config('tema.grises_disponibles'))
                                 ->required()
                                 ->native(false)
                                 ->live(),
                         ]),
-                        View::make('filament.apariencia.muestras-marca')
+                        View::make('filament.configuracion.muestras-marca')
                             ->columnSpanFull(),
                     ]),
             ])
@@ -163,7 +163,7 @@ class Apariencia extends Page implements HasForms
      */
     public function vistaPrevia(): array
     {
-        $servicio = app(AparienciaService::class);
+        $servicio = app(TemaService::class);
         $primario = $this->data['color_primario'] ?? null;
 
         return [
@@ -206,11 +206,11 @@ class Apariencia extends Page implements HasForms
         $configuracion = AppearanceSetting::query()->first() ?? new AppearanceSetting;
         $configuracion->fill($datos)->save();
 
-        app(AparienciaService::class)->olvidar();
+        app(TemaService::class)->olvidar();
 
         Notification::make()
             ->success()
-            ->title('Apariencia actualizada')
+            ->title('Tema actualizado')
             ->body('Los nuevos colores ya están aplicados en el panel.')
             ->send();
 
@@ -222,7 +222,7 @@ class Apariencia extends Page implements HasForms
         $configuracion = AppearanceSetting::query()->first();
 
         $configuracion?->update([
-            'tema' => config('apariencia.tema_por_defecto'),
+            'tema' => config('tema.tema_por_defecto'),
             'color_primario' => null,
             'color_gris' => null,
             'color_sidebar_claro' => null,
@@ -231,7 +231,7 @@ class Apariencia extends Page implements HasForms
             'color_topbar_oscuro' => null,
         ]);
 
-        app(AparienciaService::class)->olvidar();
+        app(TemaService::class)->olvidar();
 
         Notification::make()
             ->success()
@@ -248,11 +248,11 @@ class Apariencia extends Page implements HasForms
     {
         $opciones = [];
 
-        foreach (config('apariencia.temas', []) as $clave => $tema) {
+        foreach (config('tema.temas', []) as $clave => $tema) {
             $opciones[$clave] = $tema['etiqueta'];
         }
 
-        $opciones[AparienciaService::TEMA_PERSONALIZADO] = 'Personalizado';
+        $opciones[TemaService::TEMA_PERSONALIZADO] = 'Personalizado';
 
         return $opciones;
     }
@@ -264,11 +264,11 @@ class Apariencia extends Page implements HasForms
     {
         $descripciones = [];
 
-        foreach (config('apariencia.temas', []) as $clave => $tema) {
+        foreach (config('tema.temas', []) as $clave => $tema) {
             $descripciones[$clave] = $tema['descripcion'];
         }
 
-        $descripciones[AparienciaService::TEMA_PERSONALIZADO] = 'Elige cada color manualmente.';
+        $descripciones[TemaService::TEMA_PERSONALIZADO] = 'Elige cada color manualmente.';
 
         return $descripciones;
     }

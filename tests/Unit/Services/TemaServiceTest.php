@@ -3,28 +3,28 @@
 namespace Tests\Unit\Services;
 
 use App\Models\AppearanceSetting;
-use App\Services\Apariencia\AparienciaService;
+use App\Services\Configuracion\TemaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class AparienciaServiceTest extends TestCase
+class TemaServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function servicio(): AparienciaService
+    private function servicio(): TemaService
     {
         // Instancia limpia: el servicio memoriza la resolución por request.
-        return new AparienciaService;
+        return new TemaService;
     }
 
     public function test_sin_configuracion_guardada_usa_el_tema_por_defecto(): void
     {
-        $apariencia = $this->servicio()->resolver();
+        $resolucion = $this->servicio()->resolver();
 
-        $this->assertSame('safi', $apariencia['tema']);
-        $this->assertSame('#003973', $apariencia['primario']);
-        $this->assertSame('#003973', $apariencia['sidebar']['claro']);
-        $this->assertSame('#FFFFFF', $apariencia['topbar']['claro']);
+        $this->assertSame('safi', $resolucion['tema']);
+        $this->assertSame('#003973', $resolucion['primario']);
+        $this->assertSame('#003973', $resolucion['sidebar']['claro']);
+        $this->assertSame('#FFFFFF', $resolucion['topbar']['claro']);
     }
 
     public function test_un_tema_curado_ignora_los_colores_personalizados_guardados(): void
@@ -35,16 +35,16 @@ class AparienciaServiceTest extends TestCase
             'color_sidebar_claro' => '#FF00FF',
         ]);
 
-        $apariencia = $this->servicio()->resolver();
+        $resolucion = $this->servicio()->resolver();
 
-        $this->assertSame('#008A83', $apariencia['primario']);
-        $this->assertSame('#006B96', $apariencia['sidebar']['claro']);
+        $this->assertSame('#008A83', $resolucion['primario']);
+        $this->assertSame('#006B96', $resolucion['sidebar']['claro']);
     }
 
     public function test_el_tema_personalizado_respeta_los_colores_guardados(): void
     {
         AppearanceSetting::create([
-            'tema' => AparienciaService::TEMA_PERSONALIZADO,
+            'tema' => TemaService::TEMA_PERSONALIZADO,
             'color_primario' => '#13A538',
             'color_gris' => 'Zinc',
             'color_sidebar_claro' => '#0081C1',
@@ -52,10 +52,10 @@ class AparienciaServiceTest extends TestCase
         ]);
 
         $servicio = $this->servicio();
-        $apariencia = $servicio->resolver();
+        $resolucion = $servicio->resolver();
 
-        $this->assertSame('#13A538', $apariencia['primario']);
-        $this->assertSame('#0081C1', $apariencia['sidebar']['claro']);
+        $this->assertSame('#13A538', $resolucion['primario']);
+        $this->assertSame('#0081C1', $resolucion['sidebar']['claro']);
         $this->assertSame('#13A538', $servicio->coloresDelPanel()['primary']);
         $this->assertIsArray($servicio->coloresDelPanel()['gray']);
     }

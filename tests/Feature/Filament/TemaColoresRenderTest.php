@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Filament;
 
-use App\Filament\Clusters\Configuracion\Pages\Apariencia;
+use App\Filament\Clusters\Configuracion\Pages\TemaColores;
 use App\Models\AppearanceSetting;
 use App\Models\User;
-use App\Services\Apariencia\AparienciaService;
+use App\Services\Configuracion\TemaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
@@ -14,7 +14,7 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class AparienciaRenderTest extends TestCase
+class TemaColoresRenderTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -31,7 +31,7 @@ class AparienciaRenderTest extends TestCase
         Gate::before(fn () => true);
 
         AppearanceSetting::create([
-            'tema' => AparienciaService::TEMA_PERSONALIZADO,
+            'tema' => TemaService::TEMA_PERSONALIZADO,
             'color_primario' => '#008A83',
             'color_gris' => 'Slate',
             'color_sidebar_claro' => '#003973',
@@ -61,7 +61,7 @@ class AparienciaRenderTest extends TestCase
         Gate::before(fn () => true);
 
         $respuesta = $this->actingAs($this->usuarioConAcceso())
-            ->get(Apariencia::getUrl(panel: 'admin'))
+            ->get(TemaColores::getUrl(panel: 'admin'))
             ->assertSuccessful();
 
         $respuesta->assertSee('.fi-sidebar .fi-sidebar-item-label', false);
@@ -70,14 +70,14 @@ class AparienciaRenderTest extends TestCase
         // Ningún selector puede empezar por la clase suelta (cada uno va en su línea).
         $this->assertDoesNotMatchRegularExpression(
             '/^\s*\.fi-sidebar-(item|group)/m',
-            $this->soloEstilosDeApariencia($respuesta->getContent()),
+            $this->soloEstilosDeTema($respuesta->getContent()),
         );
 
         // Y la sub-navegación sigue mostrando sus dos páginas.
         $respuesta->assertSee('Tema y colores')->assertSee('Marca e identidad');
     }
 
-    private function soloEstilosDeApariencia(string $html): string
+    private function soloEstilosDeTema(string $html): string
     {
         preg_match_all('/<style>(?<css>[^<]*--icu-sidebar-bg[^<]*)<\/style>/', $html, $coincidencias);
 
@@ -94,13 +94,13 @@ class AparienciaRenderTest extends TestCase
             ->assertSee('--icu-sidebar-bg: #003973', false);
     }
 
-    public function test_la_apariencia_se_resuelve_aunque_la_tabla_no_exista(): void
+    public function test_el_tema_se_resuelve_aunque_la_tabla_no_exista(): void
     {
         Schema::drop('appearance_settings');
 
-        $apariencia = (new AparienciaService)->resolver();
+        $resolucion = (new TemaService)->resolver();
 
-        $this->assertSame(config('apariencia.tema_por_defecto'), $apariencia['tema']);
+        $this->assertSame(config('tema.tema_por_defecto'), $resolucion['tema']);
     }
 
     public function test_solo_quien_tiene_el_permiso_de_shield_entra_a_la_pagina(): void
@@ -121,11 +121,11 @@ class AparienciaRenderTest extends TestCase
         $operador->assignRole(Role::firstOrCreate(['name' => 'operador', 'guard_name' => 'web']));
 
         $this->actingAs($superAdmin)
-            ->get(Apariencia::getUrl(panel: 'admin'))
+            ->get(TemaColores::getUrl(panel: 'admin'))
             ->assertSuccessful();
 
         $this->actingAs($operador)
-            ->get(Apariencia::getUrl(panel: 'admin'))
+            ->get(TemaColores::getUrl(panel: 'admin'))
             ->assertForbidden();
     }
 }

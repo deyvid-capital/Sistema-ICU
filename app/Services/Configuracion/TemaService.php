@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Apariencia;
+namespace App\Services\Configuracion;
 
 use App\Models\AppearanceSetting;
 use App\Services\Archivos\ArchivosService;
@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
- * Resuelve la apariencia del panel combinando los temas de config/apariencia.php
+ * Resuelve el tema del panel combinando config/tema.php
  * con los valores guardados en la tabla `appearance_settings`.
  */
-class AparienciaService
+class TemaService
 {
-    public const CACHE_KEY = 'apariencia.resuelta';
+    public const CACHE_KEY = 'tema.resuelto';
 
     public const TEMA_PERSONALIZADO = 'personalizado';
 
@@ -43,6 +43,7 @@ class AparienciaService
         $this->resuelta = null;
 
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('apariencia.resuelta');
     }
 
     /**
@@ -52,14 +53,14 @@ class AparienciaService
      */
     public function coloresDelPanel(): array
     {
-        $apariencia = $this->resolver();
+        $resolucion = $this->resolver();
 
         $colores = [
-            'primary' => $this->paleta($apariencia['primario']),
-            'gray' => $this->paleta($apariencia['gris']),
+            'primary' => $this->paleta($resolucion['primario']),
+            'gray' => $this->paleta($resolucion['gris']),
         ];
 
-        foreach (config('apariencia.semanticos', []) as $nombre => $valor) {
+        foreach (config('tema.semanticos', []) as $nombre => $valor) {
             $colores[$nombre] = $this->paleta($valor);
         }
 
@@ -73,16 +74,16 @@ class AparienciaService
      */
     public function variablesCss(): array
     {
-        $apariencia = $this->resolver();
+        $resolucion = $this->resolver();
 
         return [
             'claro' => [
-                'sidebar' => $this->tokensDeBarra($apariencia['sidebar']['claro']),
-                'topbar' => $this->tokensDeBarra($apariencia['topbar']['claro']),
+                'sidebar' => $this->tokensDeBarra($resolucion['sidebar']['claro']),
+                'topbar' => $this->tokensDeBarra($resolucion['topbar']['claro']),
             ],
             'oscuro' => [
-                'sidebar' => $this->tokensDeBarra($apariencia['sidebar']['oscuro']),
-                'topbar' => $this->tokensDeBarra($apariencia['topbar']['oscuro']),
+                'sidebar' => $this->tokensDeBarra($resolucion['sidebar']['oscuro']),
+                'topbar' => $this->tokensDeBarra($resolucion['topbar']['oscuro']),
             ],
             'placaDeLogo' => $this->placaDeLogo(),
         ];
@@ -101,7 +102,7 @@ class AparienciaService
 
         return filled($archivo)
             ? $this->url($archivo)
-            : asset(config('apariencia.logo.fallback_claro'));
+            : asset(config('tema.logo.fallback_claro'));
     }
 
     public function logoOscuro(): ?string
@@ -136,7 +137,7 @@ class AparienciaService
 
         return filled($archivo)
             ? $this->url($archivo)
-            : asset(config('apariencia.favicon.fallback'));
+            : asset(config('tema.favicon.fallback'));
     }
 
     /**
@@ -152,8 +153,8 @@ class AparienciaService
      */
     public function placaDeLogo(): array
     {
-        $apariencia = $this->resolver();
-        $modo = $apariencia['fondo_logo'];
+        $resolucion = $this->resolver();
+        $modo = $resolucion['fondo_logo'];
 
         $vacia = ['sidebar' => false, 'topbar' => false];
 
@@ -162,19 +163,19 @@ class AparienciaService
         }
 
         $forzada = $modo === 'claro';
-        $usaLogoIncluido = blank($apariencia['logo_claro']);
-        $tieneLogoOscuro = filled($apariencia['logo_oscuro']);
+        $usaLogoIncluido = blank($resolucion['logo_claro']);
+        $tieneLogoOscuro = filled($resolucion['logo_oscuro']);
 
         $aplica = fn (bool $permitida, string $fondo): bool => $permitida && $this->barraEsOscura($fondo);
 
         return [
             'claro' => [
-                'sidebar' => $aplica($forzada || $usaLogoIncluido, $apariencia['sidebar']['claro']),
-                'topbar' => $aplica($forzada || $usaLogoIncluido, $apariencia['topbar']['claro']),
+                'sidebar' => $aplica($forzada || $usaLogoIncluido, $resolucion['sidebar']['claro']),
+                'topbar' => $aplica($forzada || $usaLogoIncluido, $resolucion['topbar']['claro']),
             ],
             'oscuro' => [
-                'sidebar' => $aplica($forzada || ($usaLogoIncluido && ! $tieneLogoOscuro), $apariencia['sidebar']['oscuro']),
-                'topbar' => $aplica($forzada || ($usaLogoIncluido && ! $tieneLogoOscuro), $apariencia['topbar']['oscuro']),
+                'sidebar' => $aplica($forzada || ($usaLogoIncluido && ! $tieneLogoOscuro), $resolucion['sidebar']['oscuro']),
+                'topbar' => $aplica($forzada || ($usaLogoIncluido && ! $tieneLogoOscuro), $resolucion['topbar']['oscuro']),
             ],
         ];
     }
@@ -271,10 +272,10 @@ class AparienciaService
     protected function construir(): array
     {
         $fila = $this->leerFila();
-        $temas = config('apariencia.temas', []);
-        $porDefecto = $temas[config('apariencia.tema_por_defecto')] ?? reset($temas);
+        $temas = config('tema.temas', []);
+        $porDefecto = $temas[config('tema.tema_por_defecto')] ?? reset($temas);
 
-        $tema = $fila?->tema ?: config('apariencia.tema_por_defecto');
+        $tema = $fila?->tema ?: config('tema.tema_por_defecto');
         $base = $temas[$tema] ?? $porDefecto;
         $esPersonalizado = $tema === self::TEMA_PERSONALIZADO;
 
@@ -297,7 +298,7 @@ class AparienciaService
             'logo_claro' => $this->rutaMarca($fila, 'logo_claro'),
             'logo_oscuro' => $this->rutaMarca($fila, 'logo_oscuro'),
             'favicon' => $this->rutaMarca($fila, 'favicon'),
-            'alto_logo' => $fila?->alto_logo ?: config('apariencia.logo.alto_por_defecto'),
+            'alto_logo' => $fila?->alto_logo ?: config('tema.logo.alto_por_defecto'),
             'fondo_logo' => $fila?->fondo_logo ?: 'auto',
         ];
     }

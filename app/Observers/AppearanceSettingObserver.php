@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\AppearanceSetting;
-use App\Services\Apariencia\AparienciaService;
+use App\Services\Configuracion\TemaService;
 
 class AppearanceSettingObserver
 {
@@ -23,6 +23,6 @@ class AppearanceSettingObserver
      */
     private function olvidar(): void
     {
-        app(AparienciaService::class)->olvidar();
+        app(TemaService::class)->olvidar();
     }
 }

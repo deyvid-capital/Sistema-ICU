@@ -16,7 +16,7 @@ Paquetes: `filament/spatie-laravel-media-library-plugin` **^5** sobre `spatie/la
 Requiere extensión **GD** (o Imagick) en el contenedor Sail para conversiones.
 
 La marca (logo/favicon) se documenta también, en detalle de ciclo de vida, en
-[`../Apariencia-Tema-y-Marca/README.md`](../Apariencia-Tema-y-Marca/README.md) (§8.1–8.2).
+[`../Configuracion-Tema-y-Marca/README.md`](../Configuracion-Tema-y-Marca/README.md) (§8.1–8.2).
 Este documento describe el **subsistema completo de archivos en ICU**.
 
 ---
@@ -54,12 +54,12 @@ PDFs (sin Media Library)
 
 ## 2. Qué se ve en el panel
 
-Acceso: **menú de usuario → Apariencia** abre el cluster Configuración (oculto del sidebar).
+Acceso: **menú de usuario → Configuraciones** abre el cluster Configuración (oculto del sidebar).
 La sub-navegación izquierda lista:
 
 | Página | Ruta | Contenido |
 |---|---|---|
-| Tema y colores | `/admin/configuracion/apariencia` | Temas y colores |
+| Tema y colores | `/admin/configuracion/tema-colores` | Temas y colores |
 | Marca e identidad | `/admin/configuracion/marca` | Logos y favicon (Media Library) |
 | **Archivos** | `/admin/configuracion/archivos` | Disco, prefijo, optimización, límites, catálogo |
 
@@ -302,7 +302,7 @@ app/Models/AppearanceSetting.php              # HasMedia + colecciones + clearBr
 app/Filament/.../MantenimientoEquipoForm.php  # SpatieMediaLibraryFileUpload
 app/Filament/.../MantenimientoEquipoInfolist.php
 app/Filament/Clusters/Configuracion/Pages/Marca.php
-app/Services/Apariencia/AparienciaService.php # URLs desde media
+app/Services/Configuracion/TemaService.php # URLs desde media
 app/Models/PdfEquipo.php | PdfCelular.php | PdfMovimiento.php | ReciboEquipo.php
 app/Filament/.../Pdf*Form.php | ReciboEquipoForm.php
 .env.example                                  # ARCHIVOS_DISK, ARCHIVOS_PREFIJO
@@ -322,12 +322,12 @@ vendor/bin/sail artisan test --compact \
   tests/Feature/Console/MigrarImagenesAMediaCommandTest.php \
   tests/Feature/Media/ImageConversionTest.php \
   tests/Unit/Services/ArchivosServiceTest.php \
-  tests/Unit/Services/AparienciaServiceTest.php
+  tests/Unit/Services/TemaServiceTest.php
 ```
 
 Cubren: subida a media con nombres esperados, soft/force delete, reemplazo `singleFile`,
 fallback de columna legacy, página Archivos + servicio, migración idempotente (con **PNG reales**,
-no texto), conversiones `thumb`/`webp` según umbral, y resolución de apariencia/marca.
+no texto), conversiones `thumb`/`webp` según umbral, y resolución de tema/marca.
 
 ---
 

@@ -4,8 +4,8 @@ namespace App\Filament\Clusters\Configuracion\Pages;
 
 use App\Filament\Clusters\Configuracion\ConfiguracionCluster;
 use App\Models\AppearanceSetting;
-use App\Services\Apariencia\AparienciaService;
 use App\Services\Archivos\ArchivosService;
+use App\Services\Configuracion\TemaService;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
@@ -62,11 +62,11 @@ class Marca extends Page implements HasForms
     public function mount(): void
     {
         $this->record = AppearanceSetting::query()->first() ?? AppearanceSetting::query()->create([
-            'tema' => config('apariencia.tema_por_defecto'),
+            'tema' => config('tema.tema_por_defecto'),
         ]);
 
         $this->form->fill([
-            'alto_logo' => $this->record->alto_logo ?: config('apariencia.logo.alto_por_defecto'),
+            'alto_logo' => $this->record->alto_logo ?: config('tema.logo.alto_por_defecto'),
             'fondo_logo' => $this->record->fondo_logo ?: 'auto',
         ]);
     }
@@ -97,7 +97,7 @@ class Marca extends Page implements HasForms
                             ->native(false),
                         TextInput::make('alto_logo')
                             ->label('Alto del logo')
-                            ->placeholder(config('apariencia.logo.alto_por_defecto'))
+                            ->placeholder(config('tema.logo.alto_por_defecto'))
                             ->helperText('Valor CSS, por ejemplo 2.5rem o 40px.')
                             ->maxLength(20)
                             ->rule('regex:/^\d+(\.\d+)?(rem|px|em)$/')
@@ -165,7 +165,7 @@ class Marca extends Page implements HasForms
 
         $this->purgarArchivosHeredados();
 
-        app(AparienciaService::class)->olvidar();
+        app(TemaService::class)->olvidar();
 
         Notification::make()
             ->success()
@@ -192,7 +192,7 @@ class Marca extends Page implements HasForms
             ])->save();
         }
 
-        app(AparienciaService::class)->olvidar();
+        app(TemaService::class)->olvidar();
 
         Notification::make()
             ->success()

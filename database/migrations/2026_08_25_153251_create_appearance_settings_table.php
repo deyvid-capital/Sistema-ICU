@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Configuración visual del panel. Tabla de una sola fila: los valores nulos
-     * se resuelven contra el tema definido en config/apariencia.php.
+     * se resuelven contra el tema definido en config/tema.php.
      */
     public function up(): void
     {

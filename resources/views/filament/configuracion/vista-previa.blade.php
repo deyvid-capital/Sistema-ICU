@@ -1,6 +1,6 @@
 {{--
     Simulación del panel con los colores del formulario. Los tokens vienen de
-    AparienciaService, así que el texto y el ítem activo que se ven aquí son
+    TemaService, así que el texto y el ítem activo que se ven aquí son
     exactamente los que calculará el CSS real.
 --}}
 @php

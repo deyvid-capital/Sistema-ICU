@@ -5,7 +5,7 @@ namespace Tests\Feature\Filament;
 use App\Filament\Clusters\Configuracion\Pages\Marca;
 use App\Models\AppearanceSetting;
 use App\Models\User;
-use App\Services\Apariencia\AparienciaService;
+use App\Services\Configuracion\TemaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
@@ -55,7 +55,7 @@ class MarcaPageTest extends TestCase
         $this->assertSame('3rem', $configuracion->alto_logo);
         $this->assertNull($configuracion->logo_claro);
 
-        $servicio = app(AparienciaService::class);
+        $servicio = app(TemaService::class);
         $servicio->olvidar();
 
         $this->assertNotNull($servicio->logoClaro());
@@ -174,7 +174,7 @@ class MarcaPageTest extends TestCase
 
         Storage::disk('public')->assertExists('apariencia/logo-en-uso.png');
         $this->assertSame('apariencia/logo-en-uso.png', $configuracion->logo_claro);
-        $this->assertStringContainsString('logo-en-uso.png', (string) app(AparienciaService::class)->logoClaro());
+        $this->assertStringContainsString('logo-en-uso.png', (string) app(TemaService::class)->logoClaro());
     }
 
     public function test_quitar_la_personalizacion_no_deja_ningun_archivo(): void
@@ -259,7 +259,7 @@ class MarcaPageTest extends TestCase
 
         $this->assertStringContainsString(
             'Capital-Safi-SA-logo-.png',
-            (string) app(AparienciaService::class)->logoClaro(),
+            (string) app(TemaService::class)->logoClaro(),
         );
     }
 }

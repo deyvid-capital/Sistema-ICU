@@ -1,10 +1,10 @@
 {{--
     Recolorea el sidebar y la barra superior con los valores guardados en la
-    página de Apariencia. Se inyecta en el render hook `panels::styles.after`,
+    página Tema y colores. Se inyecta en el render hook `panels::styles.after`,
     por lo que gana a los estilos de Filament sin recompilar assets.
 
     Todo el color legible (texto, iconos, hover, ítem activo) se deriva de los
-    tokens --icu-*-fg calculados en AparienciaService con la API de contraste de
+    tokens --icu-*-fg calculados en TemaService con la API de contraste de
     Filament, de modo que un fondo oscuro nunca deja el menú ilegible.
 --}}
 <style>

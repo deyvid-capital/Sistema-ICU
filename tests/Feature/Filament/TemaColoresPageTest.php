@@ -2,17 +2,17 @@
 
 namespace Tests\Feature\Filament;
 
-use App\Filament\Clusters\Configuracion\Pages\Apariencia;
+use App\Filament\Clusters\Configuracion\Pages\TemaColores;
 use App\Models\AppearanceSetting;
 use App\Models\User;
-use App\Services\Apariencia\AparienciaService;
+use App\Services\Configuracion\TemaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class AparienciaPageTest extends TestCase
+class TemaColoresPageTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -31,7 +31,7 @@ class AparienciaPageTest extends TestCase
 
     public function test_la_pagina_carga_con_la_sub_navegacion_de_configuracion(): void
     {
-        $this->get(Apariencia::getUrl(panel: 'admin'))
+        $this->get(TemaColores::getUrl(panel: 'admin'))
             ->assertSuccessful()
             ->assertSee('Tema y colores')
             ->assertSee('Marca e identidad')
@@ -40,21 +40,21 @@ class AparienciaPageTest extends TestCase
 
     public function test_guardar_un_tema_curado_persiste_la_configuracion(): void
     {
-        Livewire::test(Apariencia::class)
+        Livewire::test(TemaColores::class)
             ->fillForm(['tema' => 'turquesa'])
             ->call('guardar')
             ->assertNotified()
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('appearance_settings', ['tema' => 'turquesa']);
-        $this->assertSame('#008A83', app(AparienciaService::class)->resolver()['primario']);
+        $this->assertSame('#008A83', app(TemaService::class)->resolver()['primario']);
     }
 
     public function test_guardar_colores_personalizados_persiste_cada_valor(): void
     {
-        Livewire::test(Apariencia::class)
+        Livewire::test(TemaColores::class)
             ->fillForm([
-                'tema' => AparienciaService::TEMA_PERSONALIZADO,
+                'tema' => TemaService::TEMA_PERSONALIZADO,
                 'color_primario' => '#008A83',
                 'color_gris' => 'Zinc',
                 'color_sidebar_claro' => '#003973',
@@ -74,9 +74,9 @@ class AparienciaPageTest extends TestCase
 
     public function test_un_color_con_formato_invalido_no_se_guarda(): void
     {
-        Livewire::test(Apariencia::class)
+        Livewire::test(TemaColores::class)
             ->fillForm([
-                'tema' => AparienciaService::TEMA_PERSONALIZADO,
+                'tema' => TemaService::TEMA_PERSONALIZADO,
                 'color_sidebar_claro' => 'azul',
             ])
             ->call('guardar')
@@ -88,13 +88,13 @@ class AparienciaPageTest extends TestCase
     public function test_restaurar_descarta_los_colores_pero_conserva_la_marca(): void
     {
         AppearanceSetting::create([
-            'tema' => AparienciaService::TEMA_PERSONALIZADO,
+            'tema' => TemaService::TEMA_PERSONALIZADO,
             'color_primario' => '#FF00FF',
             'color_sidebar_claro' => '#FF00FF',
             'logo_claro' => 'apariencia/logo.png',
         ]);
 
-        Livewire::test(Apariencia::class)
+        Livewire::test(TemaColores::class)
             ->call('restaurar')
             ->assertNotified();
 
@@ -108,7 +108,7 @@ class AparienciaPageTest extends TestCase
 
     public function test_al_elegir_un_tema_se_precargan_sus_colores(): void
     {
-        Livewire::test(Apariencia::class)
+        Livewire::test(TemaColores::class)
             ->fillForm(['tema' => 'confianza'])
             ->assertFormSet([
                 'color_primario' => '#0081C1',

@@ -1,4 +1,4 @@
-# Apariencia: tema, colores y marca del panel
+# Configuraciones: tema, colores y marca del panel
 
 El super administrador cambia **colores del sidebar, de la barra superior, color primario, paleta
 gris, logo (claro/oscuro), alto del logo y favicon** desde una página del propio panel, **sin tocar
@@ -17,23 +17,23 @@ implementado en ICU**.
 
 | Pieza | Rol |
 |---|---|
-| `config/apariencia.php` | **Define por código** los temas disponibles, los grises seleccionables y la paleta corporativa |
+| `config/tema.php` | **Define por código** los temas disponibles, los grises seleccionables y la paleta corporativa |
 | Tabla `appearance_settings` | Una sola fila con el tema elegido y los valores personalizados |
 | `App\Models\AppearanceSetting` | Modelo de fila única (`AppearanceSetting::actual()`) |
-| `App\Services\Apariencia\AparienciaService` | Resuelve tema + overrides, cachea y calcula contraste |
+| `App\Services\Configuracion\TemaService` | Resuelve tema + overrides, cachea y calcula contraste |
 | `App\Observers\AppearanceSettingObserver` | Invalida caché y memo al guardar |
-| `resources/views/filament/apariencia/estilos.blade.php` | El **único** CSS acoplado a clases `.fi-*`, inyectado en `panels::styles.after` |
+| `resources/views/filament/configuracion/estilos.blade.php` | El **único** CSS acoplado a clases `.fi-*`, inyectado en `panels::styles.after` |
 | `ConfiguracionCluster` | Cluster oculto del sidebar, con sub-navegación a la izquierda |
-| Páginas `Apariencia` y `Marca` | Formularios de tema/colores y de logo/favicon |
+| Páginas `TemaColores` y `Marca` | Formularios de tema/colores y de logo/favicon |
 | `AppearanceSetting::registerMediaCollections()` | Colecciones `singleFile()` de logo claro, logo oscuro y favicon |
 | `App\Models\Concerns\HasIcuMedia` | URLs, conversiones y purga de rutas heredadas |
-| Ítem **Apariencia** en `userMenuItems` | Única vía de acceso (no aparece en el sidebar) |
+| Ítem **Configuraciones** en `userMenuItems` | Única vía de acceso (no aparece en el sidebar) |
 
 Flujo de una petición:
 
 ```text
 Panel::boot()                                    (vendor/filament/filament/src/Panel.php:95)
-  ├─► ->colors(fn () => AparienciaService::coloresDelPanel())
+  ├─► ->colors(fn () => TemaService::coloresDelPanel())
   │      └─► FilamentColor::register(...)
   │             └─► AssetManager::renderStyles()  →  <style> :root { --primary-600: oklch(...) }
   │
@@ -51,14 +51,14 @@ participa: los colores nunca pasan por el build.
 
 ## 2. Qué se ve en el panel
 
-Acceso: **menú de usuario → Apariencia** (visible solo si `Apariencia::canAccess()`).
+Acceso: **menú de usuario → Configuraciones** (visible si hay acceso a Tema y colores, Marca o Archivos).
 La página vive en el cluster `Configuración`, que **no se registra en el sidebar**
 (`$shouldRegisterNavigation = false`) y usa `SubNavigationPosition::Start`, de modo que la columna
 izquierda lista sus páginas:
 
 | Página | Ruta | Contenido |
 |---|---|---|
-| **Tema y colores** | `/admin/configuracion/apariencia` | Radio de temas con descripción, vista previa en vivo (modo claro y oscuro), colores personalizados y paleta corporativa de referencia |
+| **Tema y colores** | `/admin/configuracion/tema-colores` | Radio de temas con descripción, vista previa en vivo (modo claro y oscuro), colores personalizados y paleta corporativa de referencia |
 | **Marca e identidad** | `/admin/configuracion/marca` | Logo claro/oscuro, fondo detrás del logo, alto del logo y favicon |
 | **Archivos** | `/admin/configuracion/archivos` | Disco, prefijo, optimización y límites ([guía](../Archivos-y-Media-Library/README.md)) |
 
@@ -75,7 +75,7 @@ se apliquen de inmediato.
 
 ## 3. Temas y paleta corporativa
 
-Los temas **se definen en código**, en `config/apariencia.php`. Añadir un tema = añadir una entrada;
+Los temas **se definen en código**, en `config/tema.php`. Añadir un tema = añadir una entrada;
 aparece automáticamente en el radio de la página.
 
 | Clave | Etiqueta | Primario | Sidebar claro | Barra superior clara |
@@ -88,7 +88,7 @@ aparece automáticamente en el radio de la página.
 Los tonos claros son los hexadecimales corporativos exactos. Los tonos oscuros de cada tema
 (`#041E36`, `#0E1A22`, `#062A38`, `#17191C`…) son variantes elegidas para acompañar esa paleta.
 
-Colores semánticos compartidos por todos los temas (`apariencia.semanticos`):
+Colores semánticos compartidos por todos los temas (`tema.semanticos`):
 
 ```php
 'info'    => '#0081C1',   // Azul Cielo
@@ -97,7 +97,7 @@ Colores semánticos compartidos por todos los temas (`apariencia.semanticos`):
 'danger'  => 'Rose',
 ```
 
-Paleta corporativa completa (`apariencia.paleta_marca`), que la página muestra como muestras con su
+Paleta corporativa completa (`tema.paleta_marca`), que la página muestra como muestras con su
 hexadecimal para elegir dentro de la marca:
 
 | Color | HEX | Color | HEX |
@@ -108,7 +108,7 @@ hexadecimal para elegir dentro de la marca:
 | Turquesa Lealtad | `#008A83` | Gris SAFI | `#949494` |
 | Turquesa Respeto | `#48B9B2` | | |
 
-Grises seleccionables (`apariencia.grises_disponibles`): `Slate` (recomendado), `Zinc`, `Gray`,
+Grises seleccionables (`tema.grises_disponibles`): `Slate` (recomendado), `Zinc`, `Gray`,
 `Neutral`, `Stone` y `#949494` (Gris SAFI). El gris afecta a **toda** la interfaz —fondos, bordes,
 textos—, no solo a las barras; el campo lo advierte con un `helperText`.
 
@@ -204,7 +204,7 @@ El texto y el acento de cada barra **no se configuran**: se calculan con la API 
 de Filament, de modo que ningún fondo elegido deja el menú ilegible.
 
 ```php
-// AparienciaService::tokensDeBarra()
+// TemaService::tokensDeBarra()
 $textoClaroEsLegible = Color::calculateContrastRatio($fondo, '#FFFFFF')
     >= Color::calculateContrastRatio($fondo, '#0F1419');
 
@@ -233,7 +233,7 @@ El logo institucional (`public/images/Capital-Safi-SA-logo-.png`) es **azul oscu
 transparente**: sobre una barra oscura desaparece. Se detectó en la verificación visual con el tema
 *Azul Confianza* (barra superior `#006B96`), donde el logo quedaba ilegible.
 
-`AparienciaService::placaDeLogo()` decide **por barra y por modo** si hay que pintar una placa blanca
+`TemaService::placaDeLogo()` decide **por barra y por modo** si hay que pintar una placa blanca
 redondeada detrás del logo. Es necesario decidirlo por barra porque el logo se dibuja en la **barra
 superior** cuando el sidebar es colapsable (el caso de este panel, con
 `sidebarFullyCollapsibleOnDesktop()`) y en la cabecera del sidebar cuando no lo es.
@@ -264,8 +264,8 @@ appearance_settings   (una sola fila)
 └─ fondo_logo                             auto | claro | ninguno
 ```
 
-Caché: `Cache::rememberForever('apariencia.resuelta')` más un memo en el propio servicio (que está
-registrado como **singleton**). `AppearanceSettingObserver` llama a `AparienciaService::olvidar()`,
+Caché: `Cache::rememberForever('tema.resuelto')` más un memo en el propio servicio (que está
+registrado como **singleton**). `AppearanceSettingObserver` llama a `TemaService::olvidar()`,
 que limpia **ambos** —la caché y el memo—; con solo `Cache::forget()`, un proceso largo (cola, test,
 Octane) seguiría sirviendo los colores anteriores.
 
@@ -298,7 +298,7 @@ Las rutas las construye `App\Media\IcuPathGenerator`:
 
 Las **columnas heredadas** `logo_claro`, `logo_oscuro` y `favicon` son de la primera versión de esta
 página (subida directa con `FileUpload` a `apariencia/`). `HasIcuMedia::storedImageUrl()` y
-`AparienciaService` prefieren la media y solo caen a la columna si la colección está vacía, de modo
+`TemaService` prefieren la media y solo caen a la columna si la colección está vacía, de modo
 que una instalación sin migrar sigue mostrando su logo. El comando
 `icu:migrar-imagenes-a-media` pasa esos archivos a Media Library con `preservingOriginal()`, así que
 tras migrar **la ruta y el archivo antiguo siguen existiendo** hasta que se purguen (ver §8.2).
@@ -330,8 +330,9 @@ el permiso pero no lo aplica** y cualquier usuario del panel entraría (verifica
 Permisos generados por la configuración de Shield (`pages.prefix = view`):
 
 ```text
-View:Apariencia
+View:TemaColores
 View:Marca
+View:Archivos
 ```
 
 Tras desplegar:
@@ -341,7 +342,7 @@ vendor/bin/sail artisan shield:generate --all --panel=admin --option=permissions
 ```
 
 El rol `super_admin` los recibe al sincronizar permisos. El ítem del menú de usuario se oculta solo
-(`->visible(fn () => Apariencia::canAccess())`).
+(`->visible(fn () => TemaColores::canAccess() || Marca::canAccess() || Archivos::canAccess())`).
 
 ---
 
@@ -349,7 +350,7 @@ El rol `super_admin` los recibe al sincronizar permisos. El ítem del menú de u
 
 ### Añadir un tema
 
-En `config/apariencia.php`:
+En `config/tema.php`:
 
 ```php
 'institucional' => [
@@ -381,7 +382,7 @@ Va **solo** en `estilos.blade.php`, siempre acotado (`.fi-sidebar …`, `.fi-top
 
 ## 11. Qué no hace
 
-- No hay apariencia **por usuario**: la configuración es global.
+- No hay tema **por usuario**: la configuración es global.
 - No configura fuente tipográfica, `brandName()`, navegación superior vs lateral, ancho del sidebar
   ni CSS libre. La tabla y el servicio admiten añadirlo sin migración destructiva.
 - No recolorea el modo oscuro de forma independiente por elemento: cada barra tiene un color para
@@ -397,23 +398,23 @@ Va **solo** en `estilos.blade.php`, siempre acotado (`.fi-sidebar …`, `.fi-top
 **Nuevos**
 
 ```text
-config/apariencia.php
+config/tema.php
 app/Models/AppearanceSetting.php
 app/Observers/AppearanceSettingObserver.php
-app/Services/Apariencia/AparienciaService.php
+app/Services/Configuracion/TemaService.php
 app/Filament/Clusters/Configuracion/ConfiguracionCluster.php
-app/Filament/Clusters/Configuracion/Pages/Apariencia.php
+app/Filament/Clusters/Configuracion/Pages/TemaColores.php
 app/Filament/Clusters/Configuracion/Pages/Marca.php
-resources/views/filament/apariencia/estilos.blade.php
-resources/views/filament/apariencia/vista-previa.blade.php
-resources/views/filament/apariencia/muestras-marca.blade.php
-resources/views/filament/clusters/configuracion/pages/apariencia.blade.php
+resources/views/filament/configuracion/estilos.blade.php
+resources/views/filament/configuracion/vista-previa.blade.php
+resources/views/filament/configuracion/muestras-marca.blade.php
+resources/views/filament/clusters/configuracion/pages/tema-colores.blade.php
 resources/views/filament/clusters/configuracion/pages/marca.blade.php
 database/migrations/2026_08_25_153251_create_appearance_settings_table.php
 database/migrations/2026_08_25_154829_add_fondo_logo_to_appearance_settings_table.php
-tests/Unit/Services/AparienciaServiceTest.php
-tests/Feature/Filament/AparienciaPageTest.php
-tests/Feature/Filament/AparienciaRenderTest.php
+tests/Unit/Services/TemaServiceTest.php
+tests/Feature/Filament/TemaColoresPageTest.php
+tests/Feature/Filament/TemaColoresRenderTest.php
 tests/Feature/Filament/MarcaPageTest.php
 ```
 
@@ -422,12 +423,12 @@ tests/Feature/Filament/MarcaPageTest.php
 ```text
 app/Providers/AppServiceProvider.php            # singleton del servicio + observer + path generator
 app/Providers/Filament/AdminPanelProvider.php   # colors()/brandLogo()/favicon() como closures,
-                                                # renderHook(STYLES_AFTER), ítem "Apariencia" en userMenuItems
+                                                # renderHook(STYLES_AFTER), ítem "Configuraciones" en userMenuItems
 app/Models/Concerns/HasIcuMedia.php             # purgarArchivoHeredado()
 app/Models/AppearanceSetting.php                # colecciones de media + clearBrandMedia()
 ```
 
-Piezas compartidas con el subsistema de archivos (no exclusivas de apariencia): ver
+Piezas compartidas con el subsistema de archivos (no exclusivas del tema): ver
 [`../Archivos-y-Media-Library/README.md`](../Archivos-y-Media-Library/README.md)
 (`ArchivosService`, `IcuPathGenerator`, `MediaSetting`, `config/archivos.php`,
 `icu:migrar-imagenes-a-media`, página **Configuración → Archivos**).
@@ -441,10 +442,10 @@ falta un `pnpm build` una única vez al implementar. **Cambiar colores no requie
 ## 13. Pruebas
 
 ```bash
-vendor/bin/sail artisan test --compact tests/Unit/Services/AparienciaServiceTest.php \
-  tests/Feature/Filament/AparienciaPageTest.php \
+vendor/bin/sail artisan test --compact tests/Unit/Services/TemaServiceTest.php \
+  tests/Feature/Filament/TemaColoresPageTest.php \
   tests/Feature/Filament/MarcaPageTest.php \
-  tests/Feature/Filament/AparienciaRenderTest.php
+  tests/Feature/Filament/TemaColoresRenderTest.php
 ```
 
 26 tests. Cubren:

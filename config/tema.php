@@ -19,7 +19,7 @@ return [
     | Temas disponibles
     |--------------------------------------------------------------------------
     |
-    | Cada entrada aparece como opción en la página de Apariencia. Los tonos
+    | Cada entrada aparece como opción en la página Tema y colores. Los tonos
     | claros usan la paleta corporativa de Capital SAFI tal cual; los oscuros
     | son variantes seleccionadas para combinar con ella.
     |
@@ -134,6 +134,7 @@ return [
 
     'logo' => [
         'disco' => 'public',
+        // Carpeta histórica en disco; no se renombra para no romper logos ya subidos.
         'directorio' => 'apariencia',
         'max_kb' => 2048,
         'alto_por_defecto' => '2.5rem',

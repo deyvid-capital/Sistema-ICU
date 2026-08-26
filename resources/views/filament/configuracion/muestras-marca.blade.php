@@ -5,7 +5,7 @@
     </p>
 
     <div class="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-9">
-        @foreach (config('apariencia.paleta_marca', []) as $color)
+        @foreach (config('tema.paleta_marca', []) as $color)
             <div class="flex flex-col gap-1">
                 <div
                     class="h-8 rounded-lg ring-1 ring-gray-950/10 dark:ring-white/20"

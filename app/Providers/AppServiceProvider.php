@@ -28,8 +28,8 @@ use App\Observers\MovimientoObserver;
 use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
 use App\Policies\ActivityPolicy;
-use App\Services\Apariencia\AparienciaService;
 use App\Services\Archivos\ArchivosService;
+use App\Services\Configuracion\TemaService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Facades\FilamentTimezone;
@@ -49,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(AparienciaService::class);
+        $this->app->singleton(TemaService::class);
         $this->app->singleton(ArchivosService::class);
     }
 
