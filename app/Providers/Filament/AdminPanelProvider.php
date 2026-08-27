@@ -14,6 +14,8 @@ use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\RequestPasswordReset;
+use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Auth\SetupTwoFactor;
 use App\Filament\Pages\Auth\TwoFactorChallenge;
 use App\Filament\Resources\Activitylogs\ActivitylogResource;
@@ -98,6 +100,7 @@ class AdminPanelProvider extends PanelProvider
             ])
 
             ->login(Login::class)
+            ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
             ->authenticatedRoutes(function (): void {
                 Route::get('/configurar-2fa', SetupTwoFactor::class)
                     ->name('auth.setup-two-factor');
