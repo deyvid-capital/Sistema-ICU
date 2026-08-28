@@ -3,16 +3,21 @@
 namespace App\Filament\Resources\Equipos\Schemas;
 
 use App\Enums\EstadoEquipo;
+use App\Models\Equipo;
+use App\Services\CambiarEstadoEquipo;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\Rules\Unique;
+use Livewire\Component;
 
 class EquipoForm
 {
@@ -53,13 +58,41 @@ class EquipoForm
                                     ignoreRecord: true,
                                     modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),
                                 ),
+                            Hidden::make('confirmar_cierre_asignacion')
+                                ->dehydrated(false)
+                                ->default(false),
                             Select::make('estado')
                                 ->label('Estado')
                                 ->native(false)
-                                ->options(EstadoEquipo::class)
+                                ->options(fn (?Equipo $record): array => static::opcionesDeEstado($record))
                                 ->default(EstadoEquipo::SinAsignar)
                                 ->required()
-                                ->helperText('Solo los equipos en estado «Sin asignar» pueden asignarse a un usuario.'),
+                                ->live()
+                                ->helperText('Solo los equipos en estado «Sin asignar» pueden asignarse a un usuario.')
+                                ->afterStateUpdated(function (
+                                    ?string $state,
+                                    ?string $old,
+                                    Set $set,
+                                    Component $livewire,
+                                    ?Equipo $record,
+                                ): void {
+                                    $set('confirmar_cierre_asignacion', false);
+
+                                    if (blank($state) || ! $record instanceof Equipo) {
+                                        return;
+                                    }
+
+                                    $nuevo = EstadoEquipo::tryFrom($state);
+
+                                    if ($nuevo === null || ! app(CambiarEstadoEquipo::class)->requiereConfirmacion($record, $nuevo)) {
+                                        return;
+                                    }
+
+                                    $set('estado', $old);
+                                    $livewire->mountAction('confirmarCierreAsignacionEquipo', [
+                                        'estado' => $state,
+                                    ]);
+                                }),
                         ]),
                     ]),
                 Section::make('Hardware')
@@ -155,5 +188,21 @@ class EquipoForm
                             ]),
                     ]),
             ]);
+    }
+
+    /**
+     * «Asignado» se deriva de las asignaciones vigentes, así que no se ofrece;
+     * se conserva únicamente si es el estado actual del registro.
+     *
+     * @return array<string, string>
+     */
+    protected static function opcionesDeEstado(?Equipo $record): array
+    {
+        $actual = $record?->estado;
+
+        return collect(EstadoEquipo::cases())
+            ->filter(fn (EstadoEquipo $estado): bool => $estado->esSeleccionableManualmente() || $estado === $actual)
+            ->mapWithKeys(fn (EstadoEquipo $estado): array => [$estado->value => $estado->getLabel()])
+            ->all();
     }
 }

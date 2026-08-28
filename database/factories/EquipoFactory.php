@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\EstadoEquipo;
 use App\Models\Equipo;
 use App\Models\MemoriaRam;
 use App\Models\Microprocesador;
@@ -37,7 +38,7 @@ class EquipoFactory extends Factory
             'usuario_admin' => fake()->boolean(40),
             'litigation_hold' => false,
             'bitlocker' => false,
-            'estado' => fake()->randomElement(['sin asignar', 'asignado', 'en mantenimiento', 'resguardo', 'baja']),
+            'estado' => fake()->randomElement(EstadoEquipo::cases()),
             'observaciones' => fake()->optional()->randomElement([
                 '<p><strong>Equipo revisado</strong> y listo para inventario.</p>',
                 '<p>Observación: <em>requiere limpieza</em>.</p>',

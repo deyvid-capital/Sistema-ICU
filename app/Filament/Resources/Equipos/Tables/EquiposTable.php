@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Equipos\Tables;
 
 use App\Enums\EstadoEquipo;
 use App\Filament\Actions\ActivityTimelineAction;
+use App\Filament\Actions\CambiarEstadoEquipoAction;
 use App\Filament\Resources\Equipos\EquipoResource;
 use App\Models\Equipo;
 use Filament\Actions\ActionGroup;
@@ -28,6 +29,7 @@ class EquiposTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('asignacionActiva.usuario.area'))
             ->recordUrl(fn (Equipo $record): string => $record->trashed()
                 ? EquipoResource::getUrl('view', ['record' => $record])
                 : EquipoResource::getUrl('edit', ['record' => $record]))
@@ -37,6 +39,7 @@ class EquiposTable
             ->columns([
                 TextColumn::make('service_tag')
                     ->label('Service Tag')
+                    ->description(fn (Equipo $record): string => $record->asignacionUsuarioActual?->usuario?->nombres ?? '—')
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
@@ -53,19 +56,8 @@ class EquiposTable
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
-                    ->formatStateUsing(fn (EstadoEquipo|string|null $state): string => $state instanceof EstadoEquipo
-                        ? $state->getLabel()
-                        : (string) ($state ?? '—'))
-                    ->color(fn (EstadoEquipo|string|null $state): string => $state instanceof EstadoEquipo
-                        ? (string) $state->getColor()
-                        : match ($state) {
-                            'asignado' => 'success',
-                            'sin asignar' => 'warning',
-                            'en mantenimiento' => 'info',
-                            'resguardo' => 'gray',
-                            'baja' => 'danger',
-                            default => 'gray',
-                        }),
+                    ->sortable()
+                    ->placeholder('—'),
                 TextColumn::make('codigo_activo')
                     ->label('Código activo')
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -122,6 +114,7 @@ class EquiposTable
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (Equipo $record): bool => ! $record->trashed()),
+                    CambiarEstadoEquipoAction::make(),
                     DeleteAction::make()
                         ->label('Eliminar')
                         ->visible(fn (Equipo $record): bool => ! $record->trashed())

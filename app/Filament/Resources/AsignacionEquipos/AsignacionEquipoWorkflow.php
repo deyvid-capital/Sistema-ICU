@@ -44,6 +44,16 @@ class AsignacionEquipoWorkflow
         return "<p><strong>Reasignación:</strong> de <strong>{$usuarioOrigenNombre}</strong> a <strong>{$usuarioDestinoNombre}</strong> el {$fechaTexto}.</p>";
     }
 
+    public static function notaCierrePorEstado(
+        EstadoEquipo $estado,
+        Carbon|string|null $fecha = null,
+    ): string {
+        $fechaTexto = Carbon::parse($fecha ?? now())->format('d/m/Y');
+        $estadoTexto = $estado->getLabel();
+
+        return "<p><strong>Cierre por cambio de estado:</strong> el equipo pasó a <strong>{$estadoTexto}</strong> el {$fechaTexto}.</p>";
+    }
+
     /**
      * Cierra la asignación activa del equipo (con el usuario anterior) y anota el
      * movimiento. Devuelve la nota HTML para agregar a la nueva asignación.

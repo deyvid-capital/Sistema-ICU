@@ -15,13 +15,19 @@ class SincronizarAsignacionEquipo
             return;
         }
 
-        if (filled($asignacion->fecha_fin)) {
-            $equipo->update(['estado' => EstadoEquipo::SinAsignar]);
+        $estado = $equipo->estado instanceof EstadoEquipo
+            ? $equipo->estado
+            : EstadoEquipo::tryFrom((string) $equipo->estado);
 
+        // Un equipo en mantenimiento, resguardo o baja conserva su estado: cerrar
+        // la asignación no debe devolverlo al inventario asignable.
+        if ($estado?->estaBloqueado() ?? false) {
             return;
         }
 
-        if (in_array($equipo->estado, [EstadoEquipo::EnMantenimiento, EstadoEquipo::Resguardo, EstadoEquipo::Baja], true)) {
+        if (filled($asignacion->fecha_fin)) {
+            $equipo->update(['estado' => EstadoEquipo::SinAsignar]);
+
             return;
         }
 

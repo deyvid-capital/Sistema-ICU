@@ -132,11 +132,11 @@ class AsignacionCargadorForm
                                     })
                                     ->hiddenOn(CargadorAsignacionesRelationManager::class),
                                 DatePicker::make('fecha_inicio')
-                                    ->label('Fecha de inicio')
+                                    ->label('Fecha de Alta')
                                     ->default(now())
                                     ->required(),
                                 DatePicker::make('fecha_fin')
-                                    ->label('Fecha de fin')
+                                    ->label('Fecha de Baja')
                                     ->afterOrEqual('fecha_inicio')
                                     ->helperText('Deje vacío mientras la asignación esté activa.'),
                                 RichEditor::make('observaciones')

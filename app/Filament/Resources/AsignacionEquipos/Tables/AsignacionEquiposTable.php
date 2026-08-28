@@ -9,7 +9,6 @@ use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationM
 use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
 use App\Models\AsignacionEquipo;
 use App\Models\Equipo;
-use App\Models\User;
 use Carbon\Carbon;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -59,11 +58,16 @@ class AsignacionEquiposTable
                     ->placeholder('—')
                     ->hiddenOn(AsignacionesUsuarioRelationManager::class),
                 TextColumn::make('fecha_inicio')
-                    ->label('Inicio - Fin')
+                    ->label('Alta')
                     ->weight(FontWeight::Bold)
-                    ->description(fn ($record) => $record->fecha_fin ? 'Fin: '.Carbon::parse($record->fecha_fin)->format('d/m/Y') : 'Sin fecha de fin')
                     ->date('d/m/Y')
-                    ->color(fn ($record) => $record->fecha_fin ? 'success' : 'warning')
+                    ->sortable(),
+                TextColumn::make('fecha_fin')
+                    ->label('Baja')
+                    ->badge()
+                    ->date('d/m/Y')
+                    ->placeholder('Activa')
+                    ->color(fn ($state): string => $state ? 'gray' : 'success')
                     ->sortable(),
                 TextColumn::make('motivo')
                     ->label('Motivo')
@@ -90,11 +94,15 @@ class AsignacionEquiposTable
             ->filters([
                 SelectFilter::make('usuario_id')
                     ->label('Usuario')
-                    ->options(User::all()->pluck('name', 'id'))
-                    ->searchable(),
-                SelectFilter::make('equipo_id')
+                    ->relationship('usuario', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('service_tag')
                     ->label('Equipo')
-                    ->options(Equipo::all()->pluck('service_tag', 'id'))
+                    ->options(fn (): array => Equipo::query()
+                        ->orderBy('service_tag')
+                        ->pluck('service_tag', 'service_tag')
+                        ->all())
                     ->searchable(),
                 SelectFilter::make('estado_asignacion')
                     ->label('Estado de la asignación')
@@ -108,12 +116,12 @@ class AsignacionEquiposTable
                         default => $query,
                     }),
                 Filter::make('fecha_inicio')
-                    ->label('Fecha de inicio')
+                    ->label('Fecha de Alta')
                     ->schema([
                         DatePicker::make('inicio_desde')
-                            ->label('Inicio desde'),
+                            ->label('Desde'),
                         DatePicker::make('inicio_hasta')
-                            ->label('Inicio hasta')
+                            ->label('Hasta')
                             ->afterOrEqual('inicio_desde'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -129,24 +137,24 @@ class AsignacionEquiposTable
                         $indicators = [];
 
                         if ($data['inicio_desde'] ?? null) {
-                            $indicators[] = Indicator::make('Inicio desde '.Carbon::parse($data['inicio_desde'])->format('d/m/Y'))
+                            $indicators[] = Indicator::make('Alta desde '.Carbon::parse($data['inicio_desde'])->format('d/m/Y'))
                                 ->removeField('inicio_desde');
                         }
 
                         if ($data['inicio_hasta'] ?? null) {
-                            $indicators[] = Indicator::make('Inicio hasta '.Carbon::parse($data['inicio_hasta'])->format('d/m/Y'))
+                            $indicators[] = Indicator::make('Alta hasta '.Carbon::parse($data['inicio_hasta'])->format('d/m/Y'))
                                 ->removeField('inicio_hasta');
                         }
 
                         return $indicators;
                     }),
                 Filter::make('fecha_fin')
-                    ->label('Fecha de fin')
+                    ->label('Fecha de Baja')
                     ->schema([
                         DatePicker::make('fin_desde')
-                            ->label('Fin desde'),
+                            ->label('Desde'),
                         DatePicker::make('fin_hasta')
-                            ->label('Fin hasta')
+                            ->label('Hasta')
                             ->afterOrEqual('fin_desde'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -162,12 +170,12 @@ class AsignacionEquiposTable
                         $indicators = [];
 
                         if ($data['fin_desde'] ?? null) {
-                            $indicators[] = Indicator::make('Fin desde '.Carbon::parse($data['fin_desde'])->format('d/m/Y'))
+                            $indicators[] = Indicator::make('Baja desde '.Carbon::parse($data['fin_desde'])->format('d/m/Y'))
                                 ->removeField('fin_desde');
                         }
 
                         if ($data['fin_hasta'] ?? null) {
-                            $indicators[] = Indicator::make('Fin hasta '.Carbon::parse($data['fin_hasta'])->format('d/m/Y'))
+                            $indicators[] = Indicator::make('Baja hasta '.Carbon::parse($data['fin_hasta'])->format('d/m/Y'))
                                 ->removeField('fin_hasta');
                         }
 

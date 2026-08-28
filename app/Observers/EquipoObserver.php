@@ -23,13 +23,13 @@ class EquipoObserver
             ? $equipo->estado
             : EstadoEquipo::tryFrom((string) $equipo->estado);
 
-        if ($estado !== EstadoEquipo::Baja) {
+        if (! ($estado?->esBaja() ?? false)) {
             return;
         }
 
         NotifyAdmins::dispatch(
             title: 'Equipo dado de baja',
-            body: "El equipo {$equipo->getKey()} se dio de baja — por {$this->actor()}.",
+            body: "El equipo {$equipo->getKey()} pasó a «{$estado->getLabel()}» — por {$this->actor()}.",
             url: EquipoResource::getUrl('view', ['record' => $equipo]),
             icon: 'heroicon-o-exclamation-triangle',
             color: 'danger',

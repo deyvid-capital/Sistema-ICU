@@ -77,6 +77,13 @@ class Equipo extends Model
             ->whereNull('fecha_fin')
             ->latest('fecha_inicio');
     }
+    public function asignacionUsuarioActual(): HasOne
+    {
+        return $this->hasOne(AsignacionEquipo::class, 'service_tag', 'service_tag')
+            ->latest('fecha_inicio')
+            ->whereNull('fecha_fin')
+            ->with('usuario:id,nombres');
+    }
 
     public function modelo(): BelongsTo
     {

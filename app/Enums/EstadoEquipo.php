@@ -11,7 +11,12 @@ enum EstadoEquipo: string implements HasColor, HasLabel
     case Asignado = 'asignado';
     case EnMantenimiento = 'en mantenimiento';
     case Resguardo = 'resguardo';
-    case Baja = 'baja';
+    case BajaTemporal = 'baja temporal';
+    case BajaDefinitiva = 'baja definitiva';
+    case Desarmado = 'desarmado';
+    case Robo = 'robo';
+    case Perdida = 'perdida';
+    case Depreciado = 'depreciado';
 
     public function getLabel(): string
     {
@@ -20,7 +25,12 @@ enum EstadoEquipo: string implements HasColor, HasLabel
             self::Asignado => 'Asignado',
             self::EnMantenimiento => 'En mantenimiento',
             self::Resguardo => 'Resguardo',
-            self::Baja => 'Baja',
+            self::BajaTemporal => 'Baja temporal',
+            self::BajaDefinitiva => 'Baja definitiva',
+            self::Desarmado => 'Desarmado',
+            self::Robo => 'Robo',
+            self::Perdida => 'Pérdida',
+            self::Depreciado => 'Depreciado por uso',
         };
     }
 
@@ -31,7 +41,12 @@ enum EstadoEquipo: string implements HasColor, HasLabel
             self::Asignado => 'success',
             self::EnMantenimiento => 'info',
             self::Resguardo => 'gray',
-            self::Baja => 'danger',
+            self::BajaTemporal => 'warning',
+            self::BajaDefinitiva => 'danger',
+            self::Desarmado => 'gray',
+            self::Robo => 'danger',
+            self::Perdida => 'danger',
+            self::Depreciado => 'gray',
         };
     }
 
@@ -40,8 +55,43 @@ enum EstadoEquipo: string implements HasColor, HasLabel
         return $this === self::SinAsignar;
     }
 
+    /**
+     * Todo lo que no sea «sin asignar» ni «asignado» impide asignar el equipo.
+     */
     public function estaBloqueado(): bool
     {
-        return in_array($this, [self::EnMantenimiento, self::Resguardo, self::Baja], true);
+        return ! in_array($this, [self::SinAsignar, self::Asignado], true);
+    }
+
+    /**
+     * Cualquier forma de baja, temporal o no.
+     */
+    public function esBaja(): bool
+    {
+        return in_array($this, [
+            self::BajaTemporal,
+            self::BajaDefinitiva,
+            self::Desarmado,
+            self::Robo,
+            self::Perdida,
+            self::Depreciado,
+        ], true);
+    }
+
+    /**
+     * Bajas sin retorno previsto: salir de ellas exige una advertencia extra.
+     */
+    public function esDefinitivo(): bool
+    {
+        return $this->esBaja() && $this !== self::BajaTemporal;
+    }
+
+    /**
+     * «Asignado» se deriva de las asignaciones vigentes, nunca se elige a mano.
+     * Cualquier otro estado, elegido manualmente, cierra la asignación activa.
+     */
+    public function esSeleccionableManualmente(): bool
+    {
+        return $this !== self::Asignado;
     }
 }
