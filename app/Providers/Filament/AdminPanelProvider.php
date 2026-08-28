@@ -28,6 +28,7 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Actions\Action;
 use Filament\Enums\UserMenuPosition;
+use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -105,7 +106,7 @@ class AdminPanelProvider extends PanelProvider
                 Route::get('/configurar-2fa', SetupTwoFactor::class)
                     ->name('auth.setup-two-factor');
             })
-            ->font('Roboto Mono')
+            ->font('Lato', provider: LocalFontProvider::class)
             ->topNavigation(false)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
@@ -124,6 +125,10 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
 
             ->colors(fn (): array => app(TemaService::class)->coloresDelPanel())
+            ->renderHook(
+                PanelsRenderHook::STYLES_BEFORE,
+                fn (): View => view('filament.fonts'),
+            )
             ->renderHook(
                 PanelsRenderHook::STYLES_AFTER,
                 fn (): View => view('filament.configuracion.estilos', app(TemaService::class)->variablesCss()),
