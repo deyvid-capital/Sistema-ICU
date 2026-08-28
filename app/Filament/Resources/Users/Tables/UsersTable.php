@@ -7,6 +7,7 @@ use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use App\Support\Seguridad\ProteccionSuperAdmin;
 use App\Support\Sessions\UserSessions;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -189,8 +190,19 @@ class UsersTable
                         ->color(fn (User $record): string => $record->acceso_habilitado ? 'danger' : 'success')
                         ->requiresConfirmation()
                         ->visible(fn (User $record): bool => ! $record->trashed()
-                            && (bool) auth()->user()?->can('manageSecurity', User::class))
+                            && (bool) auth()->user()?->can('manageSecurity', User::class)
+                            && ! ProteccionSuperAdmin::esPropio($record))
                         ->action(function (User $record): void {
+                            if (ProteccionSuperAdmin::esPropio($record)) {
+                                Notification::make()
+                                    ->title('Acción no permitida')
+                                    ->body('No puedes cambiar tu propio acceso desde aquí.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
                             $record->forceFill(['acceso_habilitado' => ! $record->acceso_habilitado])->save();
 
                             if (! $record->acceso_habilitado) {

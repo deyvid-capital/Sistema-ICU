@@ -80,14 +80,16 @@ class EquiposTable
                     ->trueIcon(Heroicon::OutlinedCheckCircle)
                     ->falseIcon(Heroicon::OutlinedXCircle)
                     ->trueColor('success')
-                    ->falseColor('danger'),
+                    ->falseColor('danger')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('bitlocker')
                     ->label('BitLocker')
                     ->boolean()
                     ->trueIcon(Heroicon::OutlinedCheckCircle)
                     ->falseIcon(Heroicon::OutlinedXCircle)
                     ->trueColor('success')
-                    ->falseColor('danger'),
+                    ->falseColor('danger')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Registrado')
                     ->since()

@@ -7,6 +7,7 @@ use App\Enums\TipoAcceso;
 use App\Enums\TipoEventoNotificacion;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use App\Support\Seguridad\ProteccionSuperAdmin;
 use App\Support\Sessions\UserSessions;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -22,6 +23,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
@@ -79,7 +81,10 @@ class ManageUserSeguridad extends EditRecord
                     ->label('Acceso habilitado')
                     ->onColor('success')
                     ->offColor('danger')
-                    ->helperText('Si se desactiva, el usuario no puede entrar al panel (se cierran sus sesiones al guardar).'),
+                    ->disabled(fn (): bool => ProteccionSuperAdmin::esPropio($this->record))
+                    ->helperText(fn (): string => ProteccionSuperAdmin::esPropio($this->record)
+                        ? 'No puedes cambiar tu propio acceso. Pídele a otro super administrador con acceso vigente que lo haga.'
+                        : 'Si se desactiva, el usuario no puede entrar al panel (se cierran sus sesiones al guardar).'),
                 Grid::make(['default' => 1, 'md' => 2])->schema([
                     Select::make('tipo_acceso')
                         ->label('Vigencia del acceso')
@@ -91,14 +96,21 @@ class ManageUserSeguridad extends EditRecord
                         ->selectablePlaceholder(false)
                         ->native(false)
                         ->live()
+                        ->disabled(fn (): bool => ProteccionSuperAdmin::esPropio($this->record))
+                        ->afterStateUpdated(function (Set $set, ?string $state): void {
+                            if ($state === TipoAcceso::Indefinido->value) {
+                                $set('acceso_expira_at', null);
+                            }
+                        })
                         ->dehydrated(false),
                     DateTimePicker::make('acceso_expira_at')
                         ->label('Acceso hasta')
                         ->placeholder('Selecciona fecha y hora límite')
                         ->seconds(false)
                         ->minDate(now())
+                        ->disabled(fn (): bool => ProteccionSuperAdmin::esPropio($this->record))
                         ->required(fn (Get $get): bool => $get('tipo_acceso') === TipoAcceso::Definido->value)
-                        ->visible(fn (Get $get): bool => $get('tipo_acceso') === TipoAcceso::Definido->value)
+                        ->hidden(fn (Get $get): bool => $get('tipo_acceso') !== TipoAcceso::Definido->value)
                         ->dehydrateStateUsing(fn ($state, Get $get) => $get('tipo_acceso') === TipoAcceso::Definido->value ? $state : null),
                 ]),
                 Placeholder::make('estado_bloqueo')
@@ -137,7 +149,18 @@ class ManageUserSeguridad extends EditRecord
                     ->multiple()
                     ->preload()
                     ->searchable()
-                    ->helperText('Sin al menos un rol, el usuario no puede entrar al panel.'),
+                    ->disableOptionWhen(function (string $value): bool {
+                        $rolSuperAdminId = ProteccionSuperAdmin::idRolSuperAdmin();
+
+                        return $rolSuperAdminId !== null
+                            && (int) $value === $rolSuperAdminId
+                            && ProteccionSuperAdmin::esPropio($this->record)
+                            && ! ProteccionSuperAdmin::existeOtroSuperAdminActivo($this->record);
+                    })
+                    ->helperText(fn (): string => ProteccionSuperAdmin::esPropio($this->record)
+                        && ! ProteccionSuperAdmin::existeOtroSuperAdminActivo($this->record)
+                        ? 'No puedes quitarte super_admin: no hay otro super administrador con acceso vigente.'
+                        : 'Sin al menos un rol, el usuario no puede entrar al panel.'),
             ]);
     }
 
@@ -205,11 +228,22 @@ class ManageUserSeguridad extends EditRecord
                         ->label('Cerrar todas las sesiones')
                         ->icon(Heroicon::OutlinedArrowRightStartOnRectangle)
                         ->color('danger')
-                        ->visible(fn (): bool => UserSessions::active($this->record)->isNotEmpty())
+                        ->visible(fn (): bool => ProteccionSuperAdmin::puedeCerrarSesiones($this->record)
+                            && UserSessions::active($this->record)->isNotEmpty())
                         ->requiresConfirmation()
                         ->modalHeading('Cerrar todas las sesiones')
                         ->modalDescription('El usuario será desconectado de todos sus dispositivos.')
                         ->action(function (): void {
+                            if (! ProteccionSuperAdmin::puedeCerrarSesiones($this->record)) {
+                                Notification::make()
+                                    ->title('Acción no permitida')
+                                    ->body('No puedes cerrar tus propias sesiones desde aquí.')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
                             $cerradas = UserSessions::terminate($this->record);
 
                             Notification::make()
@@ -269,6 +303,38 @@ class ManageUserSeguridad extends EditRecord
         }
 
         return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $tipo = $this->data['tipo_acceso'] ?? TipoAcceso::Indefinido->value;
+
+        if ($tipo === TipoAcceso::Indefinido->value) {
+            $data['acceso_expira_at'] = null;
+        } elseif (array_key_exists('acceso_expira_at', $this->data)) {
+            $data['acceso_expira_at'] = $this->data['acceso_expira_at'];
+        }
+
+        return $data;
+    }
+
+    protected function beforeSave(): void
+    {
+        $errores = ProteccionSuperAdmin::erroresAlGuardar($this->record, $this->data, $this->data);
+
+        if ($errores !== []) {
+            Notification::make()
+                ->title('No se pudo guardar la seguridad')
+                ->body(implode(' ', $errores))
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
     }
 
     protected function afterSave(): void
