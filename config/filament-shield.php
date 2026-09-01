@@ -1,6 +1,8 @@
 <?php
 
 declare(strict_types=1);
+
+use App\Filament\Resources\Users\UserResource;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -176,6 +178,9 @@ return [
                 'update',
                 'delete',
             ],
+            UserResource::class => [
+                'manageSecurity',
+            ],
         ],
         'exclude' => [
             //
@@ -233,7 +238,7 @@ return [
     */
 
     'custom_permissions' => [
-        'ManageSecurity:User',
+        //
     ],
 
     /*

@@ -22,17 +22,37 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
+use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class UsersTable
 {
+    /**
+     * Paleta rotativa para distinguir visualmente cada área.
+     *
+     * @var array<int, array<int, string>>
+     */
+    private const COLORES_AREA = [
+        Color::Blue,
+        Color::Emerald,
+        Color::Amber,
+        Color::Rose,
+        Color::Violet,
+        Color::Cyan,
+        Color::Orange,
+        Color::Teal,
+        Color::Fuchsia,
+        Color::Lime,
+    ];
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -53,7 +73,8 @@ class UsersTable
                         fn (User $record): ?string => $record->cargo?->cargo ? 'Cargo: '.$record->cargo->cargo : null,
                         position: 'above',
                     )
-                    ->color('primary')
+                    ->badge()
+                    ->color(fn (User $record): string|array => self::colorDeArea($record->id_area))
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->where(function (Builder $query) use ($search): void {
                             $query->whereHas('area', fn (Builder $q) => $q->where('area', 'ilike', "%{$search}%"))
@@ -114,6 +135,17 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
             ])
+            ->groups([
+                Group::make('area.area')
+                    ->label('Área')
+                    ->getTitleFromRecordUsing(fn (User $record): string => $record->area?->area ?? 'Sin área')
+                    ->collapsible(),
+
+                Group::make('cargo.cargo')
+                    ->label('Cargo')
+                    ->getTitleFromRecordUsing(fn (User $record): string => $record->cargo?->cargo ?? 'Sin cargo')
+                    ->collapsible(),
+            ])->collapsedGroupsByDefault(true)
             ->headerActions([
                 GuiaImportAction::make()
                     ->importer(UserImporter::class)
@@ -298,5 +330,19 @@ class UsersTable
             ->striped()
             ->paginated([10, 25, 50])
             ->checkIfRecordIsSelectableUsing(fn (User $record): bool => $record->id !== auth()->id());
+    }
+
+    /**
+     * Color estable asignado a un área, tomado de la paleta rotativa.
+     *
+     * @return string|array<int, string>
+     */
+    private static function colorDeArea(?int $idArea): string|array
+    {
+        if ($idArea === null) {
+            return 'gray';
+        }
+
+        return self::COLORES_AREA[$idArea % count(self::COLORES_AREA)];
     }
 }

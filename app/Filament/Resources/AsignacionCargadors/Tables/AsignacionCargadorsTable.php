@@ -48,12 +48,12 @@ class AsignacionCargadorsTable
                     ->placeholder('—')
                     ->hiddenOn(AsignacionesCargadorRelationManager::class),
                 TextColumn::make('fecha_inicio')
-                    ->label('Fecha de inicio')
+                    ->label('Alta')
                     ->date('d/m/Y')
                     ->sortable()
                     ->placeholder('—'),
                 TextColumn::make('fecha_fin')
-                    ->label('Fecha de fin')
+                    ->label('Baja')
                     ->date('d/m/Y')
                     ->sortable()
                     ->placeholder('—'),
