@@ -47,11 +47,6 @@ class ActivityPolicy
         return $authUser->can('Restore:Activity');
     }
 
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('RestoreAny:Activity');
-    }
-
     public function forceDelete(AuthUser $authUser, Activity $activity): bool
     {
         return $authUser->can('ForceDelete:Activity');
@@ -60,6 +55,11 @@ class ActivityPolicy
     public function forceDeleteAny(AuthUser $authUser): bool
     {
         return $authUser->can('ForceDeleteAny:Activity');
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:Activity');
     }
 
     public function replicate(AuthUser $authUser, Activity $activity): bool

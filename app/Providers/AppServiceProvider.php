@@ -12,6 +12,7 @@ use App\Models\AsignacionCargador;
 use App\Models\AsignacionEquipo;
 use App\Models\Cargador;
 use App\Models\Equipo;
+use App\Models\MailSetting;
 use App\Models\MediaSetting;
 use App\Models\Movimiento;
 use App\Models\PdfEquipo;
@@ -23,12 +24,14 @@ use App\Observers\AsignacionEquipoObserver;
 use App\Observers\BreezySessionObserver;
 use App\Observers\CargadorObserver;
 use App\Observers\EquipoObserver;
+use App\Observers\MailSettingObserver;
 use App\Observers\MediaSettingObserver;
 use App\Observers\MovimientoObserver;
 use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
 use App\Policies\ActivityPolicy;
 use App\Services\Archivos\ArchivosService;
+use App\Services\Configuracion\MailConfigService;
 use App\Services\Configuracion\TemaService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -51,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(TemaService::class);
         $this->app->singleton(ArchivosService::class);
+        $this->app->singleton(MailConfigService::class);
     }
 
     /**
@@ -69,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
 
         AppearanceSetting::observe(AppearanceSettingObserver::class);
         MediaSetting::observe(MediaSettingObserver::class);
+        MailSetting::observe(MailSettingObserver::class);
         BreezySession::observe(BreezySessionObserver::class);
         AsignacionEquipo::observe(AsignacionEquipoObserver::class);
         AsignacionCargador::observe(AsignacionCargadorObserver::class);
@@ -78,6 +83,10 @@ class AppServiceProvider extends ServiceProvider
         SoftwareExc::observe(SoftwareExcObserver::class);
         PdfEquipo::observe(PdfEquipoObserver::class);
         Movimiento::observe(MovimientoObserver::class);
+
+        $this->app->booted(function (): void {
+            app(MailConfigService::class)->aplicar();
+        });
 
         Livewire::component('two-factor-page', TwoFactorChallenge::class);
         Livewire::component('two_factor_authentication', TwoFactorAuthentication::class);

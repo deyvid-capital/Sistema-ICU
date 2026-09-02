@@ -6,6 +6,7 @@ use App\Filament\Clusters\Accesos\AccesosCluster;
 use App\Filament\Clusters\Asignacion\AsignacionCluster;
 use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Clusters\Configuracion\Pages\Archivos;
+use App\Filament\Clusters\Configuracion\Pages\Correo;
 use App\Filament\Clusters\Configuracion\Pages\Marca;
 use App\Filament\Clusters\Configuracion\Pages\TemaColores;
 use App\Filament\Clusters\Equipos\EquiposCluster;
@@ -83,7 +84,7 @@ class AdminPanelProvider extends PanelProvider
                 Action::make('configuraciones')
                     ->label('Configuraciones')
                     ->url(function (): string {
-                        foreach ([TemaColores::class, Marca::class, Archivos::class] as $pagina) {
+                        foreach ([TemaColores::class, Marca::class, Archivos::class, Correo::class] as $pagina) {
                             if ($pagina::canAccess()) {
                                 return $pagina::getUrl();
                             }
@@ -92,7 +93,7 @@ class AdminPanelProvider extends PanelProvider
                         return TemaColores::getUrl();
                     })
                     ->icon(Heroicon::OutlinedCog6Tooth)
-                    ->visible(fn (): bool => TemaColores::canAccess() || Marca::canAccess() || Archivos::canAccess()),
+                    ->visible(fn (): bool => TemaColores::canAccess() || Marca::canAccess() || Archivos::canAccess() || Correo::canAccess()),
                 Action::make('roles')
                     ->label('Roles y permisos')
                     ->url(fn (): string => RoleResource::getUrl())

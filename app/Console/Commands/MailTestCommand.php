@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Configuracion\MailConfigService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
@@ -22,6 +23,8 @@ class MailTestCommand extends Command
 
     public function handle(): int
     {
+        app(MailConfigService::class)->aplicar();
+
         /** @var string $email */
         $email = $this->argument('email');
         /** @var string $subject */
@@ -29,11 +32,13 @@ class MailTestCommand extends Command
 
         $password = (string) config('mail.mailers.smtp.password');
         $hasSpecialChars = (bool) preg_match('/[^A-Za-z0-9]/', $password);
+        $fuente = app(MailConfigService::class)->resolver()['activo'] ? 'base de datos' : '.env';
 
         $this->info('Configuración de correo actual:');
         $this->table(
             ['Clave', 'Valor'],
             [
+                ['Fuente', $fuente],
                 ['MAIL_MAILER', (string) config('mail.default')],
                 ['MAIL_HOST', (string) config('mail.mailers.smtp.host')],
                 ['MAIL_PORT', (string) config('mail.mailers.smtp.port')],
