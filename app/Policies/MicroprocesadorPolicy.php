@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Microprocesador;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class MicroprocesadorPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Microprocesador');
@@ -61,15 +61,4 @@ class MicroprocesadorPolicy
     {
         return $authUser->can('RestoreAny:Microprocesador');
     }
-
-    public function replicate(AuthUser $authUser, Microprocesador $microprocesador): bool
-    {
-        return $authUser->can('Replicate:Microprocesador');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Microprocesador');
-    }
-
 }

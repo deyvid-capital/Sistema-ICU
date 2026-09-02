@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\AccesoInternet;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class AccesoInternetPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:AccesoInternet');
@@ -61,15 +61,4 @@ class AccesoInternetPolicy
     {
         return $authUser->can('RestoreAny:AccesoInternet');
     }
-
-    public function replicate(AuthUser $authUser, AccesoInternet $accesoInternet): bool
-    {
-        return $authUser->can('Replicate:AccesoInternet');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:AccesoInternet');
-    }
-
 }

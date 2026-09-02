@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Fondo;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class FondoPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Fondo');
@@ -61,15 +61,4 @@ class FondoPolicy
     {
         return $authUser->can('RestoreAny:Fondo');
     }
-
-    public function replicate(AuthUser $authUser, Fondo $fondo): bool
-    {
-        return $authUser->can('Replicate:Fondo');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Fondo');
-    }
-
 }

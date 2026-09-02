@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\AzureAd;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class AzureAdPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:AzureAd');
@@ -61,15 +61,4 @@ class AzureAdPolicy
     {
         return $authUser->can('RestoreAny:AzureAd');
     }
-
-    public function replicate(AuthUser $authUser, AzureAd $azureAd): bool
-    {
-        return $authUser->can('Replicate:AzureAd');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:AzureAd');
-    }
-
 }

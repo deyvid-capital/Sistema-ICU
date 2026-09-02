@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Movimiento;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class MovimientoPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Movimiento');
@@ -61,15 +61,4 @@ class MovimientoPolicy
     {
         return $authUser->can('RestoreAny:Movimiento');
     }
-
-    public function replicate(AuthUser $authUser, Movimiento $movimiento): bool
-    {
-        return $authUser->can('Replicate:Movimiento');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Movimiento');
-    }
-
 }

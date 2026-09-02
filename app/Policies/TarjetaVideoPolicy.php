@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\TarjetaVideo;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class TarjetaVideoPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:TarjetaVideo');
@@ -61,15 +61,4 @@ class TarjetaVideoPolicy
     {
         return $authUser->can('RestoreAny:TarjetaVideo');
     }
-
-    public function replicate(AuthUser $authUser, TarjetaVideo $tarjetaVideo): bool
-    {
-        return $authUser->can('Replicate:TarjetaVideo');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:TarjetaVideo');
-    }
-
 }

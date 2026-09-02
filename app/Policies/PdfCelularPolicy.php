@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\PdfCelular;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class PdfCelularPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:PdfCelular');
@@ -61,15 +61,4 @@ class PdfCelularPolicy
     {
         return $authUser->can('RestoreAny:PdfCelular');
     }
-
-    public function replicate(AuthUser $authUser, PdfCelular $pdfCelular): bool
-    {
-        return $authUser->can('Replicate:PdfCelular');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:PdfCelular');
-    }
-
 }

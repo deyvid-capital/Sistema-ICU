@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\RecepcionCelular;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class RecepcionCelularPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:RecepcionCelular');
@@ -61,15 +61,4 @@ class RecepcionCelularPolicy
     {
         return $authUser->can('RestoreAny:RecepcionCelular');
     }
-
-    public function replicate(AuthUser $authUser, RecepcionCelular $recepcionCelular): bool
-    {
-        return $authUser->can('Replicate:RecepcionCelular');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:RecepcionCelular');
-    }
-
 }

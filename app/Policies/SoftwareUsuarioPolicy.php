@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\SoftwareUsuario;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class SoftwareUsuarioPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:SoftwareUsuario');
@@ -61,15 +61,4 @@ class SoftwareUsuarioPolicy
     {
         return $authUser->can('RestoreAny:SoftwareUsuario');
     }
-
-    public function replicate(AuthUser $authUser, SoftwareUsuario $softwareUsuario): bool
-    {
-        return $authUser->can('Replicate:SoftwareUsuario');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:SoftwareUsuario');
-    }
-
 }

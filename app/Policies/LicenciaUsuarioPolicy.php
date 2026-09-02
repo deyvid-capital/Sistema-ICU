@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\LicenciaUsuario;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class LicenciaUsuarioPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:LicenciaUsuario');
@@ -61,15 +61,4 @@ class LicenciaUsuarioPolicy
     {
         return $authUser->can('RestoreAny:LicenciaUsuario');
     }
-
-    public function replicate(AuthUser $authUser, LicenciaUsuario $licenciaUsuario): bool
-    {
-        return $authUser->can('Replicate:LicenciaUsuario');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:LicenciaUsuario');
-    }
-
 }

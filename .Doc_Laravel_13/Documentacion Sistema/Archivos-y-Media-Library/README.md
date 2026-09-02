@@ -62,6 +62,7 @@ La sub-navegación izquierda lista:
 | Tema y colores | `/admin/configuracion/tema-colores` | Temas y colores |
 | Marca e identidad | `/admin/configuracion/marca` | Logos y favicon (Media Library) |
 | **Archivos** | `/admin/configuracion/archivos` | Disco, prefijo, optimización, límites, catálogo |
+| Correo | `/admin/configuracion/correo` | SMTP cifrado ([guía](../Correo-SMTP/README.md)) |
 
 La página **Archivos** usa `HasPageShield` (permiso de página Shield). Tras desplegar, regenerar
 permisos si hace falta (`shield:generate` / asignar al rol).

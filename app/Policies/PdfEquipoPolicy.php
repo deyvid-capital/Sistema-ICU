@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\PdfEquipo;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class PdfEquipoPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:PdfEquipo');
@@ -61,15 +61,4 @@ class PdfEquipoPolicy
     {
         return $authUser->can('RestoreAny:PdfEquipo');
     }
-
-    public function replicate(AuthUser $authUser, PdfEquipo $pdfEquipo): bool
-    {
-        return $authUser->can('Replicate:PdfEquipo');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:PdfEquipo');
-    }
-
 }

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Virtual;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class VirtualPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Virtual');
@@ -61,15 +61,4 @@ class VirtualPolicy
     {
         return $authUser->can('RestoreAny:Virtual');
     }
-
-    public function replicate(AuthUser $authUser, Virtual $virtual): bool
-    {
-        return $authUser->can('Replicate:Virtual');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Virtual');
-    }
-
 }

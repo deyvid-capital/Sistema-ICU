@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\AccesoSistema;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class AccesoSistemaPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:AccesoSistema');
@@ -61,15 +61,4 @@ class AccesoSistemaPolicy
     {
         return $authUser->can('RestoreAny:AccesoSistema');
     }
-
-    public function replicate(AuthUser $authUser, AccesoSistema $accesoSistema): bool
-    {
-        return $authUser->can('Replicate:AccesoSistema');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:AccesoSistema');
-    }
-
 }

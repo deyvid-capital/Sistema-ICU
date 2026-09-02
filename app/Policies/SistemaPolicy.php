@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Sistema;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class SistemaPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Sistema');
@@ -61,15 +61,4 @@ class SistemaPolicy
     {
         return $authUser->can('RestoreAny:Sistema');
     }
-
-    public function replicate(AuthUser $authUser, Sistema $sistema): bool
-    {
-        return $authUser->can('Replicate:Sistema');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Sistema');
-    }
-
 }

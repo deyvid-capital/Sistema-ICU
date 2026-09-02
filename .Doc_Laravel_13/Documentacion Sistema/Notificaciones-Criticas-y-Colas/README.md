@@ -49,6 +49,11 @@ CriticalEventNotification::SEVERIDAD_MEDIA;  // 'media' → solo database
 
 El **actor** que originó el evento se **excluye** de los destinatarios (no se autonotifica).
 
+La entrega por `mail` usa el mailer por defecto de Laravel. Si **Configuración → Correo** está
+activo, esos envíos salen con la SMTP de la base de datos (contraseña cifrada). Guía:
+[`../Correo-SMTP/README.md`](../Correo-SMTP/README.md). Tras cambiar credenciales, reinicia el
+worker de colas para que no conserve mailers viejos.
+
 ---
 
 ## 3. Eventos cubiertos (Observers)

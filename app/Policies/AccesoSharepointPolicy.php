@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\AccesoSharepoint;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class AccesoSharepointPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:AccesoSharepoint');
@@ -61,15 +61,4 @@ class AccesoSharepointPolicy
     {
         return $authUser->can('RestoreAny:AccesoSharepoint');
     }
-
-    public function replicate(AuthUser $authUser, AccesoSharepoint $accesoSharepoint): bool
-    {
-        return $authUser->can('Replicate:AccesoSharepoint');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:AccesoSharepoint');
-    }
-
 }

@@ -51,7 +51,7 @@ participa: los colores nunca pasan por el build.
 
 ## 2. Qué se ve en el panel
 
-Acceso: **menú de usuario → Configuraciones** (visible si hay acceso a Tema y colores, Marca o Archivos).
+Acceso: **menú de usuario → Configuraciones** (visible si hay acceso a Tema y colores, Marca, Archivos o Correo).
 La página vive en el cluster `Configuración`, que **no se registra en el sidebar**
 (`$shouldRegisterNavigation = false`) y usa `SubNavigationPosition::Start`, de modo que la columna
 izquierda lista sus páginas:
@@ -61,6 +61,7 @@ izquierda lista sus páginas:
 | **Tema y colores** | `/admin/configuracion/tema-colores` | Radio de temas con descripción, vista previa en vivo (modo claro y oscuro), colores personalizados y paleta corporativa de referencia |
 | **Marca e identidad** | `/admin/configuracion/marca` | Logo claro/oscuro, fondo detrás del logo, alto del logo y favicon |
 | **Archivos** | `/admin/configuracion/archivos` | Disco, prefijo, optimización y límites ([guía](../Archivos-y-Media-Library/README.md)) |
+| **Correo** | `/admin/configuracion/correo` | SMTP y credenciales cifradas ([guía](../Correo-SMTP/README.md)) |
 
 Ambas tienen **Guardar cambios** y una acción de restaurar con confirmación:
 

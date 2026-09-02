@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\RecursoVpn;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class RecursoVpnPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:RecursoVpn');
@@ -61,15 +61,4 @@ class RecursoVpnPolicy
     {
         return $authUser->can('RestoreAny:RecursoVpn');
     }
-
-    public function replicate(AuthUser $authUser, RecursoVpn $recursoVpn): bool
-    {
-        return $authUser->can('Replicate:RecursoVpn');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:RecursoVpn');
-    }
-
 }

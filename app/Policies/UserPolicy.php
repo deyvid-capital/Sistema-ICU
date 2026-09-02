@@ -59,16 +59,6 @@ class UserPolicy
         return $authUser->can('RestoreAny:User');
     }
 
-    public function replicate(AuthUser $authUser): bool
-    {
-        return $authUser->can('Replicate:User');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:User');
-    }
-
     public function manageSecurity(AuthUser $authUser): bool
     {
         return $authUser->can('ManageSecurity:User');

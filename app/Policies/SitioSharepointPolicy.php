@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\SitioSharepoint;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class SitioSharepointPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:SitioSharepoint');
@@ -61,15 +61,4 @@ class SitioSharepointPolicy
     {
         return $authUser->can('RestoreAny:SitioSharepoint');
     }
-
-    public function replicate(AuthUser $authUser, SitioSharepoint $sitioSharepoint): bool
-    {
-        return $authUser->can('Replicate:SitioSharepoint');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:SitioSharepoint');
-    }
-
 }

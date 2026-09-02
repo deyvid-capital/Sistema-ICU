@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\NotaSalidaEquipo;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class NotaSalidaEquipoPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:NotaSalidaEquipo');
@@ -61,15 +61,4 @@ class NotaSalidaEquipoPolicy
     {
         return $authUser->can('RestoreAny:NotaSalidaEquipo');
     }
-
-    public function replicate(AuthUser $authUser, NotaSalidaEquipo $notaSalidaEquipo): bool
-    {
-        return $authUser->can('Replicate:NotaSalidaEquipo');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:NotaSalidaEquipo');
-    }
-
 }

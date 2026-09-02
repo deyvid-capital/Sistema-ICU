@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\Roles\RoleResource;
 use App\Filament\Resources\Users\UserResource;
-use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
@@ -129,7 +129,7 @@ return [
         'generate' => true,
         'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny', 'restore',
-            'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',
+            'forceDelete', 'forceDeleteAny', 'restoreAny',
         ],
         'single_parameter_methods' => [
             'viewAny',
@@ -137,7 +137,6 @@ return [
             'deleteAny',
             'forceDeleteAny',
             'restoreAny',
-            'reorder',
         ],
     ],
 

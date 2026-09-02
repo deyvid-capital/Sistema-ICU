@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Cargador;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class CargadorPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Cargador');
@@ -61,15 +61,4 @@ class CargadorPolicy
     {
         return $authUser->can('RestoreAny:Cargador');
     }
-
-    public function replicate(AuthUser $authUser, Cargador $cargador): bool
-    {
-        return $authUser->can('Replicate:Cargador');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Cargador');
-    }
-
 }

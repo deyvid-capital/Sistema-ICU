@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\ModeloLaptop;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class ModeloLaptopPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:ModeloLaptop');
@@ -61,15 +61,4 @@ class ModeloLaptopPolicy
     {
         return $authUser->can('RestoreAny:ModeloLaptop');
     }
-
-    public function replicate(AuthUser $authUser, ModeloLaptop $modeloLaptop): bool
-    {
-        return $authUser->can('Replicate:ModeloLaptop');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:ModeloLaptop');
-    }
-
 }

@@ -61,14 +61,4 @@ class ActivityPolicy
     {
         return $authUser->can('RestoreAny:Activity');
     }
-
-    public function replicate(AuthUser $authUser, Activity $activity): bool
-    {
-        return $authUser->can('Replicate:Activity');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('Reorder:Activity');
-    }
 }

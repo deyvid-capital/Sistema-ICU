@@ -20,13 +20,13 @@ use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Auth\SetupTwoFactor;
 use App\Filament\Pages\Auth\TwoFactorChallenge;
 use App\Filament\Resources\Activitylogs\ActivitylogResource;
+use App\Filament\Resources\Roles\RoleResource;
 use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
 use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Livewire\Profile\UpdatePassword as ProfileUpdatePassword;
 use App\Services\Configuracion\TemaService;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Actions\Action;
 use Filament\Enums\UserMenuPosition;
 use Filament\FontProviders\LocalFontProvider;
@@ -166,7 +166,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make()
-                    ->registerNavigation(false),
+                    ->registerNavigation(false)
+                    ->gridColumns(['default' => 1, 'lg' => 2])
+                    ->sectionColumnSpan(1)
+                    ->resourceCheckboxListColumns(['default' => 1, 'sm' => 2]),
                 ActivitylogPlugin::make()
                     ->resource(ActivitylogResource::class)
                     ->label('Registro de actividad')
