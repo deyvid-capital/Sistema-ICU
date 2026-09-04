@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
                 'password' => '12345678',
                 'id_area' => $adminCargo?->area_id,
                 'id_cargo' => $adminCargo?->id_cargo,
+                'acceso_habilitado' => true,
             ],
         );
 

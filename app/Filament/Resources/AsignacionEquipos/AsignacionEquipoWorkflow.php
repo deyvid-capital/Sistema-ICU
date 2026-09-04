@@ -5,11 +5,10 @@ namespace App\Filament\Resources\AsignacionEquipos;
 use App\Enums\EstadoEquipo;
 use App\Models\AsignacionEquipo;
 use App\Models\Equipo;
-use App\Models\User;
 use Illuminate\Support\Carbon;
 
 /**
- * Lógica de negocio de asignación de equipos (creación, reasignación, cierre).
+ * Lógica de negocio de asignación de equipos (creación y cierre).
  * Pensado para llamarse desde Create/Edit o RelationManagers.
  */
 class AsignacionEquipoWorkflow
@@ -34,16 +33,6 @@ class AsignacionEquipoWorkflow
         return $estado?->estaBloqueado() ?? false;
     }
 
-    public static function notaReasignacion(
-        string $usuarioOrigenNombre,
-        string $usuarioDestinoNombre,
-        Carbon|string|null $fecha = null,
-    ): string {
-        $fechaTexto = Carbon::parse($fecha ?? now())->format('d/m/Y');
-
-        return "<p><strong>Reasignación:</strong> de <strong>{$usuarioOrigenNombre}</strong> a <strong>{$usuarioDestinoNombre}</strong> el {$fechaTexto}.</p>";
-    }
-
     public static function notaCierrePorEstado(
         EstadoEquipo $estado,
         Carbon|string|null $fecha = null,
@@ -52,38 +41,6 @@ class AsignacionEquipoWorkflow
         $estadoTexto = $estado->getLabel();
 
         return "<p><strong>Cierre por cambio de estado:</strong> el equipo pasó a <strong>{$estadoTexto}</strong> el {$fechaTexto}.</p>";
-    }
-
-    /**
-     * Cierra la asignación activa del equipo (con el usuario anterior) y anota el
-     * movimiento. Devuelve la nota HTML para agregar a la nueva asignación.
-     */
-    public static function cerrarAsignacionesPreviasYAnotar(
-        string $serviceTag,
-        string $usuarioDestinoId,
-        ?int $ignoreAsignacionId = null,
-    ): string {
-        $activa = static::asignacionActivaDelEquipo($serviceTag, $ignoreAsignacionId);
-
-        if ($activa === null || $activa->usuario_id === $usuarioDestinoId) {
-            return '';
-        }
-
-        $fecha = now()->toDateString();
-        $usuarioDestino = User::withTrashed()->find($usuarioDestinoId);
-
-        $nota = static::notaReasignacion(
-            $activa->usuario?->name ?? (string) $activa->usuario_id,
-            $usuarioDestino?->name ?? $usuarioDestinoId,
-            $fecha,
-        );
-
-        $activa->update([
-            'fecha_fin' => $fecha,
-            'observaciones' => static::appendObservacion($activa->observaciones, $nota),
-        ]);
-
-        return $nota;
     }
 
     public static function appendObservacion(string|array|null $actual, string $nota): string

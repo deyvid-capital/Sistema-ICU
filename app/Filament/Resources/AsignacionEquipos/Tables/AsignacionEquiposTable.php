@@ -58,12 +58,12 @@ class AsignacionEquiposTable
                     ->placeholder('—')
                     ->hiddenOn(AsignacionesUsuarioRelationManager::class),
                 TextColumn::make('fecha_inicio')
-                    ->label('Alta')
+                    ->label('Fecha de Alta')
                     ->weight(FontWeight::Bold)
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('fecha_fin')
-                    ->label('Baja')
+                    ->label('Fecha de Baja')
                     ->badge()
                     ->date('d/m/Y')
                     ->placeholder('Activa')
@@ -119,9 +119,9 @@ class AsignacionEquiposTable
                     ->label('Fecha de Alta')
                     ->schema([
                         DatePicker::make('inicio_desde')
-                            ->label('Desde'),
+                            ->label(' Alta desde'),
                         DatePicker::make('inicio_hasta')
-                            ->label('Hasta')
+                            ->label(' Alta hasta')
                             ->afterOrEqual('inicio_desde'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -152,9 +152,9 @@ class AsignacionEquiposTable
                     ->label('Fecha de Baja')
                     ->schema([
                         DatePicker::make('fin_desde')
-                            ->label('Desde'),
+                            ->label(' Baja desde'),
                         DatePicker::make('fin_hasta')
-                            ->label('Hasta')
+                            ->label(' Baja hasta')
                             ->afterOrEqual('fin_desde'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query

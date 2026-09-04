@@ -35,52 +35,6 @@ class AsignacionEquipoWorkflowTest extends TestCase
         $this->assertTrue(AsignacionEquipoWorkflow::equipoEstaBloqueado($equipo));
     }
 
-    public function test_closes_previous_assignment_and_appends_notes(): void
-    {
-        $equipo = Equipo::factory()->create(['estado' => EstadoEquipo::Asignado]);
-        $usuarioA = User::factory()->create(['name' => 'Usuario Origen']);
-        $usuarioB = User::factory()->create(['name' => 'Usuario Destino']);
-
-        $previa = AsignacionEquipo::factory()->create([
-            'service_tag' => $equipo->service_tag,
-            'usuario_id' => $usuarioA->id,
-            'fecha_fin' => null,
-            'observaciones' => '<p>Nota previa</p>',
-        ]);
-
-        $nota = AsignacionEquipoWorkflow::cerrarAsignacionesPreviasYAnotar(
-            $equipo->service_tag,
-            $usuarioB->id,
-        );
-
-        $previa->refresh();
-
-        $this->assertNotNull($previa->fecha_fin);
-        $this->assertStringContainsString('Nota previa', (string) $previa->observaciones);
-        $this->assertStringContainsString('Usuario Origen', $nota);
-        $this->assertStringContainsString('Usuario Destino', $nota);
-    }
-
-    public function test_does_not_close_assignment_for_same_usuario(): void
-    {
-        $equipo = Equipo::factory()->create(['estado' => EstadoEquipo::Asignado]);
-        $usuario = User::factory()->create();
-
-        $previa = AsignacionEquipo::factory()->create([
-            'service_tag' => $equipo->service_tag,
-            'usuario_id' => $usuario->id,
-            'fecha_fin' => null,
-        ]);
-
-        $nota = AsignacionEquipoWorkflow::cerrarAsignacionesPreviasYAnotar(
-            $equipo->service_tag,
-            $usuario->id,
-        );
-
-        $this->assertSame('', $nota);
-        $this->assertNull($previa->fresh()->fecha_fin);
-    }
-
     public function test_updates_estado_to_asignado(): void
     {
         $equipo = Equipo::factory()->create(['estado' => EstadoEquipo::SinAsignar]);

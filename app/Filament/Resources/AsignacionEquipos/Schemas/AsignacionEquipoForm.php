@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\AsignacionEquipos\Schemas;
 
 use App\Enums\EstadoEquipo;
-use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoWorkflow;
 use App\Filament\Resources\Concerns\ConfiguresFormularioEquipoNumeroField;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
@@ -14,7 +13,6 @@ use App\Models\User;
 use App\Rules\EquipoDisponibleParaAsignacion;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,11 +21,9 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Livewire\Component;
+use Illuminate\Database\Eloquent\Builder;
 
 class AsignacionEquipoForm
 {
@@ -47,25 +43,28 @@ class AsignacionEquipoForm
                             ->icon(Heroicon::OutlinedLink)
                             ->columns(2)
                             ->schema([
-                                Hidden::make('confirmar_reasignacion')
-                                    ->dehydrated()
-                                    ->default(false),
                                 Select::make('usuario_id')
                                     ->label('Usuario')
                                     ->relationship('usuario', 'name')
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('confirmar_reasignacion', false))
                                     ->rule(new NotTrashed(User::class))
+                                    ->disabledOn('edit')
+                                    ->dehydrated(fn (?AsignacionEquipo $record): bool => $record === null)
                                     ->hiddenOn(AsignacionesEquipoRelationManager::class),
                                 Select::make('service_tag')
                                     ->label('Equipo')
                                     ->relationship(
                                         name: 'equipo',
                                         titleAttribute: 'service_tag',
-                                        modifyQueryUsing: fn ($query) => $query->with('asignacionActiva'),
+                                        modifyQueryUsing: function (Builder $query, ?AsignacionEquipo $record): Builder {
+                                            if ($record === null) {
+                                                $query->where('estado', EstadoEquipo::SinAsignar);
+                                            }
+
+                                            return $query;
+                                        },
                                     )
                                     ->getOptionLabelFromRecordUsing(function (Equipo $record): string {
                                         $estado = $record->estado instanceof EstadoEquipo
@@ -77,50 +76,17 @@ class AsignacionEquipoForm
                                     ->searchable(['service_tag', 'nombre_equipo'])
                                     ->preload()
                                     ->required()
-                                    ->live()
-                                    ->helperText('Si el equipo ya está asignado a otro usuario, deberá confirmar la reasignación.')
+                                    ->helperText(fn (?AsignacionEquipo $record): ?string => $record === null
+                                        ? 'Solo se listan equipos en estado «Sin asignar».'
+                                        : null)
                                     ->rule(new NotTrashed(Equipo::class))
                                     ->rules([
-                                        fn (?AsignacionEquipo $record, Get $get): EquipoDisponibleParaAsignacion => new EquipoDisponibleParaAsignacion(
+                                        fn (?AsignacionEquipo $record): EquipoDisponibleParaAsignacion => new EquipoDisponibleParaAsignacion(
                                             ignoreAsignacionId: $record?->getKey(),
-                                            confirmarReasignacion: (bool) $get('confirmar_reasignacion'),
                                         ),
                                     ])
-                                    ->afterStateUpdated(function (
-                                        ?string $state,
-                                        ?string $old,
-                                        Set $set,
-                                        Get $get,
-                                        Component $livewire,
-                                        ?AsignacionEquipo $record,
-                                    ): void {
-                                        $set('confirmar_reasignacion', false);
-
-                                        if (blank($state)) {
-                                            return;
-                                        }
-
-                                        $usuarioDestino = $get('usuario_id');
-
-                                        if (blank($usuarioDestino)) {
-                                            return;
-                                        }
-
-                                        $activa = AsignacionEquipoWorkflow::asignacionActivaDelEquipo(
-                                            $state,
-                                            $record?->getKey(),
-                                        );
-
-                                        // Solo pide confirmación si está activo con OTRO usuario.
-                                        if ($activa === null || $activa->usuario_id === $usuarioDestino) {
-                                            return;
-                                        }
-
-                                        $set('service_tag', $old);
-                                        $livewire->mountAction('confirmarReasignacionEquipo', [
-                                            'service_tag' => $state,
-                                        ]);
-                                    })
+                                    ->disabledOn('edit')
+                                    ->dehydrated(fn (?AsignacionEquipo $record): bool => $record === null)
                                     ->hiddenOn(AsignacionesUsuarioRelationManager::class),
                                 DatePicker::make('fecha_inicio')
                                     ->label('Fecha de Alta')
@@ -144,7 +110,7 @@ class AsignacionEquipoForm
                                         ['undo', 'redo'],
                                     ]),
                             ]),
-                        Tab::make('Entrega')
+                        Tab::make('Form. Entrega')
                             ->icon(Heroicon::OutlinedArrowUpTray)
                             ->badgeColor('gray')
                             ->schema([
@@ -192,7 +158,6 @@ class AsignacionEquipoForm
                                                         ['bulletList', 'orderedList'],
                                                         ['undo', 'redo'],
                                                     ])
-
                                                     ->columnSpanFull(),
                                                 RichEditor::make('nota')
                                                     ->label('Nota')

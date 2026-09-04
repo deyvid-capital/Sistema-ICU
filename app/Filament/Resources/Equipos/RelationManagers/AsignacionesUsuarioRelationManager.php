@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Equipos\RelationManagers;
 
-use App\Filament\Concerns\ConfirmsReasignacionEquipo;
 use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoResource;
 use App\Filament\Resources\Users\RelationManagers\Concerns\HasOwnerRecordCountBadge;
 use App\Models\AsignacionEquipo;
@@ -25,7 +24,6 @@ use Filament\Tables\Table;
 
 class AsignacionesUsuarioRelationManager extends RelationManager
 {
-    use ConfirmsReasignacionEquipo;
     use HasOwnerRecordCountBadge;
 
     protected static string $relationship = 'asignaciones';

@@ -31,7 +31,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             // Control de acceso al panel (gestionado por super-admin).
-            $table->boolean('acceso_habilitado')->default(true)->index();
+            $table->boolean('acceso_habilitado')->default(false)->index();
             $table->timestamp('acceso_expira_at')->nullable()->index();
             $table->boolean('requiere_2fa')->default(false);
             // Bloqueo por intentos de inicio de sesión fallidos.
