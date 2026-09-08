@@ -21,6 +21,10 @@ class AsignacionCargadorInfolist
                 TextEntry::make('equipo.nombre_equipo')
                     ->label('Nombre del equipo')
                     ->placeholder('—'),
+                TextEntry::make('service_tag_origen')
+                    ->label('Equipo origen')
+                    ->placeholder('—')
+                    ->visible(fn (AsignacionCargador $record): bool => filled($record->service_tag_origen)),
                 TextEntry::make('fecha_inicio')
                     ->label('Fecha de inicio')
                     ->date('d/m/Y')

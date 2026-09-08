@@ -181,7 +181,7 @@ class ProcesarBajaColaborador
 
         foreach ($asignaciones as $asignacion) {
             $asignacion->update(['fecha_fin' => $this->fechaCierre($fechaBaja, $asignacion->fecha_inicio)]);
-            AsignacionCargadorWorkflow::actualizarEstadoCargador($asignacion->serial_cargador, null, cerrada: true);
+            AsignacionCargadorWorkflow::actualizarEstadoCargador($asignacion->serial_cargador, cerrada: true);
         }
 
         return $asignaciones->count();

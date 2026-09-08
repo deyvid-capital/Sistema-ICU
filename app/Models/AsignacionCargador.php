@@ -23,6 +23,7 @@ class AsignacionCargador extends Model
     protected $fillable = [
         'serial_cargador',
         'service_tag',
+        'service_tag_origen',
         'fecha_inicio',
         'fecha_fin',
         'observaciones',
@@ -44,5 +45,10 @@ class AsignacionCargador extends Model
     public function equipo(): BelongsTo
     {
         return $this->belongsTo(Equipo::class, 'service_tag', 'service_tag')->withTrashed();
+    }
+
+    public function equipoOrigen(): BelongsTo
+    {
+        return $this->belongsTo(Equipo::class, 'service_tag_origen', 'service_tag')->withTrashed();
     }
 }

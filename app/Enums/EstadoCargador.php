@@ -19,8 +19,8 @@ enum EstadoCargador: string implements HasColor, HasLabel
         return match ($this) {
             self::Disponible => 'Disponible',
             self::Asignado => 'Asignado',
-            self::Temporal => 'Temporal',
-            self::Reasignacion => 'Reasignación',
+            self::Temporal => 'Prestado temporalmente',
+            self::Reasignacion => 'Cedido al equipo afectado',
             self::Dañado => 'Dañado',
             self::Baja => 'Baja',
         };

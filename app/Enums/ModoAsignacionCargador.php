@@ -12,8 +12,8 @@ enum ModoAsignacionCargador: string implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Temporal => 'Temporal (contingencia)',
-            self::Reasignacion => 'Reasignación (permanente)',
+            self::Temporal => 'Prestado temporalmente',
+            self::Reasignacion => 'Cedido al equipo afectado',
         };
     }
 
