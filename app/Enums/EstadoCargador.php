@@ -47,4 +47,18 @@ enum EstadoCargador: string implements HasColor, HasLabel
     {
         return in_array($this, [self::Dañado, self::Baja], true);
     }
+
+    /**
+     * «Asignado», «Prestado» y «Cedido» salen de la asignación, no se eligen a mano.
+     * Cualquier otro estado, si hay una asignación abierta, la cierra.
+     */
+    public function esSeleccionableManualmente(): bool
+    {
+        return in_array($this, [self::Disponible, self::Dañado, self::Baja], true);
+    }
+
+    public function esDerivadoDeAsignacion(): bool
+    {
+        return ! $this->esSeleccionableManualmente();
+    }
 }
