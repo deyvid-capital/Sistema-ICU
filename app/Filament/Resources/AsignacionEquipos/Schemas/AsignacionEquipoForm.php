@@ -80,11 +80,9 @@ class AsignacionEquipoForm
                                         ? 'Solo se listan equipos en estado «Sin asignar».'
                                         : null)
                                     ->rule(new NotTrashed(Equipo::class))
-                                    ->rules([
-                                        fn (?AsignacionEquipo $record): EquipoDisponibleParaAsignacion => new EquipoDisponibleParaAsignacion(
-                                            ignoreAsignacionId: $record?->getKey(),
-                                        ),
-                                    ])
+                                    ->rules(fn (?AsignacionEquipo $record): array => $record === null
+                                        ? [new EquipoDisponibleParaAsignacion]
+                                        : [])
                                     ->disabledOn('edit')
                                     ->dehydrated(fn (?AsignacionEquipo $record): bool => $record === null)
                                     ->hiddenOn(AsignacionesUsuarioRelationManager::class),

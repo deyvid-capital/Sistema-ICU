@@ -98,4 +98,72 @@ class AsignacionEquipoPdfFormActionsTest extends TestCase
                 && $job->tipo === EquipoFormularioPdfTipo::Entrega,
         );
     }
+
+    public function test_save_and_generate_pdf_works_for_closed_assignment_when_equipo_reassigned(): void
+    {
+        Bus::fake([GenerateEquipoFormularioPdfJob::class]);
+
+        $equipo = Equipo::factory()->create(['estado' => EstadoEquipo::Asignado]);
+        $usuarioAnterior = User::factory()->create();
+        $usuarioActual = User::factory()->create();
+
+        $asignacionAntigua = AsignacionEquipo::factory()->create([
+            'service_tag' => $equipo->service_tag,
+            'usuario_id' => $usuarioAnterior->id,
+            'fecha_inicio' => now()->subMonths(2)->toDateString(),
+            'fecha_fin' => now()->subMonth()->toDateString(),
+        ]);
+        $entregaAntigua = EntregaEquipo::factory()->create([
+            'asignacion_id' => $asignacionAntigua->id,
+            'numero' => '022-2026',
+        ]);
+
+        AsignacionEquipo::factory()->create([
+            'service_tag' => $equipo->service_tag,
+            'usuario_id' => $usuarioActual->id,
+            'fecha_inicio' => now()->subWeek()->toDateString(),
+            'fecha_fin' => null,
+        ]);
+
+        Livewire::test(EditAsignacionEquipo::class, ['record' => $asignacionAntigua->getKey()])
+            ->fillForm([
+                'motivo' => 'Regenerar PDF histórico',
+            ])
+            ->call('saveAndGeneratePdf')
+            ->assertHasNoFormErrors()
+            ->assertNotified();
+
+        Bus::assertDispatched(
+            GenerateEquipoFormularioPdfJob::class,
+            fn (GenerateEquipoFormularioPdfJob $job): bool => $job->record->is($entregaAntigua)
+                && $job->tipo === EquipoFormularioPdfTipo::Entrega,
+        );
+
+        $this->assertSame(EstadoEquipo::Asignado, $equipo->fresh()->estado);
+    }
+
+    public function test_save_and_generate_pdf_validates_required_fields(): void
+    {
+        Bus::fake([GenerateEquipoFormularioPdfJob::class]);
+
+        $equipo = Equipo::factory()->create(['estado' => EstadoEquipo::Asignado]);
+        $asignacion = AsignacionEquipo::factory()->create([
+            'service_tag' => $equipo->service_tag,
+            'usuario_id' => User::factory(),
+            'fecha_fin' => null,
+        ]);
+        EntregaEquipo::factory()->create([
+            'asignacion_id' => $asignacion->id,
+            'numero' => '023-2026',
+        ]);
+
+        Livewire::test(EditAsignacionEquipo::class, ['record' => $asignacion->getKey()])
+            ->fillForm([
+                'fecha_inicio' => null,
+            ])
+            ->call('saveAndGeneratePdf')
+            ->assertHasFormErrors(['fecha_inicio' => 'required']);
+
+        Bus::assertNotDispatched(GenerateEquipoFormularioPdfJob::class);
+    }
 }

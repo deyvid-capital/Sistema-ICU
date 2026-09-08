@@ -30,6 +30,7 @@ trait DispatchesEquipoFormularioPdfAfterPersist
             ->label('Crear y generar formulario PDF')
             ->color('success')
             ->icon(Heroicon::OutlinedDocumentArrowDown)
+            // Usar action(), no submit(): el form wrapper siempre despacha create/save.
             ->action('createAndGeneratePdf');
     }
 
@@ -41,6 +42,7 @@ trait DispatchesEquipoFormularioPdfAfterPersist
                 : 'Guardar y generar PDF')
             ->color('success')
             ->icon(Heroicon::OutlinedDocumentArrowDown)
+            // Usar action(), no submit(): el form wrapper siempre despacha create/save.
             ->action('saveAndGeneratePdf');
     }
 

@@ -86,23 +86,18 @@ class EquipoDisponibilidadAsignacionTest extends TestCase
         $this->assertFalse($validator->fails());
     }
 
-    public function test_allows_editing_current_active_assignment(): void
+    public function test_rejects_equipment_already_asignado(): void
     {
         $equipo = Equipo::factory()->create([
             'estado' => EstadoEquipo::Asignado,
         ]);
 
-        $asignacion = AsignacionEquipo::factory()->create([
-            'service_tag' => $equipo->service_tag,
-            'usuario_id' => User::factory(),
-            'fecha_fin' => null,
-        ]);
-
         $validator = Validator::make(
             ['service_tag' => $equipo->service_tag],
-            ['service_tag' => [new EquipoDisponibleParaAsignacion(ignoreAsignacionId: $asignacion->id)]],
+            ['service_tag' => [new EquipoDisponibleParaAsignacion]],
         );
 
-        $this->assertFalse($validator->fails());
+        $this->assertTrue($validator->fails());
+        $this->assertStringContainsString('Asignado', $validator->errors()->first('service_tag'));
     }
 }
