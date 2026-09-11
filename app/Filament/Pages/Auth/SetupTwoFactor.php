@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Auth;
 
 use App\Models\User;
+use App\Support\Auditoria\AuditorSeguridad;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Facades\Filament;
@@ -134,17 +135,22 @@ class SetupTwoFactor extends SimplePage implements HasForms
 
         $code = (string) ($this->data['code'] ?? '');
 
+        /** @var User $user */
+        $user = Filament::auth()->user();
+
         if (! filament('filament-breezy')->verify(code: $code)) {
+            app(AuditorSeguridad::class)->dosFactoresCodigoIncorrecto($user);
+
             $this->addError('data.code', 'El código no es válido. Revisa la app e inténtalo de nuevo.');
 
             return null;
         }
 
-        /** @var User $user */
-        $user = Filament::auth()->user();
         $user->confirmTwoFactorAuthentication();
         $user->setTwoFactorSession();
         $user->refresh();
+
+        app(AuditorSeguridad::class)->dosFactoresConfirmado($user);
 
         Notification::make()
             ->success()

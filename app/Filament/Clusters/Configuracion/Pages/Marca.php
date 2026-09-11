@@ -2,10 +2,12 @@
 
 namespace App\Filament\Clusters\Configuracion\Pages;
 
+use App\Enums\SeccionConfiguracion;
 use App\Filament\Clusters\Configuracion\ConfiguracionCluster;
 use App\Models\AppearanceSetting;
 use App\Services\Archivos\ArchivosService;
 use App\Services\Configuracion\TemaService;
+use App\Support\Auditoria\AuditorConfiguracion;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
@@ -152,6 +154,11 @@ class Marca extends Page implements HasForms
 
     public function guardar(): void
     {
+        // getState() persiste los archivos subidos en la Media Library, así que
+        // el muestreo previo tiene que hacerse antes de llamarlo.
+        $original = $this->record->getOriginal();
+        $mediaAntes = $this->estadoDeMedia();
+
         $datos = $this->form->getState();
 
         $this->record->fill([
@@ -159,11 +166,23 @@ class Marca extends Page implements HasForms
             'fondo_logo' => $datos['fondo_logo'] ?? null,
         ])->save();
 
+        // purgarArchivosHeredados() vuelve a guardar y refresca, así que los
+        // cambios de este save() hay que capturarlos ahora o se pierden.
+        $cambios = $this->record->getChanges();
+
         // Aplica subidas y eliminaciones: Media Library borra del disco el
         // archivo anterior de cada colección `singleFile()`.
         $this->form->model($this->record)->saveRelationships();
 
         $this->purgarArchivosHeredados();
+
+        app(AuditorConfiguracion::class)->guardado(
+            SeccionConfiguracion::Marca,
+            $this->record,
+            $original,
+            extra: $this->diferenciaDeMedia($mediaAntes, $this->estadoDeMedia()),
+            cambios: $cambios,
+        );
 
         app(TemaService::class)->olvidar();
 
@@ -180,6 +199,9 @@ class Marca extends Page implements HasForms
         $configuracion = AppearanceSetting::query()->first();
 
         if ($configuracion !== null) {
+            $original = $configuracion->getOriginal();
+            $mediaAntes = $this->estadoDeMedia($configuracion);
+
             $configuracion->clearBrandMedia();
 
             foreach (self::COLECCIONES as $coleccion) {
@@ -190,6 +212,13 @@ class Marca extends Page implements HasForms
                 'alto_logo' => null,
                 'fondo_logo' => null,
             ])->save();
+
+            app(AuditorConfiguracion::class)->restaurado(
+                SeccionConfiguracion::Marca,
+                $configuracion,
+                $original,
+                extra: $this->diferenciaDeMedia($mediaAntes, $this->estadoDeMedia($configuracion)),
+            );
         }
 
         app(TemaService::class)->olvidar();
@@ -207,6 +236,68 @@ class Marca extends Page implements HasForms
      * columna heredada queda obsoleta: se borra del disco para no acumular
      * logos ni favicons huérfanos.
      */
+    /**
+     * Archivo vigente en cada colección gestionada.
+     *
+     * getFirstMedia() memoriza la relación `media`, así que hay que soltarla o
+     * el segundo muestreo devolvería el primero y el diff saldría vacío.
+     *
+     * @return array<string, string|null>
+     */
+    protected function estadoDeMedia(?AppearanceSetting $configuracion = null): array
+    {
+        $configuracion ??= $this->record;
+
+        if ($configuracion === null) {
+            return [];
+        }
+
+        $configuracion->unsetRelation('media');
+
+        $estado = [];
+
+        foreach (self::COLECCIONES as $coleccion) {
+            $estado[$coleccion] = $configuracion->getFirstMedia($coleccion)?->file_name;
+        }
+
+        return $estado;
+    }
+
+    /**
+     * @param  array<string, string|null>  $antes
+     * @param  array<string, string|null>  $despues
+     * @return array{archivos?: array{subidos?: array<string, string>, eliminados?: array<string, string>}}
+     */
+    protected function diferenciaDeMedia(array $antes, array $despues): array
+    {
+        $subidos = [];
+        $eliminados = [];
+
+        foreach (self::COLECCIONES as $coleccion) {
+            $anterior = $antes[$coleccion] ?? null;
+            $actual = $despues[$coleccion] ?? null;
+
+            if ($anterior === $actual) {
+                continue;
+            }
+
+            if ($actual !== null) {
+                $subidos[$coleccion] = $actual;
+            }
+
+            if ($anterior !== null) {
+                $eliminados[$coleccion] = $anterior;
+            }
+        }
+
+        $archivos = array_filter([
+            'subidos' => $subidos,
+            'eliminados' => $eliminados,
+        ]);
+
+        return $archivos === [] ? [] : ['archivos' => $archivos];
+    }
+
     protected function purgarArchivosHeredados(): void
     {
         $this->record->refresh();

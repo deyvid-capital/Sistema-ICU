@@ -7,6 +7,7 @@ use App\Enums\TipoAcceso;
 use App\Enums\TipoEventoNotificacion;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
+use App\Support\Auditoria\AuditorSeguridad;
 use App\Support\Seguridad\ProteccionSuperAdmin;
 use App\Support\Sessions\UserSessions;
 use BackedEnum;
@@ -192,6 +193,8 @@ class ManageUserSeguridad extends EditRecord
                         ->action(function (): void {
                             $this->record->breezySessions()->withoutGlobalScopes()->delete();
                             $this->record->refresh();
+
+                            app(AuditorSeguridad::class)->dosFactoresReseteado($this->record);
 
                             Notification::make()->success()->title('2FA restablecido')->send();
                         }),

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages\Auth;
 
+use App\Models\User;
+use App\Support\Auditoria\AuditorSeguridad;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
@@ -48,12 +50,26 @@ class TwoFactorChallenge extends TwoFactorPage
         $this->usingRecoveryCode = false;
     }
 
+    /**
+     * TwoFactorPage::authenticate() lo invoca una sola vez y después del
+     * límite de intentos, así que auditar aquí no duplica registros.
+     */
     public function hasValidCode(): bool
     {
         if ($this->usingRecoveryCode) {
             return false;
         }
 
-        return $this->code && filament('filament-breezy')->verify(code: $this->code);
+        $valido = (bool) ($this->code && filament('filament-breezy')->verify(code: $this->code));
+
+        if (! $valido && filled($this->code)) {
+            $usuario = Filament::auth()->user();
+
+            if ($usuario instanceof User) {
+                app(AuditorSeguridad::class)->dosFactoresCodigoIncorrecto($usuario);
+            }
+        }
+
+        return $valido;
     }
 }

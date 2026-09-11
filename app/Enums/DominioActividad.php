@@ -73,6 +73,13 @@ enum DominioActividad: string implements HasLabel
     case Inventario = 'inventario';
     case Documentos = 'documentos';
 
+    /**
+     * Dominios transversales: no pertenecen a ningún modelo, se escriben a mano
+     * desde App\Support\Auditoria y por eso no aparecen en mapaDeModelos().
+     */
+    case Seguridad = 'seguridad';
+    case Configuracion = 'configuracion';
+
     public function getLabel(): string
     {
         return match ($this) {
@@ -85,6 +92,8 @@ enum DominioActividad: string implements HasLabel
             self::Recursos => 'Recursos',
             self::Inventario => 'Inventario técnico',
             self::Documentos => 'Documentos PDF',
+            self::Seguridad => 'Seguridad y accesos',
+            self::Configuracion => 'Configuración del sistema',
         };
     }
 
@@ -100,6 +109,8 @@ enum DominioActividad: string implements HasLabel
             self::Recursos => 'info',
             self::Inventario => 'gray',
             self::Documentos => 'gray',
+            self::Seguridad => 'danger',
+            self::Configuracion => 'gray',
         };
     }
 

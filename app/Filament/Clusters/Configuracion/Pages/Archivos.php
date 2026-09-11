@@ -2,9 +2,11 @@
 
 namespace App\Filament\Clusters\Configuracion\Pages;
 
+use App\Enums\SeccionConfiguracion;
 use App\Filament\Clusters\Configuracion\ConfiguracionCluster;
 use App\Models\MediaSetting;
 use App\Services\Archivos\ArchivosService;
+use App\Support\Auditoria\AuditorConfiguracion;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
@@ -186,7 +188,14 @@ class Archivos extends Page implements HasForms
         $datos = $this->form->getState();
 
         $configuracion = MediaSetting::query()->first() ?? new MediaSetting;
+        $original = $configuracion->getOriginal();
         $configuracion->fill($datos)->save();
+
+        app(AuditorConfiguracion::class)->guardado(
+            SeccionConfiguracion::Archivos,
+            $configuracion,
+            $original,
+        );
 
         app(ArchivosService::class)->olvidar();
 

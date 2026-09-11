@@ -2,9 +2,11 @@
 
 namespace App\Filament\Clusters\Configuracion\Pages;
 
+use App\Enums\SeccionConfiguracion;
 use App\Filament\Clusters\Configuracion\ConfiguracionCluster;
 use App\Models\MailSetting;
 use App\Services\Configuracion\MailConfigService;
+use App\Support\Auditoria\AuditorConfiguracion;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
@@ -211,6 +213,7 @@ class Correo extends Page implements HasForms
         $datos = $this->form->getState();
 
         $configuracion = MailSetting::query()->first() ?? new MailSetting;
+        $original = $configuracion->getOriginal();
 
         $payload = [
             'activo' => (bool) ($datos['activo'] ?? false),
@@ -235,17 +238,15 @@ class Correo extends Page implements HasForms
         app(MailConfigService::class)->olvidar();
         app(MailConfigService::class)->aplicar();
 
-        activity('configuracion')
-            ->causedBy(auth()->user())
-            ->performedOn($configuracion)
-            ->withProperties([
-                'activo' => $configuracion->activo,
-                'host' => $configuracion->host,
-                'username' => $configuracion->username,
-                'from_address' => $configuracion->from_address,
-                'password_actualizada' => filled($datos['password'] ?? null),
-            ])
-            ->log('Configuración de correo actualizada');
+        // `password` queda fuera del diff por partida doble: getChanges() trae el
+        // texto plano y getOriginal() el cifrado. Solo se registra la bandera.
+        app(AuditorConfiguracion::class)->guardado(
+            SeccionConfiguracion::Correo,
+            $configuracion,
+            $original,
+            excepto: ['password'],
+            extra: ['password_actualizada' => filled($datos['password'] ?? null)],
+        );
 
         Notification::make()
             ->success()

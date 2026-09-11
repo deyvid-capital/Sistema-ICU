@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Filament\Pages\Auth\TwoFactorChallenge;
-use App\Listeners\ResetearIntentosAlIniciarSesion;
 use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Media\IcuPathGenerator;
 use App\Models\AppearanceSetting;
@@ -33,11 +32,11 @@ use App\Policies\ActivityPolicy;
 use App\Services\Archivos\ArchivosService;
 use App\Services\Configuracion\MailConfigService;
 use App\Services\Configuracion\TemaService;
+use App\Support\Auditoria\AuditorConfiguracion;
+use App\Support\Auditoria\AuditorSeguridad;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Facades\FilamentTimezone;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -55,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(TemaService::class);
         $this->app->singleton(ArchivosService::class);
         $this->app->singleton(MailConfigService::class);
+        $this->app->singleton(AuditorSeguridad::class);
+        $this->app->singleton(AuditorConfiguracion::class);
     }
 
     /**
@@ -91,7 +92,8 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('two-factor-page', TwoFactorChallenge::class);
         Livewire::component('two_factor_authentication', TwoFactorAuthentication::class);
 
-        Event::listen(Login::class, ResetearIntentosAlIniciarSesion::class);
+        // Los listeners de app/Listeners los descubre Laravel por el tipo del
+        // argumento de handle(). Registrarlos aquí además los duplicaría.
 
         DatePicker::configureUsing(function (DatePicker $component): void {
             $component

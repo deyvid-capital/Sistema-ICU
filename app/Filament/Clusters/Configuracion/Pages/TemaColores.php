@@ -2,9 +2,11 @@
 
 namespace App\Filament\Clusters\Configuracion\Pages;
 
+use App\Enums\SeccionConfiguracion;
 use App\Filament\Clusters\Configuracion\ConfiguracionCluster;
 use App\Models\AppearanceSetting;
 use App\Services\Configuracion\TemaService;
+use App\Support\Auditoria\AuditorConfiguracion;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
@@ -204,7 +206,14 @@ class TemaColores extends Page implements HasForms
         $datos = $this->form->getState();
 
         $configuracion = AppearanceSetting::query()->first() ?? new AppearanceSetting;
+        $original = $configuracion->getOriginal();
         $configuracion->fill($datos)->save();
+
+        app(AuditorConfiguracion::class)->guardado(
+            SeccionConfiguracion::TemaColores,
+            $configuracion,
+            $original,
+        );
 
         app(TemaService::class)->olvidar();
 
@@ -220,6 +229,7 @@ class TemaColores extends Page implements HasForms
     public function restaurar(): void
     {
         $configuracion = AppearanceSetting::query()->first();
+        $original = $configuracion?->getOriginal() ?? [];
 
         $configuracion?->update([
             'tema' => config('tema.tema_por_defecto'),
@@ -230,6 +240,14 @@ class TemaColores extends Page implements HasForms
             'color_topbar_claro' => null,
             'color_topbar_oscuro' => null,
         ]);
+
+        if ($configuracion !== null) {
+            app(AuditorConfiguracion::class)->restaurado(
+                SeccionConfiguracion::TemaColores,
+                $configuracion,
+                $original,
+            );
+        }
 
         app(TemaService::class)->olvidar();
 

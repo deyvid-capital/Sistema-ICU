@@ -68,6 +68,17 @@ class DominioActividadTest extends TestCase
         $this->assertSame([], $obsoletos, 'Estas entradas del mapa apuntan a modelos que ya no registran actividad.');
     }
 
+    public function test_los_dominios_transversales_no_estan_en_el_mapa_de_modelos(): void
+    {
+        $dominios = array_values(DominioActividad::mapaDeModelos());
+
+        // Seguridad y Configuración se escriben a mano desde App\Support\Auditoria:
+        // mapearlos obligaría a poner LogsIcuActivity en los modelos de settings, y
+        // Marca::mount() crea su fila en un GET, generando registros espurios.
+        $this->assertNotContains(DominioActividad::Seguridad, $dominios);
+        $this->assertNotContains(DominioActividad::Configuracion, $dominios);
+    }
+
     public function test_cada_dominio_tiene_etiqueta_y_color(): void
     {
         foreach (DominioActividad::cases() as $dominio) {

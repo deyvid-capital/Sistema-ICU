@@ -7,6 +7,7 @@ use App\Models\PasswordResetChallenge;
 use App\Models\User;
 use App\Notifications\CodigoRecuperacionPassword;
 use App\Notifications\CriticalEventNotification;
+use App\Support\Auditoria\AuditorSeguridad;
 use App\Support\Notifications\NotifyAdmins;
 use App\Support\Sessions\UserSessions;
 use Filament\Facades\Filament;
@@ -73,6 +74,8 @@ class RecuperacionPassword
             ))->afterCommit());
         });
 
+        app(AuditorSeguridad::class)->otpSolicitado($usuario, $ip);
+
         $this->avisarAdmins(
             $usuario,
             'Solicitud de restablecimiento de contraseña',
@@ -134,6 +137,8 @@ class RecuperacionPassword
         $desafio->delete();
 
         event(new PasswordReset($usuario));
+
+        app(AuditorSeguridad::class)->passwordRestablecida($usuario);
 
         $this->avisarAdmins(
             $usuario,
@@ -223,6 +228,12 @@ class RecuperacionPassword
         $restantes = $this->maxIntentos() - $desafio->intentos_fallidos;
 
         if ($restantes > 0) {
+            app(AuditorSeguridad::class)->otpIncorrecto(
+                $desafio->email,
+                $restantes,
+                $this->buscarUsuario($desafio->email),
+            );
+
             $texto = $restantes === 1
                 ? 'Código incorrecto. Te queda 1 intento antes de bloquear la recuperación.'
                 : "Código incorrecto. Te quedan {$restantes} intentos antes de bloquear la recuperación.";
@@ -241,6 +252,8 @@ class RecuperacionPassword
         ])->save();
 
         $usuario = $this->buscarUsuario($desafio->email);
+
+        app(AuditorSeguridad::class)->otpBloqueado($desafio->email, $hasta, $usuario);
 
         if ($usuario !== null) {
             $this->avisarAdmins(

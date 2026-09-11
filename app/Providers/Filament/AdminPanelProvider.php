@@ -80,6 +80,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight(fn (): string => app(TemaService::class)->altoLogo())
             ->favicon(fn (): ?string => app(TemaService::class)->favicon())
             ->userMenu(position: UserMenuPosition::Sidebar)
+            ->topbar(false)
             ->userMenuItems([
                 Action::make('configuraciones')
                     ->label('Configuraciones')
@@ -116,7 +117,7 @@ class AdminPanelProvider extends PanelProvider
                 default => null,
             })
             ->sidebarFullyCollapsibleOnDesktop()
-            ->sidebarWidth('15rem')
+            ->sidebarWidth('18rem')
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Equipos'),
