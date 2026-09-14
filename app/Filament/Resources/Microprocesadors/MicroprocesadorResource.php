@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Microprocesadors;
 
+use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Clusters\Inventario\InventarioCluster;
+use App\Filament\Imports\MicroprocesadorImporter;
 use App\Filament\Resources\Microprocesadors\Pages\ManageMicroprocesadors;
 use App\Models\Microprocesador;
 use BackedEnum;
@@ -97,6 +99,13 @@ class MicroprocesadorResource extends Resource
             ->striped()
             ->paginated([10, 25, 50])
             ->defaultSort('nombre_micro')
+            ->headerActions([
+                GuiaImportAction::make()
+                    ->importer(MicroprocesadorImporter::class)
+                    ->maxRows(200)
+                    ->label('Importar')
+                    ->modalHeading('Importar microprocesadores'),
+            ])
             ->columns([
                 TextColumn::make('nombre_micro')
                     ->label('Procesador')

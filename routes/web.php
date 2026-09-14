@@ -8,6 +8,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+/*
 Route::get('/api/ver-form-entrega', function () {
     return view('PlantillasPdf.FormEntrega');
 });
@@ -31,6 +32,7 @@ Route::get('/api/ver-form-alta-baja', function () {
 Route::get('/api/ver-lista-usuarios', function () {
     return view('PlantillasPdf.ListaUsuarios');
 });
+*/
 
 Route::middleware('auth')->group(function () {
     Route::get('/movimientos/{movimiento}/preview-alta-baja', [MovimientoFormularioPdfController::class, 'previewHtml'])

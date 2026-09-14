@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Equipos\Tables;
 use App\Enums\EstadoEquipo;
 use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Actions\CambiarEstadoEquipoAction;
+use App\Filament\Actions\GuiaImportAction;
+use App\Filament\Imports\EquipoImporter;
 use App\Filament\Resources\Equipos\EquipoResource;
 use App\Models\Equipo;
 use Filament\Actions\ActionGroup;
@@ -36,6 +38,13 @@ class EquiposTable
             ->defaultSort('service_tag')
             ->striped()
             ->paginated([10, 25, 50])
+            ->headerActions([
+                GuiaImportAction::make()
+                    ->importer(EquipoImporter::class)
+                    ->maxRows(200)
+                    ->label('Importar')
+                    ->modalHeading('Importar equipos'),
+            ])
             ->columns([
                 TextColumn::make('service_tag')
                     ->label('Service Tag')

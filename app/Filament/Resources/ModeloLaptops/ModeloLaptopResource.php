@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\ModeloLaptops;
 
+use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Clusters\Inventario\InventarioCluster;
+use App\Filament\Imports\ModeloLaptopImporter;
 use App\Filament\Resources\ModeloLaptops\Pages\ManageModeloLaptops;
 use App\Models\ModeloLaptop;
 use BackedEnum;
@@ -97,6 +99,13 @@ class ModeloLaptopResource extends Resource
             ->striped()
             ->paginated([10, 25, 50])
             ->defaultSort('nombre')
+            ->headerActions([
+                GuiaImportAction::make()
+                    ->importer(ModeloLaptopImporter::class)
+                    ->maxRows(200)
+                    ->label('Importar')
+                    ->modalHeading('Importar modelos de laptop'),
+            ])
             ->columns([
                 TextColumn::make('nombre')
                     ->label('Modelo')

@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\MemoriaRams;
 
+use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Clusters\Inventario\InventarioCluster;
+use App\Filament\Imports\MemoriaRamImporter;
 use App\Filament\Resources\MemoriaRams\Pages\ManageMemoriaRams;
 use App\Models\MemoriaRam;
 use BackedEnum;
@@ -97,6 +99,13 @@ class MemoriaRamResource extends Resource
             ->striped()
             ->paginated([10, 25, 50])
             ->defaultSort('tipo_ram')
+            ->headerActions([
+                GuiaImportAction::make()
+                    ->importer(MemoriaRamImporter::class)
+                    ->maxRows(200)
+                    ->label('Importar')
+                    ->modalHeading('Importar memorias RAM'),
+            ])
             ->columns([
                 TextColumn::make('tipo_ram')
                     ->label('Tipo de RAM')

@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\TarjetaVideos;
 
+use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Clusters\Inventario\InventarioCluster;
+use App\Filament\Imports\TarjetaVideoImporter;
 use App\Filament\Resources\TarjetaVideos\Pages\ManageTarjetaVideos;
 use App\Models\TarjetaVideo;
 use BackedEnum;
@@ -97,6 +99,13 @@ class TarjetaVideoResource extends Resource
             ->striped()
             ->paginated([10, 25, 50])
             ->defaultSort('nombre_gpu')
+            ->headerActions([
+                GuiaImportAction::make()
+                    ->importer(TarjetaVideoImporter::class)
+                    ->maxRows(200)
+                    ->label('Importar')
+                    ->modalHeading('Importar tarjetas de video'),
+            ])
             ->columns([
                 TextColumn::make('nombre_gpu')
                     ->label('GPU')

@@ -4,8 +4,13 @@ namespace Tests\Unit\Filament;
 
 use App\Filament\Imports\AreaImporter;
 use App\Filament\Imports\CargoImporter;
+use App\Filament\Imports\EquipoImporter;
 use App\Filament\Imports\ImportColumnCatalog;
+use App\Filament\Imports\MemoriaRamImporter;
+use App\Filament\Imports\MicroprocesadorImporter;
+use App\Filament\Imports\ModeloLaptopImporter;
 use App\Filament\Imports\MovimientoImporter;
+use App\Filament\Imports\TarjetaVideoImporter;
 use App\Filament\Imports\UserImporter;
 use Tests\TestCase;
 
@@ -48,5 +53,36 @@ class ImportColumnCatalogTest extends TestCase
 
         $this->assertSame('email', $usuario['header']);
         $this->assertSame(['usuario', 'cargo'], array_column($guide['dependencies'], 'name'));
+    }
+
+    public function test_inventario_importers_guide_requires_the_unique_name_column(): void
+    {
+        $this->assertSame(['nombre'], array_column(ImportColumnCatalog::for(ModeloLaptopImporter::class)['required'], 'name'));
+        $this->assertSame(['nombre_micro'], array_column(ImportColumnCatalog::for(MicroprocesadorImporter::class)['required'], 'name'));
+        $this->assertSame(['tipo_ram'], array_column(ImportColumnCatalog::for(MemoriaRamImporter::class)['required'], 'name'));
+        $this->assertSame(['nombre_gpu'], array_column(ImportColumnCatalog::for(TarjetaVideoImporter::class)['required'], 'name'));
+
+        $modeloGuide = ImportColumnCatalog::for(ModeloLaptopImporter::class);
+        $this->assertSame([], $modeloGuide['optional']);
+        $this->assertSame([], $modeloGuide['dependencies']);
+        $this->assertStringContainsString('no se duplica', $modeloGuide['required'][0]['helperText']);
+    }
+
+    public function test_equipo_importer_guide_requires_catalog_and_keeps_observaciones_optional(): void
+    {
+        $guide = ImportColumnCatalog::for(EquipoImporter::class);
+
+        $this->assertSame(
+            ['service_tag', 'modelo', 'microprocesador', 'ram', 'gpu'],
+            array_column($guide['required'], 'name'),
+        );
+        $this->assertContains('observaciones', array_column($guide['optional'], 'name'));
+        $this->assertSame(['modelo', 'microprocesador', 'ram', 'gpu'], array_column($guide['dependencies'], 'name'));
+        $this->assertNotContains('bloqueo_bios', array_column($guide['columns'], 'name'));
+        $this->assertNotContains('etiquetado', array_column($guide['columns'], 'name'));
+        $this->assertNotContains('usuario_admin', array_column($guide['columns'], 'name'));
+        $this->assertNotContains('litigation_hold', array_column($guide['columns'], 'name'));
+        $this->assertNotContains('bitlocker', array_column($guide['columns'], 'name'));
+        $this->assertStringContainsString('booleanos', (string) $guide['summary']);
     }
 }
