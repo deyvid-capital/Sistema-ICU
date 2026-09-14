@@ -33,8 +33,6 @@ class ActivitylogResource extends BaseActivitylogResource
                 static::getEventColumnComponent(),
                 static::getSubjectTypeColumnComponent(),
                 static::getCauserNameColumnComponent(),
-                static::getCorreoColumnComponent(),
-                static::getIpColumnComponent(),
                 static::getPropertiesColumnComponent(),
                 static::getCreatedAtColumnComponent(),
             ])
@@ -47,14 +45,28 @@ class ActivitylogResource extends BaseActivitylogResource
     }
 
     /**
-     * La búsqueda por defecto del paquete usa `whereRelation()` sobre la relación
-     * polimórfica `causer`, lo que en PostgreSQL compara `activity_log.causer_id`
-     * (varchar) con `users.id` (uuid) y revienta la consulta. Se reemplaza por una
-     * búsqueda que resuelve los IDs del usuario como texto.
+     * Usuario, correo e IP en una sola columna, cada uno en su propia línea:
+     * usuario arriba, correo debajo, IP debajo de eso. Si al evento le falta
+     * alguno de los tres (un cambio de datos no tiene IP; un correo desconocido
+     * no tiene usuario) esa línea se omite en vez de quedar vacía. Sin ninguno
+     * de los tres se muestra el placeholder.
+     *
+     * La búsqueda cubre igualmente los tres. La del nombre de usuario no puede
+     * usar el `whereRelation()` por defecto del paquete: en PostgreSQL compara
+     * `activity_log.causer_id` (varchar) con `users.id` (uuid) y revienta la
+     * consulta, así que se resuelven los IDs del usuario como texto aparte.
      */
     public static function getCauserNameColumnComponent(): Column
     {
-        return parent::getCauserNameColumnComponent()
+        return TextColumn::make('causer.name')
+            ->label(__('activitylog::tables.columns.causer.label'))
+            ->listWithLineBreaks()
+            ->state(fn (Model $record): array => array_values(array_filter([
+                $record->causer?->name,
+                static::propiedad($record, 'email'),
+                static::propiedad($record, 'ip'),
+            ], fn (?string $valor): bool => filled($valor))))
+            ->placeholder('-')
             ->searchable(query: function (Builder $query, string $search): Builder {
                 $causerIds = User::withTrashed()
                     ->whereLike('name', "%{$search}%", caseSensitive: false)
@@ -62,9 +74,14 @@ class ActivitylogResource extends BaseActivitylogResource
                     ->map(fn (mixed $id): string => (string) $id)
                     ->all();
 
-                return $query
-                    ->where('causer_type', User::class)
-                    ->whereIn('causer_id', $causerIds);
+                return $query->where(function (Builder $query) use ($search, $causerIds): void {
+                    $query
+                        ->where(fn (Builder $query): Builder => $query
+                            ->where('causer_type', User::class)
+                            ->whereIn('causer_id', $causerIds))
+                        ->orWhereRaw("properties->>'email' ILIKE ?", ["%{$search}%"])
+                        ->orWhereRaw("properties->>'ip' ILIKE ?", ["%{$search}%"]);
+                });
             });
     }
 
@@ -81,35 +98,6 @@ class ActivitylogResource extends BaseActivitylogResource
             ->formatStateUsing(fn (?string $state): string => EtiquetasActividad::evento($state))
             ->color(fn (?string $state): string => EtiquetasActividad::colorDeEvento($state))
             ->wrap();
-    }
-
-    /**
-     * Correo implicado en un evento de acceso. Es el único identificador cuando
-     * el intento se hizo con una cuenta que no existe y no hay causante.
-     */
-    public static function getCorreoColumnComponent(): Column
-    {
-        return TextColumn::make('correo')
-            ->label('Correo')
-            ->state(fn (Model $record): ?string => static::propiedad($record, 'email'))
-            ->placeholder('-')
-            ->copyable()
-            // `properties` es de tipo json (no jsonb): se consulta con ->>,
-            // que devuelve texto y admite ILIKE.
-            ->searchable(query: fn (Builder $query, string $search): Builder => $query
-                ->whereRaw("properties->>'email' ILIKE ?", ['%'.$search.'%']));
-    }
-
-    public static function getIpColumnComponent(): Column
-    {
-        return TextColumn::make('ip')
-            ->label('IP')
-            ->state(fn (Model $record): ?string => static::propiedad($record, 'ip'))
-            ->placeholder('-')
-            ->copyable()
-            ->toggleable(isToggledHiddenByDefault: true)
-            ->searchable(query: fn (Builder $query, string $search): Builder => $query
-                ->whereRaw("properties->>'ip' ILIKE ?", ['%'.$search.'%']));
     }
 
     /**

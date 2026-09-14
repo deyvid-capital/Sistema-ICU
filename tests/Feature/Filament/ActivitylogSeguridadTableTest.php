@@ -47,6 +47,19 @@ class ActivitylogSeguridadTableTest extends TestCase
         return Activity::query()->latest('id')->firstOrFail();
     }
 
+    /**
+     * Estado real de la columna «Usuario» tal como la monta la tabla del
+     * listado: necesita estar mounted() para resolver record()/getState().
+     *
+     * @return list<string>
+     */
+    private function estadoColumnaUsuario(Activity $registro): array
+    {
+        $tabla = Livewire::test(ListActivitylogs::class)->instance()->getTable();
+
+        return $tabla->getColumn('causer.name')->record($registro)->getState();
+    }
+
     public function test_la_tabla_muestra_eventos_de_acceso_junto_a_los_cambios_de_datos(): void
     {
         $this->auditor()->correoDesconocido('intruso@example.com');
@@ -59,16 +72,65 @@ class ActivitylogSeguridadTableTest extends TestCase
             ->assertCanSeeTableRecords([$acceso, $negocio]);
     }
 
-    public function test_muestra_las_columnas_de_correo_e_ip(): void
+    public function test_la_columna_usuario_muestra_el_correo_de_un_evento_de_acceso(): void
     {
         $this->auditor()->correoDesconocido('intruso@example.com');
 
         Livewire::test(ListActivitylogs::class)
-            ->assertCanRenderTableColumn('correo')
-            ->assertSee('intruso@example.com')
-            // La IP existe pero llega apagada: solo estorba en las filas de
-            // negocio, que son la mayoría. Se activa desde el selector.
-            ->assertCanNotRenderTableColumn('ip');
+            ->assertCanRenderTableColumn('causer.name')
+            ->assertSee('intruso@example.com');
+    }
+
+    public function test_la_columna_usuario_apila_usuario_correo_e_ip_en_ese_orden(): void
+    {
+        $this->auditor()->ingresoExitoso($this->usuario);
+
+        $estado = $this->estadoColumnaUsuario($this->ultimo());
+
+        $this->assertSame($this->usuario->name, $estado[0]);
+        $this->assertSame($this->usuario->email, $estado[1]);
+        $this->assertNotSame('', $estado[2] ?? null);
+    }
+
+    public function test_la_columna_usuario_omite_la_linea_de_usuario_sin_causante(): void
+    {
+        $this->auditor()->correoDesconocido('intruso@example.com');
+
+        $estado = $this->estadoColumnaUsuario($this->ultimo());
+
+        $this->assertSame('intruso@example.com', $estado[0]);
+        $this->assertCount(2, $estado, 'Sin causante, la línea de usuario se omite; quedan correo e IP.');
+    }
+
+    public function test_la_columna_usuario_muestra_solo_el_usuario_en_un_cambio_de_datos(): void
+    {
+        Area::factory()->create();
+
+        $estado = $this->estadoColumnaUsuario($this->ultimo());
+
+        $this->assertSame([$this->usuario->name], $estado);
+    }
+
+    public function test_la_busqueda_de_usuario_tambien_encuentra_por_ip(): void
+    {
+        $this->auditor()->registrar(
+            EventoSeguridad::OtpSolicitado,
+            sujeto: $this->usuario,
+            propiedades: ['ip' => '203.0.113.9'],
+        );
+        $buscado = $this->ultimo();
+
+        $this->auditor()->registrar(
+            EventoSeguridad::OtpSolicitado,
+            sujeto: $this->usuario,
+            propiedades: ['ip' => '198.51.100.1'],
+        );
+        $otro = $this->ultimo();
+
+        Livewire::test(ListActivitylogs::class)
+            ->searchTable('203.0.113.9')
+            ->assertCanSeeTableRecords([$buscado])
+            ->assertCanNotSeeTableRecords([$otro]);
     }
 
     public function test_la_columna_evento_traduce_los_eventos_de_seguridad(): void

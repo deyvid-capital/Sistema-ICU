@@ -57,7 +57,9 @@ class MovimientoFormularioPdfActions
     public static function generate(MovimientoFormularioPdfTipo $tipo): Action
     {
         return Action::make('generarPdf')
-            ->label('Generar PDF')
+            ->label(fn (Movimiento $record): string => self::usesDocumentoOficial($record) && $record->hasDocumentoOficial()
+                ? 'Volver a generar PDF'
+                : 'Generar PDF')
             ->icon(Heroicon::OutlinedDocumentArrowDown)
             ->color('primary')
             ->visible(fn (Model $record): bool => $record instanceof Movimiento

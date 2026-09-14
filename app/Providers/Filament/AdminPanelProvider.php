@@ -109,14 +109,13 @@ class AdminPanelProvider extends PanelProvider
                     ->name('auth.setup-two-factor');
             })
             ->font('Lato', provider: LocalFontProvider::class)
-            ->topNavigation(false)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
                 Platform::Windows, Platform::Linux => 'CTRL+K',
                 Platform::Mac => '⌘K',
                 default => null,
             })
-            ->sidebarFullyCollapsibleOnDesktop()
+
             ->sidebarWidth('18rem')
             ->navigationGroups([
                 NavigationGroup::make()
@@ -125,7 +124,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Auditoría'),
             ])
             ->databaseNotifications()
-
             ->colors(fn (): array => app(TemaService::class)->coloresDelPanel())
             ->renderHook(
                 PanelsRenderHook::STYLES_BEFORE,

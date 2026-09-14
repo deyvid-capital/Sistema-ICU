@@ -28,12 +28,16 @@ Route::get('/api/ver-form-alta-baja', function () {
     return view('PlantillasPdf.FormAltaBaja');
 });
 
+Route::get('/api/ver-lista-usuarios', function () {
+    return view('PlantillasPdf.ListaUsuarios');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/movimientos/{movimiento}/preview-alta-baja', [MovimientoFormularioPdfController::class, 'previewHtml'])
         ->name('movimientos.preview-alta-baja');
 });
 
-Route::prefix('pdf/preview')->name('pdf.preview.')->group(function () {
+Route::prefix('pdf/preview')->middleware('auth')->name('pdf.preview.')->group(function () {
     Route::get('/entrega', [PdfPreviewController::class, 'entrega'])->name('entrega');
     Route::get('/recepcion', [PdfPreviewController::class, 'recepcion'])->name('recepcion');
     Route::get('/nota-salida', [PdfPreviewController::class, 'notaSalida'])->name('nota-salida');
