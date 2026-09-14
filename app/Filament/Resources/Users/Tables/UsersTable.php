@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Tables;
 
 use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Actions\GuiaImportAction;
+use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
@@ -16,6 +17,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
@@ -147,6 +149,14 @@ class UsersTable
                     ->collapsible(),
             ])->collapsedGroupsByDefault(true)
             ->headerActions([
+                ExportAction::make()
+                    ->exporter(UserExporter::class)
+                    ->label('Lista usuarios')
+                    ->icon(Heroicon::OutlinedDocumentArrowDown)
+                    ->color('gray')
+                    ->columnMapping(false)
+                    ->modalHeading('Exportar lista de usuarios')
+                    ->modalDescription('Se exportarán solo los usuarios con Alta vigente (sin Baja posterior) en formato Excel (.xlsx).'),
                 GuiaImportAction::make()
                     ->importer(UserImporter::class)
                     ->maxRows(200)

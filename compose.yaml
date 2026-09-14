@@ -28,12 +28,24 @@ services:
             - redis
     worker:
         image: 'sail-8.5/app'
-        # Corre como root (igual que laravel.test, cuyo WWWUSER está vacío) para poder
-        # fijar el mtime de las vistas Blade compiladas (touch requiere ser dueño del archivo).
-        # HOME=/home/sail permite que BrowsershotPdfFactory encuentre Chrome vía getenv('HOME').
-        entrypoint: ["php", "/var/www/html/artisan", "queue:work", "redis", "--sleep=3", "--tries=3", "--backoff=5", "--max-time=3600", "--max-jobs=500"]
+        # Debe correr como `sail` (WWWUSER), no como root: Filament Exports escribe
+        # en storage/app/private/filament_exports con permisos 0700 del dueño del proceso.
+        # Si el worker es root, el PHP-FPM (sail) no puede leer el .xlsx y la descarga
+        # responde 404. HOME=/home/sail permite a Browsershot localizar Chrome.
+        entrypoint: ["/usr/local/bin/start-container"]
+        command:
+            - php
+            - /var/www/html/artisan
+            - queue:work
+            - redis
+            - --sleep=3
+            - --tries=3
+            - --backoff=5
+            - --max-time=3600
+            - --max-jobs=500
         environment:
             WWWUSER: '${WWWUSER}'
+            SUPERVISOR_PHP_USER: sail
             LARAVEL_SAIL: 1
             HOME: /home/sail
         volumes:
