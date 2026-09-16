@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions;
 
+use App\Filament\Imports\CsvEncodingDetector;
 use App\Filament\Imports\ImportColumnCatalog;
 use Filament\Actions\ImportAction;
 use Filament\Support\Enums\Width;
@@ -18,5 +19,10 @@ class GuiaImportAction extends ImportAction
         $this->modalContent(fn (): View => view('filament.imports.guia', [
             'guide' => ImportColumnCatalog::for($this->getImporter()),
         ]));
+    }
+
+    protected function detectCsvEncoding(mixed $resource): ?string
+    {
+        return CsvEncodingDetector::fromStream($resource);
     }
 }
