@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\SoftwareExc;
+use App\Models\User;
+use App\Support\Seguridad\ProteccionSuperAdmin;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
@@ -14,12 +16,28 @@ class SoftwareExcPolicy
 
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:SoftwareExc');
+        if ($authUser instanceof User && $authUser->hasRole(ProteccionSuperAdmin::nombreRol())) {
+            return true;
+        }
+
+        if ($authUser->can('ViewAny:SoftwareExc')) {
+            return true;
+        }
+
+        return SoftwareExc::query()->where('aprobador_id', $authUser->getKey())->exists();
     }
 
     public function view(AuthUser $authUser, SoftwareExc $softwareExc): bool
     {
-        return $authUser->can('View:SoftwareExc');
+        if ($authUser instanceof User && $authUser->hasRole(ProteccionSuperAdmin::nombreRol())) {
+            return true;
+        }
+
+        if ($authUser->can('View:SoftwareExc')) {
+            return true;
+        }
+
+        return $authUser->getKey() === $softwareExc->aprobador_id;
     }
 
     public function create(AuthUser $authUser): bool
@@ -60,5 +78,15 @@ class SoftwareExcPolicy
     public function restoreAny(AuthUser $authUser): bool
     {
         return $authUser->can('RestoreAny:SoftwareExc');
+    }
+
+    public function approve(AuthUser $authUser, SoftwareExc $softwareExc): bool
+    {
+        return $authUser instanceof User && $softwareExc->puedeDecidir($authUser);
+    }
+
+    public function reject(AuthUser $authUser, SoftwareExc $softwareExc): bool
+    {
+        return $authUser instanceof User && $softwareExc->puedeDecidir($authUser);
     }
 }

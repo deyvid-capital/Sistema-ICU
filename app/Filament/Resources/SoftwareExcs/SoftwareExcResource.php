@@ -11,6 +11,7 @@ use App\Filament\Resources\SoftwareExcs\Schemas\SoftwareExcForm;
 use App\Filament\Resources\SoftwareExcs\Schemas\SoftwareExcInfolist;
 use App\Filament\Resources\SoftwareExcs\Tables\SoftwareExcsTable;
 use App\Models\SoftwareExc;
+use App\Support\Seguridad\ProteccionSuperAdmin;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -76,6 +77,24 @@ class SoftwareExcResource extends Resource
             'view' => ViewSoftwareExc::route('/{record}'),
             'edit' => EditSoftwareExc::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery()
+            ->with(['usuario', 'software', 'areaAprobadora', 'aprobador', 'decididoPor']);
+
+        $user = auth()->user();
+
+        if ($user === null) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        if ($user->can('ViewAny:SoftwareExc') || $user->hasRole(ProteccionSuperAdmin::nombreRol())) {
+            return $query;
+        }
+
+        return $query->where('aprobador_id', $user->getKey());
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder

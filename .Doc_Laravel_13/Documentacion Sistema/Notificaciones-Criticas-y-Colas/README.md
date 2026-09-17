@@ -68,12 +68,17 @@ si el cambio viene de una página Filament, un RelationManager, una clase Workfl
 | `AsigCelularObserver` | `AsigCelular` | creada / eliminada (sin enlace: los celulares no tienen Resource) | media |
 | `CargadorObserver` | `Cargador` | estado → `Dañado` o `Baja` | alta |
 | `EquipoObserver` | `Equipo` | estado → `Baja` | alta |
-| `SoftwareExcObserver` | `SoftwareExc` | creada / eliminada | media |
+| `SoftwareExcObserver` | `SoftwareExc` | creada / eliminada (admins) | media |
+| `NotifyExcepcionSoftware` | `SoftwareExc` | aprobador asignado o reasignado; excepción aprobada o rechazada | **alta** (campana y correo, con enlace a la ficha) |
 | `PdfEquipoObserver` | `PdfEquipo` | eliminada | media |
 | `GenerateEquipoFormularioPdfJob` | (Job) | «PDF listo» al terminar / «No se pudo generar» al fallar | media |
 
 > Nota: la notificación de **«PDF listo»** se envía desde el Job (no desde un observer), porque el
 > Job corre en el worker sin usuario autenticado y conoce al actor mediante `actorId`.
+>
+> El flujo de **aprobación de excepciones de software** (quién aprueba, Super Admin, campana +
+> correo) está documentado para el usuario en
+> [`../Excepciones-Software-Aprobacion/README.md`](../Excepciones-Software-Aprobacion/README.md).
 
 ---
 

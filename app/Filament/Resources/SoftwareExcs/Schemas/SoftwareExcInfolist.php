@@ -23,6 +23,16 @@ class SoftwareExcInfolist
                     ->badge()
                     ->color('warning')
                     ->placeholder('—'),
+                TextEntry::make('estado_aprobacion')
+                    ->label('Estado de aprobación')
+                    ->badge()
+                    ->placeholder('—'),
+                TextEntry::make('areaAprobadora.area')
+                    ->label('Área que aprueba')
+                    ->placeholder('—'),
+                TextEntry::make('aprobador.name')
+                    ->label('Aprobador designado')
+                    ->placeholder('—'),
                 TextEntry::make('motivo')
                     ->label('Motivo')
                     ->columnSpanFull(),
@@ -33,6 +43,20 @@ class SoftwareExcInfolist
                     ->label('Fecha de fin')
                     ->date('d/m/Y')
                     ->placeholder('—'),
+                TextEntry::make('decididoPor.name')
+                    ->label('Decidido por')
+                    ->placeholder('—')
+                    ->visible(fn (SoftwareExc $record): bool => ! $record->estaPendiente()),
+                TextEntry::make('decidido_at')
+                    ->label('Fecha de decisión')
+                    ->dateTime('d/m/Y H:i')
+                    ->placeholder('—')
+                    ->visible(fn (SoftwareExc $record): bool => ! $record->estaPendiente()),
+                TextEntry::make('comentario_decision')
+                    ->label('Nota de decisión')
+                    ->placeholder('—')
+                    ->columnSpanFull()
+                    ->visible(fn (SoftwareExc $record): bool => filled($record->comentario_decision)),
                 TextEntry::make('created_at')
                     ->label('Creado')
                     ->dateTime('d/m/Y H:i')

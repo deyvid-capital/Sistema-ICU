@@ -34,6 +34,8 @@ class ViewUser extends ViewRecord
             'azureAd',
             'softwareUsuarios.software',
             'softwareExcepciones.software',
+            'softwareExcepciones.aprobador',
+            'softwareExcepciones.areaAprobadora',
             'licenciasUsuarios.licencia',
             'asignacionesEquipos.equipo',
             'asignacionesCelulares.celular',

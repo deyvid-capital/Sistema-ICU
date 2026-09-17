@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Software\RelationManagers;
 
+use App\Filament\Actions\AprobarExcepcionSoftwareAction;
+use App\Filament\Actions\RechazarExcepcionSoftwareAction;
+use App\Filament\Resources\SoftwareExcs\Schemas\SoftwareExcForm;
 use App\Models\SoftwareExc;
 use App\Models\User;
 use App\Rules\NotTrashed;
@@ -18,6 +21,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -42,6 +46,8 @@ class ExcepcionesRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->required()
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('aprobador_id', null))
                     ->rule(new NotTrashed(User::class)),
                 Select::make('tipo_excepcion')
                     ->label('Tipo de excepcion')
@@ -50,6 +56,7 @@ class ExcepcionesRelationManager extends RelationManager
                         'Permanente' => 'Permanente',
                         'Emergencia' => 'Emergencia',
                     ]),
+                ...SoftwareExcForm::camposAprobacion(),
                 Textarea::make('motivo')
                     ->label('Motivo')
                     ->required()
@@ -80,6 +87,12 @@ class ExcepcionesRelationManager extends RelationManager
                     ->label('Tipo')
                     ->badge()
                     ->color('warning'),
+                TextColumn::make('estado_aprobacion')
+                    ->label('Aprobación')
+                    ->badge(),
+                TextColumn::make('aprobador.name')
+                    ->label('Aprobador')
+                    ->placeholder('—'),
                 TextColumn::make('fecha_inicio')
                     ->label('Fecha inicio')
                     ->date('d/m/Y')
@@ -113,6 +126,8 @@ class ExcepcionesRelationManager extends RelationManager
                     ->successNotificationTitle('Excepcion registrada correctamente'),
             ])
             ->recordActions([
+                AprobarExcepcionSoftwareAction::make(),
+                RechazarExcepcionSoftwareAction::make(),
                 EditAction::make()
                     ->label('Editar')
                     ->visible(fn (SoftwareExc $record): bool => ! $record->trashed()),

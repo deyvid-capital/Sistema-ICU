@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\SoftwareExcs\Tables;
 
+use App\Enums\EstadoAprobacionExcepcion;
+use App\Filament\Actions\AprobarExcepcionSoftwareAction;
+use App\Filament\Actions\RechazarExcepcionSoftwareAction;
 use App\Filament\Resources\SoftwareExcs\SoftwareExcResource;
 use App\Filament\Resources\Users\RelationManagers\SoftwareExcepcionesRelationManager;
 use App\Models\SoftwareExc;
@@ -17,18 +20,24 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class SoftwareExcsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->recordUrl(fn (SoftwareExc $record): string => $record->trashed()
-                ? SoftwareExcResource::getUrl('view', ['record' => $record])
-                : SoftwareExcResource::getUrl('edit', ['record' => $record]))
+            ->recordUrl(function (SoftwareExc $record): string {
+                if ($record->trashed() || $record->estaPendiente() || ! SoftwareExcResource::canEdit($record)) {
+                    return SoftwareExcResource::getUrl('view', ['record' => $record]);
+                }
+
+                return SoftwareExcResource::getUrl('edit', ['record' => $record]);
+            })
             ->defaultSort('fecha_inicio', 'desc')
             ->striped()
             ->paginated([10, 25, 50])
@@ -48,6 +57,20 @@ class SoftwareExcsTable
                     ->label('Tipo de excepcion')
                     ->badge()
                     ->color('warning')
+                    ->searchable(),
+                TextColumn::make('estado_aprobacion')
+                    ->label('Aprobación')
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('areaAprobadora.area')
+                    ->label('Área que aprueba')
+                    ->toggleable()
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('aprobador.name')
+                    ->label('Aprobador')
+                    ->toggleable()
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('fecha_inicio')
                     ->label('Fecha de inicio')
@@ -88,6 +111,15 @@ class SoftwareExcsTable
                         'Permanente' => 'Permanente',
                         'Emergencia' => 'Emergencia',
                     ]),
+                SelectFilter::make('estado_aprobacion')
+                    ->label('Estado de aprobación')
+                    ->options(EstadoAprobacionExcepcion::class),
+                Filter::make('pendientes_mios')
+                    ->label('Pendientes de mi aprobación')
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query
+                        ->where('aprobador_id', auth()->id())
+                        ->where('estado_aprobacion', EstadoAprobacionExcepcion::Pendiente)),
                 TrashedFilter::make()
                     ->label('Estado del registro'),
             ])
@@ -95,6 +127,8 @@ class SoftwareExcsTable
                 ActionGroup::make([
                     ViewAction::make()
                         ->label('Ver'),
+                    AprobarExcepcionSoftwareAction::make(),
+                    RechazarExcepcionSoftwareAction::make(),
                     EditAction::make()
                         ->label('Editar')
                         ->visible(fn (SoftwareExc $record): bool => ! $record->trashed()),

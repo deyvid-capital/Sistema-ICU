@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\SoftwareExcs\Pages;
 
+use App\Filament\Actions\AprobarExcepcionSoftwareAction;
+use App\Filament\Actions\RechazarExcepcionSoftwareAction;
 use App\Filament\Resources\SoftwareExcs\SoftwareExcResource;
 use App\Models\SoftwareExc;
 use Filament\Actions\ActionGroup;
@@ -28,6 +30,8 @@ class EditSoftwareExc extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            AprobarExcepcionSoftwareAction::make(),
+            RechazarExcepcionSoftwareAction::make(),
             ActionGroup::make([
                 ViewAction::make()
                     ->label('Ver'),

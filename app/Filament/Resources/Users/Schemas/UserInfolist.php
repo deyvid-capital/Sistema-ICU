@@ -37,10 +37,10 @@ class UserInfolist
                         Grid::make(['default' => 1, 'md' => 3])
                             ->schema([
                                 TextEntry::make('name')
-                                ->label('Nombre')
-                                ->icon(Heroicon::OutlinedUser)
-                                ->weight('medium')
-                                ->size('md'),
+                                    ->label('Nombre')
+                                    ->icon(Heroicon::OutlinedUser)
+                                    ->weight('medium')
+                                    ->size('md'),
                                 TextEntry::make('carnet')
                                     ->label('Carnet')
                                     ->icon(Heroicon::OutlinedIdentification)
@@ -402,6 +402,13 @@ class UserInfolist
                                                             ->label('Tipo')
                                                             ->badge()
                                                             ->color('warning')
+                                                            ->placeholder('—'),
+                                                        TextEntry::make('estado_aprobacion')
+                                                            ->label('Aprobación')
+                                                            ->badge()
+                                                            ->placeholder('—'),
+                                                        TextEntry::make('aprobador.name')
+                                                            ->label('Aprobador')
                                                             ->placeholder('—'),
                                                         TextEntry::make('fecha_inicio')
                                                             ->label('Desde')

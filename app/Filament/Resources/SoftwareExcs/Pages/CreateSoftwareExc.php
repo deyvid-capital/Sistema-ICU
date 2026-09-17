@@ -22,6 +22,6 @@ class CreateSoftwareExc extends CreateRecord
         return Notification::make()
             ->success()
             ->title('Excepcion registrada')
-            ->body('La excepcion de software fue registrada correctamente.');
+            ->body('La excepcion quedó pendiente de aprobación. Se notificó al aprobador por campana y correo.');
     }
 }

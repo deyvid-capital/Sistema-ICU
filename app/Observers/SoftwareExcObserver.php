@@ -7,11 +7,14 @@ use App\Models\SoftwareExc;
 use App\Models\User;
 use App\Notifications\CriticalEventNotification;
 use App\Support\Notifications\NotifyAdmins;
+use App\Support\Notifications\NotifyExcepcionSoftware;
 
 class SoftwareExcObserver
 {
     public function created(SoftwareExc $excepcion): void
     {
+        NotifyExcepcionSoftware::aprobadorAsignado($excepcion);
+
         NotifyAdmins::dispatch(
             title: 'Excepción de software registrada',
             body: "Excepción «{$excepcion->tipo_excepcion}» para {$this->usuario($excepcion)} — por {$this->actor()}.",
@@ -20,6 +23,15 @@ class SoftwareExcObserver
             color: 'warning',
             severity: CriticalEventNotification::SEVERIDAD_MEDIA,
         );
+    }
+
+    public function updated(SoftwareExc $excepcion): void
+    {
+        if (! $excepcion->wasChanged('aprobador_id') || ! $excepcion->estaPendiente()) {
+            return;
+        }
+
+        NotifyExcepcionSoftware::aprobadorAsignado($excepcion);
     }
 
     public function deleted(SoftwareExc $excepcion): void
