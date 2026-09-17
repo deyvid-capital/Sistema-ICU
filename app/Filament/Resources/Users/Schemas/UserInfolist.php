@@ -385,30 +385,36 @@ class UserInfolist
 
                                 Section::make('Excepciones de software')
                                     ->icon(Heroicon::OutlinedExclamationTriangle)
-                                    ->description('Autorizaciones o bloqueos especiales otorgados al usuario.')
+                                    ->description('Permisos especiales. El estado indica si ya fueron aprobados.')
                                     ->collapsible()
                                     ->schema([
                                         RepeatableEntry::make('softwareExcepciones')
                                             ->hiddenLabel()
                                             ->schema([
-                                                Grid::make(['default' => 1, 'md' => 4])
+                                                Grid::make(['default' => 1, 'md' => 3])
                                                     ->schema([
                                                         TextEntry::make('software.nombre_software')
                                                             ->label('Software')
                                                             ->badge()
                                                             ->color('info')
                                                             ->placeholder('—'),
-                                                        TextEntry::make('tipo_excepcion')
-                                                            ->label('Tipo')
-                                                            ->badge()
-                                                            ->color('warning')
-                                                            ->placeholder('—'),
                                                         TextEntry::make('estado_aprobacion')
                                                             ->label('Aprobación')
                                                             ->badge()
                                                             ->placeholder('—'),
+                                                        TextEntry::make('tipo_excepcion')
+                                                            ->label('Tipo')
+                                                            ->badge()
+                                                            ->color(fn ($record): string => match ($record->tipo_excepcion) {
+                                                                'Emergencia' => 'danger',
+                                                                'Permanente' => 'warning',
+                                                                'Temporal' => 'info',
+                                                                default => 'gray',
+                                                            })
+                                                            ->placeholder('—'),
                                                         TextEntry::make('aprobador.name')
                                                             ->label('Aprobador')
+                                                            ->icon(Heroicon::OutlinedUserCircle)
                                                             ->placeholder('—'),
                                                         TextEntry::make('fecha_inicio')
                                                             ->label('Desde')

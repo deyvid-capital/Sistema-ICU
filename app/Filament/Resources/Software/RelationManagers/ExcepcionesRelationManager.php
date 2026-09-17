@@ -6,8 +6,6 @@ use App\Filament\Actions\AprobarExcepcionSoftwareAction;
 use App\Filament\Actions\RechazarExcepcionSoftwareAction;
 use App\Filament\Resources\SoftwareExcs\Schemas\SoftwareExcForm;
 use App\Models\SoftwareExc;
-use App\Models\User;
-use App\Rules\NotTrashed;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -17,11 +15,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -38,37 +32,7 @@ class ExcepcionesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Select::make('usuario_id')
-                    ->label('Usuario')
-                    ->relationship('usuario', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->live()
-                    ->afterStateUpdated(fn (Set $set) => $set('aprobador_id', null))
-                    ->rule(new NotTrashed(User::class)),
-                Select::make('tipo_excepcion')
-                    ->label('Tipo de excepcion')
-                    ->options([
-                        'Temporal' => 'Temporal',
-                        'Permanente' => 'Permanente',
-                        'Emergencia' => 'Emergencia',
-                    ]),
-                ...SoftwareExcForm::camposAprobacion(),
-                Textarea::make('motivo')
-                    ->label('Motivo')
-                    ->required()
-                    ->maxLength(1000)
-                    ->columnSpanFull(),
-                DatePicker::make('fecha_inicio')
-                    ->label('Fecha de inicio')
-                    ->required(),
-                DatePicker::make('fecha_fin')
-                    ->label('Fecha de fin')
-                    ->afterOrEqual('fecha_inicio'),
-            ]);
+        return SoftwareExcForm::configure($schema);
     }
 
     public function table(Table $table): Table
