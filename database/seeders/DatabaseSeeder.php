@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             ?? Cargo::query()->first();
 
         User::query()->firstOrCreate(
-            ['email' => 'admin@admin.com'],
+            ['email' => 'ti@capitalsafi.com'],
             [
                 'name' => 'admin',
                 'nombres' => 'Admin',
@@ -37,11 +37,6 @@ class DatabaseSeeder extends Seeder
         // Roles/permisos y asignación de super_admin al admin (después de crearlo).
         $this->call(RolesPermissionsSeeder::class);
 
-        $this->call([
-            SoftwareLicenciasSeeder::class,
-            AccesosSeeder::class,
-            EquiposSeeder::class,
-            CelularesSeeder::class,
-        ]);
+        $this->call(EquiposSeeder::class);
     }
 }

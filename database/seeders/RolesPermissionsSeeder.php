@@ -70,6 +70,6 @@ class RolesPermissionsSeeder extends Seeder
         }
 
         // 4. Única asignación de rol en el seeder: super_admin al admin sembrado.
-        User::query()->where('email', 'admin@admin.com')->first()?->assignRole($superAdminName);
+        User::query()->where('email', 'ti@capitalsafi.com')->first()?->assignRole($superAdminName);
     }
 }

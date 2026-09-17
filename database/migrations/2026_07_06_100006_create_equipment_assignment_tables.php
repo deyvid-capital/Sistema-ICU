@@ -11,6 +11,11 @@ return new class extends Migration
         Schema::create('asignaciones_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('service_tag', 50);
+            $table->string('service_tag_origen', 50)->nullable()->after('service_tag');
+            $table->foreign('service_tag_origen')
+                ->references('service_tag')
+                ->on('equipos')
+                ->restrictOnDelete();
             $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->date('fecha_inicio');
             $table->date('fecha_fin')->nullable();

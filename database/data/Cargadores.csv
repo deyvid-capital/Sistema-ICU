@@ -1,0 +1,50 @@
+SERIAL;MARCA;MODELO;ESTADO;Title;Tipo de elemento;Ruta de acceso
+CN-07MP1P-CH200-0C7-0CFD-A02;Dell;HA130PM170;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0T3JDJ-CH200-27N-0IDD-ADD;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0M0H25-CH200-97F-01QC-A01;Dell;HA130PM170;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0FTTTJ-DES00-14U-C6CB-A01;Dell;DA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-01XMKR-LOC00-177-24A7-A02;Dell;LA90PM130;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-9BR-01RZ-A07;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0T3JDJ-CH200-27J-0GB4-A00;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-9BR-01RB-A07;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+VN-0JJ12F-LOV00-558-A93Y-A00;Dell;LA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0T3JDJ-CH200-27J-07X4-A00;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0T3JDJ-CH200-27F-03QH-A00;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-9BR-0779-A07;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-09N2C-77781-4B6-0S4A-A04;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0T3JDJ-CH200-27N-072W-A00;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+VN-0JJ12FLOV00-54P-A82H-A00;Dell;LA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0T3J0-CH200-27J-07XH-A00;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-068P9N-LOC00-94D-37E7-A01;Dell;LA130PM191;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0WMDHR-CH200-155-01RF-A02;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0WMDHR-CH200-155-01UR-A02;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+VN-0JJ12F-LOV00-558-A9TB-A00;Dell;LA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-03VT2F-LOC00-06Q-0051-A01;Dell;LA65NM191;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-03VT2F-LOC00-06Q-0371-A01;Dell;LA65NM191;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0WMDHR-CH200-155-01LM-A02;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0VFHDX-CH200-48K-3DV1-A01;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0T3JDJ-CH200-27J-07XN-A00;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0MGJN9-LOC00-085-4E5C-A09;Dell;LA65NS2-01;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0M0H25-CH200-035-06WP-A02;Dell;HA130PM170;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-05GT3K-LOC00-91B-3C52-A03;Dell;LA90PM130;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-SWMDHR-CH200-155-0227-AD2;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-07MP1P-CH200-0C7-0468-A00;Dell;HA130PM170;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-063P9N-LOC00-94D-00F0-A01;Dell;LA130PM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+VN-0JJ12F-LOV00-558-A9WD-A00;Dell;LA65NM190 LPS;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0M0H25-CH200-05C-05FO-A02;Dell;HA130PM170;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-063P9N-LOC00-94D-37E7-A01;Dell;LA130PM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-83V-00GL-A06;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-83V-00FS-A06;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+148753021 0225593;Dell;VGP-AC19V41;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0VFHDX-CH200-47M-09RF-A01;Dell;HA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0MGJN9-LOC00-11U-1A70-A10;Dell;LA65NS2-01;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-01XMKR-LOC00-177-0DD9-A02;Dell;LA90PM130;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0XK850-48661-21BF-HUM3-A02;Dell;DA50NS4-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-0CE-04WD-A09;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-83V-00FY-A06;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-9BR-01R4-A07;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0G6J41-CH600-9BR-077L-A07;Dell;HA65NS5-00;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0WMDHR-CH200-14U-DD5D-A02;DELL;;Dañado;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+VN-0JJ12F-LOV00-558-A94F-A00;DELL;LA65NM190 LPS;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+CN-0MDH25-CH200-05C-05GT-A02;Dell;HA130PM170;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores
+VN-0JJ12F-LOV00-557AGGD-A00;dell;LA65NM190;;;Elemento;sites/TestDeyvidComunicacion/Lists/Cargadores

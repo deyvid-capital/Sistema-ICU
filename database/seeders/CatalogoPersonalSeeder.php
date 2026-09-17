@@ -5,10 +5,13 @@ namespace Database\Seeders;
 use App\Models\Area;
 use App\Models\Cargo;
 use App\Models\User;
+use Database\Seeders\Concerns\ReadsCsvData;
 use Illuminate\Database\Seeder;
 
 class CatalogoPersonalSeeder extends Seeder
 {
+    use ReadsCsvData;
+
     public function run(): void
     {
         $areas = $this->rowsFromCsv('areas.csv');
@@ -57,11 +60,7 @@ class CatalogoPersonalSeeder extends Seeder
 
             $nombres = $usuario['nombres'] ?? '';
             $apellidos = $usuario['apelidos'] ?? $usuario['apellidos'] ?? '';
-            $telefono = $usuario['telefono'] ?? null;
-
-            if (in_array($telefono, [null, '', '-'], true)) {
-                $telefono = null;
-            }
+            $telefono = $this->nullableCsvValue($usuario['telefono'] ?? null);
 
             User::query()->updateOrCreate(
                 ['email' => $email],
@@ -69,63 +68,12 @@ class CatalogoPersonalSeeder extends Seeder
                     'nombres' => $nombres,
                     'apellidos' => $apellidos,
                     'name' => trim($nombres.' '.$apellidos),
-                    'carnet' => filled($usuario['carnet'] ?? null) ? $usuario['carnet'] : null,
+                    'carnet' => $this->nullableCsvValue($usuario['carnet'] ?? null),
                     'telefono' => $telefono,
                     'id_area' => $areasPorNombre[$usuario['area'] ?? ''] ?? null,
                     'id_cargo' => $cargosPorNombre[$usuario['cargo'] ?? ''] ?? null,
                 ],
             );
         }
-    }
-
-    /**
-     * @return list<array<string, string>>
-     */
-    private function rowsFromCsv(string $filename): array
-    {
-        $path = database_path('data/'.$filename);
-        $handle = fopen($path, 'r');
-
-        if ($handle === false) {
-            throw new \RuntimeException("No se pudo leer {$path}.");
-        }
-
-        try {
-            $header = fgetcsv($handle, separator: ';');
-
-            if ($header === false) {
-                return [];
-            }
-
-            $header = array_map($this->cleanCsvValue(...), $header);
-            $rows = [];
-
-            while (($row = fgetcsv($handle, separator: ';')) !== false) {
-                if ($row === [null]) {
-                    continue;
-                }
-
-                $values = array_pad(array_map($this->cleanCsvValue(...), $row), count($header), '');
-                $rows[] = array_combine($header, $values);
-            }
-
-            return $rows;
-        } finally {
-            fclose($handle);
-        }
-    }
-
-    private function cleanCsvValue(?string $value): string
-    {
-        $value = (string) $value;
-        $value = preg_replace('/^\xEF\xBB\xBF/u', '', $value) ?? $value;
-
-        if (! mb_check_encoding($value, 'UTF-8')) {
-            $value = mb_convert_encoding($value, 'UTF-8', 'Windows-1252');
-        }
-
-        $value = str_replace("\u{00A0}", ' ', $value);
-
-        return trim($value);
     }
 }

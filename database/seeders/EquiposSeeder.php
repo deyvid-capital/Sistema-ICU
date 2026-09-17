@@ -2,183 +2,225 @@
 
 namespace Database\Seeders;
 
-use App\Models\AsignacionCargador;
-use App\Models\AsignacionEquipo;
+use App\Enums\EstadoCargador;
+use App\Enums\EstadoEquipo;
 use App\Models\Cargador;
 use App\Models\Equipo;
-use App\Models\MantenimientoEquipo;
 use App\Models\MemoriaRam;
 use App\Models\Microprocesador;
 use App\Models\ModeloLaptop;
-use App\Models\ReciboEquipo;
 use App\Models\TarjetaVideo;
-use App\Models\User;
+use Database\Seeders\Concerns\ReadsCsvData;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class EquiposSeeder extends Seeder
 {
+    use ReadsCsvData;
+
     public function run(): void
     {
-        $modelos = collect([
-            'Latitude 5540',
-            'Latitude 7440',
-            'Precision 5680',
-            'ThinkPad T14 Gen 4',
-            'EliteBook 840 G10',
-        ])->map(fn (string $nombre): ModeloLaptop => ModeloLaptop::query()->updateOrCreate(
-            ['nombre' => $nombre],
-            ['nombre' => $nombre],
-        ));
+        $modelosPorCsvId = $this->seedModelos();
+        $microsPorCsvId = $this->seedMicroprocesadores();
+        $ramsPorCsvId = $this->seedMemoriasRam();
+        $gpusPorCsvId = $this->seedTarjetasVideo();
 
-        $micros = collect([
-            'Intel Core i5-1335U',
-            'Intel Core i7-1365U',
-            'Intel Core i7-13700H',
-            'AMD Ryzen 7 7730U',
-            'Intel Core Ultra 7 155H',
-        ])->map(fn (string $nombre): Microprocesador => Microprocesador::query()->updateOrCreate(
-            ['nombre_micro' => $nombre],
-            ['nombre_micro' => $nombre],
-        ));
+        $this->seedEquipos($modelosPorCsvId, $microsPorCsvId, $ramsPorCsvId, $gpusPorCsvId);
+        $this->seedCargadores();
+    }
 
-        $rams = collect([
-            '8GB DDR4',
-            '16GB DDR4',
-            '32GB DDR4',
-            '16GB DDR5',
-            '32GB DDR5',
-        ])->map(fn (string $tipo): MemoriaRam => MemoriaRam::query()->updateOrCreate(
-            ['tipo_ram' => $tipo],
-            ['tipo_ram' => $tipo],
-        ));
+    /**
+     * @return array<int, int>
+     */
+    private function seedModelos(): array
+    {
+        $idsPorCsv = [];
 
-        $gpus = collect([
-            'Intel Iris Xe',
-            'Intel Arc Graphics',
-            'NVIDIA RTX 4050',
-            'AMD Radeon 780M',
-            'Integrada',
-        ])->map(fn (string $nombre): TarjetaVideo => TarjetaVideo::query()->updateOrCreate(
-            ['nombre_gpu' => $nombre],
-            ['nombre_gpu' => $nombre],
-        ));
-
-        $equipos = collect([
-            ['service_tag' => 'ST100001', 'nombre_equipo' => 'BOCS-001', 'estado' => 'asignado'],
-            ['service_tag' => 'ST100002', 'nombre_equipo' => 'BOCS-002', 'estado' => 'sin asignar'],
-            ['service_tag' => 'ST100003', 'nombre_equipo' => 'BOCS-003', 'estado' => 'asignado'],
-            ['service_tag' => 'ST100004', 'nombre_equipo' => 'LAPTOP-004', 'estado' => 'en mantenimiento'],
-            ['service_tag' => 'ST100005', 'nombre_equipo' => 'BOCS-005', 'estado' => 'asignado'],
-            ['service_tag' => 'ST100006', 'nombre_equipo' => 'BOCS-006', 'estado' => 'sin asignar'],
-        ])->map(function (array $data, int $index) use ($modelos, $micros, $rams, $gpus): Equipo {
-            return Equipo::query()->updateOrCreate(
-                ['service_tag' => $data['service_tag']],
-                [
-                    'service_tag' => $data['service_tag'],
-                    'nombre_equipo' => $data['nombre_equipo'],
-                    'estado' => $data['estado'],
-                    'modelo_id' => $modelos->get($index % $modelos->count())->id,
-                    'microprocesador_id' => $micros->get($index % $micros->count())->id,
-                    'ram_id' => $rams->get($index % $rams->count())->id,
-                    'gpu_id' => $gpus->get($index % $gpus->count())->id,
-                    'disco_duro' => '512GB SSD',
-                    'proveedor' => 'Dell Technologies',
-                    'so' => 'Windows 11 PRO',
-                    'bloqueo_bios' => true,
-                    'etiquetado' => true,
-                    'codigo_activo' => 'ACT-'.str_pad((string) ($index + 1), 4, '0', STR_PAD_LEFT),
-                    'inicio_garantia' => now()->subYear()->toDateString(),
-                    'venc_garantia' => now()->addYears(2)->toDateString(),
-                ],
+        foreach ($this->rowsFromCsv('ModeloLaptops.csv') as $row) {
+            $csvId = (int) $row['Modelo_ID'];
+            $modelo = ModeloLaptop::query()->updateOrCreate(
+                ['nombre' => $row['Modelo']],
+                ['nombre' => $row['Modelo']],
             );
-        });
+            $idsPorCsv[$csvId] = $modelo->id;
+        }
 
-        $cargadores = collect([
-            ['serial' => 'CHG-DELL0001', 'marca' => 'Dell', 'estado' => 'asignado'],
-            ['serial' => 'CHG-DELL0002', 'marca' => 'Dell', 'estado' => 'disponible'],
-            ['serial' => 'CHG-HP0003', 'marca' => 'HP', 'estado' => 'asignado'],
-            ['serial' => 'CHG-LEN0004', 'marca' => 'Lenovo', 'estado' => 'disponible'],
-            ['serial' => 'CHG-DELL0005', 'marca' => 'Dell', 'estado' => 'asignado'],
-        ])->map(fn (array $data): Cargador => Cargador::query()->updateOrCreate(
-            ['serial' => $data['serial']],
-            [
-                'serial' => $data['serial'],
-                'marca' => $data['marca'],
-                'modelo' => '65W USB-C',
-                'estado' => $data['estado'],
-                'observaciones' => null,
-            ],
-        ));
+        return $idsPorCsv;
+    }
 
-        $usuarios = User::query()->inRandomOrder()->take(5)->get();
+    /**
+     * @return array<int, int>
+     */
+    private function seedMicroprocesadores(): array
+    {
+        $idsPorCsv = [];
 
-        if ($usuarios->isNotEmpty()) {
-            foreach ($equipos->take(4) as $index => $equipo) {
-                $usuario = $usuarios->get($index % $usuarios->count());
+        foreach ($this->rowsFromCsv('Microprocesadores.csv') as $row) {
+            $csvId = (int) $row['Procesador_ID'];
+            $micro = Microprocesador::query()->updateOrCreate(
+                ['nombre_micro' => $row['Procesador']],
+                ['nombre_micro' => $row['Procesador']],
+            );
+            $idsPorCsv[$csvId] = $micro->id;
+        }
 
-                AsignacionEquipo::query()->updateOrCreate(
-                    [
-                        'service_tag' => $equipo->service_tag,
-                        'usuario_id' => $usuario->id,
-                        'fecha_inicio' => now()->subMonths($index + 1)->toDateString(),
-                    ],
-                    [
-                        'service_tag' => $equipo->service_tag,
-                        'usuario_id' => $usuario->id,
-                        'fecha_inicio' => now()->subMonths($index + 1)->toDateString(),
-                        'fecha_fin' => null,
-                        'motivo' => 'Asignación operativa',
-                        'observaciones' => 'Registro de demostración.',
-                    ],
-                );
+        return $idsPorCsv;
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function seedMemoriasRam(): array
+    {
+        $idsPorCsv = [];
+
+        foreach ($this->rowsFromCsv('MemoriasRam.csv') as $row) {
+            $csvId = (int) $row['Ram_ID'];
+            $ram = MemoriaRam::query()->updateOrCreate(
+                ['tipo_ram' => $row['Memoria_RAM']],
+                ['tipo_ram' => $row['Memoria_RAM']],
+            );
+            $idsPorCsv[$csvId] = $ram->id;
+        }
+
+        return $idsPorCsv;
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function seedTarjetasVideo(): array
+    {
+        $idsPorCsv = [];
+
+        foreach ($this->rowsFromCsv('TarjetaVideo.csv') as $row) {
+            $csvId = (int) $row['GPU_ID'];
+            $gpu = TarjetaVideo::query()->updateOrCreate(
+                ['nombre_gpu' => $row['Tarjeta_Video']],
+                ['nombre_gpu' => $row['Tarjeta_Video']],
+            );
+            $idsPorCsv[$csvId] = $gpu->id;
+        }
+
+        return $idsPorCsv;
+    }
+
+    /**
+     * @param  array<int, int>  $modelosPorCsvId
+     * @param  array<int, int>  $microsPorCsvId
+     * @param  array<int, int>  $ramsPorCsvId
+     * @param  array<int, int>  $gpusPorCsvId
+     */
+    private function seedEquipos(
+        array $modelosPorCsvId,
+        array $microsPorCsvId,
+        array $ramsPorCsvId,
+        array $gpusPorCsvId,
+    ): void {
+        foreach ($this->rowsFromCsv('Equipos.csv') as $row) {
+            $serviceTag = $this->nullableCsvValue($row['Service_Tag'] ?? null);
+
+            if ($serviceTag === null) {
+                continue;
             }
-        }
 
-        foreach ($cargadores->take(3) as $index => $cargador) {
-            $equipo = $equipos->get($index);
-
-            AsignacionCargador::query()->updateOrCreate(
-                ['serial_cargador' => $cargador->serial],
+            Equipo::query()->updateOrCreate(
+                ['service_tag' => $serviceTag],
                 [
-                    'serial_cargador' => $cargador->serial,
-                    'service_tag' => $equipo->service_tag,
-                    'fecha_inicio' => now()->subMonths($index + 1)->toDateString(),
-                    'fecha_fin' => null,
+                    'service_tag' => $serviceTag,
+                    'modelo_id' => $this->catalogId($modelosPorCsvId, $row['Modelo_ID'] ?? null, 'Modelo_ID', $serviceTag),
+                    'microprocesador_id' => $this->catalogId($microsPorCsvId, $row['Procesador_ID'] ?? null, 'Procesador_ID', $serviceTag),
+                    'ram_id' => $this->catalogId($ramsPorCsvId, $row['Ram_ID'] ?? null, 'Ram_ID', $serviceTag),
+                    'gpu_id' => $this->catalogId($gpusPorCsvId, $row['GPU_ID'] ?? null, 'GPU_ID', $serviceTag),
+                    'disco_duro' => $this->nullableCsvValue($row['Disco'] ?? null),
+                    'proveedor' => $this->nullableCsvValue($row['Proveedor'] ?? null),
+                    'inicio_garantia' => $this->parseCsvDate($row['Fecha_Compra'] ?? null),
+                    'venc_garantia' => $this->parseCsvDate($row['Fecha_Garantia'] ?? null),
+                    'nombre_equipo' => $this->nombreEquipo($row['Nombre_Equipo'] ?? null),
+                    'licencia_so' => $this->nullableCsvValue($row['Licencia'] ?? null),
+                    'estado' => EstadoEquipo::SinAsignar,
                 ],
             );
         }
+    }
 
-        foreach ($equipos->take(3) as $index => $equipo) {
-            ReciboEquipo::query()->updateOrCreate(
-                [
-                    'equipo_id' => $equipo->service_tag,
-                    'fecha' => now()->subDays(($index + 1) * 10)->toDateString(),
-                ],
-                [
-                    'equipo_id' => $equipo->service_tag,
-                    'fecha' => now()->subDays(($index + 1) * 10)->toDateString(),
-                    'url' => 'https://example.com/recibos/'.$equipo->service_tag,
-                    'observaciones' => 'Recibo de ingreso al inventario.',
-                ],
-            );
+    private function seedCargadores(): void
+    {
+        foreach ($this->rowsFromCsv('Cargadores.csv') as $row) {
+            $serial = $this->nullableCsvValue($row['SERIAL'] ?? null);
 
-            MantenimientoEquipo::query()->updateOrCreate(
+            if ($serial === null) {
+                continue;
+            }
+
+            Cargador::query()->updateOrCreate(
+                ['serial' => $serial],
                 [
-                    'service_tag' => $equipo->service_tag,
-                    'fecha_soporte' => now()->subDays(($index + 1) * 15)->toDateString(),
-                ],
-                [
-                    'service_tag' => $equipo->service_tag,
-                    'fecha_soporte' => now()->subDays(($index + 1) * 15)->toDateString(),
-                    'cap_antes' => null,
-                    'cap_despues' => null,
-                    'observaciones' => 'Mantenimiento preventivo.',
+                    'serial' => $serial,
+                    'marca' => $this->nullableCsvValue($row['MARCA'] ?? null),
+                    'modelo' => $this->nullableCsvValue($row['MODELO'] ?? null),
+                    'estado' => $this->estadoCargador($row['ESTADO'] ?? null),
+                    'observaciones' => null,
                 ],
             );
         }
+    }
 
-        Equipo::query()->where('service_tag', 'ST100006')->first()?->delete();
-        Cargador::query()->where('serial', 'CHG-LEN0004')->first()?->delete();
-        ReciboEquipo::query()->latest('id')->first()?->delete();
+    /**
+     * @param  array<int, int>  $idsPorCsv
+     */
+    private function catalogId(array $idsPorCsv, ?string $csvId, string $columna, string $serviceTag): int
+    {
+        $id = $idsPorCsv[(int) $csvId] ?? null;
+
+        if ($id === null) {
+            throw new \RuntimeException("{$columna} «{$csvId}» no existe en el catálogo (equipo {$serviceTag}).");
+        }
+
+        return $id;
+    }
+
+    private function nombreEquipo(?string $value): string
+    {
+        $nombre = $this->nullableCsvValue($value);
+
+        if ($nombre === null || $nombre === '0') {
+            return 'BOCS';
+        }
+
+        return $nombre;
+    }
+
+    private function parseCsvDate(?string $value): ?string
+    {
+        $value = $this->nullableCsvValue($value);
+
+        if ($value === null) {
+            return null;
+        }
+
+        $fecha = Carbon::createFromFormat('j/n/Y', $value);
+
+        if ($fecha === false) {
+            throw new \RuntimeException("Fecha inválida: {$value}");
+        }
+
+        return $fecha->toDateString();
+    }
+
+    private function estadoCargador(?string $value): string
+    {
+        $value = $this->nullableCsvValue($value);
+
+        if ($value === null) {
+            return EstadoCargador::Disponible->value;
+        }
+
+        $estado = EstadoCargador::tryFrom(mb_strtolower($value))
+            ?? collect(EstadoCargador::cases())->first(
+                fn (EstadoCargador $estado): bool => strcasecmp($estado->getLabel(), $value) === 0,
+            );
+
+        return $estado?->value ?? EstadoCargador::Disponible->value;
     }
 }
