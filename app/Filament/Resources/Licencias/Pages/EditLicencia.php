@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Licencias\Pages;
 
 use App\Filament\Resources\Licencias\LicenciaResource;
 use App\Models\LicenciaUsuario;
+use App\Services\Licencias\GestionarCupoLicencia;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -40,6 +41,14 @@ class EditLicencia extends EditRecord
                 ->button()
                 ->tooltip('Acciones'),
         ];
+    }
+
+    protected function beforeSave(): void
+    {
+        app(GestionarCupoLicencia::class)->haltarSiNoPuedeReducir(
+            $this->record,
+            (int) ($this->data['total_licencias'] ?? 0),
+        );
     }
 
     protected function afterSave(): void

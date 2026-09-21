@@ -19,6 +19,7 @@ class LicenciaFactory extends Factory
             'categoria' => fake()->randomElement(['MICROSOFT', 'ADOBE', 'ANTIVIRUS', 'VPN', 'OTRO']),
             'descripcion' => fake()->optional()->sentence(),
             'estado' => fake()->boolean(85),
+            'total_licencias' => 100,
         ];
     }
 }

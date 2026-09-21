@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LicenciasUsuarios\Tables;
 use App\Filament\Resources\LicenciasUsuarios\LicenciaUsuarioResource;
 use App\Filament\Resources\Users\RelationManagers\LicenciasUsuariosRelationManager;
 use App\Models\LicenciaUsuario;
+use App\Services\Licencias\GestionarCupoLicencia;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -117,6 +118,7 @@ class LicenciasUsuariosTable
                     RestoreAction::make()
                         ->label('Restaurar')
                         ->visible(fn (LicenciaUsuario $record): bool => $record->trashed())
+                        ->before(fn (LicenciaUsuario $record) => GestionarCupoLicencia::haltarRestoreDeAsignacion($record))
                         ->successNotificationTitle('Asignación restaurada correctamente'),
                 ])
                     ->label('Acciones')

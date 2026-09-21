@@ -15,12 +15,14 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class LicenciasTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withCount('licenciasUsuariosActivas'))
             ->recordUrl(fn (Licencia $record): string => LicenciaResource::getUrl('edit', ['record' => $record]))
             ->defaultSort('nombre_licencia')
             ->striped()
@@ -38,6 +40,17 @@ class LicenciasTable
                     ->color('info')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('total_licencias')
+                    ->label('Total')
+                    ->sortable()
+                    ->alignEnd(),
+                TextColumn::make('licencias_usuarios_activas_count')
+                    ->label('Asignadas')
+                    ->counts('licenciasUsuariosActivas')
+                    ->alignEnd()
+                    ->color(fn (Licencia $record): string => $record->asignadas >= $record->total_licencias
+                        ? 'danger'
+                        : 'success'),
                 IconColumn::make('estado')
                     ->label('Activa')
                     ->boolean()

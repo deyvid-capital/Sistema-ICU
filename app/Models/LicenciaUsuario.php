@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToUsuario;
+use App\Models\Concerns\EnforcesLicenciaCupo;
 use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\TogglesEstadoOnSoftDelete;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LicenciaUsuario extends Model
 {
-    use BelongsToUsuario, GuardsAgainstTrashedRelations, HasFactory, LogsIcuActivity, SoftDeletes, TogglesEstadoOnSoftDelete, WarnsOnInactiveCatalogRelations;
+    use BelongsToUsuario, EnforcesLicenciaCupo, GuardsAgainstTrashedRelations, HasFactory, LogsIcuActivity, SoftDeletes, TogglesEstadoOnSoftDelete, WarnsOnInactiveCatalogRelations;
 
     protected static array $trashGuardedRelations = ['usuario'];
 

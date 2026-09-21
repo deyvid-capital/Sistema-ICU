@@ -3,16 +3,18 @@
 namespace App\Filament\Resources\LicenciasUsuarios\Schemas;
 
 use App\Filament\Resources\Users\RelationManagers\LicenciasUsuariosRelationManager;
+use App\Models\Licencia;
 use App\Models\LicenciaUsuario;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Forms\Components\Component;
 use App\Models\User;
+use App\Rules\LicenciaConCupoDisponible;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\Unique;
 
 class LicenciaUsuarioForm
@@ -39,10 +41,29 @@ class LicenciaUsuarioForm
                     ),
                 Select::make('licencia_id')
                     ->label('Licencia')
-                    ->relationship('licencia', 'nombre_licencia')
+                    ->relationship(
+                        name: 'licencia',
+                        titleAttribute: 'nombre_licencia',
+                        modifyQueryUsing: fn (Builder $query): Builder => $query->withCount('licenciasUsuariosActivas'),
+                    )
+                    ->getOptionLabelFromRecordUsing(fn (Licencia $record): string => $record->etiquetaConCupo())
+                    ->disableOptionWhen(function (string $value, ?LicenciaUsuario $record): bool {
+                        if ($record !== null && (string) $record->licencia_id === $value) {
+                            return false;
+                        }
+
+                        $licencia = Licencia::query()->find($value);
+
+                        return $licencia === null || ! $licencia->tieneCupoDisponible($record);
+                    })
+                    ->helperText('Solo se pueden asignar licencias con cupo disponible.')
                     ->searchable()
                     ->preload()
                     ->required()
+                    ->rule(fn (Get $get, ?LicenciaUsuario $record): LicenciaConCupoDisponible => new LicenciaConCupoDisponible(
+                        assignment: $record,
+                        consumes: (bool) $get('estado'),
+                    ))
                     ->unique(
                         table: LicenciaUsuario::class,
                         column: 'licencia_id',

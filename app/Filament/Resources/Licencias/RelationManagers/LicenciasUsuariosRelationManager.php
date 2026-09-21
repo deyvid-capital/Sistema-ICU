@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Licencias\RelationManagers;
 
+use App\Models\Licencia;
 use App\Models\LicenciaUsuario;
 use App\Models\User;
+use App\Rules\LicenciaConCupoDisponible;
 use App\Rules\NotTrashed;
+use App\Services\Licencias\GestionarCupoLicencia;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -50,7 +53,7 @@ class LicenciasUsuariosRelationManager extends RelationManager
                         ignoreRecord: true,
                         modifyRuleUsing: function (Unique $rule, Get $get, ?LicenciaUsuario $record): Unique {
                             return $rule
-                                ->where('licencia_id', $this->ownerRecord->getKey())
+                                ->where('licencia_id', $this->getOwnerRecord()->getKey())
                                 ->ignore($record);
                         },
                     ),
@@ -60,7 +63,12 @@ class LicenciasUsuariosRelationManager extends RelationManager
                 Toggle::make('estado')
                     ->label('Activa')
                     ->default(true)
-                    ->required(),
+                    ->required()
+                    ->rule(fn (Get $get, ?LicenciaUsuario $record): LicenciaConCupoDisponible => new LicenciaConCupoDisponible(
+                        assignment: $record,
+                        consumes: (bool) $get('estado'),
+                        licencia: $this->ownerLicencia(),
+                    )),
             ]);
     }
 
@@ -105,12 +113,30 @@ class LicenciasUsuariosRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Asignar licencia')
+                    ->disabled(fn (): bool => ! $this->ownerLicencia()->tieneCupoDisponible())
+                    ->tooltip(fn (): ?string => $this->ownerLicencia()->tieneCupoDisponible()
+                        ? null
+                        : 'Cupo agotado. Desasigne un usuario o aumente el total.')
+                    ->before(function (array $data): void {
+                        if (! ($data['estado'] ?? false)) {
+                            return;
+                        }
+
+                        app(GestionarCupoLicencia::class)->haltarSiNoPuedeConsumir($this->ownerLicencia());
+                    })
                     ->successNotificationTitle('Asignacion registrada correctamente'),
             ])
             ->recordActions([
                 EditAction::make()
                     ->label('Editar')
-                    ->visible(fn (LicenciaUsuario $record): bool => ! $record->trashed()),
+                    ->visible(fn (LicenciaUsuario $record): bool => ! $record->trashed())
+                    ->before(function (LicenciaUsuario $record, array $data): void {
+                        if (! ($data['estado'] ?? false)) {
+                            return;
+                        }
+
+                        app(GestionarCupoLicencia::class)->haltarSiNoPuedeConsumir($this->ownerLicencia(), $record);
+                    }),
                 DeleteAction::make()
                     ->label('Eliminar')
                     ->visible(fn (LicenciaUsuario $record): bool => ! $record->trashed())
@@ -122,6 +148,7 @@ class LicenciasUsuariosRelationManager extends RelationManager
                 RestoreAction::make()
                     ->label('Restaurar')
                     ->visible(fn (LicenciaUsuario $record): bool => $record->trashed())
+                    ->before(fn (LicenciaUsuario $record) => GestionarCupoLicencia::haltarRestoreDeAsignacion($record))
                     ->successNotificationTitle('Asignacion restaurada correctamente'),
             ])
             ->toolbarActions([
@@ -135,5 +162,13 @@ class LicenciasUsuariosRelationManager extends RelationManager
                 ]),
             ])
             ->poll('5s');
+    }
+
+    private function ownerLicencia(): Licencia
+    {
+        /** @var Licencia $licencia */
+        $licencia = $this->getOwnerRecord();
+
+        return $licencia;
     }
 }
