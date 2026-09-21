@@ -44,7 +44,9 @@
        (page/sub-navigation/sidebar.blade.php) y heredaría un texto ilegible. */
     .fi-sidebar .fi-sidebar-item-label,
     .fi-sidebar .fi-sidebar-item-label:where(.dark, .dark *),
-    .fi-sidebar .fi-user-menu-trigger-text {
+    .fi-sidebar .fi-user-menu-trigger-text,
+    .fi-sidebar .fi-sidebar-database-notifications-btn > .fi-sidebar-database-notifications-btn-label,
+    .fi-sidebar .fi-sidebar-database-notifications-btn > .fi-sidebar-database-notifications-btn-label:where(.dark, .dark *) {
         color: var(--icu-sidebar-fg);
     }
 
@@ -57,6 +59,8 @@
     .fi-sidebar .fi-sidebar-item-btn > .fi-icon:where(.dark, .dark *),
     .fi-sidebar .fi-user-menu-trigger .fi-icon,
     .fi-sidebar .fi-user-menu-trigger .fi-icon:where(.dark, .dark *),
+    .fi-sidebar .fi-sidebar-database-notifications-btn > .fi-icon,
+    .fi-sidebar .fi-sidebar-database-notifications-btn > .fi-icon:where(.dark, .dark *),
     .fi-sidebar-header .fi-icon-btn,
     .fi-sidebar-header .fi-icon-btn:where(.dark, .dark *) {
         color: color-mix(in oklab, var(--icu-sidebar-fg) 72%, transparent);
@@ -64,7 +68,11 @@
 
     .fi-sidebar .fi-sidebar-item:not(.fi-active) > .fi-sidebar-item-btn:hover,
     .fi-sidebar .fi-user-menu-trigger:hover,
-    .fi-sidebar .fi-sidebar-group-dropdown-trigger-btn:hover {
+    .fi-sidebar .fi-sidebar-group-dropdown-trigger-btn:hover,
+    .fi-sidebar .fi-sidebar-database-notifications-btn:hover,
+    .fi-sidebar .fi-sidebar-database-notifications-btn:focus-visible,
+    .fi-sidebar .fi-sidebar-database-notifications-btn:where(.dark, .dark *):hover,
+    .fi-sidebar .fi-sidebar-database-notifications-btn:where(.dark, .dark *):focus-visible {
         background-color: color-mix(in oklab, var(--icu-sidebar-fg) 8%, transparent);
     }
 

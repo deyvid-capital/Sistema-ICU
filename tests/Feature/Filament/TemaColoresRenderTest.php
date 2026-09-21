@@ -66,6 +66,7 @@ class TemaColoresRenderTest extends TestCase
 
         $respuesta->assertSee('.fi-sidebar .fi-sidebar-item-label', false);
         $respuesta->assertSee('.fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn', false);
+        $respuesta->assertSee('.fi-sidebar .fi-sidebar-database-notifications-btn > .fi-sidebar-database-notifications-btn-label', false);
 
         // Ningún selector puede empezar por la clase suelta (cada uno va en su línea).
         $this->assertDoesNotMatchRegularExpression(
