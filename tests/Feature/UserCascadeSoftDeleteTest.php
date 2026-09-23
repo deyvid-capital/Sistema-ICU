@@ -7,6 +7,7 @@ use App\Models\AccesoSistema;
 use App\Models\AccesoVirtual;
 use App\Models\LicenciaUsuario;
 use App\Models\User;
+use App\Models\UsuarioFortitoken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -35,7 +36,7 @@ class UserCascadeSoftDeleteTest extends TestCase
         $this->assertFalse($licenciaUsuario->fresh()->estado);
     }
 
-    public function test_soft_deleting_user_cascades_to_internet_and_virtual_accesses(): void
+    public function test_soft_deleting_user_cascades_to_internet_virtual_and_fortitoken(): void
     {
         $user = User::factory()->create();
         $accesoInternet = AccesoInternet::factory()->create([
@@ -43,7 +44,11 @@ class UserCascadeSoftDeleteTest extends TestCase
             'estado' => true,
         ]);
         $accesoVirtual = AccesoVirtual::factory()->create([
-            'internet_id' => $accesoInternet->id,
+            'usuario_id' => $user->id,
+            'estado' => true,
+        ]);
+        $fortitoken = UsuarioFortitoken::factory()->create([
+            'usuario_id' => $user->id,
             'estado' => true,
         ]);
 
@@ -51,8 +56,10 @@ class UserCascadeSoftDeleteTest extends TestCase
 
         $this->assertSoftDeleted($accesoInternet);
         $this->assertSoftDeleted($accesoVirtual);
+        $this->assertSoftDeleted($fortitoken);
         $this->assertFalse($accesoInternet->fresh()->estado);
         $this->assertFalse($accesoVirtual->fresh()->estado);
+        $this->assertFalse($fortitoken->fresh()->estado);
     }
 
     public function test_restoring_user_restores_cascaded_assignments_and_reactivates_them(): void

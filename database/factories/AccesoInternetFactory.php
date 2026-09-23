@@ -19,7 +19,6 @@ class AccesoInternetFactory extends Factory
             'usuario_id' => User::query()->inRandomOrder()->value('id') ?? User::factory(),
             'usuario_red' => fake()->userName().'.red',
             'nivel_acceso' => fake()->randomElement(['Básico', 'Estándar', 'Avanzado']),
-            'fortitoken' => fake()->optional()->bothify('FTK-####'),
             'estado' => fake()->boolean(80),
             'fecha' => fake()->optional()->date(),
             'observaciones' => fake()->optional()->sentence(),

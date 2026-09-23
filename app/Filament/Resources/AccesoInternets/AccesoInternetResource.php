@@ -7,7 +7,6 @@ use App\Filament\Resources\AccesoInternets\Pages\CreateAccesoInternet;
 use App\Filament\Resources\AccesoInternets\Pages\EditAccesoInternet;
 use App\Filament\Resources\AccesoInternets\Pages\ListAccesoInternets;
 use App\Filament\Resources\AccesoInternets\Pages\ViewAccesoInternet;
-use App\Filament\Resources\AccesoInternets\RelationManagers\AccesosVirtualRelationManager;
 use App\Filament\Resources\AccesoInternets\Schemas\AccesoInternetForm;
 use App\Filament\Resources\AccesoInternets\Schemas\AccesoInternetInfolist;
 use App\Filament\Resources\AccesoInternets\Tables\AccesoInternetsTable;
@@ -56,9 +55,7 @@ class AccesoInternetResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            AccesosVirtualRelationManager::class,
-        ];
+        return [];
     }
 
     /**
@@ -66,7 +63,7 @@ class AccesoInternetResource extends Resource
      */
     public static function getGloballySearchableAttributes(): array
     {
-        return ['usuario_red', 'nivel_acceso', 'fortitoken', 'usuario.name'];
+        return ['usuario_red', 'nivel_acceso', 'usuario.name'];
     }
 
     public static function getPages(): array

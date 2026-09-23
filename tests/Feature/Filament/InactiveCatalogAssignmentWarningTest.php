@@ -10,7 +10,6 @@ use App\Filament\Resources\LicenciasUsuarios\LicenciaUsuarioResource;
 use App\Filament\Resources\LicenciasUsuarios\Pages\CreateLicenciaUsuario;
 use App\Filament\Resources\SoftwareUsuarios\Pages\CreateSoftwareUsuario;
 use App\Filament\Resources\SoftwareUsuarios\SoftwareUsuarioResource;
-use App\Models\AccesoInternet;
 use App\Models\AccesoSharepoint;
 use App\Models\AccesoVirtual;
 use App\Models\Licencia;
@@ -125,7 +124,7 @@ class InactiveCatalogAssignmentWarningTest extends TestCase
 
     public function test_it_groups_both_inactive_resources_of_an_acceso_virtual_in_one_warning(): void
     {
-        $accesoInternet = AccesoInternet::factory()->create();
+        $usuario = User::factory()->create();
         $virtual = Virtual::factory()->create([
             'maquina_virtual' => 'VM-CONTA-01',
             'estado' => false,
@@ -137,16 +136,17 @@ class InactiveCatalogAssignmentWarningTest extends TestCase
 
         Livewire::test(CreateAccesoVirtual::class)
             ->fillForm([
-                'internet_id' => $accesoInternet->id,
+                'usuario_id' => $usuario->id,
                 'virtual_id' => $virtual->id,
                 'vpn_id' => $vpn->id,
+                'estado' => true,
             ])
             ->call('create')
             ->assertHasNoFormErrors()
             ->assertNotified('Recurso en estado no activo');
 
         $this->assertDatabaseHas(AccesoVirtual::class, [
-            'internet_id' => $accesoInternet->id,
+            'usuario_id' => $usuario->id,
             'virtual_id' => $virtual->id,
             'vpn_id' => $vpn->id,
         ]);
@@ -161,7 +161,7 @@ class InactiveCatalogAssignmentWarningTest extends TestCase
 
     public function test_it_warns_only_about_the_inactive_resource_of_an_acceso_virtual(): void
     {
-        $accesoInternet = AccesoInternet::factory()->create();
+        $usuario = User::factory()->create();
         $virtual = Virtual::factory()->create(['estado' => true]);
         $vpn = RecursoVpn::factory()->create([
             'nombre_vpn' => 'VPN Contingencia',
@@ -170,9 +170,10 @@ class InactiveCatalogAssignmentWarningTest extends TestCase
 
         Livewire::test(CreateAccesoVirtual::class)
             ->fillForm([
-                'internet_id' => $accesoInternet->id,
+                'usuario_id' => $usuario->id,
                 'virtual_id' => $virtual->id,
                 'vpn_id' => $vpn->id,
+                'estado' => true,
             ])
             ->call('create')
             ->assertHasNoFormErrors()

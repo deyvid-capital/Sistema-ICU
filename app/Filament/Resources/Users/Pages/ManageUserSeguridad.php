@@ -15,6 +15,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -68,6 +69,7 @@ class ManageUserSeguridad extends EditRecord
                     $this->tabRoles(),
                     $this->tabDosFactores(),
                     $this->tabSesiones(),
+                    $this->tabFortitoken(),
                     $this->tabNotificaciones(),
                 ]),
         ]);
@@ -259,6 +261,28 @@ class ManageUserSeguridad extends EditRecord
             ]);
     }
 
+    protected function tabFortitoken(): Tab
+    {
+        return Tab::make('FortiToken')
+            ->icon(Heroicon::OutlinedDevicePhoneMobile)
+            ->schema([
+                TextInput::make('fortitoken_serial')
+                    ->label('Serial FortiToken')
+                    ->maxLength(100)
+                    ->dehydrated(false)
+                    ->revealable()
+                    ->password()
+                    ->helperText('Se guarda cifrado. Obligatorio si el token está activo.')
+                    ->required(fn (Get $get): bool => (bool) $get('fortitoken_estado')),
+                Toggle::make('fortitoken_estado')
+                    ->label('Activo')
+                    ->default(true)
+                    ->dehydrated(false)
+                    ->live()
+                    ->helperText('Si se desactiva, el serial se conserva pero el token queda marcado como inactivo.'),
+            ]);
+    }
+
     protected function tabNotificaciones(): Tab
     {
         $fieldsets = [];
@@ -304,6 +328,10 @@ class ManageUserSeguridad extends EditRecord
                 $data[$this->prefKey($tipo->value, $canal->value)] = $this->record->debeRecibir($tipo->value, $canal->value);
             }
         }
+
+        $fortitoken = $this->record->fortitoken;
+        $data['fortitoken_serial'] = $fortitoken?->serial;
+        $data['fortitoken_estado'] = $fortitoken?->estado ?? true;
 
         return $data;
     }
@@ -356,6 +384,39 @@ class ManageUserSeguridad extends EditRecord
                 );
             }
         }
+
+        $this->persistirFortitoken();
+    }
+
+    protected function persistirFortitoken(): void
+    {
+        $serial = trim((string) ($this->data['fortitoken_serial'] ?? ''));
+        $estado = (bool) ($this->data['fortitoken_estado'] ?? false);
+        $existente = $this->record->fortitoken()->withTrashed()->first();
+
+        if ($serial === '') {
+            $existente?->delete();
+
+            return;
+        }
+
+        if ($existente !== null) {
+            if ($existente->trashed()) {
+                $existente->restore();
+            }
+
+            $existente->update([
+                'serial' => $serial,
+                'estado' => $estado,
+            ]);
+
+            return;
+        }
+
+        $this->record->fortitoken()->create([
+            'serial' => $serial,
+            'estado' => $estado,
+        ]);
     }
 
     protected function getSavedNotification(): ?Notification

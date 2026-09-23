@@ -26,6 +26,7 @@ use App\Models\Software;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
+use App\Models\UsuarioFortitoken;
 use App\Services\Movimientos\ProcesarBajaColaborador;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -52,6 +53,8 @@ class BajaColaboradorCascadaTest extends TestCase
             AccesoSistema::factory()->create(['usuario_id' => $user->id, 'estado' => true]),
             AccesoDaza::factory()->create(['usuario_id' => $user->id, 'estado' => true]),
             AccesoInternet::factory()->create(['usuario_id' => $user->id, 'estado' => true]),
+            AccesoVirtual::factory()->create(['usuario_id' => $user->id, 'estado' => true]),
+            UsuarioFortitoken::factory()->create(['usuario_id' => $user->id, 'estado' => true]),
             AzureAd::factory()->create(['usuario_id' => $user->id, 'estado' => true]),
             AccUdCompartida::factory()->create(['usuario_id' => $user->id, 'estado' => true]),
         ];
@@ -62,14 +65,14 @@ class BajaColaboradorCascadaTest extends TestCase
             $this->assertFalse($registro->fresh()->estado, $registro::class.' debería quedar inactivo');
         }
 
-        $this->assertSame(8, $resumen->accesosDesactivados);
+        $this->assertSame(10, $resumen->accesosDesactivados);
     }
 
-    public function test_la_baja_desactiva_los_accesos_virtuales_a_traves_del_acceso_de_internet(): void
+    public function test_la_baja_desactiva_los_accesos_virtuales_del_usuario(): void
     {
         $user = User::factory()->create();
+        $virtual = AccesoVirtual::factory()->create(['usuario_id' => $user->id, 'estado' => true]);
         $internet = AccesoInternet::factory()->create(['usuario_id' => $user->id, 'estado' => true]);
-        $virtual = AccesoVirtual::factory()->create(['internet_id' => $internet->id, 'estado' => true]);
 
         $this->servicio()->ejecutar($user->id, Carbon::parse('2026-08-12'));
 

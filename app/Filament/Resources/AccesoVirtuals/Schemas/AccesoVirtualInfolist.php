@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoVirtuals\Schemas;
 
+use App\Filament\Resources\Concerns\ShowsUsuarioFortitoken;
 use App\Models\AccesoVirtual;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -9,22 +10,22 @@ use Filament\Schemas\Schema;
 
 class AccesoVirtualInfolist
 {
+    use ShowsUsuarioFortitoken;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextEntry::make('accesoInternet.usuario.name')
+                TextEntry::make('usuario.name')
                     ->label('Usuario')
                     ->placeholder('—'),
-                TextEntry::make('accesoInternet.usuario_red')
-                    ->label('Usuario de red')
-                    ->placeholder('—'),
+                static::fortitokenInfolistEntry(),
                 TextEntry::make('virtual.maquina_virtual')
                     ->label('Máquina virtual')
                     ->placeholder('—'),
                 TextEntry::make('recursoVpn.nombre_vpn')
                     ->label('Recurso VPN')
-                    ->placeholder('—'),
+                    ->placeholder('Sin VPN'),
                 IconEntry::make('estado')
                     ->label('Activo')
                     ->boolean(),

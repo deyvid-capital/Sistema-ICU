@@ -32,6 +32,7 @@ return [
         'acceso internet' => 'acceso a internet',
         'acceso sharepoint' => 'acceso a SharePoint',
         'acceso virtual' => 'acceso a virtual',
+        'usuario fortitoken' => 'FortiToken',
         'acceso daza' => 'acceso Daza',
         'acc ud compartida' => 'unidad compartida',
         'sitio sharepoint' => 'sitio SharePoint',

@@ -53,13 +53,13 @@ class UserInfolistTabsTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $internet = AccesoInternet::factory()->create([
+        AccesoInternet::factory()->create([
             'usuario_id' => $user->id,
             'estado' => true,
         ]);
 
         AccesoVirtual::factory()->create([
-            'internet_id' => $internet->id,
+            'usuario_id' => $user->id,
             'vpn_id' => RecursoVpn::factory()->create(['nombre_vpn' => 'VPN-CONTABILIDAD'])->id,
             'virtual_id' => Virtual::factory()->create(['maquina_virtual' => 'VM-FINANZAS'])->id,
         ]);

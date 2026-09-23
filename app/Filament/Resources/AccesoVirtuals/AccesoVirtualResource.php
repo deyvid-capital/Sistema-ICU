@@ -65,7 +65,7 @@ class AccesoVirtualResource extends Resource
      */
     public static function getGloballySearchableAttributes(): array
     {
-        return ['accesoInternet.usuario_red', 'virtual.maquina_virtual', 'recursoVpn.nombre_vpn'];
+        return ['usuario.name', 'virtual.maquina_virtual', 'recursoVpn.nombre_vpn'];
     }
 
     public static function getPages(): array

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoInternets\Schemas;
 
+use App\Filament\Resources\Concerns\ShowsUsuarioFortitoken;
 use App\Models\AccesoInternet;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -9,6 +10,8 @@ use Filament\Schemas\Schema;
 
 class AccesoInternetInfolist
 {
+    use ShowsUsuarioFortitoken;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -16,14 +19,12 @@ class AccesoInternetInfolist
                 TextEntry::make('usuario.name')
                     ->label('Usuario')
                     ->placeholder('—'),
+                static::fortitokenInfolistEntry(),
                 TextEntry::make('usuario_red')
                     ->label('Usuario de red')
                     ->placeholder('—'),
                 TextEntry::make('nivel_acceso')
                     ->label('Nivel de acceso')
-                    ->placeholder('—'),
-                TextEntry::make('fortitoken')
-                    ->label('FortiToken')
                     ->placeholder('—'),
                 TextEntry::make('fecha')
                     ->label('Fecha')

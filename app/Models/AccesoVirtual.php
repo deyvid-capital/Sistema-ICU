@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUsuario;
+use App\Models\Concerns\GuardsAgainstTrashedRelations;
 use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\TogglesEstadoOnSoftDelete;
 use App\Models\Concerns\WarnsOnInactiveCatalogRelations;
@@ -12,11 +14,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AccesoVirtual extends Model
 {
+    use BelongsToUsuario;
+    use GuardsAgainstTrashedRelations;
     use HasFactory;
     use LogsIcuActivity;
     use SoftDeletes;
     use TogglesEstadoOnSoftDelete;
     use WarnsOnInactiveCatalogRelations;
+
+    protected static array $trashGuardedRelations = ['usuario'];
 
     /**
      * @var array<string, array{label: string, attribute: string}>
@@ -29,7 +35,7 @@ class AccesoVirtual extends Model
     protected $table = 'accesos_virtuales';
 
     protected $fillable = [
-        'internet_id',
+        'usuario_id',
         'virtual_id',
         'vpn_id',
         'estado',
@@ -40,11 +46,6 @@ class AccesoVirtual extends Model
         return [
             'estado' => 'boolean',
         ];
-    }
-
-    public function accesoInternet(): BelongsTo
-    {
-        return $this->belongsTo(AccesoInternet::class, 'internet_id');
     }
 
     public function virtual(): BelongsTo

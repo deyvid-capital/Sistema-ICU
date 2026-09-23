@@ -75,10 +75,18 @@ return new class extends Migration
             $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->string('usuario_red', 50);
             $table->string('nivel_acceso', 50);
-            $table->string('fortitoken', 50)->nullable();
             $table->boolean('estado');
             $table->date('fecha')->nullable();
             $table->text('observaciones')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('usuario_fortitokens', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('usuario_id')->unique()->constrained('users')->restrictOnDelete();
+            $table->text('serial');
+            $table->boolean('estado')->default(true);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -128,14 +136,14 @@ return new class extends Migration
 
         Schema::create('accesos_virtuales', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('internet_id')->constrained('accesos_wifi')->cascadeOnDelete();
+            $table->foreignUuid('usuario_id')->constrained('users')->restrictOnDelete();
             $table->foreignId('virtual_id')->constrained('virtuales')->restrictOnDelete();
-            $table->foreignId('vpn_id')->constrained('recursos_vpn')->restrictOnDelete();
+            $table->foreignId('vpn_id')->nullable()->constrained('recursos_vpn')->restrictOnDelete();
             $table->boolean('estado')->default(true);
             $table->timestamps();
             $table->softDeletes();
 
-            $table->unique(['internet_id', 'virtual_id', 'vpn_id']);
+            $table->unique(['usuario_id', 'virtual_id', 'vpn_id']);
         });
     }
 
@@ -146,6 +154,7 @@ return new class extends Migration
         Schema::dropIfExists('cuentas_azure_ad');
         Schema::dropIfExists('software_usuarios');
         Schema::dropIfExists('licencias_usuarios');
+        Schema::dropIfExists('usuario_fortitokens');
         Schema::dropIfExists('accesos_wifi');
         Schema::dropIfExists('software_excepciones');
         Schema::dropIfExists('accesos_daza');

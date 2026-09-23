@@ -2,8 +2,11 @@
 
 namespace App\Filament\Resources\AccesoVirtuals\Schemas;
 
-use App\Models\AccesoInternet;
+use App\Filament\Resources\Concerns\ShowsUsuarioFortitoken;
+use App\Filament\Resources\Users\RelationManagers\AccesosVirtualRelationManager;
 use App\Models\AccesoVirtual;
+use App\Models\User;
+use App\Rules\NotTrashed;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
@@ -15,42 +18,50 @@ use Illuminate\Validation\Rules\Unique;
 
 class AccesoVirtualForm
 {
+    use ShowsUsuarioFortitoken;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Section::make('Datos del acceso virtual')
-                    ->description('Agrega a quién se le va a otorgar acceso a la VPN, y qué nivel de acceso tiene.')
+                    ->description('Asigna una máquina virtual al colaborador. El recurso VPN es opcional.')
                     ->icon(Heroicon::OutlinedAtSymbol)
                     ->columnSpanFull()
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                Select::make('internet_id')
-                                    ->label('Acceso a Internet')
-                                    ->relationship(
-                                        'accesoInternet',
-                                        'usuario_red',
-                                        modifyQueryUsing: fn ($query) => $query->with('usuario'),
-                                    )
-                                    ->getOptionLabelFromRecordUsing(fn (AccesoInternet $record): string => trim("{$record->usuario?->name} — {$record->usuario_red}"))
+                                Select::make('usuario_id')
+                                    ->label('Usuario')
+                                    ->relationship('usuario', 'name')
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->live(),
+                                    ->live()
+                                    ->rule(new NotTrashed(User::class))
+                                    ->hiddenOn(AccesosVirtualRelationManager::class),
+                                static::fortitokenFormPlaceholder(),
                                 Select::make('virtual_id')
                                     ->label('Máquina virtual')
                                     ->relationship('virtual', 'maquina_virtual')
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->live()
                                     ->unique(
                                         ignoreRecord: true,
                                         modifyRuleUsing: function (Unique $rule, Get $get, ?AccesoVirtual $record): Unique {
-                                            return $rule
-                                                ->where('internet_id', $get('internet_id'))
-                                                ->where('vpn_id', $get('vpn_id'))
-                                                ->ignore($record);
+                                            $usuarioId = $get('usuario_id') ?? $record?->usuario_id;
+
+                                            $rule = $rule->where('usuario_id', $usuarioId);
+
+                                            $vpnId = $get('vpn_id');
+
+                                            if (blank($vpnId)) {
+                                                return $rule->whereNull('vpn_id')->ignore($record);
+                                            }
+
+                                            return $rule->where('vpn_id', $vpnId)->ignore($record);
                                         },
                                     ),
                                 Select::make('vpn_id')
@@ -58,8 +69,26 @@ class AccesoVirtualForm
                                     ->relationship('recursoVpn', 'nombre_vpn')
                                     ->searchable()
                                     ->preload()
-                                    ->required()
-                                    ->live(),
+                                    ->nullable()
+                                    ->live()
+                                    ->unique(
+                                        ignoreRecord: true,
+                                        modifyRuleUsing: function (Unique $rule, Get $get, ?AccesoVirtual $record): Unique {
+                                            $usuarioId = $get('usuario_id') ?? $record?->usuario_id;
+
+                                            $rule = $rule
+                                                ->where('usuario_id', $usuarioId)
+                                                ->where('virtual_id', $get('virtual_id'));
+
+                                            $vpnId = $get('vpn_id');
+
+                                            if (blank($vpnId)) {
+                                                return $rule->whereNull('vpn_id')->ignore($record);
+                                            }
+
+                                            return $rule->where('vpn_id', $vpnId)->ignore($record);
+                                        },
+                                    ),
                                 Toggle::make('estado')
                                     ->label('Activo')
                                     ->default(true)

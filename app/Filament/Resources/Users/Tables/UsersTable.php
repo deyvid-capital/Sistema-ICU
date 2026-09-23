@@ -338,7 +338,7 @@ class UsersTable
                 : UserResource::getUrl('edit', ['record' => $record]))
             ->defaultSort('name')
             ->striped()
-            ->paginated([50, 60, 100])
+            ->paginated([25, 50, 100])
             ->checkIfRecordIsSelectableUsing(fn (User $record): bool => $record->id !== auth()->id());
     }
 

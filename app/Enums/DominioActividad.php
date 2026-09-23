@@ -50,6 +50,7 @@ use App\Models\SoftwareUsuario;
 use App\Models\TarjetaVideo;
 use App\Models\User;
 use App\Models\UsuarioExterno;
+use App\Models\UsuarioFortitoken;
 use App\Models\Virtual;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Database\Eloquent\Model;
@@ -164,6 +165,7 @@ enum DominioActividad: string implements HasLabel
             AccesoVirtual::class => self::Accesos,
             AccUdCompartida::class => self::Accesos,
             AzureAd::class => self::Accesos,
+            UsuarioFortitoken::class => self::Seguridad,
 
             Software::class => self::Software,
             SoftwareArea::class => self::Software,

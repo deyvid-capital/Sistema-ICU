@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoInternets\Schemas;
 
+use App\Filament\Resources\Concerns\ShowsUsuarioFortitoken;
 use App\Filament\Resources\Users\RelationManagers\AccesosInternetRelationManager;
 use App\Models\User;
 use App\Rules\NotTrashed;
@@ -17,6 +18,8 @@ use Filament\Support\Icons\Heroicon;
 
 class AccesoInternetForm
 {
+    use ShowsUsuarioFortitoken;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -34,8 +37,10 @@ class AccesoInternetForm
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->live()
                                     ->rule(new NotTrashed(User::class))
                                     ->hiddenOn(AccesosInternetRelationManager::class),
+                                static::fortitokenFormPlaceholder(),
                                 TextInput::make('usuario_red')
                                     ->label('Usuario de red')
                                     ->maxLength(50),
@@ -49,9 +54,6 @@ class AccesoInternetForm
                                         'Usuario de Administración' => 'Usuario de Administración',
                                     ])
                                     ->required(),
-                                TextInput::make('fortitoken')
-                                    ->label('FortiToken')
-                                    ->maxLength(50),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')
                                     ->default(now())

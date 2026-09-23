@@ -20,7 +20,6 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Collection;
 
 class UserInfolist
 {
@@ -98,6 +97,7 @@ class UserInfolist
                             ->icon(Heroicon::OutlinedKey)
                             ->badge(fn (User $record): ?int => static::totalOrNull(
                                 $record->accesosInternet->count()
+                                + $record->accesosVirtual->count()
                                 + $record->accesosDaza->count()
                                 + $record->accesosSharepoint->count()
                                 + $record->accesosSistemas->count()
@@ -107,10 +107,27 @@ class UserInfolist
                             ->badgeColor('info')
                             ->schema([
 
-                                Section::make('Acceso a red / Wifi, VPN y máquinas virtuales')
+                                Section::make('Acceso a red / Wifi')
                                     ->icon(Heroicon::OutlinedGlobeAlt)
                                     ->collapsible()
                                     ->schema([
+                                        TextEntry::make('fortitoken_resumen')
+                                            ->label('FortiToken')
+                                            ->badge()
+                                            ->state(function (User $record): string {
+                                                $token = $record->fortitoken;
+
+                                                if ($token === null) {
+                                                    return 'No asignado';
+                                                }
+
+                                                return $token->estado ? 'Asignado (activo)' : 'Asignado (inactivo)';
+                                            })
+                                            ->color(fn (User $record): string => match (true) {
+                                                $record->fortitoken === null => 'gray',
+                                                $record->fortitoken->estado => 'success',
+                                                default => 'warning',
+                                            }),
                                         RepeatableEntry::make('accesosInternet')
                                             ->hiddenLabel()
                                             ->schema([
@@ -131,9 +148,6 @@ class UserInfolist
                                                             ->badge()
                                                             ->state(fn (AccesoInternet $record): string => $record->estado ? 'Activo' : 'Inactivo')
                                                             ->color(fn (AccesoInternet $record): string => $record->estado ? 'success' : 'danger'),
-                                                        IconEntry::make('fortitoken')
-                                                            ->label('FortiToken')
-                                                            ->boolean(),
                                                         TextEntry::make('fecha')
                                                             ->label('Fecha')
                                                             ->icon(Heroicon::OutlinedCalendarDays)
@@ -141,33 +155,40 @@ class UserInfolist
                                                             ->placeholder('—'),
                                                         TextEntry::make('observaciones')
                                                             ->label('Observaciones')
-                                                            ->placeholder('Sin observaciones'),
-                                                        TextEntry::make('vpn')
-                                                            ->label('Recursos VPN')
-                                                            ->badge()
-                                                            ->color('warning')
-                                                            ->state(fn (AccesoInternet $record): array => $record->accesosVirtual
-                                                                ->map(fn ($acceso): ?string => $acceso->recursoVpn?->nombre_vpn)
-                                                                ->filter()
-                                                                ->unique()
-                                                                ->values()
-                                                                ->all())
-                                                            ->placeholder('Sin VPN asignada')
+                                                            ->placeholder('Sin observaciones')
                                                             ->columnSpan(['md' => 2]),
-                                                        TextEntry::make('maquinas_virtuales')
-                                                            ->label('Máquinas virtuales')
-                                                            ->badge()
-                                                            ->color('primary')
-                                                            ->state(fn (AccesoInternet $record): array => $record->accesosVirtual
-                                                                ->map(fn ($acceso): ?string => $acceso->virtual?->maquina_virtual)
-                                                                ->filter()
-                                                                ->unique()
-                                                                ->values()
-                                                                ->all())
-                                                            ->placeholder('Sin máquina virtual'),
                                                     ]),
                                             ]),
                                         static::emptyNotice('accesosInternet', 'El usuario no tiene acceso a red / Internet registrado.'),
+                                    ]),
+
+                                Section::make('Máquinas virtuales y VPN')
+                                    ->icon(Heroicon::OutlinedRectangleGroup)
+                                    ->collapsible()
+                                    ->schema([
+                                        RepeatableEntry::make('accesosVirtual')
+                                            ->hiddenLabel()
+                                            ->schema([
+                                                Grid::make(['default' => 1, 'md' => 3])
+                                                    ->schema([
+                                                        TextEntry::make('virtual.maquina_virtual')
+                                                            ->label('Máquina virtual')
+                                                            ->badge()
+                                                            ->color('primary')
+                                                            ->placeholder('—'),
+                                                        TextEntry::make('recursoVpn.nombre_vpn')
+                                                            ->label('Recurso VPN')
+                                                            ->badge()
+                                                            ->color('warning')
+                                                            ->placeholder('Sin VPN'),
+                                                        TextEntry::make('estado')
+                                                            ->label('Estado')
+                                                            ->badge()
+                                                            ->state(fn ($record): string => $record->estado ? 'Activo' : 'Inactivo')
+                                                            ->color(fn ($record): string => $record->estado ? 'success' : 'danger'),
+                                                    ]),
+                                            ]),
+                                        static::emptyNotice('accesosVirtual', 'El usuario no tiene accesos virtuales registrados.'),
                                     ]),
 
                                 Section::make('Accesos DAZA')
@@ -709,18 +730,25 @@ class UserInfolist
                 fn (User $record): int => $record->accesosInternet->where('estado', true)->count(),
             ),
             static::resumenEntry(
+                'fortitoken',
+                'FortiToken',
+                Heroicon::OutlinedDevicePhoneMobile,
+                fn (User $record): int => $record->fortitoken !== null ? 1 : 0,
+                fn (User $record): int => ($record->fortitoken?->estado ?? false) ? 1 : 0,
+            ),
+            static::resumenEntry(
                 'vpn',
                 'Recursos VPN',
                 Heroicon::OutlinedLockClosed,
-                fn (User $record): int => static::accesosVirtualesDe($record)->whereNotNull('vpn_id')->count(),
-                fn (User $record): int => static::accesosVirtualesDe($record)->whereNotNull('vpn_id')->count(),
+                fn (User $record): int => $record->accesosVirtual->whereNotNull('vpn_id')->count(),
+                fn (User $record): int => $record->accesosVirtual->whereNotNull('vpn_id')->where('estado', true)->count(),
             ),
             static::resumenEntry(
                 'virtual',
                 'Máquinas virtuales',
                 Heroicon::OutlinedRectangleGroup,
-                fn (User $record): int => static::accesosVirtualesDe($record)->whereNotNull('virtual_id')->count(),
-                fn (User $record): int => static::accesosVirtualesDe($record)->whereNotNull('virtual_id')->count(),
+                fn (User $record): int => $record->accesosVirtual->count(),
+                fn (User $record): int => $record->accesosVirtual->where('estado', true)->count(),
             ),
             static::resumenEntry(
                 'daza',
@@ -835,16 +863,6 @@ class UserInfolist
 
                 return $activos($record) > 0 ? 'success' : 'warning';
             });
-    }
-
-    /**
-     * Accesos a VPN y máquinas virtuales derivados de los accesos a red del usuario.
-     */
-    protected static function accesosVirtualesDe(User $record): Collection
-    {
-        return $record->accesosInternet
-            ->flatMap(fn (AccesoInternet $acceso) => $acceso->accesosVirtual)
-            ->values();
     }
 
     /**

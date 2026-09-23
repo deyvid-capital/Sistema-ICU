@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AccesoInternets\Tables;
 
 use App\Filament\Resources\AccesoInternets\AccesoInternetResource;
+use App\Filament\Resources\Concerns\ShowsUsuarioFortitoken;
 use App\Filament\Resources\Users\RelationManagers\AccesosInternetRelationManager;
 use App\Models\AccesoInternet;
 use Filament\Actions\ActionGroup;
@@ -25,9 +26,12 @@ use Illuminate\Database\Eloquent\Builder;
 
 class AccesoInternetsTable
 {
+    use ShowsUsuarioFortitoken;
+
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['usuario.fortitoken']))
             ->recordUrl(fn (AccesoInternet $record): string => $record->trashed()
                 ? AccesoInternetResource::getUrl('view', ['record' => $record])
                 : AccesoInternetResource::getUrl('edit', ['record' => $record]))
@@ -52,11 +56,7 @@ class AccesoInternetsTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('—'),
-                TextColumn::make('fortitoken')
-                    ->label('FortiToken')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('—'),
+                static::fortitokenTableColumn(),
                 TextColumn::make('fecha')
                     ->label('Fecha')
                     ->date('d/m/Y')

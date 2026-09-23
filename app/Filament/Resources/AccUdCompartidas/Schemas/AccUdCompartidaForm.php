@@ -37,9 +37,9 @@ class AccUdCompartidaForm
                                     ->label('Unidad compartida')
                                     ->options(
                                         [
-                                            'PRODUCCION' => 'PRODUCCION',
-                                            'CONTINGENCIA' => 'CONTINGENCIA',
-                                            'TEST' => 'TEST',
+                                            'Daza Producción (P)' => ' Daza Producción (P) ',
+                                            'Daza Contingencia (Q)' => 'Daza Contingencia (Q)',
+                                            'Daza Test (T)' => 'Daza Test (T)',
                                         ]
                                     )
                                     ->native(false)

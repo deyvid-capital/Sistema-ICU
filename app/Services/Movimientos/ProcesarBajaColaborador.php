@@ -17,6 +17,7 @@ use App\Models\LicenciaUsuario;
 use App\Models\Movimiento;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
+use App\Models\UsuarioFortitoken;
 use App\Services\SincronizarAsignacionEquipo;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -45,6 +46,8 @@ class ProcesarBajaColaborador
         AccesoSistema::class,
         AccesoDaza::class,
         AccesoInternet::class,
+        AccesoVirtual::class,
+        UsuarioFortitoken::class,
         AzureAd::class,
         AccUdCompartida::class,
     ];
@@ -65,7 +68,7 @@ class ProcesarBajaColaborador
         $fechaBaja = CarbonImmutable::parse($fecha)->startOfDay();
 
         return DB::transaction(function () use ($usuarioId, $fechaBaja): ResumenBajaColaborador {
-            $accesos = $this->desactivarAccesosVirtuales($usuarioId);
+            $accesos = 0;
 
             foreach (self::MODELOS_CON_ESTADO as $modelo) {
                 $accesos += $this->desactivarPorUsuario($modelo, $usuarioId);
@@ -100,20 +103,6 @@ class ProcesarBajaColaborador
     {
         return $modelo::query()
             ->where('usuario_id', $usuarioId)
-            ->where('estado', true)
-            ->update(['estado' => false]);
-    }
-
-    /**
-     * Los accesos virtuales (VM + VPN) cuelgan del acceso a internet, no del
-     * usuario, así que hay que llegar a ellos por subconsulta.
-     */
-    private function desactivarAccesosVirtuales(string $usuarioId): int
-    {
-        return AccesoVirtual::query()
-            ->whereIn('internet_id', AccesoInternet::query()
-                ->where('usuario_id', $usuarioId)
-                ->select('id'))
             ->where('estado', true)
             ->update(['estado' => false]);
     }

@@ -79,6 +79,8 @@ class User extends Authenticatable implements FilamentUser
         'accesosSistemas',
         'accesosDaza',
         'accesosInternet',
+        'accesosVirtual',
+        'fortitoken',
         'softwareUsuarios',
         'softwareExcepciones',
         'licenciasUsuarios',
@@ -100,6 +102,8 @@ class User extends Authenticatable implements FilamentUser
             'accesosSistemas',
             'accesosDaza',
             'accesosInternet',
+            'accesosVirtual',
+            'fortitoken',
             'softwareUsuarios',
             'softwareExcepciones',
             'licenciasUsuarios',
@@ -279,6 +283,22 @@ class User extends Authenticatable implements FilamentUser
     public function accesosInternet(): HasMany
     {
         return $this->hasMany(AccesoInternet::class, 'usuario_id');
+    }
+
+    /**
+     * Accesos a máquinas virtuales (y VPN opcional) del colaborador.
+     */
+    public function accesosVirtual(): HasMany
+    {
+        return $this->hasMany(AccesoVirtual::class, 'usuario_id');
+    }
+
+    /**
+     * Serial FortiToken del colaborador (como máximo uno).
+     */
+    public function fortitoken(): HasOne
+    {
+        return $this->hasOne(UsuarioFortitoken::class, 'usuario_id');
     }
 
     /**

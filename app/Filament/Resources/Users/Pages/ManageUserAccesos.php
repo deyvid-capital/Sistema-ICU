@@ -6,6 +6,7 @@ use App\Filament\Resources\Users\RelationManagers\AccesosDazaRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AccesosInternetRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AccesosSharepointRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AccesosSistemasRelationManager;
+use App\Filament\Resources\Users\RelationManagers\AccesosVirtualRelationManager;
 use Filament\Support\Icons\Heroicon;
 
 class ManageUserAccesos extends ManageUserRelations
@@ -23,6 +24,7 @@ class ManageUserAccesos extends ManageUserRelations
             AccesosSistemasRelationManager::class,
             AccesosDazaRelationManager::class,
             AccesosInternetRelationManager::class,
+            AccesosVirtualRelationManager::class,
         ];
     }
 
@@ -36,6 +38,7 @@ class ManageUserAccesos extends ManageUserRelations
             'accesosSistemas',
             'accesosDaza',
             'accesosInternet',
+            'accesosVirtual',
         ];
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AccesoVirtuals\Tables;
 
 use App\Filament\Resources\AccesoVirtuals\AccesoVirtualResource;
+use App\Filament\Resources\Concerns\ShowsUsuarioFortitoken;
+use App\Filament\Resources\Users\RelationManagers\AccesosVirtualRelationManager;
 use App\Models\AccesoVirtual;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -24,9 +26,12 @@ use Illuminate\Database\Eloquent\Builder;
 
 class AccesoVirtualsTable
 {
+    use ShowsUsuarioFortitoken;
+
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['usuario.fortitoken']))
             ->recordUrl(fn (AccesoVirtual $record): string => $record->trashed()
                 ? AccesoVirtualResource::getUrl('view', ['record' => $record])
                 : AccesoVirtualResource::getUrl('edit', ['record' => $record]))
@@ -34,17 +39,13 @@ class AccesoVirtualsTable
             ->striped()
             ->paginated([10, 25, 50])
             ->columns([
-                TextColumn::make('accesoInternet.usuario.name')
+                TextColumn::make('usuario.name')
                     ->label('Usuario')
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->icon(Heroicon::OutlinedUser),
-                TextColumn::make('accesoInternet.usuario_red')
-                    ->label('Usuario de red')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('—'),
+                    ->icon(Heroicon::OutlinedUser)
+                    ->hiddenOn(AccesosVirtualRelationManager::class),
                 TextColumn::make('virtual.maquina_virtual')
                     ->label('Máquina virtual')
                     ->searchable()
@@ -55,7 +56,8 @@ class AccesoVirtualsTable
                     ->label('Recurso VPN')
                     ->searchable()
                     ->sortable()
-                    ->placeholder('—'),
+                    ->placeholder('Sin VPN'),
+                static::fortitokenTableColumn(),
                 IconColumn::make('estado')
                     ->label('Activo')
                     ->boolean()
@@ -78,6 +80,12 @@ class AccesoVirtualsTable
                     ->placeholder('—'),
             ])
             ->filters([
+                SelectFilter::make('usuario_id')
+                    ->label('Usuario')
+                    ->relationship('usuario', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->hiddenOn(AccesosVirtualRelationManager::class),
                 SelectFilter::make('virtual_id')
                     ->label('Máquina virtual')
                     ->relationship('virtual', 'maquina_virtual')
