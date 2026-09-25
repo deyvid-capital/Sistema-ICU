@@ -24,6 +24,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
@@ -115,13 +116,18 @@ class AsignacionEquiposTable
                         'concluidas' => $query->whereNotNull('fecha_fin'),
                         default => $query,
                     }),
+                TrashedFilter::make()
+                    ->label('Estado del registro'),
                 Filter::make('fecha_inicio')
                     ->label('Fecha de Alta')
+                    ->columns(2)
                     ->schema([
                         DatePicker::make('inicio_desde')
-                            ->label(' Alta desde'),
+                            ->label('Fecha de alta desde')
+                            ->helperText('Asignaciones que empezaron en esta fecha o después.'),
                         DatePicker::make('inicio_hasta')
-                            ->label(' Alta hasta')
+                            ->label('Fecha de alta hasta')
+                            ->helperText('Asignaciones que empezaron en esta fecha o antes.')
                             ->afterOrEqual('inicio_desde'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -137,12 +143,12 @@ class AsignacionEquiposTable
                         $indicators = [];
 
                         if ($data['inicio_desde'] ?? null) {
-                            $indicators[] = Indicator::make('Alta desde '.Carbon::parse($data['inicio_desde'])->format('d/m/Y'))
+                            $indicators[] = Indicator::make('Fecha de alta desde '.Carbon::parse($data['inicio_desde'])->format('d/m/Y'))
                                 ->removeField('inicio_desde');
                         }
 
                         if ($data['inicio_hasta'] ?? null) {
-                            $indicators[] = Indicator::make('Alta hasta '.Carbon::parse($data['inicio_hasta'])->format('d/m/Y'))
+                            $indicators[] = Indicator::make('Fecha de alta hasta '.Carbon::parse($data['inicio_hasta'])->format('d/m/Y'))
                                 ->removeField('inicio_hasta');
                         }
 
@@ -150,11 +156,14 @@ class AsignacionEquiposTable
                     }),
                 Filter::make('fecha_fin')
                     ->label('Fecha de Baja')
+                    ->columns(2)
                     ->schema([
                         DatePicker::make('fin_desde')
-                            ->label(' Baja desde'),
+                            ->label('Fecha de baja desde')
+                            ->helperText('Asignaciones que terminaron en esta fecha o después.'),
                         DatePicker::make('fin_hasta')
-                            ->label(' Baja hasta')
+                            ->label('Fecha de baja hasta')
+                            ->helperText('Asignaciones que terminaron en esta fecha o antes.')
                             ->afterOrEqual('fin_desde'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
@@ -170,20 +179,20 @@ class AsignacionEquiposTable
                         $indicators = [];
 
                         if ($data['fin_desde'] ?? null) {
-                            $indicators[] = Indicator::make('Baja desde '.Carbon::parse($data['fin_desde'])->format('d/m/Y'))
+                            $indicators[] = Indicator::make('Fecha de baja desde '.Carbon::parse($data['fin_desde'])->format('d/m/Y'))
                                 ->removeField('fin_desde');
                         }
 
                         if ($data['fin_hasta'] ?? null) {
-                            $indicators[] = Indicator::make('Baja hasta '.Carbon::parse($data['fin_hasta'])->format('d/m/Y'))
+                            $indicators[] = Indicator::make('Fecha de baja hasta '.Carbon::parse($data['fin_hasta'])->format('d/m/Y'))
                                 ->removeField('fin_hasta');
                         }
 
                         return $indicators;
                     }),
-                TrashedFilter::make()
-                    ->label('Estado del registro'),
-            ])
+
+            ], layout: FiltersLayout::Modal)
+            ->filtersFormColumns(2)
             ->recordActions([
                 ActionGroup::make([
                     ...EquipoFormularioPdfActions::makeForAsignacionEntrega(),

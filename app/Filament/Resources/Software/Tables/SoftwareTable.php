@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Software\Tables;
 
+use App\Enums\CategoriasSoftware;
 use App\Filament\Resources\Software\SoftwareResource;
 use App\Models\Software;
 use Filament\Actions\ActionGroup;
@@ -60,14 +61,8 @@ class SoftwareTable
             ->filters([
                 SelectFilter::make('categoria')
                     ->label('Categoria')
-                    ->options([
-                        'Productividad' => 'Productividad',
-                        'Diseno' => 'Diseno',
-                        'Seguridad' => 'Seguridad',
-                        'Comunicacion' => 'Comunicacion',
-                        'Desarrollo' => 'Desarrollo',
-                        'Otro' => 'Otro',
-                    ]),
+                    ->searchable()
+                    ->options(CategoriasSoftware::getOptions()),
                 SelectFilter::make('estado')
                     ->label('Estado')
                     ->options([

@@ -1,0 +1,261 @@
+# Tablas
+## Filtros
+### Distribución de filtros
+
+---
+
+## Posicionando los filtros en columnas de una cuadrícula
+
+Para cambiar el número de columnas que pueden ocupar los filtros, puedes usar el método `filtersFormColumns()`:
+
+```php
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ])
+        ->filtersFormColumns(3);
+}
+```
+_Vista previa: Tabla con filtros en columnas de cuadrícula_
+
+---
+
+## Controlando el ancho del desplegable de filtros
+
+Para personalizar el ancho del desplegable de filtros, utiliza el método `filtersFormWidth()` y especifica un ancho: `ExtraSmall`, `Small`, `Medium`, `Large`, `ExtraLarge`, `TwoExtraLarge`, `ThreeExtraLarge`, `FourExtraLarge`, `FiveExtraLarge`, `SixExtraLarge` o `SevenExtraLarge`. Por defecto, el ancho es `ExtraSmall`:
+
+```php
+use Filament\Support\Enums\Width;
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ])
+        ->filtersFormWidth(Width::FourExtraLarge);
+}
+```
+
+---
+
+## Controlando la altura máxima del desplegable de filtros
+
+Para limitar la altura máxima del contenido del desplegable de filtros (haciendo que sea desplazable), usa el método `filtersFormMaxHeight()`, pasando un valor de CSS:
+
+```php
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ])
+        ->filtersFormMaxHeight('400px');
+}
+```
+
+---
+
+## Mostrando los filtros en un modal
+
+Para mostrar los filtros en un modal en vez de en un desplegable, usa:
+
+```php
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ], layout: FiltersLayout::Modal);
+}
+```
+_Vista previa: Tabla con filtros en un modal_
+
+Puedes usar la API de acciones trigger para personalizar el modal, incluyendo el uso de un `slideOver()`.
+
+---
+
+## Mostrando los filtros encima del contenido de la tabla
+
+Para renderizar los filtros encima del contenido de la tabla (en vez de en un desplegable), utiliza:
+
+```php
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ], layout: FiltersLayout::AboveContent);
+}
+```
+_Vista previa: Tabla con filtros arriba del contenido_
+
+---
+
+## Permitir que los filtros encima del contenido sean colapsables
+
+Para que los filtros mostrados encima del contenido de la tabla puedan ser colapsados:
+
+```php
+use Filament\Tables\Enums\FiltersLayout;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ], layout: FiltersLayout::AboveContentCollapsible);
+}
+```
+_Vista previa: Filtros colapsables arriba del contenido_
+
+---
+
+## Mostrando los filtros debajo del contenido de la tabla
+
+Para mostrar los filtros debajo del contenido de la tabla, usa:
+
+```php
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ], layout: FiltersLayout::BelowContent);
+}
+```
+_Vista previa: Tabla con filtros debajo del contenido_
+
+---
+
+## Mostrando los filtros a la izquierda o derecha del contenido de la tabla
+
+Para renderizar los filtros a la izquierda (antes) o derecha (después) del contenido de la tabla:
+
+```php
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ], layout: FiltersLayout::BeforeContent); // o `FiltersLayout::AfterContent`
+}
+```
+_Vista previa: Filtros antes del contenido_
+
+_Vista previa: Filtros después del contenido_
+
+---
+
+## Permitir que los filtros a la izquierda o derecha del contenido sean colapsables
+
+Para permitir que los filtros a la izquierda o derecha sean colapsables:
+
+```php
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ], layout: FiltersLayout::BeforeContentCollapsible); // o `FiltersLayout::AfterContentCollapsible`
+}
+```
+
+---
+
+## Ocultando los indicadores de filtros activos
+
+Para ocultar los indicadores de filtros activos sobre la tabla, utiliza `hiddenFilterIndicators()`:
+
+```php
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ])
+        ->hiddenFilterIndicators();
+}
+```
+
+---
+
+## Personalizando el esquema del formulario de filtros
+
+Puedes personalizar todo el esquema del formulario de filtros, reorganizar los filtros en el layout deseado, y usar cualquier componente de layout disponible en los formularios. Hazlo usando `filterFormSchema()` y pasando un closure que recibe el array de filtros definidos `$filters`:
+
+```php
+use Filament\Schemas\Components\Section;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            Filter::make('is_featured'),
+            Filter::make('published_at'),
+            Filter::make('author'),
+        ])
+        ->filtersFormColumns(2)
+        ->filtersFormSchema(fn (array $filters): array => [
+            Section::make('Visibilidad')
+                ->description('Estos filtros afectan la visibilidad de los registros en la tabla.')
+                ->schema([
+                    $filters['is_featured'],
+                    $filters['published_at'],
+                ])
+                ->columns(2)
+                ->columnSpanFull(),
+            $filters['author'],
+        ]);
+}
+```
+
+En este ejemplo, dos de los filtros se colocan dentro de un componente `Section` y se usa el método `columns()` para que la sección tenga dos columnas. También se usa `columnSpanFull()` para que la sección ocupe el ancho completo del formulario de filtros. Cada filtro se inserta en el esquema del formulario usando el nombre del filtro como clave en el array `$filters`.
+
+_Vista previa: Tabla con esquema de formulario de filtros personalizado_
+
+---
+
+## Mostrar la acción de reiniciar en el pie del formulario
+
+Por defecto, la acción para reiniciar los filtros aparece en el encabezado del formulario. Puedes moverla al pie, junto a la acción de aplicar, usando el método `filtersResetActionPosition()`:
+
+```php
+use Filament\Tables\Enums\FiltersResetActionPosition;
+use Filament\Tables\Table;
+
+public function table(Table $table): Table
+{
+    return $table
+        ->filters([
+            // ...
+        ])
+        ->filtersResetActionPosition(FiltersResetActionPosition::Footer);
+}
+```
