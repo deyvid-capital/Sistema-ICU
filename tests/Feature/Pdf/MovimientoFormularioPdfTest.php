@@ -2,20 +2,28 @@
 
 namespace Tests\Feature\Pdf;
 
+use App\Enums\CategoriasSoftware;
+use App\Enums\EstadoAprobacionExcepcion;
 use App\Enums\MovimientoFormularioPdfTipo;
+use App\Models\AccesoDaza;
 use App\Models\AccesoInternet;
 use App\Models\AccesoSistema;
+use App\Models\AccesoVirtual;
 use App\Models\Area;
 use App\Models\AsignacionEquipo;
 use App\Models\Cargo;
 use App\Models\Equipo;
+use App\Models\Fondo;
 use App\Models\ModeloLaptop;
 use App\Models\Movimiento;
 use App\Models\PdfMovimiento;
+use App\Models\RecursoVpn;
 use App\Models\Sistema;
 use App\Models\Software;
+use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
+use App\Models\Virtual;
 use App\Services\Pdf\BrowsershotPdfFactory;
 use App\Services\Pdf\GenerateMovimientoFormularioPdf;
 use App\Services\Pdf\MovimientoFormularioPdfData;
@@ -70,7 +78,7 @@ class MovimientoFormularioPdfTest extends TestCase
 
         $software = Software::factory()->create([
             'nombre_software' => 'Adobe Acrobat',
-            'categoria' => 'Diseno',
+            'categoria' => CategoriasSoftware::PDF->value,
         ]);
         SoftwareUsuario::factory()->create([
             'usuario_id' => $usuario->id,
@@ -134,7 +142,10 @@ class MovimientoFormularioPdfTest extends TestCase
         ]);
         AccesoInternet::factory()->create(['usuario_id' => $usuario->id, 'estado' => true]);
 
-        $software = Software::factory()->create(['nombre_software' => 'Adobe Acrobat']);
+        $software = Software::factory()->create([
+            'nombre_software' => 'Adobe Acrobat',
+            'categoria' => CategoriasSoftware::PDF->value,
+        ]);
         SoftwareUsuario::factory()->create([
             'usuario_id' => $usuario->id,
             'id_software' => $software->id_software,
@@ -222,6 +233,84 @@ class MovimientoFormularioPdfTest extends TestCase
             ->assertOk()
             ->assertSee('Maria', false)
             ->assertSee('Lopez', false)
-            ->assertSee('Baja', false);
+            ->assertSee('Baja', false)
+            ->assertSee('Acceso a DAZA', false)
+            ->assertSee('Excepciones', false)
+            ->assertDontSee('FortiToken', false)
+            ->assertDontSee('Complemento de asignaciones', false);
+    }
+
+    public function test_clasifica_por_categoria_y_muestra_daza_y_excepciones(): void
+    {
+        $area = Area::factory()->create(['area' => 'Riesgos']);
+        $cargo = Cargo::factory()->create(['area_id' => $area->id_area]);
+        $usuario = User::factory()->create([
+            'id_area' => $area->id_area,
+            'id_cargo' => $cargo->id_cargo,
+        ]);
+
+        SoftwareUsuario::factory()->create([
+            'usuario_id' => $usuario->id,
+            'estado' => true,
+            'id_software' => Software::factory()->create([
+                'nombre_software' => 'Adobe Acrobat',
+                'categoria' => CategoriasSoftware::PDF->value,
+            ])->id_software,
+        ]);
+        $virtual = Virtual::factory()->create(['maquina_virtual' => 'VM-CONTABILIDAD']);
+        $vpn = RecursoVpn::factory()->create(['nombre_vpn' => 'VPN Corporativa']);
+        AccesoVirtual::factory()->create([
+            'usuario_id' => $usuario->id,
+            'virtual_id' => $virtual->id,
+            'vpn_id' => $vpn->id,
+            'estado' => true,
+        ]);
+
+        $fondo = Fondo::factory()->create(['nombre_completo' => 'Fondo Capital']);
+        AccesoDaza::factory()->create([
+            'usuario_id' => $usuario->id,
+            'usuario_daza' => 'cduran',
+            'nivel_acceso' => 'Lectura',
+            'fondo_id' => $fondo->id_fondo,
+            'ambiente' => 'Produccion',
+            'estado' => true,
+        ]);
+
+        SoftwareExc::factory()->aprobada()->create([
+            'usuario_id' => $usuario->id,
+            'fecha_fin' => null,
+            'software_id' => Software::factory()->create([
+                'nombre_software' => 'AnyDesk',
+                'categoria' => CategoriasSoftware::SoporteRemoto->value,
+            ])->id_software,
+        ]);
+        SoftwareExc::factory()->create([
+            'usuario_id' => $usuario->id,
+            'estado_aprobacion' => EstadoAprobacionExcepcion::Pendiente,
+            'fecha_fin' => null,
+            'software_id' => Software::factory()->create([
+                'nombre_software' => 'TeamViewer',
+                'categoria' => CategoriasSoftware::SoporteRemoto->value,
+            ])->id_software,
+        ]);
+
+        $movimiento = Movimiento::query()->create([
+            'usuario_id' => $usuario->id,
+            'tipo' => 'Alta',
+            'fecha' => '2026-04-01',
+            'cargo_id' => $cargo->id_cargo,
+        ]);
+
+        $documento = app(MovimientoFormularioPdfData::class)->for($movimiento)['documento'];
+
+        $this->assertSame('Adobe Acrobat', $documento['software']['pdf']);
+        $this->assertSame('-', $documento['software']['compresion']);
+        $this->assertSame('VM-CONTABILIDAD', $documento['software']['escritorio_remoto']);
+        $this->assertSame('VPN Corporativa', $documento['software']['vpn']);
+        $this->assertSame('AnyDesk', $documento['software']['soporte_remoto']);
+        $this->assertStringContainsString('TeamViewer (Pendiente)', $documento['software']['excepciones']);
+        $this->assertStringContainsString('AnyDesk (Aprobada)', $documento['software']['excepciones']);
+        $this->assertSame('cduran - Lectura - Fondo Capital - Produccion', $documento['software']['daza']);
+        $this->assertArrayNotHasKey('complemento', $documento);
     }
 }

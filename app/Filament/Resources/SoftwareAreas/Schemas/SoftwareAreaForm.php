@@ -6,10 +6,12 @@ use App\Models\Software;
 use App\Models\SoftwareArea;
 use Closure;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Operation;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\Unique;
 
@@ -19,41 +21,46 @@ class SoftwareAreaForm
     {
         return $schema
             ->components([
-                Select::make('area_id')
-                    ->label('Area')
-                    ->relationship('area', 'area')
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->live()
-                    ->afterStateUpdated(fn (Set $set) => $set('software_ids', [])),
-                Select::make('software_ids')
-                    ->label('Software')
-                    ->helperText('Puedes elegir varios. Todos quedan asignados al area seleccionada.')
-                    ->options(fn (Get $get): array => self::softwareDisponibleParaArea($get('area_id')))
-                    ->multiple()
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->visibleOn(Operation::Create)
-                    ->disabled(fn (Get $get): bool => blank($get('area_id')))
+                Section::make('Asignación de software al área')
+                    ->icon(Heroicon::OutlinedBuildingOffice)
                     ->columnSpanFull()
-                    ->rule(fn (Get $get): Closure => self::softwareIdsSonAsignables($get)),
-                Select::make('software_id')
-                    ->label('Software')
-                    ->relationship('software', 'nombre_software')
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->hiddenOn(Operation::Create)
-                    ->unique(
-                        ignoreRecord: true,
-                        modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareArea $record): Unique {
-                            return $rule
-                                ->where('area_id', $get('area_id'))
-                                ->ignore($record);
-                        },
-                    ),
+                    ->schema([
+                        Select::make('area_id')
+                            ->label('Area')
+                            ->relationship('area', 'area')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set) => $set('software_ids', [])),
+                        Select::make('software_ids')
+                            ->label('Software')
+                            ->helperText('Puedes elegir varios. Todos quedan asignados al area seleccionada.')
+                            ->options(fn (Get $get): array => self::softwareDisponibleParaArea($get('area_id')))
+                            ->multiple()
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->visibleOn(Operation::Create)
+                            ->disabled(fn (Get $get): bool => blank($get('area_id')))
+                            ->columnSpanFull()
+                            ->rule(fn (Get $get): Closure => self::softwareIdsSonAsignables($get)),
+                        Select::make('software_id')
+                            ->label('Software')
+                            ->relationship('software', 'nombre_software')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->hiddenOn(Operation::Create)
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareArea $record): Unique {
+                                    return $rule
+                                        ->where('area_id', $get('area_id'))
+                                        ->ignore($record);
+                                },
+                            ),
+                    ]),
             ]);
     }
 

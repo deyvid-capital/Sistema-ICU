@@ -2,43 +2,28 @@
 
 namespace App\Services\Pdf;
 
+use App\Enums\CategoriasSoftware;
+use App\Enums\EstadoAprobacionExcepcion;
 use App\Enums\MovimientoFormularioPdfTipo;
+use App\Models\AccesoDaza;
 use App\Models\AccesoInternet;
 use App\Models\AccesoSharepoint;
 use App\Models\AccesoSistema;
+use App\Models\AccesoVirtual;
 use App\Models\AccUdCompartida;
 use App\Models\AsignacionEquipo;
 use App\Models\AzureAd;
 use App\Models\LicenciaUsuario;
 use App\Models\Movimiento;
+use App\Models\Software;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 
 class MovimientoFormularioPdfData
 {
-    /**
-     * Keywords (lowercase) → FormAltaBaja software field.
-     *
-     * @var array<string, list<string>>
-     */
-    private const SOFTWARE_FIELD_KEYWORDS = [
-        'antivirus' => ['forticlient', 'defender', 'antivirus', 'kaspersky', 'norton'],
-        'colaboracion' => ['teams', 'slack', 'colaboracion', 'Teams'],
-        'escritorio_remoto' => ['remote desktop', 'rdp', 'escritorio remoto'],
-        'mensajeria_instantanea' => ['whatsapp', 'telegram', 'mensajeria', 'Teams'],
-        'pdf' => ['acrobat', 'pdfsam', 'adobe acrobat', 'foxit'],
-        'vpn' => ['vpn'],
-        'navegadores' => ['chrome', 'firefox', 'edge', 'brave', 'navegador'],
-        'software_vpn' => ['forticlient vpn', 'openvpn', 'wireguard'],
-        'soporte_remoto' => ['anydesk', 'teamviewer', 'rustdesk'],
-        'impresora_scaner' => ['canon', 'epson', 'impresora', 'scaner', 'scanner', 'print'],
-        'compresion' => ['winrar', '7-zip', '7zip', 'winzip', 'compres'],
-        'software_escaner' => ['naps', 'scangear', 'epson scan', 'color network'],
-    ];
-
     /**
      * En una Baja los accesos y asignaciones ya fueron desactivados en cascada,
      * así que el formulario debe listar también lo inactivo: de lo contrario el
@@ -65,6 +50,9 @@ class MovimientoFormularioPdfData
             'usuario.accesosSistemas.sistema',
             'usuario.accesosSharepoint.sitio',
             'usuario.accesosInternet',
+            'usuario.accesosDaza.fondo',
+            'usuario.accesosVirtual.virtual',
+            'usuario.accesosVirtual.recursoVpn',
             'usuario.licenciasUsuarios.licencia',
             'usuario.unidadesCompartidas',
             'usuario.azureAd',
@@ -81,13 +69,14 @@ class MovimientoFormularioPdfData
 
         $usuario = $movimiento->usuario;
         $fechas = $this->resolveFechas($movimiento);
+        $asignacionEquipo = $this->asignacionEquipoPrincipal($usuario);
 
         return [
             'tipo' => $this->text($movimiento->tipo),
             'fecha_alta' => $fechas['fecha_alta'],
             'fecha_baja' => $fechas['fecha_baja'],
             'usuario' => $this->mapUsuario($movimiento, $usuario),
-            'equipo' => $this->mapEquipo($usuario),
+            'equipo' => $this->mapEquipo($asignacionEquipo),
             'software' => $this->mapSoftware($usuario),
         ];
     }
@@ -155,17 +144,21 @@ class MovimientoFormularioPdfData
      *     sistema_operativo: string
      * }
      */
-    private function mapEquipo(?User $usuario): array
+    private function asignacionEquipoPrincipal(?User $usuario): ?AsignacionEquipo
     {
         $asignaciones = $usuario?->asignacionesEquipos;
 
-        /** @var AsignacionEquipo|null $asignacion */
         $asignacion = $asignaciones?->first(fn (AsignacionEquipo $item): bool => $item->fecha_fin === null);
 
         if ($asignacion === null && $this->incluirInactivos) {
-            $asignacion = $asignaciones?->sortByDesc('fecha_inicio')->first();
+            return $asignaciones?->sortByDesc('fecha_inicio')->first();
         }
 
+        return $asignacion;
+    }
+
+    private function mapEquipo(?AsignacionEquipo $asignacion): array
+    {
         $equipo = $asignacion?->equipo;
 
         return [
@@ -183,7 +176,7 @@ class MovimientoFormularioPdfData
      */
     private function mapSoftware(?User $usuario): array
     {
-        $softwareNombres = $this->collectSoftwareNombres($usuario);
+        $porCategoria = $this->softwarePorCategoria($usuario);
 
         return [
             'sistemas' => $this->joinList(
@@ -220,11 +213,11 @@ class MovimientoFormularioPdfData
                     ->values()
                     ->all() ?? []
             ),
-            'antivirus' => $this->softwareField($softwareNombres, 'antivirus'),
+            'antivirus' => $this->nombresCategoria($porCategoria, CategoriasSoftware::Antivirus),
             'internet' => $this->mapInternet($usuario),
-            'colaboracion' => $this->softwareField($softwareNombres, 'colaboracion'),
-            'escritorio_remoto' => $this->softwareField($softwareNombres, 'escritorio_remoto'),
-            'mensajeria_instantanea' => $this->softwareField($softwareNombres, 'mensajeria_instantanea'),
+            'excepciones' => $this->mapExcepciones($usuario),
+            'escritorio_remoto' => $this->mapEscritorioRemoto($usuario),
+            'daza' => $this->mapDaza($usuario),
             'unidad_compartida' => $this->joinList(
                 $usuario?->unidadesCompartidas
                     ?->filter(fn (AccUdCompartida $item): bool => $this->vigente($item->estado))
@@ -233,15 +226,18 @@ class MovimientoFormularioPdfData
                     ->values()
                     ->all() ?? []
             ),
-            'pdf' => $this->softwareField($softwareNombres, 'pdf'),
-            'vpn' => $this->softwareField($softwareNombres, 'vpn'),
-            'navegadores' => $this->softwareField($softwareNombres, 'navegadores'),
-            'software_vpn' => $this->softwareField($softwareNombres, 'software_vpn'),
-            'soporte_remoto' => $this->softwareField($softwareNombres, 'soporte_remoto'),
-            'impresora_scaner' => $this->softwareField($softwareNombres, 'impresora_scaner'),
-            'compresion' => $this->softwareField($softwareNombres, 'compresion'),
-            'software_escaner' => $this->softwareField($softwareNombres, 'software_escaner'),
-            'autenticacion_multifactor' => $this->mapMfa($usuario),
+            'pdf' => $this->nombresCategoria($porCategoria, CategoriasSoftware::PDF),
+            'vpn' => $this->mapVpn($usuario),
+            'navegadores' => $this->nombresCategoria($porCategoria, CategoriasSoftware::Navegadores),
+            'software_vpn' => $this->nombresCategoria($porCategoria, CategoriasSoftware::SoftwareVPN, CategoriasSoftware::VPN),
+            'soporte_remoto' => $this->nombresCategoria($porCategoria, CategoriasSoftware::SoporteRemoto),
+            'impresora_scaner' => $this->nombresCategoria($porCategoria, CategoriasSoftware::Impresora, CategoriasSoftware::Scanner),
+            'compresion' => $this->nombresCategoria($porCategoria, CategoriasSoftware::Compresion),
+            'software_escaner' => $this->nombresCategoria($porCategoria, CategoriasSoftware::SoftwareEscaner),
+            'autenticacion_multifactor' => $this->joinList([
+                $this->mapMfa($usuario) === '-' ? null : $this->mapMfa($usuario),
+                ...$this->nombresDe($porCategoria, CategoriasSoftware::AutenticacionMultifactor),
+            ]),
         ];
     }
 
@@ -276,58 +272,129 @@ class MovimientoFormularioPdfData
         return $azure->mfa ? 'Microsoft Authenticator' : '-';
     }
 
+    private function mapEscritorioRemoto(?User $usuario): string
+    {
+        return $this->joinList(
+            $usuario?->accesosVirtual
+                ?->filter(fn (AccesoVirtual $acceso): bool => $this->vigente($acceso->estado))
+                ->map(fn (AccesoVirtual $acceso): ?string => $acceso->virtual?->maquina_virtual)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all() ?? []
+        );
+    }
+
+    private function mapVpn(?User $usuario): string
+    {
+        return $this->joinList(
+            $usuario?->accesosVirtual
+                ?->filter(fn (AccesoVirtual $acceso): bool => $this->vigente($acceso->estado) && filled($acceso->vpn_id))
+                ->map(fn (AccesoVirtual $acceso): ?string => $acceso->recursoVpn?->nombre_vpn)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all() ?? []
+        );
+    }
+
+    private function mapDaza(?User $usuario): string
+    {
+        return $this->joinList(
+            $usuario?->accesosDaza
+                ?->filter(fn (AccesoDaza $acceso): bool => $this->vigente($acceso->estado))
+                ->map(function (AccesoDaza $acceso): string {
+                    $fondo = $acceso->fondo?->nombre_completo ?? $acceso->fondo?->codigo;
+                    $partes = array_filter([
+                        $acceso->usuario_daza,
+                        $acceso->nivel_acceso,
+                        $fondo,
+                        $acceso->ambiente,
+                    ], fn (?string $parte): bool => filled($parte));
+
+                    return implode(' - ', $partes);
+                })
+                ->filter()
+                ->values()
+                ->all() ?? []
+        );
+    }
+
+    private function mapExcepciones(?User $usuario): string
+    {
+        return $this->joinList(
+            $usuario?->softwareExcepciones
+                ?->map(function (SoftwareExc $excepcion): ?string {
+                    $nombre = $excepcion->software?->nombre_software;
+
+                    if (blank($nombre)) {
+                        return null;
+                    }
+
+                    $estado = $excepcion->estado_aprobacion?->getLabel() ?? 'Pendiente';
+
+                    return $nombre.' ('.$estado.')';
+                })
+                ->filter()
+                ->values()
+                ->all() ?? []
+        );
+    }
+
     /**
-     * @return list<string>
+     * Software asignado al usuario, el de su área y las excepciones aprobadas,
+     * agrupado por el valor de CategoriasSoftware.
+     *
+     * @return Collection<string, Collection<int, Software>>
      */
-    private function collectSoftwareNombres(?User $usuario): array
+    private function softwarePorCategoria(?User $usuario): Collection
     {
         if ($usuario === null) {
-            return [];
+            return collect();
         }
 
         $fromUsuarios = $usuario->softwareUsuarios
             ->filter(fn (SoftwareUsuario $item): bool => $this->vigente($item->estado))
-            ->map(fn (SoftwareUsuario $item): ?string => $item->software?->nombre_software);
+            ->map(fn (SoftwareUsuario $item): ?Software => $item->software);
 
         $fromExcepciones = $usuario->softwareExcepciones
-            ->map(fn (SoftwareExc $item): ?string => $item->software?->nombre_software);
+            ->filter(fn (SoftwareExc $item): bool => $item->estado_aprobacion === EstadoAprobacionExcepcion::Aprobada)
+            ->filter(fn (SoftwareExc $item): bool => $this->incluirInactivos || $item->fecha_fin === null)
+            ->map(fn (SoftwareExc $item): ?Software => $item->software);
 
         $fromArea = $usuario->area?->softwareAreas
-            ?->map(fn ($item): ?string => $item->software?->nombre_software) ?? collect();
+            ?->map(fn ($item): ?Software => $item->software) ?? collect();
 
         return collect()
             ->merge($fromUsuarios)
             ->merge($fromExcepciones)
             ->merge($fromArea)
             ->filter()
-            ->unique()
-            ->values()
-            ->all();
+            ->unique(fn (Software $software): int => (int) $software->getKey())
+            ->groupBy(fn (Software $software): string => (string) ($software->categoria ?? ''));
     }
 
     /**
-     * @param  list<string>  $nombres
+     * @param  Collection<string, Collection<int, Software>>  $porCategoria
      */
-    private function softwareField(array $nombres, string $field): string
+    private function nombresCategoria(Collection $porCategoria, CategoriasSoftware ...$categorias): string
     {
-        $keywords = self::SOFTWARE_FIELD_KEYWORDS[$field] ?? [];
+        return $this->joinList($this->nombresDe($porCategoria, ...$categorias));
+    }
 
-        $matches = collect($nombres)
-            ->filter(function (string $nombre) use ($keywords): bool {
-                $haystack = Str::lower($nombre);
-
-                foreach ($keywords as $keyword) {
-                    if (str_contains($haystack, Str::lower($keyword))) {
-                        return true;
-                    }
-                }
-
-                return false;
-            })
+    /**
+     * @param  Collection<string, Collection<int, Software>>  $porCategoria
+     * @return list<string>
+     */
+    private function nombresDe(Collection $porCategoria, CategoriasSoftware ...$categorias): array
+    {
+        return collect($categorias)
+            ->flatMap(fn (CategoriasSoftware $categoria) => $porCategoria->get($categoria->value, collect()))
+            ->map(fn (Software $software): string => (string) $software->nombre_software)
+            ->filter()
+            ->unique()
             ->values()
             ->all();
-
-        return $this->joinList($matches);
     }
 
     /**

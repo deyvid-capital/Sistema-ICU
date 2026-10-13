@@ -26,9 +26,9 @@
             'sitio_sharepoint' => 'Intranet | Inversiones Alternativas | Administración y Finanzas',
             'antivirus' => 'FortiClient - Inversiones_Alternativas',
             'internet' => 'Inversiones Alternativas (IA)',
-            'colaboracion' => 'Teams',
+            'excepciones' => '-',
             'escritorio_remoto' => '-',
-            'mensajeria_instantanea' => '-',
+            'daza' => '-',
             'unidad_compartida' => '-',
             'pdf' => 'Adobe Acrobat | PDFSamBasic',
             'vpn' => '-',
@@ -104,6 +104,7 @@
                     box-shadow: none !important;
                     background: #fff !important;
                 }
+
             }
             :root {
                 --plomo-titulo: #02348f;
@@ -469,14 +470,14 @@
                 <tr>
                     <td class="lbl">Internet</td>
                     <td class="val">{!! $casillaSoftware($software['internet']) !!}</td>
-                    <td class="lbl">Colaboraci&oacute;n</td>
-                    <td class="val">{!! $casillaSoftware($software['colaboracion']) !!}</td>
+                    <td class="lbl">Excepciones</td>
+                    <td class="val">{!! $casillaSoftware($software['excepciones'] ?? '-') !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Escritorio Remoto</td>
                     <td class="val">{!! $casillaSoftware($software['escritorio_remoto']) !!}</td>
-                    <td class="lbl">Mensajer&iacute;a Instant&aacute;nea</td>
-                    <td class="val">{!! $casillaSoftware($software['mensajeria_instantanea']) !!}</td>
+                    <td class="lbl">Acceso a DAZA</td>
+                    <td class="val">{!! $casillaSoftware($software['daza'] ?? '-') !!}</td>
                 </tr>
                 <tr>
                     <td class="lbl">Unidad Compartida</td>

@@ -2,38 +2,41 @@
 
 namespace App\Filament\Resources\AccesoSharepoints\Schemas;
 
-use App\Models\AccesoSharepoint;
+use App\Filament\Resources\Concerns\HasRegistroInfolistSection;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class AccesoSharepointInfolist
 {
+    use HasRegistroInfolistSection;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
-                TextEntry::make('usuario.name')
-                    ->label('Usuario')
-                    ->placeholder('—'),
-                TextEntry::make('sitio.nombre_sitio')
-                    ->label('Sitio SharePoint')
-                    ->placeholder('—'),
-                IconEntry::make('estado')
-                    ->label('Activo')
-                    ->boolean(),
-                TextEntry::make('created_at')
-                    ->label('Creado')
-                    ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
-                TextEntry::make('updated_at')
-                    ->label('Actualizado')
-                    ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
-                TextEntry::make('deleted_at')
-                    ->label('Eliminado')
-                    ->dateTime('d/m/Y H:i')
-                    ->visible(fn (AccesoSharepoint $record): bool => $record->trashed()),
+                Section::make('Acceso SharePoint')
+                    ->description('Permiso del colaborador sobre un sitio SharePoint.')
+                    ->icon(Heroicon::OutlinedGlobeAlt)
+                    ->columnSpanFull()
+                    ->columns(['default' => 1, 'md' => 2])
+                    ->schema([
+                        TextEntry::make('usuario.name')
+                            ->label('Usuario')
+                            ->icon(Heroicon::OutlinedUser)
+                            ->placeholder('—'),
+                        TextEntry::make('sitio.nombre_sitio')
+                            ->label('Sitio SharePoint')
+                            ->icon(Heroicon::OutlinedBuildingLibrary)
+                            ->placeholder('—'),
+                        IconEntry::make('estado')
+                            ->label('Activo')
+                            ->boolean(),
+                    ]),
+                static::registroInfolistSection(),
             ]);
     }
 }

@@ -2,29 +2,44 @@
 
 namespace App\Filament\Resources\CargadorCels\Schemas;
 
-use App\Models\CargadorCel;
+use App\Filament\Resources\Concerns\HasRegistroInfolistSection;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Icons\Heroicon;
 
 class CargadorCelInfolist
 {
+    use HasRegistroInfolistSection;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
-                TextEntry::make('serial')->label('Serial'),
-                TextEntry::make('modelo')->label('Modelo')->placeholder('—'),
-                TextEntry::make('observacion')
-                    ->label('Observación')
-                    ->html()
-                    ->placeholder('—')
-                    ->columnSpanFull(),
-                TextEntry::make('created_at')->label('Creado')->dateTime('d/m/Y H:i')->placeholder('—'),
-                TextEntry::make('updated_at')->label('Actualizado')->dateTime('d/m/Y H:i')->placeholder('—'),
-                TextEntry::make('deleted_at')
-                    ->label('Eliminado')
-                    ->dateTime('d/m/Y H:i')
-                    ->visible(fn (CargadorCel $record): bool => $record->trashed()),
+                Section::make('Datos del cargador de celular')
+                    ->description('Cargador asociado a dispositivos móviles.')
+                    ->icon(Heroicon::OutlinedBolt)
+                    ->columnSpanFull()
+                    ->columns(['default' => 1, 'md' => 2])
+                    ->schema([
+                        TextEntry::make('serial')
+                            ->label('Serial')
+                            ->icon(Heroicon::OutlinedHashtag)
+                            ->weight(FontWeight::Bold)
+                            ->copyable()
+                            ->placeholder('—'),
+                        TextEntry::make('modelo')
+                            ->label('Modelo')
+                            ->placeholder('—'),
+                        TextEntry::make('observacion')
+                            ->label('Observación')
+                            ->html()
+                            ->placeholder('Sin observación')
+                            ->columnSpanFull(),
+                    ]),
+                static::registroInfolistSection(),
             ]);
     }
 }

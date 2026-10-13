@@ -2,42 +2,48 @@
 
 namespace App\Filament\Resources\LicenciasUsuarios\Schemas;
 
-use App\Models\LicenciaUsuario;
+use App\Filament\Resources\Concerns\HasRegistroInfolistSection;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class LicenciaUsuarioInfolist
 {
+    use HasRegistroInfolistSection;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
-                TextEntry::make('usuario.name')
-                    ->label('Usuario')
-                    ->placeholder('—'),
-                TextEntry::make('licencia.nombre_licencia')
-                    ->label('Licencia')
-                    ->placeholder('—'),
-                TextEntry::make('fecha')
-                    ->label('Fecha de solicitud')
-                    ->date('d/m/Y')
-                    ->placeholder('—'),
-                IconEntry::make('estado')
-                    ->label('Activa')
-                    ->boolean(),
-                TextEntry::make('created_at')
-                    ->label('Creado')
-                    ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
-                TextEntry::make('updated_at')
-                    ->label('Actualizado')
-                    ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
-                TextEntry::make('deleted_at')
-                    ->label('Eliminado')
-                    ->dateTime('d/m/Y H:i')
-                    ->visible(fn (LicenciaUsuario $record): bool => $record->trashed()),
+                Section::make('Asignación de licencia')
+                    ->description('Licencia otorgada a un colaborador.')
+                    ->icon(Heroicon::OutlinedKey)
+                    ->columnSpanFull()
+                    ->columns(['default' => 1, 'md' => 2])
+                    ->schema([
+                        TextEntry::make('usuario.name')
+                            ->label('Usuario')
+                            ->icon(Heroicon::OutlinedUser)
+                            ->placeholder('—'),
+                        TextEntry::make('licencia.nombre_licencia')
+                            ->label('Licencia')
+                            ->icon(Heroicon::OutlinedKey)
+                            ->badge()
+                            ->color('info')
+                            ->placeholder('—'),
+                        TextEntry::make('fecha')
+                            ->label('Fecha de asignación')
+                            ->icon(Heroicon::OutlinedCalendarDays)
+                            ->date('d/m/Y')
+                            ->placeholder('—'),
+                        IconEntry::make('estado')
+                            ->label('Activa')
+                            ->boolean(),
+                    ]),
+                static::registroInfolistSection(),
             ]);
     }
 }

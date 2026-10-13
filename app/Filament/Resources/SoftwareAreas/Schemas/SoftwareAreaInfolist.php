@@ -2,31 +2,41 @@
 
 namespace App\Filament\Resources\SoftwareAreas\Schemas;
 
+use App\Filament\Resources\Concerns\HasRegistroInfolistSection;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class SoftwareAreaInfolist
 {
+    use HasRegistroInfolistSection;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
-                TextEntry::make('software.nombre_software')
-                    ->label('Software')
-                    ->placeholder('—'),
-                TextEntry::make('area.area')
-                    ->label('Area')
-                    ->badge()
-                    ->color('info')
-                    ->placeholder('—'),
-                TextEntry::make('created_at')
-                    ->label('Creado')
-                    ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
-                TextEntry::make('updated_at')
-                    ->label('Actualizado')
-                    ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
+                Section::make('Software autorizado por área')
+                    ->description('Relación entre un software y el área que lo autoriza.')
+                    ->icon(Heroicon::OutlinedBuildingOffice2)
+                    ->columnSpanFull()
+                    ->columns(['default' => 1, 'md' => 2])
+                    ->schema([
+                        TextEntry::make('software.nombre_software')
+                            ->label('Software')
+                            ->icon(Heroicon::OutlinedCube)
+                            ->badge()
+                            ->color('info')
+                            ->placeholder('—'),
+                        TextEntry::make('area.area')
+                            ->label('Área')
+                            ->icon(Heroicon::OutlinedBuildingOffice)
+                            ->badge()
+                            ->color('gray')
+                            ->placeholder('—'),
+                    ]),
+                static::registroInfolistSection(withDeletedAt: false),
             ]);
     }
 }

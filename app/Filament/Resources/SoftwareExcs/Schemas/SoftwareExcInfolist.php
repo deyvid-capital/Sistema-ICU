@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SoftwareExcs\Schemas;
 
 use App\Enums\EstadoAprobacionExcepcion;
+use App\Filament\Resources\Concerns\HasRegistroInfolistSection;
 use App\Models\SoftwareExc;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -13,6 +14,8 @@ use Filament\Support\Icons\Heroicon;
 
 class SoftwareExcInfolist
 {
+    use HasRegistroInfolistSection;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -112,25 +115,7 @@ class SoftwareExcInfolist
                             ->columnSpanFull()
                             ->visible(fn (SoftwareExc $record): bool => filled($record->comentario_decision)),
                     ]),
-                Section::make('Registro')
-                    ->icon(Heroicon::OutlinedClock)
-                    ->columnSpanFull()
-                    ->columns(['default' => 1, 'md' => 3])
-                    ->collapsed()
-                    ->schema([
-                        TextEntry::make('created_at')
-                            ->label('Creado')
-                            ->dateTime('d/m/Y H:i')
-                            ->placeholder('—'),
-                        TextEntry::make('updated_at')
-                            ->label('Actualizado')
-                            ->dateTime('d/m/Y H:i')
-                            ->placeholder('—'),
-                        TextEntry::make('deleted_at')
-                            ->label('Eliminado')
-                            ->dateTime('d/m/Y H:i')
-                            ->visible(fn (SoftwareExc $record): bool => $record->trashed()),
-                    ]),
+                static::registroInfolistSection(),
             ]);
     }
 

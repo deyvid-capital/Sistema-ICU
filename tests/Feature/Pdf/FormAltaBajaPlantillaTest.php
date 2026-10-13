@@ -38,9 +38,9 @@ class FormAltaBajaPlantillaTest extends TestCase
                     'sitio_sharepoint' => 'Intranet',
                     'antivirus' => '-',
                     'internet' => 'Tecnología (T)',
-                    'colaboracion' => '-',
+                    'excepciones' => '-',
                     'escritorio_remoto' => '-',
-                    'mensajeria_instantanea' => '-',
+                    'daza' => '-',
                     'unidad_compartida' => '-',
                     'pdf' => '-',
                     'vpn' => '-',
@@ -78,6 +78,11 @@ class FormAltaBajaPlantillaTest extends TestCase
         $html = $this->render('Alta');
 
         $this->assertStringContainsString('<div class="celda celda-lista">Bflow - Usuario</div>', $html);
+        $this->assertStringContainsString('Excepciones', $html);
+        $this->assertStringContainsString('Acceso a DAZA', $html);
+        $this->assertStringNotContainsString('FortiToken', $html);
+        $this->assertStringNotContainsString('Complemento de asignaciones', $html);
+        $this->assertStringNotContainsString('Colaboraci', $html);
         $this->assertStringNotContainsString('<div class="sin-acceso', $html);
         $this->assertStringNotContainsString('celda-lista celda-revocada', $html);
     }

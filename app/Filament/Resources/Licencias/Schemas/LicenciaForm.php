@@ -12,6 +12,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use InvalidArgumentException;
 
 class LicenciaForm
@@ -21,6 +22,8 @@ class LicenciaForm
         return $schema
             ->components([
                 Section::make('Datos de la licencia')
+                    ->icon(Heroicon::OutlinedBuildingOffice)
+                    ->columnSpanFull()
                     ->schema([
                         Grid::make(2)
                             ->schema([

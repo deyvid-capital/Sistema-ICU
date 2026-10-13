@@ -2,53 +2,55 @@
 
 namespace App\Filament\Resources\AzureAds\Schemas;
 
-use App\Models\AzureAd;
+use App\Filament\Resources\Concerns\HasRegistroInfolistSection;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class AzureAdInfolist
 {
+    use HasRegistroInfolistSection;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
-                TextEntry::make('usuario.name')
-                    ->label('Usuario')
-                    ->placeholder('—'),
-                TextEntry::make('iniciales')
-                    ->label('Iniciales')
-                    ->badge()
-                    ->color('info')
-                    ->placeholder('—'),
-                TextEntry::make('sincronizacion')
-                    ->label('Sincronización')
-                    ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'Nube' => 'success',
-                        'Local / Nube' => 'warning',
-                        'Local / No sincronizado' => 'danger',
-                        default => 'gray',
-                    })
-                    ->placeholder('—'),
-                IconEntry::make('mfa')
-                    ->label('MFA')
-                    ->boolean(),
-                IconEntry::make('estado')
-                    ->label('Activo')
-                    ->boolean(),
-                TextEntry::make('created_at')
-                    ->label('Creado')
-                    ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
-                TextEntry::make('updated_at')
-                    ->label('Actualizado')
-                    ->dateTime('d/m/Y H:i')
-                    ->placeholder('—'),
-                TextEntry::make('deleted_at')
-                    ->label('Eliminado')
-                    ->dateTime('d/m/Y H:i')
-                    ->visible(fn (AzureAd $record): bool => $record->trashed()),
+                Section::make('Azure AD')
+                    ->description('Estado de sincronización e identidad del colaborador en Azure AD.')
+                    ->icon(Heroicon::OutlinedCloud)
+                    ->columnSpanFull()
+                    ->columns(['default' => 1, 'md' => 2])
+                    ->schema([
+                        TextEntry::make('usuario.name')
+                            ->label('Usuario')
+                            ->icon(Heroicon::OutlinedUser)
+                            ->placeholder('—'),
+                        TextEntry::make('iniciales')
+                            ->label('Iniciales')
+                            ->badge()
+                            ->color('info')
+                            ->placeholder('—'),
+                        TextEntry::make('sincronizacion')
+                            ->label('Sincronización')
+                            ->badge()
+                            ->color(fn (?string $state): string => match ($state) {
+                                'Nube' => 'success',
+                                'Local / Nube' => 'warning',
+                                'Local / No sincronizado' => 'danger',
+                                default => 'gray',
+                            })
+                            ->placeholder('—'),
+                        IconEntry::make('mfa')
+                            ->label('MFA')
+                            ->boolean(),
+                        IconEntry::make('estado')
+                            ->label('Activo')
+                            ->boolean(),
+                    ]),
+                static::registroInfolistSection(),
             ]);
     }
 }
