@@ -100,6 +100,11 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn (): string => RoleResource::getUrl())
                     ->icon(Heroicon::OutlinedKey)
                     ->visible(fn (): bool => RoleResource::canViewAny()),
+                Action::make('registro_actividad')
+                    ->label('Registro de actividad')
+                    ->url(fn (): string => ActivitylogResource::getUrl())
+                    ->icon(Heroicon::OutlinedClipboardDocumentList)
+                    ->visible(fn (): bool => ActivitylogResource::canViewAny()),
             ])
 
             ->login(Login::class)
@@ -120,8 +125,6 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Equipos'),
-                NavigationGroup::make()
-                    ->label('Auditoría'),
             ])
             ->databaseNotifications()
             ->colors(fn (): array => app(TemaService::class)->coloresDelPanel())
@@ -173,10 +176,8 @@ class AdminPanelProvider extends PanelProvider
                     ->resource(ActivitylogResource::class)
                     ->label('Registro de actividad')
                     ->pluralLabel('Registros de actividad')
-                    ->navigationGroup('Auditoría')
+                    ->navigationItem(false)
                     ->navigationIcon('heroicon-o-clipboard-document-list')
-                    ->navigationSort(99)
-                    ->navigationCountBadge(true)
                     ->resourceActionLabel('Ver recurso')
                     ->isRestoreModelActionHidden(false)
                     ->dateFormat('d/m/Y')
