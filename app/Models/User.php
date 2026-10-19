@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Concerns\CascadesDependentSoftDeletes;
 use App\Models\Concerns\LogsIcuActivity;
+use App\Models\Concerns\MemoizesPermissionChecks;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use App\Support\Sessions\UserSessions;
 use Database\Factories\UserFactory;
@@ -37,10 +38,14 @@ class User extends Authenticatable implements FilamentUser
         HasRoles,
         HasUuids,
         LogsIcuActivity,
+        MemoizesPermissionChecks,
         Notifiable,
         PreventsForceDeleteWithDependents,
         SoftDeletes,
-        TwoFactorAuthenticatable;
+        TwoFactorAuthenticatable {
+            MemoizesPermissionChecks::hasPermissionTo insteadof HasRoles;
+            HasRoles::hasPermissionTo as protected spatieHasPermissionTo;
+        }
 
     public $incrementing = false;
 

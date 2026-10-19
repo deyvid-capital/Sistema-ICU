@@ -57,6 +57,8 @@ class UsersTable
 
     public static function configure(Table $table): Table
     {
+        $puedeGestionarSeguridad = (bool) auth()->user()?->can('manageSecurity', User::class);
+
         return $table
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['area', 'cargo', 'ultimoMovimiento']))
 
@@ -225,14 +227,14 @@ class UsersTable
                         ->color('info')
                         ->url(fn (User $record): string => UserResource::getUrl('seguridad', ['record' => $record]))
                         ->visible(fn (User $record): bool => ! $record->trashed()
-                            && (bool) auth()->user()?->can('manageSecurity', User::class)),
+                            && $puedeGestionarSeguridad),
                     Action::make('toggleAcceso')
                         ->label(fn (User $record): string => $record->acceso_habilitado ? 'Deshabilitar acceso' : 'Habilitar acceso')
                         ->icon(fn (User $record): Heroicon => $record->acceso_habilitado ? Heroicon::OutlinedLockClosed : Heroicon::OutlinedLockOpen)
                         ->color(fn (User $record): string => $record->acceso_habilitado ? 'danger' : 'success')
                         ->requiresConfirmation()
                         ->visible(fn (User $record): bool => ! $record->trashed()
-                            && (bool) auth()->user()?->can('manageSecurity', User::class)
+                            && $puedeGestionarSeguridad
                             && ! ProteccionSuperAdmin::esPropio($record))
                         ->action(function (User $record): void {
                             if (ProteccionSuperAdmin::esPropio($record)) {
@@ -259,7 +261,7 @@ class UsersTable
                         ->color('warning')
                         ->requiresConfirmation()
                         ->visible(fn (User $record): bool => $record->estaBloqueado()
-                            && (bool) auth()->user()?->can('manageSecurity', User::class))
+                            && $puedeGestionarSeguridad)
                         ->action(function (User $record): void {
                             $record->desbloquear();
 
@@ -290,7 +292,7 @@ class UsersTable
                         ->icon(Heroicon::OutlinedLockOpen)
                         ->color('success')
                         ->requiresConfirmation()
-                        ->visible(fn (): bool => (bool) auth()->user()?->can('manageSecurity', User::class))
+                        ->visible(fn (): bool => $puedeGestionarSeguridad)
                         ->action(function (Collection $records): void {
                             $records->each(fn (User $user): bool => $user->forceFill(['acceso_habilitado' => true])->save());
 
@@ -302,7 +304,7 @@ class UsersTable
                         ->icon(Heroicon::OutlinedLockClosed)
                         ->color('danger')
                         ->requiresConfirmation()
-                        ->visible(fn (): bool => (bool) auth()->user()?->can('manageSecurity', User::class))
+                        ->visible(fn (): bool => $puedeGestionarSeguridad)
                         ->action(function (Collection $records): void {
                             $records->each(function (User $user): void {
                                 $user->forceFill(['acceso_habilitado' => false])->save();
@@ -317,7 +319,7 @@ class UsersTable
                         ->icon(Heroicon::OutlinedArrowRightStartOnRectangle)
                         ->color('danger')
                         ->requiresConfirmation()
-                        ->visible(fn (): bool => (bool) auth()->user()?->can('manageSecurity', User::class))
+                        ->visible(fn (): bool => $puedeGestionarSeguridad)
                         ->action(function (Collection $records): void {
                             $records->each(fn (User $user): int => UserSessions::terminate($user));
 
