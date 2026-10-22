@@ -13,6 +13,8 @@ use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager as BaseActi
 
 class ActivitylogRelationManager extends BaseActivitylogRelationManager
 {
+    protected static string $relationship = 'activitiesAsSubject';
+
     public function form(Schema $schema): Schema
     {
         return ActivitylogResource::form($schema);

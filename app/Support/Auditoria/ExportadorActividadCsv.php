@@ -33,7 +33,7 @@ class ExportadorActividadCsv
      *
      * @var list<string>
      */
-    private const PROPIEDADES_PROPIAS = ['old', 'attributes', 'email', 'ip'];
+    private const PROPIEDADES_PROPIAS = ['email', 'ip'];
 
     /**
      * @return list<string>
@@ -85,6 +85,7 @@ class ExportadorActividadCsv
     public function fila(Activity $registro): array
     {
         $propiedades = $registro->properties?->all() ?? [];
+        $cambios = $registro->attribute_changes?->all() ?? [];
 
         return [
             $registro->created_at?->timezone(config('app.display_timezone'))->format('d/m/Y H:i:s') ?? '',
@@ -93,7 +94,7 @@ class ExportadorActividadCsv
             $this->actorOrigen($registro, $propiedades),
             $this->sujeto($registro),
             (string) $registro->description,
-            $this->detalleConsolidado($propiedades),
+            $this->detalleConsolidado($cambios, $propiedades),
         ];
     }
 
@@ -143,12 +144,13 @@ class ExportadorActividadCsv
      * Cambios de campos y resto de propiedades en una sola celda, cada bloque
      * bajo su propio encabezado y cada dato en su propia línea.
      *
+     * @param  array{old?: mixed, attributes?: mixed}  $cambios
      * @param  array<string, mixed>  $propiedades
      */
-    private function detalleConsolidado(array $propiedades): string
+    private function detalleConsolidado(array $cambios, array $propiedades): string
     {
         $bloques = array_filter([
-            'Cambios' => $this->cambios($propiedades),
+            'Cambios' => $this->cambios($cambios),
             'Detalle' => $this->detalle($propiedades),
         ], fn (string $contenido): bool => $contenido !== '');
 
@@ -165,17 +167,17 @@ class ExportadorActividadCsv
      * Diferencia legible: «campo: antes → después», con los nombres de campo en
      * español.
      *
-     * @param  array<string, mixed>  $propiedades
+     * @param  array{old?: mixed, attributes?: mixed}  $cambios
      */
-    private function cambios(array $propiedades): string
+    private function cambios(array $cambios): string
     {
-        $nuevos = Arr::wrap($propiedades['attributes'] ?? []);
+        $nuevos = Arr::wrap($cambios['attributes'] ?? []);
 
         if ($nuevos === []) {
             return '';
         }
 
-        $anteriores = Arr::wrap($propiedades['old'] ?? []);
+        $anteriores = Arr::wrap($cambios['old'] ?? []);
 
         $lineas = [];
 

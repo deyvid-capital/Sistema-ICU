@@ -42,12 +42,13 @@ class UsuarioFortitokenEncryptedTest extends TestCase
         $rows = DB::table('activity_log')
             ->where('subject_type', UsuarioFortitoken::class)
             ->where('subject_id', $token->id)
-            ->pluck('properties');
+            ->get(['properties', 'attribute_changes']);
 
         $this->assertNotEmpty($rows);
 
-        foreach ($rows as $json) {
-            $this->assertStringNotContainsString('FTK-SECRET', (string) $json);
+        foreach ($rows as $row) {
+            $this->assertStringNotContainsString('FTK-SECRET', (string) $row->properties);
+            $this->assertStringNotContainsString('FTK-SECRET', (string) $row->attribute_changes);
         }
     }
 }

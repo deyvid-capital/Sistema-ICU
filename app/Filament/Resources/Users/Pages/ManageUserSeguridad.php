@@ -276,7 +276,7 @@ class ManageUserSeguridad extends EditRecord
                     ->required(fn (Get $get): bool => (bool) $get('fortitoken_estado')),
                 Toggle::make('fortitoken_estado')
                     ->label('Activo')
-                    ->default(true)
+                    ->default(false)
                     ->dehydrated(false)
                     ->live()
                     ->helperText('Si se desactiva, el serial se conserva pero el token queda marcado como inactivo.'),

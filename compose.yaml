@@ -6,7 +6,9 @@ services:
             args:
                 WWWGROUP: '${WWWGROUP}'
         image: 'sail-8.5/app'
-        entrypoint: ["/bin/sh", "-c", "chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache && exec /usr/local/bin/start-container"]
+        # Docker crea /home/sail/.cache como root al montar sail-puppeteer; sin el
+        # chown, corepack (pnpm) y Composer no pueden escribir su caché.
+        entrypoint: ["/bin/sh", "-c", "chown sail:sail /home/sail/.cache && chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache && exec /usr/local/bin/start-container"]
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:

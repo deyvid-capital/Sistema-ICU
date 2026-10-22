@@ -16,21 +16,15 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::connection(config('activitylog.database_connection'))->table(
-            config('activitylog.table_name'),
-            function (Blueprint $table): void {
-                $table->index(['log_name', 'created_at'], self::INDICE);
-            },
-        );
+        Schema::table('activity_log', function (Blueprint $table): void {
+            $table->index(['log_name', 'created_at'], self::INDICE);
+        });
     }
 
     public function down(): void
     {
-        Schema::connection(config('activitylog.database_connection'))->table(
-            config('activitylog.table_name'),
-            function (Blueprint $table): void {
-                $table->dropIndex(self::INDICE);
-            },
-        );
+        Schema::table('activity_log', function (Blueprint $table): void {
+            $table->dropIndex(self::INDICE);
+        });
     }
 };

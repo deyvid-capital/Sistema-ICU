@@ -24,7 +24,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
 use Livewire\Livewire;
-use Spatie\Activitylog\Traits\CausesActivity;
+use Spatie\Activitylog\Models\Concerns\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['id', 'name', 'nombres', 'apellidos', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at', 'acceso_habilitado', 'acceso_expira_at', 'requiere_2fa'])]

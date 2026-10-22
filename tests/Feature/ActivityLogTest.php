@@ -66,8 +66,8 @@ class ActivityLogTest extends TestCase
 
         $this->assertNotNull($actividad);
         $this->assertSame($admin->getKey(), $actividad->causer_id);
-        $this->assertSame('USB-C 20W', $actividad->properties['old']['modelo'] ?? null);
-        $this->assertSame('USB-C 30W', $actividad->properties['attributes']['modelo'] ?? null);
+        $this->assertSame('USB-C 20W', $actividad->attribute_changes['old']['modelo'] ?? null);
+        $this->assertSame('USB-C 30W', $actividad->attribute_changes['attributes']['modelo'] ?? null);
     }
 
     public function test_no_registra_el_password_del_usuario(): void
@@ -86,8 +86,8 @@ class ActivityLogTest extends TestCase
         $this->assertNotEmpty($registros);
 
         foreach ($registros as $registro) {
-            $this->assertArrayNotHasKey('password', $registro->properties['attributes'] ?? []);
-            $this->assertArrayNotHasKey('password', $registro->properties['old'] ?? []);
+            $this->assertArrayNotHasKey('password', $registro->attribute_changes['attributes'] ?? []);
+            $this->assertArrayNotHasKey('password', $registro->attribute_changes['old'] ?? []);
         }
     }
 

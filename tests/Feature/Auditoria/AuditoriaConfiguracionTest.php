@@ -69,9 +69,9 @@ class AuditoriaConfiguracionTest extends TestCase
         $registro = $registros->first();
 
         $this->assertSame('updated', $registro->event);
-        $this->assertSame('#112233', $registro->properties['attributes']['color_primario']);
+        $this->assertSame('#112233', $registro->attribute_changes['attributes']['color_primario']);
         $this->assertSame((string) $this->usuario->id, (string) $registro->causer_id);
-        $this->assertArrayNotHasKey('updated_at', $registro->properties['attributes']);
+        $this->assertArrayNotHasKey('updated_at', $registro->attribute_changes['attributes']);
     }
 
     public function test_guardar_sin_cambios_no_registra_nada(): void
@@ -98,7 +98,7 @@ class AuditoriaConfiguracionTest extends TestCase
 
         $this->assertCount(2, $registros);
         $this->assertSame('restored', $registros->last()->event);
-        $this->assertSame('#112233', $registros->last()->properties['old']['color_primario']);
+        $this->assertSame('#112233', $registros->last()->attribute_changes['old']['color_primario']);
     }
 
     public function test_visitar_marca_no_genera_ningun_registro(): void
@@ -129,7 +129,7 @@ class AuditoriaConfiguracionTest extends TestCase
 
         $this->assertArrayHasKey('logo_claro', $propiedades['archivos']['subidos']);
         $this->assertArrayNotHasKey('eliminados', $propiedades['archivos']);
-        $this->assertSame('3rem', $propiedades['attributes']['alto_logo']);
+        $this->assertSame('3rem', $registros->first()->attribute_changes['attributes']['alto_logo']);
     }
 
     public function test_quitar_logo_registra_el_archivo_eliminado(): void
@@ -172,7 +172,7 @@ class AuditoriaConfiguracionTest extends TestCase
         $registros = $this->registros(SeccionConfiguracion::Archivos);
 
         $this->assertCount(1, $registros);
-        $this->assertSame('icu-nuevo', $registros->first()->properties['attributes']['prefijo']);
+        $this->assertSame('icu-nuevo', $registros->first()->attribute_changes['attributes']['prefijo']);
     }
 
     public function test_guardar_correo_registra_una_sola_fila_sin_exponer_la_contrasena(): void
@@ -196,13 +196,14 @@ class AuditoriaConfiguracionTest extends TestCase
         $this->assertCount(1, $registros);
 
         $propiedades = $registros->first()->properties;
-        $serializado = json_encode($propiedades->all());
+        $cambios = $registros->first()->attribute_changes;
+        $serializado = json_encode([$propiedades->all(), $cambios->all()]);
 
         $this->assertTrue($propiedades['password_actualizada']);
-        $this->assertArrayNotHasKey('password', $propiedades['attributes']);
-        $this->assertArrayNotHasKey('password', $propiedades['old']);
+        $this->assertArrayNotHasKey('password', $cambios['attributes']);
+        $this->assertArrayNotHasKey('password', $cambios['old']);
         $this->assertStringNotContainsString('SuperSecreta123', $serializado);
-        $this->assertSame('smtp.example.com', $propiedades['attributes']['host']);
+        $this->assertSame('smtp.example.com', $cambios['attributes']['host']);
     }
 
     public function test_las_cuatro_paginas_usan_el_dominio_de_configuracion(): void

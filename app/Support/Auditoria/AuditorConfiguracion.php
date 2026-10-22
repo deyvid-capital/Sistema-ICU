@@ -13,9 +13,9 @@ use Illuminate\Support\Arr;
  * Escribe los cambios del panel de Configuración en `activity_log` bajo el
  * dominio "configuracion".
  *
- * El diff usa las claves `old` y `attributes` a propósito: son las mismas que
- * escribe el trait LogsIcuActivity, así la vista de detalle del plugin muestra
- * el cambio campo a campo sin código adicional.
+ * El diff va en `attribute_changes` con las claves `old` y `attributes`, igual
+ * que lo escribe el trait LogsIcuActivity, así la vista de detalle del plugin
+ * muestra el cambio campo a campo sin código adicional.
  */
 class AuditorConfiguracion
 {
@@ -101,7 +101,7 @@ class AuditorConfiguracion
 
         $cambios = Arr::except($cambios ?? $this->cambiosDe($configuracion), $ignorar);
 
-        // Equivalente a dontSubmitEmptyLogs(): guardar sin tocar nada no deja rastro.
+        // Equivalente a dontLogEmptyChanges(): guardar sin tocar nada no deja rastro.
         if ($cambios === [] && $extra === []) {
             return;
         }
@@ -112,10 +112,12 @@ class AuditorConfiguracion
             ->event($evento)
             ->performedOn($configuracion)
             ->causedBy($this->usuarioAutenticado())
-            ->withProperties(array_merge($this->contextoPeticion(), [
-                'seccion' => $seccion->value,
+            ->withChanges([
                 'old' => $anteriores,
                 'attributes' => $cambios,
+            ])
+            ->withProperties(array_merge($this->contextoPeticion(), [
+                'seccion' => $seccion->value,
             ], $extra))
             ->log($descripcion);
     }
