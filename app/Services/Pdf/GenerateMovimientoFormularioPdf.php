@@ -33,7 +33,7 @@ class GenerateMovimientoFormularioPdf
         $viewData = $this->dataMapper->for($movimiento, $tipo);
         $binary = $this->pdfFactory->fromView($tipo->view(), $viewData);
 
-        $path = $tipo->pdfRelativePath($movimiento->id);
+        $path = $tipo->pdfRelativePath($movimiento);
         $fecha = $movimiento->fecha;
 
         return DB::transaction(function () use ($movimiento, $tipo, $binary, $path, $fecha): PdfMovimiento {

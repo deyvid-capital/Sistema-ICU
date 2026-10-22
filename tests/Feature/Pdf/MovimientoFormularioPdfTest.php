@@ -207,9 +207,31 @@ class MovimientoFormularioPdfTest extends TestCase
 
         $this->assertInstanceOf(PdfMovimiento::class, $pdf);
         $this->assertSame(MovimientoFormularioPdfTipo::AltaBaja->nombreOficial(), $pdf->nombre);
-        $this->assertSame('pdf-movimientos/FU-'.$movimiento->id.'.pdf', $pdf->url);
+        $this->assertSame('pdf-movimientos/FUA-Ana Pérez-18-04-2026.pdf', $pdf->url);
         $this->assertTrue($movimiento->fresh()->hasDocumentoOficial());
         Storage::disk('public')->assertExists($pdf->url);
+    }
+
+    public function test_baja_filename_uses_fub_prefix_with_first_name_and_first_surname(): void
+    {
+        $cargo = Cargo::factory()->create();
+        $usuario = User::factory()->create([
+            'id_cargo' => $cargo->id_cargo,
+            'nombres' => '  Cristian   Fernando ',
+            'apellidos' => 'Duran Gonzales',
+        ]);
+
+        $movimiento = Movimiento::query()->create([
+            'usuario_id' => $usuario->id,
+            'tipo' => 'Baja',
+            'fecha' => '2026-10-02',
+            'cargo_id' => $cargo->id_cargo,
+        ]);
+
+        $this->assertSame(
+            'pdf-movimientos/FUB-Cristian Duran-02-10-2026.pdf',
+            MovimientoFormularioPdfTipo::AltaBaja->pdfRelativePath($movimiento),
+        );
     }
 
     public function test_preview_route_renders_real_user_data(): void

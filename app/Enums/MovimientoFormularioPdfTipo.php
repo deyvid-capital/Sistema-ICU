@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+use App\Models\Movimiento;
+use Illuminate\Support\Str;
+
 enum MovimientoFormularioPdfTipo: string
 {
     case AltaBaja = 'alta_baja';
@@ -38,9 +41,12 @@ enum MovimientoFormularioPdfTipo: string
         return $this->nombreOficial();
     }
 
-    public function pdfFilenamePrefix(): string
+    /**
+     * FUA para movimientos de Alta y FUB para los de Baja.
+     */
+    public function pdfFilenamePrefix(Movimiento $movimiento): string
     {
-        return 'FU-';
+        return $movimiento->tipo === 'Baja' ? 'FUB' : 'FUA';
     }
 
     public function storageDirectory(): string
@@ -48,8 +54,33 @@ enum MovimientoFormularioPdfTipo: string
         return 'pdf-movimientos';
     }
 
-    public function pdfRelativePath(string|int $movimientoId): string
+    /**
+     * Nombre del archivo con el formato «FUA-Nombre Apellido-dd-mm-aaaa.pdf».
+     */
+    public function pdfFilename(Movimiento $movimiento): string
     {
-        return $this->storageDirectory().'/'.$this->pdfFilenamePrefix().$movimientoId.'.pdf';
+        $usuario = $movimiento->usuario;
+
+        $nombreCompleto = trim(
+            Str::before(Str::squish((string) $usuario?->nombres), ' ')
+            .' '.
+            Str::before(Str::squish((string) $usuario?->apellidos), ' ')
+        );
+
+        $partes = array_filter(
+            [
+                $this->pdfFilenamePrefix($movimiento),
+                str_replace(['/', '\\'], '', $nombreCompleto),
+                $movimiento->fecha?->format('d-m-Y'),
+            ],
+            fn (?string $parte): bool => filled($parte),
+        );
+
+        return implode('-', $partes).'.pdf';
+    }
+
+    public function pdfRelativePath(Movimiento $movimiento): string
+    {
+        return $this->storageDirectory().'/'.$this->pdfFilename($movimiento);
     }
 }

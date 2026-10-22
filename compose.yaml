@@ -8,7 +8,12 @@ services:
         image: 'sail-8.5/app'
         # Docker crea /home/sail/.cache como root al montar sail-puppeteer; sin el
         # chown, corepack (pnpm) y Composer no pueden escribir su caché.
-        entrypoint: ["/bin/sh", "-c", "chown sail:sail /home/sail/.cache && chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache && exec /usr/local/bin/start-container"]
+        # storage/ y bootstrap/cache/ se reasignan a sail en cada arranque porque cualquier
+        # `docker exec` como root deja carpetas root:root donde PHP (sail) no puede escribir.
+        # El setgid (2775) en storage/app/public hace que lo nuevo herede el grupo sail.
+        # Se usa $WWWUSER y no `sail` porque este script corre antes del `usermod -u` de
+        # start-container: en ese momento `sail` aún tiene el UID 1337 de la imagen.
+        entrypoint: ["/bin/sh", "-c", "chown $$WWWUSER:sail /home/sail/.cache && mkdir -p /var/www/html/storage/app/public && chown -R $$WWWUSER:sail /var/www/html/storage /var/www/html/bootstrap/cache && chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache && find /var/www/html/storage/app/public -type d -exec chmod 2775 {} + && exec /usr/local/bin/start-container"]
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -34,7 +39,9 @@ services:
         # en storage/app/private/filament_exports con permisos 0700 del dueño del proceso.
         # Si el worker es root, el PHP-FPM (sail) no puede leer el .xlsx y la descarga
         # responde 404. HOME=/home/sail permite a Browsershot localizar Chrome.
-        entrypoint: ["/usr/local/bin/start-container"]
+        # Antes de arrancar se corrigen dueño y permisos de storage/ (ver laravel.test);
+        # el "--" ocupa $0 para que `command` llegue íntegro a start-container vía "$@".
+        entrypoint: ["/bin/sh", "-c", "mkdir -p /var/www/html/storage/app/public && chown -R $$WWWUSER:sail /var/www/html/storage /var/www/html/bootstrap/cache && chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache && find /var/www/html/storage/app/public -type d -exec chmod 2775 {} + && exec /usr/local/bin/start-container \"$$@\"", "--"]
         command:
             - php
             - /var/www/html/artisan
