@@ -45,6 +45,15 @@ class SolicitudFirmaPolicy
     }
 
     /**
+     * Ubicar los recuadros y enviar: solo borradores, por su creador o un admin.
+     */
+    public function prepararEnvio(AuthUser $authUser, SolicitudFirma $solicitudFirma): bool
+    {
+        return $solicitudFirma->estado === EstadoSolicitudFirma::Borrador
+            && (($authUser instanceof User && $solicitudFirma->esCreadaPor($authUser)) || $authUser->can('Update:SolicitudFirma'));
+    }
+
+    /**
      * Solo se eliminan borradores (nunca enviados), por su creador o un admin.
      */
     public function delete(AuthUser $authUser, SolicitudFirma $solicitudFirma): bool

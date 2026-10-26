@@ -117,6 +117,34 @@ class FirmaDigitalException extends Exception
         return new self("No tienen una firma digital activa y vigente: {$nombres}.");
     }
 
+    public static function solicitudNoEsBorrador(): self
+    {
+        return new self('Este envío ya fue enviado: no se pueden cambiar sus documentos ni sus firmas.');
+    }
+
+    public static function posicionInvalida(): self
+    {
+        return new self('Las posiciones de firma no son válidas. Recarga la página e inténtalo de nuevo.');
+    }
+
+    public static function posicionFueraDePagina(string $firmante, string $documento): self
+    {
+        return new self("El recuadro de {$firmante} en \"{$documento}\" sale de la página.");
+    }
+
+    public static function posicionesSuperpuestas(string $documento, int $pagina): self
+    {
+        return new self("Hay recuadros de firma superpuestos en \"{$documento}\" (página {$pagina}).");
+    }
+
+    /**
+     * @param  list<string>  $faltantes
+     */
+    public static function posicionesIncompletas(array $faltantes): self
+    {
+        return new self('Falta ubicar la firma de: '.implode('; ', $faltantes).'.');
+    }
+
     public static function firmadorNoDisponible(): self
     {
         return new self('El servicio de firma no está disponible. Intenta nuevamente en unos minutos.');

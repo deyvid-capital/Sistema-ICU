@@ -11,7 +11,8 @@ Este documento describe **lo que ya está construido**:
 | 1. Motor de firma | ✅ | Contenedor `firmador` (Python + pyHanko) y cliente Laravel |
 | 2. Certificados y contraseña única | ✅ | Carga de `.p12` por el admin, activación por el titular, firma con la contraseña del sistema, suspensión al restablecer la contraseña |
 | 3. Preparar envíos | ✅ | Envíos a firmar en borrador: documentos (del sistema o subidos), firmantes, orden opcional, plazo y recordatorio |
-| 4–8. Canvas, firma, recordatorios, integración | ⏳ | Ver el plan |
+| 4. Canvas de posiciones y envío | ✅ | Se ubican los recuadros sobre cada PDF y se envía a los firmantes |
+| 5–8. Firma, recordatorios, integración | ⏳ | Ver el plan |
 
 > **Regla de oro:** la firma nunca es automática. El titular firma escribiendo **su contraseña
 > del sistema** (la misma del login). Ninguna contraseña se guarda en texto plano.
@@ -114,7 +115,24 @@ eliminan.
 Los PDF del envío se sirven por `firma.documentos.ver` / `firma.documentos.descargar`, que verifican
 que el usuario pueda ver el envío.
 
-> Ubicar los recuadros de firma (canvas) y enviar a los firmantes llega en la fase 4.
+**Ubicar firmas y enviar** (botón en el detalle de un borrador → `/admin/firmas/solicitudes/{id}/posiciones`):
+
+- A la izquierda, los firmantes (cada uno con un color) y los documentos (con `ubicados/total`).
+- Se elige un firmante y se hace **clic** en el PDF: aparece su recuadro de 200 × 95 pt centrado en el
+  clic y se pasa solo al siguiente firmante. El recuadro se **arrastra** para moverlo y no puede salir de
+  la página. La ✕ lo quita.
+- **Copiar posiciones a los demás documentos** (si hay varios) y **Usar posiciones de la última vez**
+  (si hay un envío anterior del mismo tipo de documento del sistema; asigna 1º con 1º, 2º con 2º…).
+- **Guardar posiciones** guarda aunque falten firmantes. **Enviar a firmar** exige todos los recuadros,
+  crea los campos vacíos en cada PDF (versión 0), pasa el envío a *en curso* y avisa por campana y correo
+  a todos los firmantes, o solo al primero si el envío exige orden. Desde ahí ya no se pueden cambiar
+  documentos ni posiciones.
+
+Técnica: el canvas es `resources/js/firma/canvas-firmas.js` (pdf.js + Alpine), cargado bajo demanda con
+`x-load` solo en esta pantalla. Las posiciones se guardan en puntos PDF (origen abajo-izquierda) y el
+servidor las vuelve a validar (`GuardarPosicionesFirma`).
+
+> En páginas rotadas el sello saldría girado; los PDF que genera el sistema no están rotados.
 
 ---
 
@@ -278,6 +296,10 @@ La fecha la pone el reloj del servidor (el sello de tiempo TSA quedó para despu
 | `app/Policies/SolicitudFirmaPolicy.php` | Quién ve, prepara y elimina envíos |
 | `app/Http/Controllers/Firma/DocumentoFirmaController.php` | Ver / descargar los PDF del envío |
 | `app/Rules/FirmanteDisponible.php` | Validación: firmante con firma activa y vigente |
+| `resources/js/firma/canvas-firmas.js` | Canvas (pdf.js + Alpine) |
+| `app/Filament/Resources/SolicitudesFirma/Pages/ConfigurarPosicionesFirma.php` + vista `configurar-posiciones.blade.php` | Pantalla del canvas |
+| `app/Services/Firma/GuardarPosicionesFirma.php`, `EnviarSolicitudFirma.php`, `PosicionesFirmaAnteriores.php` | Guardar, enviar y sugerir posiciones |
+| `app/Notifications/Firma/FirmaSolicitadaNotification.php` | Aviso al firmante (campana + correo, solo enlace, sin adjuntos) |
 
 ---
 
@@ -342,6 +364,7 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 4. Permisos: `vendor/bin/sail artisan db:seed --class=RolesPermissionsSeeder` (le da todo a
    `super_admin`) y asignar `*:CertificadoFirma`, `View:FirmaDigital` y `Create:SolicitudFirma`
    (quién prepara envíos) a otros roles si hace falta.
-5. Reiniciar el worker: `vendor/bin/sail artisan queue:restart`.
-6. **Respaldar `FIRMA_ENCRYPTION_KEY`** por separado de `storage/app/private`: sin ella no se
+5. Compilar el frontend (incluye el canvas): `vendor/bin/sail pnpm install && vendor/bin/sail pnpm run build`.
+6. Reiniciar el worker: `vendor/bin/sail artisan queue:restart`.
+7. **Respaldar `FIRMA_ENCRYPTION_KEY`** por separado de `storage/app/private`: sin ella no se
    pueden abrir los `.p12` y todos los usuarios tendrían que recibir el archivo de nuevo.

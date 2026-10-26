@@ -6,7 +6,13 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/css/filament/admin/theme.css'],
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+                'resources/css/filament/admin/theme.css',
+                // Se carga bajo demanda con x-load en el canvas de posiciones de firma.
+                'resources/js/firma/canvas-firmas.js',
+            ],
             refresh: true,
             fonts: [
                 bunny('Lato', {
@@ -17,6 +23,13 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        rolldownOptions: {
+            // En modo app Vite descarta los export de las entradas; x-load necesita el
+            // `export default` de resources/js/firma/canvas-firmas.js.
+            preserveEntrySignatures: 'exports-only',
+        },
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

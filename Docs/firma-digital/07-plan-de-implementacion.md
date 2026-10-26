@@ -57,14 +57,16 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 - [x] Regla `FirmanteDisponible`: solo usuarios con firma activa y vigente.
 - [x] **Pruebas:** `CrearSolicitudFirmaTest` (11) y `SolicitudFirmaResourceTest` (10).
 
-## Fase 4: Canvas de posiciones
+## Fase 4: Canvas de posiciones ✅
 
-- [ ] `pnpm add pdfjs-dist` + entrada Vite `resources/js/firma/canvas-firmas.js` (componente Alpine).
-- [ ] Página `ConfigurarPosicionesFirma`: pestañas por documento, recuadros arrastrables y "Copiar posiciones a los demás".
-- [ ] Conversión px ↔ puntos PDF (rotación y CropBox), validación de límites y superposición.
-- [ ] "Usar posiciones de la última vez" por tipo de documento.
-- [ ] "Enviar a firmar": `/pdf/preparar` por documento → versión 0 → notificaciones.
-- [ ] **Pruebas:** posiciones válidas o inválidas, que el envío prepare todos los documentos y notifique a todos (orden libre) o solo al primero (con orden). Revisión manual en el navegador.
+- [x] `pdfjs-dist` (pnpm) + entrada Vite `resources/js/firma/canvas-firmas.js` (componente Alpine cargado bajo demanda con `x-load`). En `vite.config.js` se agregó `preserveEntrySignatures: 'exports-only'`: sin eso Vite descarta el `export default` que necesita `x-load`.
+- [x] Página `ConfigurarPosicionesFirma` (`/admin/firmas/solicitudes/{id}/posiciones`): documentos y firmantes a la izquierda, PDF a la derecha; clic para ubicar, arrastrar para mover, quitar, zoom, "Copiar posiciones a los demás documentos" y "Usar posiciones de la última vez".
+- [x] Conversión píxeles ↔ puntos PDF con la matriz del viewport de pdf.js (los objetos de pdf.js quedan fuera del estado reactivo de Alpine, que los rompe).
+- [x] `GuardarPosicionesFirma`: valida en el servidor documento y firmante del envío, página existente, recuadro dentro de la página y sin superposiciones.
+- [x] `EnviarSolicitudFirma`: exige todas las posiciones, crea los campos vacíos en cada PDF (`/pdf/preparar`), guarda la versión 0, pasa el envío a *en curso* y notifica (`FirmaSolicitadaNotification`) a todos, o solo al primero si hay orden.
+- [x] `PosicionesFirmaAnteriores`: sugerencias por tipo de documento del sistema.
+- [x] **Pruebas:** `PosicionesYEnvioFirmaTest` (17). Además, prueba en Chrome headless con el módulo compilado: render del PDF, clic (coordenadas exactas), arrastre, límites de la página y copia entre documentos; y firma real con el `firmador` en la posición obtenida (el sello cae donde estaba el recuadro).
+- [ ] Pendiente conocido: en páginas **rotadas** el recuadro se ubica bien, pero el sello sale girado. Los PDF que genera el sistema no están rotados.
 
 ## Fase 5: Firma (Pantalla 3)
 

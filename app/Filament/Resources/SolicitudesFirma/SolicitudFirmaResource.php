@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SolicitudesFirma;
 
 use App\Filament\Clusters\Firmas\FirmasCluster;
+use App\Filament\Resources\SolicitudesFirma\Pages\ConfigurarPosicionesFirma;
 use App\Filament\Resources\SolicitudesFirma\Pages\CreateSolicitudFirma;
 use App\Filament\Resources\SolicitudesFirma\Pages\ListSolicitudesFirma;
 use App\Filament\Resources\SolicitudesFirma\Pages\ViewSolicitudFirma;
@@ -75,6 +76,7 @@ class SolicitudFirmaResource extends Resource
             'index' => ListSolicitudesFirma::route('/'),
             'create' => CreateSolicitudFirma::route('/crear'),
             'view' => ViewSolicitudFirma::route('/{record}'),
+            'posiciones' => ConfigurarPosicionesFirma::route('/{record}/posiciones'),
         ];
     }
 }
