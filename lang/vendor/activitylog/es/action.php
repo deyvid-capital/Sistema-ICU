@@ -26,5 +26,8 @@ return [
         'dos_factores_confirmado' => 'dos pasos confirmado',
         'dos_factores_codigo_incorrecto' => 'código de dos pasos incorrecto',
         'dos_factores_reseteado' => 'dos pasos reiniciado por un administrador',
+        'firma_digital_activada' => 'firma digital activada',
+        'firma_digital_contrasena_incorrecta' => 'contraseña del .p12 incorrecta',
+        'firma_digital_suspendida' => 'firma digital suspendida',
     ],
 ];

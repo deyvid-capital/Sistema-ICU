@@ -7,6 +7,7 @@ use App\Filament\Clusters\Asignacion\AsignacionCluster;
 use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Clusters\Configuracion\Pages\Archivos;
 use App\Filament\Clusters\Configuracion\Pages\Correo;
+use App\Filament\Clusters\Configuracion\Pages\FirmaDigital;
 use App\Filament\Clusters\Configuracion\Pages\Marca;
 use App\Filament\Clusters\Configuracion\Pages\TemaColores;
 use App\Filament\Clusters\Equipos\EquiposCluster;
@@ -19,7 +20,9 @@ use App\Filament\Pages\Auth\RequestPasswordReset;
 use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Auth\SetupTwoFactor;
 use App\Filament\Pages\Auth\TwoFactorChallenge;
+use App\Filament\Pages\MiFirmaDigital;
 use App\Filament\Resources\Activitylogs\ActivitylogResource;
+use App\Filament\Resources\CertificadosFirma\CertificadoFirmaResource;
 use App\Filament\Resources\Roles\RoleResource;
 use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
@@ -85,16 +88,24 @@ class AdminPanelProvider extends PanelProvider
                 Action::make('configuraciones')
                     ->label('Configuraciones')
                     ->url(function (): string {
-                        foreach ([TemaColores::class, Marca::class, Archivos::class, Correo::class] as $pagina) {
+                        foreach ([TemaColores::class, Marca::class, Archivos::class, Correo::class, FirmaDigital::class] as $pagina) {
                             if ($pagina::canAccess()) {
                                 return $pagina::getUrl();
                             }
                         }
 
-                        return TemaColores::getUrl();
+                        return CertificadoFirmaResource::canViewAny()
+                            ? CertificadoFirmaResource::getUrl()
+                            : TemaColores::getUrl();
                     })
                     ->icon(Heroicon::OutlinedCog6Tooth)
-                    ->visible(fn (): bool => TemaColores::canAccess() || Marca::canAccess() || Archivos::canAccess() || Correo::canAccess()),
+                    ->visible(fn (): bool => TemaColores::canAccess() || Marca::canAccess() || Archivos::canAccess() || Correo::canAccess()
+                        || FirmaDigital::canAccess() || CertificadoFirmaResource::canViewAny()),
+                Action::make('mi_firma_digital')
+                    ->label('Mi firma digital')
+                    ->url(fn (): string => MiFirmaDigital::getUrl())
+                    ->icon(Heroicon::OutlinedFingerPrint)
+                    ->visible(fn (): bool => MiFirmaDigital::tieneFirmaAsignada()),
                 Action::make('roles')
                     ->label('Roles y permisos')
                     ->url(fn (): string => RoleResource::getUrl())

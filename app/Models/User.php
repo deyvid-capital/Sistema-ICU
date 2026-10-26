@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\EstadoCertificadoFirma;
 use App\Models\Concerns\CascadesDependentSoftDeletes;
 use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\MemoizesPermissionChecks;
@@ -94,6 +95,7 @@ class User extends Authenticatable implements FilamentUser
         'asignacionesEquipos',
         'asignacionesCelulares',
         'firmantes',
+        'certificadosFirma',
     ];
 
     /**
@@ -343,6 +345,23 @@ class User extends Authenticatable implements FilamentUser
             'id',
             'id'
         )->withPivot(['fecha', 'estado'])->withTimestamps();
+    }
+
+    /**
+     * Firmas digitales (.p12) del usuario, incluido el historial de renovaciones.
+     */
+    public function certificadosFirma(): HasMany
+    {
+        return $this->hasMany(CertificadoFirma::class, 'usuario_id');
+    }
+
+    /**
+     * Firma digital con la que el usuario firma hoy (como máximo una).
+     */
+    public function certificadoFirmaActivo(): HasOne
+    {
+        return $this->hasOne(CertificadoFirma::class, 'usuario_id')
+            ->where('estado', EstadoCertificadoFirma::Activo);
     }
 
     /**

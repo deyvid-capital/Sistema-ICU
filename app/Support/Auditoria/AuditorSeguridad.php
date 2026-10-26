@@ -173,6 +173,30 @@ class AuditorSeguridad
         );
     }
 
+    public function firmaDigitalActivada(User $usuario): void
+    {
+        $this->registrar(EventoSeguridad::FirmaDigitalActivada, sujeto: $usuario);
+    }
+
+    public function firmaDigitalContrasenaIncorrecta(User $usuario): void
+    {
+        $this->registrar(EventoSeguridad::FirmaDigitalContrasenaIncorrecta, sujeto: $usuario);
+    }
+
+    /**
+     * El causante es quien cambió la contraseña (admin) o nadie (recuperación por
+     * correo o importación); el sujeto es el titular de la firma.
+     */
+    public function firmaDigitalSuspendida(User $usuario, string $motivo, ?User $actor = null): void
+    {
+        $this->registrar(
+            EventoSeguridad::FirmaDigitalSuspendida,
+            sujeto: $usuario,
+            causante: $actor ?? $usuario,
+            propiedades: ['motivo' => $motivo],
+        );
+    }
+
     private function usuarioAutenticado(): ?User
     {
         $usuario = auth()->user();

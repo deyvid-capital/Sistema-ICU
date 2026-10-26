@@ -30,6 +30,9 @@ enum EventoSeguridad: string implements HasColor, HasLabel
     case DosFactoresConfirmado = 'dos_factores_confirmado';
     case DosFactoresCodigoIncorrecto = 'dos_factores_codigo_incorrecto';
     case DosFactoresReseteado = 'dos_factores_reseteado';
+    case FirmaDigitalActivada = 'firma_digital_activada';
+    case FirmaDigitalContrasenaIncorrecta = 'firma_digital_contrasena_incorrecta';
+    case FirmaDigitalSuspendida = 'firma_digital_suspendida';
 
     public function getLabel(): string
     {
@@ -48,6 +51,9 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::DosFactoresConfirmado => 'Confirmó la verificación en dos pasos',
             self::DosFactoresCodigoIncorrecto => 'Código de dos pasos incorrecto',
             self::DosFactoresReseteado => 'Verificación en dos pasos reiniciada por un administrador',
+            self::FirmaDigitalActivada => 'Activó su firma digital',
+            self::FirmaDigitalContrasenaIncorrecta => 'Contraseña del .p12 incorrecta',
+            self::FirmaDigitalSuspendida => 'Firma digital suspendida por cambio de contraseña',
         };
     }
 
@@ -71,6 +77,9 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::DosFactoresConfirmado => Heroicon::OutlinedShieldCheck,
             self::DosFactoresCodigoIncorrecto => Heroicon::OutlinedShieldExclamation,
             self::DosFactoresReseteado => Heroicon::OutlinedArrowPath,
+            self::FirmaDigitalActivada => Heroicon::OutlinedFingerPrint,
+            self::FirmaDigitalContrasenaIncorrecta => Heroicon::OutlinedExclamationTriangle,
+            self::FirmaDigitalSuspendida => Heroicon::OutlinedPauseCircle,
         };
     }
 
@@ -81,18 +90,21 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::CierreSesion,
             self::OtpSolicitado,
             self::PasswordRestablecida,
-            self::DosFactoresConfirmado => ResultadoSeguridad::Exito,
+            self::DosFactoresConfirmado,
+            self::FirmaDigitalActivada => ResultadoSeguridad::Exito,
 
             self::PasswordIncorrecta,
             self::CorreoDesconocido,
             self::AccesoDenegado,
             self::OtpIncorrecto,
-            self::DosFactoresCodigoIncorrecto => ResultadoSeguridad::Fallo,
+            self::DosFactoresCodigoIncorrecto,
+            self::FirmaDigitalContrasenaIncorrecta => ResultadoSeguridad::Fallo,
 
             self::IntentoConCuentaBloqueada,
             self::CuentaBloqueada,
             self::OtpBloqueado,
-            self::DosFactoresReseteado => ResultadoSeguridad::Bloqueo,
+            self::DosFactoresReseteado,
+            self::FirmaDigitalSuspendida => ResultadoSeguridad::Bloqueo,
         };
     }
 

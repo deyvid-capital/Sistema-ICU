@@ -14,6 +14,7 @@ enum SeccionConfiguracion: string implements HasLabel
     case Marca = 'marca';
     case Archivos = 'archivos';
     case Correo = 'correo';
+    case FirmaDigital = 'firma_digital';
 
     public function getLabel(): string
     {
@@ -22,6 +23,7 @@ enum SeccionConfiguracion: string implements HasLabel
             self::Marca => 'Marca e identidad',
             self::Archivos => 'Archivos y almacenamiento',
             self::Correo => 'Correo SMTP',
+            self::FirmaDigital => 'Firma digital',
         };
     }
 
@@ -32,6 +34,7 @@ enum SeccionConfiguracion: string implements HasLabel
             self::Marca => 'Marca e identidad actualizadas',
             self::Archivos => 'Configuración de archivos actualizada',
             self::Correo => 'Configuración de correo actualizada',
+            self::FirmaDigital => 'Configuración de firma digital actualizada',
         };
     }
 
@@ -42,6 +45,7 @@ enum SeccionConfiguracion: string implements HasLabel
             self::Marca => 'Marca e identidad restauradas',
             self::Archivos => 'Configuración de archivos restaurada',
             self::Correo => 'Configuración de correo restaurada',
+            self::FirmaDigital => 'Configuración de firma digital restaurada',
         };
     }
 

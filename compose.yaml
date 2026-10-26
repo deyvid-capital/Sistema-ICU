@@ -107,6 +107,22 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+    firmador:
+        # Firma PDF con pyHanko (docker/firmador). Sin puertos publicados: solo
+        # laravel.test y worker lo alcanzan por la red interna (http://firmador:8000).
+        # Raíz de solo lectura; /tmp en memoria para los uploads que FastAPI vuelca a disco.
+        build:
+            context: ./docker/firmador
+        image: 'icu-firmador'
+        environment:
+            FIRMADOR_TOKEN: '${FIRMADOR_TOKEN}'
+        read_only: true
+        tmpfs:
+            - /tmp
+        networks:
+            - sail
+        restart: unless-stopped
+        mem_limit: 512m
 networks:
     sail:
         driver: bridge

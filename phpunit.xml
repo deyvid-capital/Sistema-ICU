@@ -34,5 +34,10 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="FIRMADOR_URL" value="http://firmador:8000"/>
+        <env name="FIRMADOR_TOKEN" value="token-de-prueba"/>
+        <env name="FIRMA_ENCRYPTION_KEY" value="base64:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="/>
+        <env name="FIRMA_KDF_OPERACIONES" value="1"/>
+        <env name="FIRMA_KDF_MEMORIA" value="8192"/>
     </php>
 </phpunit>

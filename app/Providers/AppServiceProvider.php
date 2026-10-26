@@ -16,6 +16,7 @@ use App\Models\MediaSetting;
 use App\Models\Movimiento;
 use App\Models\PdfEquipo;
 use App\Models\SoftwareExc;
+use App\Models\User;
 use App\Observers\AppearanceSettingObserver;
 use App\Observers\AsigCelularObserver;
 use App\Observers\AsignacionCargadorObserver;
@@ -28,6 +29,7 @@ use App\Observers\MediaSettingObserver;
 use App\Observers\MovimientoObserver;
 use App\Observers\PdfEquipoObserver;
 use App\Observers\SoftwareExcObserver;
+use App\Observers\UserObserver;
 use App\Policies\ActivityPolicy;
 use App\Services\Archivos\ArchivosService;
 use App\Services\Configuracion\MailConfigService;
@@ -84,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
         SoftwareExc::observe(SoftwareExcObserver::class);
         PdfEquipo::observe(PdfEquipoObserver::class);
         Movimiento::observe(MovimientoObserver::class);
+        User::observe(UserObserver::class);
 
         $this->app->booted(function (): void {
             app(MailConfigService::class)->aplicar();

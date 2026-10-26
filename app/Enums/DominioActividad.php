@@ -20,6 +20,7 @@ use App\Models\Cargador;
 use App\Models\CargadorCel;
 use App\Models\Cargo;
 use App\Models\Celular;
+use App\Models\CertificadoFirma;
 use App\Models\EntregaCelular;
 use App\Models\EntregaEquipo;
 use App\Models\Equipo;
@@ -73,6 +74,7 @@ enum DominioActividad: string implements HasLabel
     case Recursos = 'recursos';
     case Inventario = 'inventario';
     case Documentos = 'documentos';
+    case FirmaDigital = 'firma_digital';
 
     /**
      * Dominios transversales: no pertenecen a ningún modelo, se escriben a mano
@@ -93,6 +95,7 @@ enum DominioActividad: string implements HasLabel
             self::Recursos => 'Recursos',
             self::Inventario => 'Inventario técnico',
             self::Documentos => 'Documentos PDF',
+            self::FirmaDigital => 'Firma digital',
             self::Seguridad => 'Seguridad y accesos',
             self::Configuracion => 'Configuración del sistema',
         };
@@ -110,6 +113,7 @@ enum DominioActividad: string implements HasLabel
             self::Recursos => 'info',
             self::Inventario => 'gray',
             self::Documentos => 'gray',
+            self::FirmaDigital => 'primary',
             self::Seguridad => 'danger',
             self::Configuracion => 'gray',
         };
@@ -188,6 +192,8 @@ enum DominioActividad: string implements HasLabel
             PdfEquipo::class => self::Documentos,
             PdfCelular::class => self::Documentos,
             PdfMovimiento::class => self::Documentos,
+
+            CertificadoFirma::class => self::FirmaDigital,
         ];
     }
 }
