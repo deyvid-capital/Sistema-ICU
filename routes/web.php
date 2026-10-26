@@ -51,4 +51,5 @@ Route::prefix('pdf/preview')->middleware('auth')->name('pdf.preview.')->group(fu
 Route::prefix('firma/documentos')->middleware('auth')->name('firma.documentos.')->group(function () {
     Route::get('/{documento}/ver', [DocumentoFirmaController::class, 'ver'])->name('ver');
     Route::get('/{documento}/descargar', [DocumentoFirmaController::class, 'descargar'])->name('descargar');
+    Route::get('/envio/{solicitud}/zip', [DocumentoFirmaController::class, 'zip'])->name('zip');
 });

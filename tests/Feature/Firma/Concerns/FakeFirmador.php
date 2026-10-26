@@ -27,17 +27,80 @@ trait FakeFirmador
     /**
      * @param  array<string, mixed>  $datosCertificado  Sobrescribe la respuesta de /certificados/inspeccionar.
      */
-    protected function fakeFirmador(array $datosCertificado = [], bool $p12Valido = true): void
-    {
-        Http::fake(function (Request $request) use ($datosCertificado, $p12Valido) {
+    /**
+     * @var array{datos: array<string, mixed>, p12Valido: bool, alFirmar: ?\Closure, verificacionValida: bool}|null
+     */
+    private ?array $configuracionFirmador = null;
+
+    /**
+     * Http::fake ejecuta todos los fakes registrados y usa la primera respuesta, así que
+     * se registra una sola vez: las llamadas siguientes solo cambian la configuración.
+     *
+     * @param  (\Closure(Request): void)|null  $alFirmar  Se ejecuta en cada /pdf/firmar (p. ej. para simular a otro firmante).
+     */
+    protected function fakeFirmador(
+        array $datosCertificado = [],
+        bool $p12Valido = true,
+        ?\Closure $alFirmar = null,
+        bool $verificacionValida = true,
+    ): void {
+        $registrado = $this->configuracionFirmador !== null;
+
+        $this->configuracionFirmador = [
+            'datos' => $datosCertificado,
+            'p12Valido' => $p12Valido,
+            'alFirmar' => $alFirmar,
+            'verificacionValida' => $verificacionValida,
+        ];
+
+        if ($registrado) {
+            return;
+        }
+
+        Http::fake(function (Request $request) {
+            $configuracion = $this->configuracionFirmador;
+
             return match (parse_url($request->url(), PHP_URL_PATH)) {
-                '/certificados/inspeccionar' => $this->respuestaCertificado($request, $datosCertificado, $p12Valido),
+                '/certificados/inspeccionar' => $this->respuestaCertificado($request, $configuracion['datos'], $configuracion['p12Valido']),
                 '/pdf/inspeccionar' => $this->respuestaPdf($request),
                 '/pdf/preparar' => Http::response('%PDF-preparado'),
-                '/pdf/firmar' => Http::response('%PDF-firmado'),
+                '/pdf/firmar' => $this->respuestaFirmar($request, $configuracion['alFirmar']),
+                '/pdf/verificar' => $this->respuestaVerificar($request, $configuracion['verificacionValida']),
                 default => Http::response(['codigo' => 'error_interno', 'mensaje' => 'Ruta no simulada'], 500),
             };
         });
+    }
+
+    /**
+     * Firma "incremental" simulada: agrega una marca con el campo firmado al final del PDF.
+     */
+    private function respuestaFirmar(Request $request, ?\Closure $alFirmar): mixed
+    {
+        if ($this->campoMultipart($request, 'contrasena') !== self::CONTRASENA_P12) {
+            return Http::response(['codigo' => 'contrasena_incorrecta', 'mensaje' => 'La contraseña del certificado .p12 no es correcta.'], 422);
+        }
+
+        if ($alFirmar !== null) {
+            $alFirmar($request);
+        }
+
+        return Http::response($this->campoMultipart($request, 'pdf').' +'.$this->campoMultipart($request, 'campo'));
+    }
+
+    private function respuestaVerificar(Request $request, bool $valida): mixed
+    {
+        preg_match_all('/\+(firma_\d+)/', (string) $this->campoMultipart($request, 'pdf'), $campos);
+
+        return Http::response(['firmas' => array_map(fn (string $campo): array => [
+            'campo' => $campo,
+            'titular' => ['cn' => 'TITULAR'],
+            'emisor' => ['cn' => 'Entidad Certificadora Autorizada Digicert'],
+            'fecha_firma' => now()->toIso8601String(),
+            'intacta' => $valida,
+            'valida' => $valida,
+            'cobertura' => 'ENTIRE_FILE',
+            'modificaciones' => 'FORM_FILLING',
+        ], $campos[1])]);
     }
 
     /**

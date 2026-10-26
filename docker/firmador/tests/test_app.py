@@ -214,3 +214,25 @@ def test_firma_con_logo(cliente, p12_juanito):
 
 def test_verificar_pdf_sin_firmas(cliente):
     assert verificar(cliente, crear_pdf()).json() == {"firmas": []}
+
+
+def test_el_sello_se_reduce_si_el_recuadro_es_chico(cliente, p12_juanito):
+    import pymupdf  # noqa: PLC0415
+
+    campos = [{"nombre": "firma_1", "pagina": 1, "x": 60, "y": 60, "ancho": 150, "alto": 80}]
+    preparado = preparar(cliente, crear_pdf(), campos).content
+    with open("/logo/Logo-Firma.png", "rb") as archivo:
+        logo = archivo.read()
+    respuesta = cliente.post(
+        "/pdf/firmar", headers=TOKEN,
+        files={"pdf": ("doc.pdf", preparado), "p12": ("firma.p12", p12_juanito), "logo": ("logo.png", logo)},
+        data={"contrasena": CONTRASENA, "campo": "firma_1", "sello": SELLO},
+    )
+    assert respuesta.status_code == 200
+
+    # Todo el texto del sello queda dentro del recuadro de 150 × 80.
+    pagina = pymupdf.open(stream=respuesta.content, filetype="pdf")[0]
+    pagina.clean_contents()
+    texto = pagina.get_text(clip=pymupdf.Rect(60, pagina.rect.height - 140, 210, pagina.rect.height - 60))
+    for esperado in ("Firmado digitalmente por:", "Juanito", "26/10/2026"):
+        assert esperado in texto

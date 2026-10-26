@@ -5,6 +5,7 @@ namespace App\Services\Pdf;
 use App\Enums\CelularFormularioPdfTipo;
 use App\Exceptions\CelularFormularioPdfException;
 use App\Models\PdfCelular;
+use App\Services\Firma\DocumentosEnFirma;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,12 @@ class GenerateCelularFormularioPdf
      */
     public function execute(Model $record, CelularFormularioPdfTipo $tipo): PdfCelular
     {
+        $enFirma = app(DocumentosEnFirma::class);
+
+        if (($envio = $enFirma->envioEnCurso($record)) !== null) {
+            throw new CelularFormularioPdfException($enFirma->mensaje($envio));
+        }
+
         $this->validator->validate($record, $tipo);
 
         $viewData = $this->dataMapper->for($record, $tipo);

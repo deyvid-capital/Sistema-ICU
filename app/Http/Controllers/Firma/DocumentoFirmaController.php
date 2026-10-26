@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Firma;
 
 use App\Http\Controllers\Controller;
+use App\Models\SolicitudFirma;
 use App\Models\SolicitudFirmaDocumento;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use ZipArchive;
 
 /**
  * Sirve la versión actual de un documento de un envío. Los PDF viven en el disco
@@ -22,6 +25,30 @@ class DocumentoFirmaController extends Controller
     public function descargar(SolicitudFirmaDocumento $documento): StreamedResponse
     {
         return $this->responder($documento, 'attachment');
+    }
+
+    /**
+     * Todos los documentos del envío (en su versión actual) en un ZIP.
+     */
+    public function zip(SolicitudFirma $solicitud): BinaryFileResponse
+    {
+        Gate::authorize('view', $solicitud);
+
+        $disco = Storage::disk(SolicitudFirmaDocumento::DISCO);
+        $temporal = tempnam(sys_get_temp_dir(), 'firma-zip-');
+        $zip = new ZipArchive;
+        $zip->open($temporal, ZipArchive::OVERWRITE);
+
+        foreach ($solicitud->documentos as $documento) {
+            if ($disco->exists($documento->archivo_actual)) {
+                $zip->addFromString($documento->id.'-'.$documento->nombre, (string) $disco->get($documento->archivo_actual));
+            }
+        }
+
+        $zip->close();
+
+        return response()->download($temporal, "{$solicitud->codigo}.zip", ['Content-Type' => 'application/zip'])
+            ->deleteFileAfterSend();
     }
 
     private function responder(SolicitudFirmaDocumento $documento, string $disposicion): StreamedResponse

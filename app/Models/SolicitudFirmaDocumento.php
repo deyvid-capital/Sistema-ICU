@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EstadoDocumentoFirma;
+use App\Enums\EstadoFirma;
 use Database\Factories\SolicitudFirmaDocumentoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -68,6 +69,17 @@ class SolicitudFirmaDocumento extends Model
     public function versiones(): HasMany
     {
         return $this->hasMany(SolicitudFirmaVersion::class, 'documento_id')->orderBy('version');
+    }
+
+    /**
+     * Completado cuando ya no quedan firmas pendientes.
+     */
+    public function completarSiCorresponde(): void
+    {
+        if ($this->estado === EstadoDocumentoFirma::EnCurso
+            && ! $this->firmas()->where('estado', EstadoFirma::Pendiente)->exists()) {
+            $this->update(['estado' => EstadoDocumentoFirma::Completado, 'completado_at' => now()]);
+        }
     }
 
     public function totalPaginas(): int

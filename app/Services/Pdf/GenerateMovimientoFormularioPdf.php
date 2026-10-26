@@ -6,6 +6,7 @@ use App\Enums\MovimientoFormularioPdfTipo;
 use App\Exceptions\MovimientoFormularioPdfException;
 use App\Models\Movimiento;
 use App\Models\PdfMovimiento;
+use App\Services\Firma\DocumentosEnFirma;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -25,6 +26,12 @@ class GenerateMovimientoFormularioPdf
      */
     public function execute(Model $record, MovimientoFormularioPdfTipo $tipo = MovimientoFormularioPdfTipo::AltaBaja): PdfMovimiento
     {
+        $enFirma = app(DocumentosEnFirma::class);
+
+        if (($envio = $enFirma->envioEnCurso($record)) !== null) {
+            throw new MovimientoFormularioPdfException($enFirma->mensaje($envio));
+        }
+
         $this->validator->validate($record, $tipo);
 
         /** @var Movimiento $movimiento */

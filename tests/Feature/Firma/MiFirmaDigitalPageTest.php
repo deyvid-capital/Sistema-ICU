@@ -156,7 +156,7 @@ class MiFirmaDigitalPageTest extends TestCase
 
         Livewire::test(MiFirmaDigital::class)
             ->callAction('probar', ['contrasena_sistema' => self::CONTRASENA_SISTEMA])
-            ->assertFileDownloaded('prueba-firma-digital.pdf', '%PDF-firmado');
+            ->assertFileDownloaded('prueba-firma-digital.pdf', '%PDF-preparado +firma_prueba');
 
         // Al firmador le llega la contraseña del .p12 (desenvuelta), nunca la del sistema.
         Http::assertSent(fn (Request $request): bool => str_ends_with($request->url(), '/pdf/firmar')

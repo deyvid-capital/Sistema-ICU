@@ -57,8 +57,8 @@ return [
     */
 
     'sello' => [
-        'ancho' => 200,
-        'alto' => 95,
+        'ancho' => 150,
+        'alto' => 80,
         'logo' => public_path('images/Logo-Firma.png'),
         'zona_horaria' => 'America/La_Paz',
         'abreviatura_zona' => 'BOT',

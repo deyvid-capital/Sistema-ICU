@@ -8,6 +8,7 @@ use App\Models\AsignacionEquipo;
 use App\Models\Concerns\HasDocumentoOficialPdf;
 use App\Models\EntregaEquipo;
 use App\Models\User;
+use App\Services\Firma\DocumentosEnFirma;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -67,6 +68,8 @@ class EquipoFormularioPdfActions
             ->icon(Heroicon::OutlinedDocumentArrowDown)
             ->color('primary')
             ->visible(fn (Model $record): bool => self::documentIsActionable($resolveDocument($record)))
+            ->disabled(fn (Model $record): bool => self::enFirmaDigital($resolveDocument($record)) !== null)
+            ->tooltip(fn (Model $record): ?string => self::enFirmaDigital($resolveDocument($record)))
             ->modalIcon(Heroicon::OutlinedDocumentArrowDown)
             ->modalHeading(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
                 ? 'Volver a generar PDF'
@@ -106,6 +109,16 @@ class EquipoFormularioPdfActions
         }
 
         return $action;
+    }
+
+    /**
+     * Mensaje si el documento se está firmando digitalmente (no se puede regenerar), o null.
+     */
+    private static function enFirmaDigital(?Model $document): ?string
+    {
+        $envio = $document instanceof Model ? app(DocumentosEnFirma::class)->envioEnCurso($document) : null;
+
+        return $envio !== null ? app(DocumentosEnFirma::class)->mensaje($envio) : null;
     }
 
     /**

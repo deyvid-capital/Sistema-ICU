@@ -183,6 +183,20 @@ class AuditorSeguridad
         $this->registrar(EventoSeguridad::FirmaDigitalContrasenaIncorrecta, sujeto: $usuario);
     }
 
+    public function firmaDigitalIntentoFallido(User $usuario, int $intentosRestantes): void
+    {
+        $this->registrar(EventoSeguridad::FirmaDigitalIntentoFallido, sujeto: $usuario, propiedades: [
+            'intentos_restantes' => $intentosRestantes,
+        ]);
+    }
+
+    public function firmaDigitalBloqueada(User $usuario, CarbonInterface $hasta): void
+    {
+        $this->registrar(EventoSeguridad::FirmaDigitalBloqueada, sujeto: $usuario, propiedades: [
+            'bloqueado_hasta' => $hasta->toDateTimeString(),
+        ]);
+    }
+
     /**
      * El causante es quien cambió la contraseña (admin) o nadie (recuperación por
      * correo o importación); el sujeto es el titular de la firma.

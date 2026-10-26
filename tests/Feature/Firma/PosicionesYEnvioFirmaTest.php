@@ -89,7 +89,7 @@ class PosicionesYEnvioFirmaTest extends TestCase
                     'documento_id' => $documento->id,
                     'firmante_id' => $firmante->id,
                     'pagina' => 1,
-                    'x' => 60 + $indice * 260,
+                    'x' => 20 + $indice * (config('firma.sello.ancho') + 10),
                     'y' => 80,
                 ];
             }
@@ -110,7 +110,10 @@ class PosicionesYEnvioFirmaTest extends TestCase
         $this->assertCount(2, $firmas);
         $this->assertSame(EstadoFirma::Pendiente, $firmas[0]->estado);
         $this->assertSame('firma_'.$firmas[0]->firmante_id, $firmas[0]->campo);
-        $this->assertSame([60.0, 80.0, 200.0, 95.0], [$firmas[0]->x, $firmas[0]->y, $firmas[0]->ancho, $firmas[0]->alto]);
+        $this->assertSame(
+            [20.0, 80.0, (float) config('firma.sello.ancho'), (float) config('firma.sello.alto')],
+            [$firmas[0]->x, $firmas[0]->y, $firmas[0]->ancho, $firmas[0]->alto],
+        );
     }
 
     public function test_guardar_de_nuevo_reemplaza_las_posiciones(): void
@@ -129,7 +132,7 @@ class PosicionesYEnvioFirmaTest extends TestCase
     {
         $solicitud = $this->borrador([$this->firmante('Juanito')]);
         $posiciones = $this->posicionesValidas($solicitud);
-        $posiciones[0]['x'] = 500; // 500 + 200 > 612 de ancho
+        $posiciones[0]['x'] = 612 - config('firma.sello.ancho') + 10; // sale 10 pt por la derecha
 
         $this->expectExceptionObject(FirmaDigitalException::posicionFueraDePagina('Juanito', 'acta.pdf'));
 
@@ -151,7 +154,7 @@ class PosicionesYEnvioFirmaTest extends TestCase
     {
         $solicitud = $this->borrador([$this->firmante('Juanito'), $this->firmante('Carlos')]);
         $posiciones = $this->posicionesValidas($solicitud);
-        $posiciones[1]['x'] = $posiciones[0]['x'] + 100;
+        $posiciones[1]['x'] = $posiciones[0]['x'] + config('firma.sello.ancho') / 2;
 
         $this->expectExceptionObject(FirmaDigitalException::posicionesSuperpuestas('acta.pdf', 1));
 
@@ -210,7 +213,9 @@ class PosicionesYEnvioFirmaTest extends TestCase
 
             $campos = json_decode((string) $this->campoMultipart($request, 'campos'), true);
 
-            return count($campos) === 2 && $campos[0]['ancho'] == 200 && $campos[0]['alto'] == 95;
+            return count($campos) === 2
+                && $campos[0]['ancho'] == config('firma.sello.ancho')
+                && $campos[0]['alto'] == config('firma.sello.alto');
         });
 
         Notification::assertSentTo([$juanito, $carlos], FirmaSolicitadaNotification::class);

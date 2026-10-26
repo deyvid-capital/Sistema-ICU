@@ -56,28 +56,41 @@ class PaginaEnMemoria(ImportedPdfPage):
 
 
 def dibujar_sello(datos: DatosSello, logo: bytes | None) -> bytes:
-    """Logo centrado arriba, título en negrita y bloque de datos alineado a la izquierda."""
-    salida = io.BytesIO()
-    c = canvas.Canvas(salida, pagesize=(datos.ancho, datos.alto))
+    """Logo centrado arriba, título en negrita y bloque de datos alineado a la izquierda.
 
-    y = datos.alto - 2
+    Se dibuja a su tamaño natural (letra de 9,5 pt); pyHanko lo reduce
+    proporcionalmente si el recuadro configurado es más chico, así nunca se corta.
+    """
+    lineas = [linea for linea in (datos.nombre, datos.cargo, datos.fecha) if linea]
+    paso = TAMANO_LETRA * INTERLINEADO
+    medir = canvas.Canvas(io.BytesIO())
+    ancho_texto = max(
+        [medir.stringWidth(TITULO, FUENTE_TITULO, TAMANO_LETRA)]
+        + [medir.stringWidth(t, FUENTE_TEXTO, TAMANO_LETRA) for t in lineas]
+    )
+    alto_natural = 2 + (ALTO_LOGO if logo else 0) + paso * (1 + len(lineas)) + 4
+    ancho = max(datos.ancho, ancho_texto + 4)
+    alto = max(datos.alto, alto_natural)
+
+    salida = io.BytesIO()
+    c = canvas.Canvas(salida, pagesize=(ancho, alto))
+
+    y = alto - 2
     if logo:
         imagen = ImageReader(io.BytesIO(logo))
         ancho_img, alto_img = imagen.getSize()
         ancho_logo = ALTO_LOGO * ancho_img / alto_img
         y -= ALTO_LOGO
-        c.drawImage(imagen, (datos.ancho - ancho_logo) / 2, y, ancho_logo, ALTO_LOGO, mask="auto")
+        c.drawImage(imagen, (ancho - ancho_logo) / 2, y, ancho_logo, ALTO_LOGO, mask="auto")
 
-    paso = TAMANO_LETRA * INTERLINEADO
     c.setFillColor(COLOR_TEXTO)
     y -= paso
     c.setFont(FUENTE_TITULO, TAMANO_LETRA)
-    c.drawCentredString(datos.ancho / 2, y, TITULO)
+    c.drawCentredString(ancho / 2, y, TITULO)
 
-    lineas = [linea for linea in (datos.nombre, datos.cargo, datos.fecha) if linea]
     if lineas:
         ancho_bloque = max(c.stringWidth(t, FUENTE_TEXTO, TAMANO_LETRA) for t in lineas)
-        x = max((datos.ancho - ancho_bloque) / 2, 2)
+        x = max((ancho - ancho_bloque) / 2, 2)
         c.setFont(FUENTE_TEXTO, TAMANO_LETRA)
         for linea in lineas:
             y -= paso

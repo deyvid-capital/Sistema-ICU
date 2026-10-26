@@ -49,6 +49,7 @@ use App\Models\SoftwareArea;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
 use App\Models\SolicitudFirma;
+use App\Models\SolicitudFirmaFirma;
 use App\Models\TarjetaVideo;
 use App\Models\User;
 use App\Models\UsuarioExterno;
@@ -196,6 +197,7 @@ enum DominioActividad: string implements HasLabel
 
             CertificadoFirma::class => self::FirmaDigital,
             SolicitudFirma::class => self::FirmaDigital,
+            SolicitudFirmaFirma::class => self::FirmaDigital,
         ];
     }
 }

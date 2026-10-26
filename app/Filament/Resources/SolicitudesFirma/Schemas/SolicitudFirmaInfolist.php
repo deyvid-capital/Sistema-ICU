@@ -2,12 +2,10 @@
 
 namespace App\Filament\Resources\SolicitudesFirma\Schemas;
 
-use App\Models\SolicitudFirmaDocumento;
-use App\Models\SolicitudFirmaFirmante;
-use App\Services\Firma\DocumentosFirmables;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\RepeatableEntry;
+use App\Enums\EstadoDocumentoFirma;
+use App\Models\SolicitudFirma;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
@@ -32,12 +30,16 @@ class SolicitudFirmaInfolist
                             ->badge(),
                         TextEntry::make('creador.name')
                             ->label('Enviado por'),
+                        TextEntry::make('motivo_cancelacion')
+                            ->label('Motivo de cancelación')
+                            ->visible(fn (SolicitudFirma $record): bool => filled($record->motivo_cancelacion))
+                            ->columnSpanFull(),
                         TextEntry::make('asunto')
                             ->label('Asunto')
                             ->columnSpanFull(),
                         TextEntry::make('mensaje')
                             ->label('Mensaje')
-                            ->placeholder('Sin mensaje')
+                            ->visible(fn (SolicitudFirma $record): bool => filled($record->mensaje))
                             ->columnSpanFull(),
                         TextEntry::make('fecha_limite')
                             ->label('Fecha límite')
@@ -47,53 +49,42 @@ class SolicitudFirmaInfolist
                             ->label('Recordatorio')
                             ->formatStateUsing(fn (?int $state): string => "Cada {$state} horas")
                             ->placeholder('Sin recordatorios'),
-                        IconEntry::make('orden_obligatorio')
-                            ->label('Orden obligatorio')
-                            ->boolean(),
+                        TextEntry::make('orden_obligatorio')
+                            ->label('Orden de firma')
+                            ->formatStateUsing(fn (bool $state): string => $state ? 'Orden obligatorio' : 'En cualquier orden'),
                     ]),
                 Section::make('Documentos')
                     ->icon(Heroicon::OutlinedDocumentDuplicate)
-                    ->schema([
-                        RepeatableEntry::make('documentos')
+                    ->description(fn (SolicitudFirma $record): string => self::resumenDocumentos($record))
+                    ->schema(fn (SolicitudFirma $record): array => [
+                        ViewEntry::make('detalle_documentos')
                             ->hiddenLabel()
-                            ->columns(['default' => 1, 'md' => 4])
-                            ->schema([
-                                TextEntry::make('nombre')
-                                    ->label('Archivo')
-                                    ->icon(Heroicon::OutlinedDocument)
-                                    ->url(fn (SolicitudFirmaDocumento $record): string => route('firma.documentos.ver', $record), shouldOpenInNewTab: true)
-                                    ->color('primary'),
-                                TextEntry::make('origen_type')
-                                    ->label('Origen')
-                                    ->state(fn (SolicitudFirmaDocumento $record): string => app(DocumentosFirmables::class)->etiquetaOrigen($record->origen_type)),
-                                TextEntry::make('paginas')
-                                    ->label('Páginas')
-                                    ->state(fn (SolicitudFirmaDocumento $record): int => $record->totalPaginas()),
-                                TextEntry::make('estado')
-                                    ->label('Estado')
-                                    ->badge(),
+                            ->view('filament.resources.solicitudes-firma.documentos', [
+                                'documentos' => $record->documentos()->with('firmas.firmante.usuario')->orderBy('id')->get(),
                             ]),
                     ]),
                 Section::make('Firmantes')
                     ->icon(Heroicon::OutlinedUsers)
-                    ->description(fn ($record): string => $record->orden_obligatorio
+                    ->description(fn (SolicitudFirma $record): string => $record->orden_obligatorio
                         ? 'Firman uno tras otro, en este orden.'
                         : 'Firman en cualquier orden, cuando estén disponibles.')
-                    ->schema([
-                        RepeatableEntry::make('firmantes')
+                    ->schema(fn (SolicitudFirma $record): array => [
+                        ViewEntry::make('detalle_firmantes')
                             ->hiddenLabel()
-                            ->columns(['default' => 1, 'md' => 3])
-                            ->schema([
-                                TextEntry::make('orden')
-                                    ->label('#'),
-                                TextEntry::make('usuario.name')
-                                    ->label('Nombre'),
-                                TextEntry::make('cargo')
-                                    ->label('Cargo en el sello')
-                                    ->state(fn (SolicitudFirmaFirmante $record): ?string => $record->usuario?->certificadoFirmaActivo?->cargo_en_sello)
-                                    ->placeholder('—'),
+                            ->view('filament.resources.solicitudes-firma.firmantes', [
+                                'firmantes' => $record->firmantes()->with(['usuario.certificadoFirmaActivo', 'firmas'])->get(),
                             ]),
                     ]),
             ]);
+    }
+
+    private static function resumenDocumentos(SolicitudFirma $record): string
+    {
+        $documentos = $record->documentos()->count();
+        $completados = $record->documentos()->where('estado', EstadoDocumentoFirma::Completado)->count();
+
+        return $documentos === 1
+            ? ($completados === 1 ? 'El documento tiene todas sus firmas.' : '1 documento en este envío.')
+            : "{$completados} de {$documentos} documentos con todas sus firmas.";
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services\Pdf;
 use App\Enums\EquipoFormularioPdfTipo;
 use App\Exceptions\EquipoFormularioPdfException;
 use App\Models\PdfEquipo;
+use App\Services\Firma\DocumentosEnFirma;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,12 @@ class GenerateEquipoFormularioPdf
      */
     public function execute(Model $record, EquipoFormularioPdfTipo $tipo, ?string $firmanteId = null): PdfEquipo
     {
+        $enFirma = app(DocumentosEnFirma::class);
+
+        if (($envio = $enFirma->envioEnCurso($record)) !== null) {
+            throw new EquipoFormularioPdfException($enFirma->mensaje($envio));
+        }
+
         $this->validator->validate($record, $tipo);
 
         $viewData = $this->dataMapper->for($record, $tipo, $firmanteId);

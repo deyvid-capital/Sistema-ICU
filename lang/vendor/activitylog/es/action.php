@@ -29,5 +29,7 @@ return [
         'firma_digital_activada' => 'firma digital activada',
         'firma_digital_contrasena_incorrecta' => 'contraseña del .p12 incorrecta',
         'firma_digital_suspendida' => 'firma digital suspendida',
+        'firma_digital_intento_fallido' => 'contraseña incorrecta al firmar',
+        'firma_digital_bloqueada' => 'firma digital bloqueada',
     ],
 ];

@@ -65,7 +65,7 @@ class FirmarDocumentoDePrueba
                 $contrasenaP12,
                 self::CAMPO,
                 $certificado->datosSello(),
-                $this->logo(),
+                SelloFirma::logo(),
                 'Prueba de firma digital',
             );
         } catch (FirmadorException $exception) {
@@ -75,12 +75,5 @@ class FirmarDocumentoDePrueba
                 default => FirmaDigitalException::firmadorNoDisponible(),
             };
         }
-    }
-
-    private function logo(): ?string
-    {
-        $ruta = (string) config('firma.sello.logo');
-
-        return is_file($ruta) ? (string) file_get_contents($ruta) : null;
     }
 }

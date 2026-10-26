@@ -12,7 +12,8 @@ Este documento describe **lo que ya está construido**:
 | 2. Certificados y contraseña única | ✅ | Carga de `.p12` por el admin, activación por el titular, firma con la contraseña del sistema, suspensión al restablecer la contraseña |
 | 3. Preparar envíos | ✅ | Envíos a firmar en borrador: documentos (del sistema o subidos), firmantes, orden opcional, plazo y recordatorio |
 | 4. Canvas de posiciones y envío | ✅ | Se ubican los recuadros sobre cada PDF y se envía a los firmantes |
-| 5–8. Firma, recordatorios, integración | ⏳ | Ver el plan |
+| 5. Firma | ✅ | Firmar con la contraseña del sistema (uno o varios), orden por documento, rechazo, cancelación, reemplazo de firmantes |
+| 6–8. Recordatorios, integración, endurecimiento | ⏳ | Ver el plan |
 
 > **Regla de oro:** la firma nunca es automática. El titular firma escribiendo **su contraseña
 > del sistema** (la misma del login). Ninguna contraseña se guarda en texto plano.
@@ -134,6 +135,37 @@ servidor las vuelve a validar (`GuardarPosicionesFirma`).
 
 > En páginas rotadas el sello saldría girado; los PDF que genera el sistema no están rotados.
 
+### 2.4 Firmar (detalle del envío)
+
+El firmante entra desde la campana o el correo ("Revisar y firmar"):
+
+- Una pestaña por documento: visor del PDF, **Abrir**, **Descargar** y el estado de cada firma (quién
+  firmó y cuándo, o el motivo de rechazo). Con varios documentos, **Descargar todo (ZIP)**.
+- **Firmar** (o **Firmar (N)**): se eligen los documentos (todos marcados), se escribe la **contraseña del
+  sistema** (y el código 2FA si *Ajustes de firma* lo exige) y se marca *Declaro haber revisado…*. Con
+  varios documentos el resultado es un resumen: lo que no se pudo firmar (p. ej. porque otra persona lo
+  estaba firmando en ese momento) queda pendiente.
+- Con **orden obligatorio** el turno es **por documento**: si falta un firmante anterior, el botón queda
+  deshabilitado con "Esperando la firma de X". Al firmar se avisa al siguiente.
+- **Rechazar**: documento + motivo. Ese documento queda rechazado; los demás siguen.
+- **Más acciones** (creador o admin): **Reemplazar firmante** (a alguien que no firmó nada), **Quitar orden
+  obligatorio** y **Cancelar envío** (motivo obligatorio; para envíos ajenos hace falta
+  `Cancel:SolicitudFirma`).
+
+Qué pasa al firmar (`FirmarDocumento`):
+
+1. Contraseña del sistema → con 5 intentos fallidos (configurable) la firma se bloquea 15 min y se avisa a
+   los admins.
+2. Bloqueo por documento (`Cache::lock`): dos personas nunca firman el mismo PDF a la vez.
+3. Se comprueba el hash del archivo actual; si alguien lo tocó en disco, se detiene y se alerta.
+4. El `firmador` firma de forma incremental y se verifican **todas** las firmas del resultado.
+5. Se guarda `v{n}.pdf` con bloqueo optimista por versión (un reintento si otro firmó en medio).
+6. El documento queda *completado* cuando no le faltan firmas y el envío *finalizado* cuando no le quedan
+   documentos en curso.
+
+Mientras un documento del sistema está en firma, su botón **Generar PDF** queda deshabilitado (y el
+servicio de generación también lo rechaza): lo firmado debe coincidir con lo que el sistema muestra.
+
 ---
 
 ## 3. Estados de una firma
@@ -214,6 +246,8 @@ Eventos de auditoría (`activity_log`, dominio `seguridad`):
 | `firma_digital_activada` | El titular activa o reactiva su firma |
 | `firma_digital_contrasena_incorrecta` | Contraseña del `.p12` incorrecta al activar |
 | `firma_digital_suspendida` | La firma pasó a *requiere reactivación* (con motivo y causante) |
+| `firma_digital_intento_fallido` | Contraseña del sistema incorrecta al firmar |
+| `firma_digital_bloqueada` | Firma bloqueada por intentos fallidos |
 
 Además, los cambios del modelo `CertificadoFirma` se registran en el dominio **Firma digital**, y
 la página de ajustes como `SeccionConfiguracion::FirmaDigital`.
@@ -300,6 +334,11 @@ La fecha la pone el reloj del servidor (el sello de tiempo TSA quedó para despu
 | `app/Filament/Resources/SolicitudesFirma/Pages/ConfigurarPosicionesFirma.php` + vista `configurar-posiciones.blade.php` | Pantalla del canvas |
 | `app/Services/Firma/GuardarPosicionesFirma.php`, `EnviarSolicitudFirma.php`, `PosicionesFirmaAnteriores.php` | Guardar, enviar y sugerir posiciones |
 | `app/Notifications/Firma/FirmaSolicitadaNotification.php` | Aviso al firmante (campana + correo, solo enlace, sin adjuntos) |
+| `app/Services/Firma/AbrirCredencialesFirma.php`, `CredencialesFirma.php` | Contraseña, 2FA, intentos y apertura del .p12 en memoria |
+| `app/Services/Firma/FirmarDocumento.php`, `FirmarLote.php` | Firma con bloqueo, verificación y versiones |
+| `app/Services/Firma/RechazarFirma.php`, `CancelarSolicitudFirma.php`, `AjustarFirmantesEnCurso.php` | Rechazo, cancelación, reemplazo y quitar orden |
+| `app/Services/Firma/DocumentosEnFirma.php` | Bloquea regenerar PDF de origen en firma |
+| `resources/views/filament/resources/solicitudes-firma/documento.blade.php` | Pestaña de cada documento (visor y firmas) |
 
 ---
 

@@ -68,26 +68,20 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 - [x] **Pruebas:** `PosicionesYEnvioFirmaTest` (17). Además, prueba en Chrome headless con el módulo compilado: render del PDF, clic (coordenadas exactas), arrastre, límites de la página y copia entre documentos; y firma real con el `firmador` en la posición obtenida (el sello cae donde estaba el recuadro).
 - [ ] Pendiente conocido: en páginas **rotadas** el recuadro se ubica bien, pero el sello sale girado. Los PDF que genera el sistema no están rotados.
 
-## Fase 5: Firma (Pantalla 3)
+## Fase 5: Firma (Pantalla 3) ✅
 
-- [ ] Página del envío: pestañas por documento, visor, firmantes y acciones.
-- [ ] `FirmarDocumento`: política, contraseña del sistema → `.p12`, `Cache::lock` por documento, hash, `firmador`, verificación, versión optimista con un reintento.
-- [ ] `FirmarLote`: una contraseña, varios documentos, resumen de resultados y tope de 20.
-- [ ] Orden obligatorio: política "le toca", reemplazar firmante y quitar orden en curso.
-- [ ] Intentos fallidos y bloqueo temporal (valores de la configuración). 2FA si está activado.
-- [ ] Rechazar (por documento) y Cancelar (creador o admin).
-- [ ] Bloquear la regeneración del PDF de origen mientras esté en curso.
-- [ ] **Pruebas:**
-  - Firma en orden libre (Carlos firma antes que Pedro).
-  - Orden obligatorio (Carlos no puede firmar antes de Pedro → 403).
-  - Lock ocupado → mensaje.
-  - Versión desactualizada → reintento correcto.
-  - Hash alterado → aborta.
-  - 5 contraseñas incorrectas → bloqueo.
-  - Lote con un documento bloqueado → resumen parcial.
-  - Último firmante → documento completado y envío finalizado.
-  - Firma `requiere_reactivacion` → no puede firmar.
-  - Rechazo, cancelación por el creador, cancelación por el admin y cancelación por un tercero (→ 403).
+- [x] Detalle del envío: una pestaña por documento con visor del PDF, estado de cada firma (quién, cuándo o motivo de rechazo), abrir y descargar; firmantes con su avance; "Descargar todo (ZIP)".
+- [x] **Firmar**: modal con la contraseña del sistema (+ código 2FA si está activado en los ajustes) y "Declaro haber revisado…". Con varios documentos pendientes se eligen cuáles (todos marcados por defecto).
+- [x] `AbrirCredencialesFirma`: firma activa, vigente y no bloqueada; 2FA opcional; contraseña con contador de intentos (bloqueo temporal y aviso a admins al llegar al máximo). El `.p12` se abre una sola vez por petición (`CredencialesFirma`, no serializable).
+- [x] `FirmarDocumento`: bloqueo por documento (`Cache::lock`), verificación de hash del archivo (si no coincide se detiene y se alerta), firma con el `firmador`, verificación de todas las firmas, nueva versión con bloqueo optimista y **un reintento** si otro firmó en medio. Cierra el documento y el envío cuando corresponde.
+- [x] `FirmarLote`: una contraseña, varios documentos (máx. 20), resumen de firmados y fallidos.
+- [x] Orden obligatorio **por documento**: con orden, el botón queda deshabilitado con "Esperando la firma de X"; al firmar se avisa al siguiente.
+- [x] `RechazarFirma` (motivo obligatorio, cierra solo ese documento) y `CancelarSolicitudFirma` (creador o `Cancel:SolicitudFirma`, permiso creado por migración).
+- [x] `AjustarFirmantesEnCurso`: reemplazar a un firmante que no firmó nada y quitar el orden obligatorio (avisa a quienes esperaban).
+- [x] No se puede regenerar el PDF de origen mientras su documento esté en firma (`DocumentosEnFirma`: botón "Generar PDF" deshabilitado con aviso + bloqueo en los servicios `Generate*FormularioPdf`).
+- [x] El sello se ajusta a cualquier tamaño de recuadro (`config/firma.php` → `sello.ancho/alto`): el `firmador` lo dibuja a tamaño natural y lo reduce proporcionalmente.
+- [x] **Pruebas:** `FirmarDocumentoTest` (22) y `FirmarPantallaTest` (12): orden libre y obligatorio, firma ajena, doble firma, intentos y bloqueo, firma suspendida, 2FA, lock ocupado, archivo alterado, carrera con reintento, verificación fallida, lote parcial, rechazo, cancelación, reemplazo, quitar orden, bloqueo de regeneración, ZIP y permisos.
+- [ ] Pendiente: resaltar en el visor el recuadro del firmante (hoy se ve el PDF con los campos vacíos).
 
 ## Fase 6: Notificaciones y recordatorios
 

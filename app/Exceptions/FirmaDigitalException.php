@@ -145,6 +145,78 @@ class FirmaDigitalException extends Exception
         return new self('Falta ubicar la firma de: '.implode('; ', $faltantes).'.');
     }
 
+    public static function contrasenaAlFirmarIncorrecta(int $intentosRestantes): self
+    {
+        return new self($intentosRestantes > 0
+            ? "La contraseña del sistema no es correcta. Te quedan {$intentosRestantes} intentos."
+            : 'La contraseña del sistema no es correcta. Tu firma quedó bloqueada temporalmente.');
+    }
+
+    public static function firmaBloqueada(string $hasta): self
+    {
+        return new self("Tu firma está bloqueada por intentos fallidos hasta las {$hasta}.");
+    }
+
+    public static function sinFirmaActiva(): self
+    {
+        return new self('No tienes una firma digital activa. Revisa Mi firma digital.');
+    }
+
+    public static function dosPasosNoConfigurado(): self
+    {
+        return new self('Para firmar se exige verificación en dos pasos. Actívala en Mi perfil.');
+    }
+
+    public static function codigoDosPasosIncorrecto(): self
+    {
+        return new self('El código de verificación en dos pasos no es correcto.');
+    }
+
+    public static function noEsTuFirma(): self
+    {
+        return new self('Este recuadro de firma no te corresponde.');
+    }
+
+    public static function firmaNoPendiente(): self
+    {
+        return new self('Este documento ya no está pendiente de tu firma.');
+    }
+
+    public static function noEsTuTurno(string $esperando): self
+    {
+        return new self("Este envío exige orden: falta la firma de {$esperando}.");
+    }
+
+    public static function documentoEnUso(string $nombre): self
+    {
+        return new self("Otra persona está firmando \"{$nombre}\" en este momento. Inténtalo en unos segundos.");
+    }
+
+    public static function documentoAlterado(string $nombre): self
+    {
+        return new self("El archivo de \"{$nombre}\" no coincide con su última versión registrada. Se avisó a los administradores.");
+    }
+
+    public static function firmaNoVerificada(string $nombre): self
+    {
+        return new self("La firma de \"{$nombre}\" no pasó la verificación y no se guardó.");
+    }
+
+    public static function solicitudNoEnCurso(): self
+    {
+        return new self('Este envío ya no está en curso.');
+    }
+
+    public static function firmanteYaFirmo(string $nombre): self
+    {
+        return new self("{$nombre} ya firmó al menos un documento y no se puede reemplazar.");
+    }
+
+    public static function firmanteYaIncluido(string $nombre): self
+    {
+        return new self("{$nombre} ya es firmante de este envío.");
+    }
+
     public static function firmadorNoDisponible(): self
     {
         return new self('El servicio de firma no está disponible. Intenta nuevamente en unos minutos.');

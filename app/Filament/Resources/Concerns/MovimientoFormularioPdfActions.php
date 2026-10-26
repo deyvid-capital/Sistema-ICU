@@ -6,6 +6,7 @@ use App\Enums\MovimientoFormularioPdfTipo;
 use App\Jobs\GenerateMovimientoFormularioPdfJob;
 use App\Models\Concerns\HasDocumentoOficialMovimientoPdf;
 use App\Models\Movimiento;
+use App\Services\Firma\DocumentosEnFirma;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Alignment;
@@ -40,6 +41,10 @@ class MovimientoFormularioPdfActions
             ->color('gray')
             ->visible(fn (Model $record): bool => $record instanceof Movimiento
                 && (! method_exists($record, 'trashed') || ! $record->trashed()))
+            ->disabled(fn (Model $record): bool => app(DocumentosEnFirma::class)->envioEnCurso($record) !== null)
+            ->tooltip(fn (Model $record): ?string => ($envio = app(DocumentosEnFirma::class)->envioEnCurso($record)) !== null
+                ? app(DocumentosEnFirma::class)->mensaje($envio)
+                : null)
             ->modalHeading('Vista previa — '.$tipo->nombreOficial())
             ->modalWidth(Width::FiveExtraLarge)
             ->modalAlignment(Alignment::Center)

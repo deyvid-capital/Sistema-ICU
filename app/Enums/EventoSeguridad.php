@@ -33,6 +33,8 @@ enum EventoSeguridad: string implements HasColor, HasLabel
     case FirmaDigitalActivada = 'firma_digital_activada';
     case FirmaDigitalContrasenaIncorrecta = 'firma_digital_contrasena_incorrecta';
     case FirmaDigitalSuspendida = 'firma_digital_suspendida';
+    case FirmaDigitalIntentoFallido = 'firma_digital_intento_fallido';
+    case FirmaDigitalBloqueada = 'firma_digital_bloqueada';
 
     public function getLabel(): string
     {
@@ -54,6 +56,8 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::FirmaDigitalActivada => 'Activó su firma digital',
             self::FirmaDigitalContrasenaIncorrecta => 'Contraseña del .p12 incorrecta',
             self::FirmaDigitalSuspendida => 'Firma digital suspendida por cambio de contraseña',
+            self::FirmaDigitalIntentoFallido => 'Contraseña incorrecta al firmar',
+            self::FirmaDigitalBloqueada => 'Firma digital bloqueada por intentos fallidos',
         };
     }
 
@@ -80,6 +84,8 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::FirmaDigitalActivada => Heroicon::OutlinedFingerPrint,
             self::FirmaDigitalContrasenaIncorrecta => Heroicon::OutlinedExclamationTriangle,
             self::FirmaDigitalSuspendida => Heroicon::OutlinedPauseCircle,
+            self::FirmaDigitalIntentoFallido => Heroicon::OutlinedExclamationTriangle,
+            self::FirmaDigitalBloqueada => Heroicon::OutlinedLockClosed,
         };
     }
 
@@ -98,13 +104,15 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::AccesoDenegado,
             self::OtpIncorrecto,
             self::DosFactoresCodigoIncorrecto,
-            self::FirmaDigitalContrasenaIncorrecta => ResultadoSeguridad::Fallo,
+            self::FirmaDigitalContrasenaIncorrecta,
+            self::FirmaDigitalIntentoFallido => ResultadoSeguridad::Fallo,
 
             self::IntentoConCuentaBloqueada,
             self::CuentaBloqueada,
             self::OtpBloqueado,
             self::DosFactoresReseteado,
-            self::FirmaDigitalSuspendida => ResultadoSeguridad::Bloqueo,
+            self::FirmaDigitalSuspendida,
+            self::FirmaDigitalBloqueada => ResultadoSeguridad::Bloqueo,
         };
     }
 

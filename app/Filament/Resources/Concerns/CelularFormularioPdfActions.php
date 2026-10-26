@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Concerns;
 use App\Enums\CelularFormularioPdfTipo;
 use App\Jobs\GenerateCelularFormularioPdfJob;
 use App\Models\Concerns\HasDocumentoOficialCelularPdf;
+use App\Services\Firma\DocumentosEnFirma;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Alignment;
@@ -35,6 +36,10 @@ class CelularFormularioPdfActions
             ->icon(Heroicon::OutlinedDocumentArrowDown)
             ->color('primary')
             ->visible(fn (Model $record): bool => ! method_exists($record, 'trashed') || ! $record->trashed())
+            ->disabled(fn (Model $record): bool => app(DocumentosEnFirma::class)->envioEnCurso($record) !== null)
+            ->tooltip(fn (Model $record): ?string => ($envio = app(DocumentosEnFirma::class)->envioEnCurso($record)) !== null
+                ? app(DocumentosEnFirma::class)->mensaje($envio)
+                : null)
             ->modalIcon(Heroicon::OutlinedDocumentArrowDown)
             ->modalHeading('Generar PDF')
             ->modalDescription(fn (Model $record): string => self::usesDocumentoOficial($record) && $record->hasDocumentoOficial()
