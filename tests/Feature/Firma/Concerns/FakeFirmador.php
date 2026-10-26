@@ -32,6 +32,7 @@ trait FakeFirmador
         Http::fake(function (Request $request) use ($datosCertificado, $p12Valido) {
             return match (parse_url($request->url(), PHP_URL_PATH)) {
                 '/certificados/inspeccionar' => $this->respuestaCertificado($request, $datosCertificado, $p12Valido),
+                '/pdf/inspeccionar' => $this->respuestaPdf($request),
                 '/pdf/preparar' => Http::response('%PDF-preparado'),
                 '/pdf/firmar' => Http::response('%PDF-firmado'),
                 default => Http::response(['codigo' => 'error_interno', 'mensaje' => 'Ruta no simulada'], 500),
@@ -120,6 +121,39 @@ trait FakeFirmador
         }
 
         return null;
+    }
+
+    /**
+     * PDF de prueba: si el contenido incluye "CIFRADO" o "DANADO" el firmador lo rechaza.
+     */
+    protected function pdfDePrueba(string $marca = '', int $paginas = 1): string
+    {
+        return "%PDF-1.7 {$marca} paginas={$paginas}";
+    }
+
+    private function respuestaPdf(Request $request): mixed
+    {
+        $contenido = (string) $this->campoMultipart($request, 'pdf');
+
+        if (str_contains($contenido, 'CIFRADO')) {
+            return Http::response(['codigo' => 'pdf_cifrado', 'mensaje' => 'El PDF está protegido con contraseña.'], 422);
+        }
+
+        if (str_contains($contenido, 'DANADO') || ! str_starts_with($contenido, '%PDF')) {
+            return Http::response(['codigo' => 'pdf_invalido', 'mensaje' => 'El PDF está dañado.'], 422);
+        }
+
+        preg_match('/paginas=(\d+)/', $contenido, $coincidencia);
+        $total = (int) ($coincidencia[1] ?? 1);
+
+        return Http::response([
+            'paginas' => array_map(
+                fn (int $numero): array => ['numero' => $numero, 'ancho' => 612.0, 'alto' => 792.0, 'rotacion' => 0],
+                range(1, $total),
+            ),
+            'campos_firma' => [],
+            'firmas' => 0,
+        ]);
     }
 
     /**

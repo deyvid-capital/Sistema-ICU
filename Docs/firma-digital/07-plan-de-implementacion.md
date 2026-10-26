@@ -44,13 +44,18 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 - [x] Policy `CertificadoFirmaPolicy` y permisos generados con el seeder de roles.
 - [x] **Pruebas** (`tests/Feature/Firma`, 63 pruebas en verde, incluidas las 11 del cliente de la Fase 1): custodia y envoltura, asignar y activar (todas las validaciones), cambios de contraseña (perfil, admin, correo), pantalla de administración, ajustes y Mi firma digital. Además, prueba real con el `firmador`: asignar → activar → probar firma → firma íntegra y válida.
 
-## Fase 3: Envíos y preparación (Pantalla 2, sin canvas)
+## Fase 3: Envíos y preparación (Pantalla 2, sin canvas) ✅
 
-- [ ] Migraciones de solicitudes, documentos, firmantes, firmas y versiones, con sus modelos, enums y factories.
-- [ ] `SolicitudFirmaResource` en el cluster **Firmas**, con el Wizard (varios documentos del sistema o subidos, firmantes, "Exigir orden", plazo y recordatorio).
-- [ ] Snapshot de cada PDF en el disco privado + hash.
-- [ ] Lista con pestañas (pendientes de mi firma, enviados, todos).
-- [ ] **Pruebas:** envío con 1 y con N documentos, rechazo de PDF cifrado o no-PDF, que el selector solo muestre firmas activas, valores por defecto tomados de la configuración, permisos.
+- [x] Migración `create_solicitudes_firma_tables` (solicitudes, documentos, firmantes, firmas y versiones), modelos, enums (`EstadoSolicitudFirma`, `EstadoDocumentoFirma`, `EstadoFirma`) y factories.
+- [x] Cluster **Firma digital** (`/admin/firmas`) con `SolicitudFirmaResource` (*Envíos a firmar*): asistente de 3 pasos (documentos del sistema y/o PDF subidos → firmantes con "Exigir orden" opcional → asunto, mensaje, fecha límite y recordatorio con los valores por defecto de la configuración).
+- [x] `DocumentosFirmables`: buscador de PDF ya generados (equipos, celulares, altas/bajas, recibos) y lectura de su archivo.
+- [x] `CrearSolicitudFirma`: valida PDF con el firmador (cifrado o dañado → error claro), guarda una copia privada de cada uno (snapshot + hash + páginas), firmantes en orden y código `SF-AAAA-NNNNN`. Si algo falla no queda nada.
+- [x] El envío queda en **borrador**. El creador puede eliminarlo (`EliminarBorradorSolicitudFirma` borra también las copias).
+- [x] Lista con pestañas: *Pendientes de mi firma*, *Enviados por mí*, *Todos* (con `View:SolicitudFirma`).
+- [x] `SolicitudFirmaPolicy`: el creador y los firmantes siempre ven su envío; preparar exige `Create:SolicitudFirma`.
+- [x] Ruta protegida para ver o descargar los PDF del envío (`firma.documentos.ver` / `firma.documentos.descargar`).
+- [x] Regla `FirmanteDisponible`: solo usuarios con firma activa y vigente.
+- [x] **Pruebas:** `CrearSolicitudFirmaTest` (11) y `SolicitudFirmaResourceTest` (10).
 
 ## Fase 4: Canvas de posiciones
 

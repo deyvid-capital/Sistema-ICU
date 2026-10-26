@@ -63,7 +63,7 @@ erDiagram
 | fecha_limite | date, null | Se define al crear |
 | recordatorio_cada_horas | unsigned smallint, null | Se define al crear (`null` = sin recordatorios) |
 | creado_por | uuid FK users | |
-| finalizada_at, cancelada_at | timestamp, null | |
+| enviada_at, finalizada_at, cancelada_at | timestamp, null | |
 | cancelada_por | uuid FK users, null | |
 | motivo_cancelacion | text, null | |
 | timestamps, soft deletes | | |
@@ -80,7 +80,8 @@ erDiagram
 | archivo_actual | string | Última versión: preparada o con N firmas |
 | hash_actual | string(64) | SHA-256 de `archivo_actual` |
 | version | unsigned int | Aumenta con cada firma (**bloqueo optimista**) |
-| estado | enum `EstadoDocumentoFirma` | `en_curso`, `completado`, `rechazado`, `cancelado` |
+| paginas | json | Tamaño y rotación de cada página (lo devuelve el firmador). Lo usa el canvas |
+| estado | enum `EstadoDocumentoFirma` | `borrador`, `en_curso`, `completado`, `rechazado`, `cancelado` |
 | completado_at | timestamp, null | |
 | timestamps | | |
 

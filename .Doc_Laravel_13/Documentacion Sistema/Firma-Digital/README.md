@@ -10,7 +10,8 @@ Este documento describe **lo que ya está construido**:
 |---|---|---|
 | 1. Motor de firma | ✅ | Contenedor `firmador` (Python + pyHanko) y cliente Laravel |
 | 2. Certificados y contraseña única | ✅ | Carga de `.p12` por el admin, activación por el titular, firma con la contraseña del sistema, suspensión al restablecer la contraseña |
-| 3–8. Envíos, canvas, firma secuencial, recordatorios, integración | ⏳ | Ver el plan |
+| 3. Preparar envíos | ✅ | Envíos a firmar en borrador: documentos (del sistema o subidos), firmantes, orden opcional, plazo y recordatorio |
+| 4–8. Canvas, firma, recordatorios, integración | ⏳ | Ver el plan |
 
 > **Regla de oro:** la firma nunca es automática. El titular firma escribiendo **su contraseña
 > del sistema** (la misma del login). Ninguna contraseña se guarda en texto plano.
@@ -34,6 +35,8 @@ Este documento describe **lo que ya está construido**:
 | Página `FirmaDigital` | Ajustes de firma (cluster Configuración) |
 | Página `MiFirmaDigital` | Pantalla de cada usuario: activar, reactivar, probar |
 | Notificaciones `App\Notifications\Firma\*` | Activación pendiente y reactivación requerida (campana + correo) |
+| Recurso `SolicitudFirmaResource` (cluster **Firma digital**) | Preparar y ver envíos a firmar |
+| `App\Services\Firma\CrearSolicitudFirma` / `DocumentosFirmables` | Crear el envío con copias privadas de los PDF / buscar PDF del sistema |
 
 ---
 
@@ -44,6 +47,7 @@ Este documento describe **lo que ya está construido**:
 | **Firmas digitales** | `/admin/configuracion/firmas-digitales` | Admin (permisos `*:CertificadoFirma`) | Tabla de firmas y acciones |
 | **Ajustes de firma** | `/admin/configuracion/firma-digital` | Permiso de página `View:FirmaDigital` | 2FA al firmar, intentos, bloqueo, plazo y recordatorio por defecto |
 | **Mi firma digital** | `/admin/mi-firma-digital` | Cualquier usuario con una firma asignada | Estado, datos del certificado, activar / reactivar, probar |
+| **Envíos a firmar** | `/admin/firmas/solicitudes` | Quien tenga `Create:SolicitudFirma` (preparar) · creador y firmantes (ver) | Lista, asistente para preparar, detalle del envío |
 
 Accesos:
 
@@ -81,6 +85,36 @@ Asistente de **2 pasos** al activar, reactivar o activar una renovación:
 
 **Probar mi firma**: pide la contraseña del sistema y descarga `prueba-firma-digital.pdf`
 firmado (documento base: `resources/firma/documento-prueba.pdf`). No guarda nada.
+
+### 2.3 Envíos a firmar
+
+Menú lateral **Firma digital → Envíos a firmar**.
+
+**Preparar envío** (asistente de 3 pasos):
+
+1. **Documentos** — buscar PDF ya generados en el sistema (entregas, recepciones, notas, altas y
+   bajas, recibos) y/o subir PDF. Máximo 20 por envío.
+2. **Firmantes** — solo aparecen usuarios con firma **activa y vigente**. *Exigir orden de firma*
+   (apagado por defecto): si se enciende, la lista se ordena arrastrando.
+3. **Detalles** — asunto, mensaje, fecha límite y recordatorio (prellenados con *Ajustes de firma*).
+
+Al guardar, el envío queda en **borrador** con código `SF-AAAA-NNNNN`. Cada PDF se copia al disco
+privado (`firma-digital/solicitudes/{codigo}/{documento}/original.pdf`) con su hash y el tamaño de
+sus páginas: lo que se firma es esa copia, nunca el archivo original del sistema. PDF con
+contraseña o dañados se rechazan con un mensaje claro y no queda nada guardado.
+
+**Lista**: pestañas *Pendientes de mi firma*, *Enviados por mí* y *Todos* (solo con
+`View:SolicitudFirma`). Sin ese permiso, cada usuario ve únicamente los envíos que creó o que debe
+firmar.
+
+**Detalle**: datos del envío, documentos (clic para abrir el PDF) y firmantes. El creador (o un
+admin con `Delete:SolicitudFirma`) puede **eliminar el borrador**; los envíos ya enviados no se
+eliminan.
+
+Los PDF del envío se sirven por `firma.documentos.ver` / `firma.documentos.descargar`, que verifican
+que el usuario pueda ver el envío.
+
+> Ubicar los recuadros de firma (canvas) y enviar a los firmantes llega en la fase 4.
 
 ---
 
@@ -202,6 +236,16 @@ La fecha la pone el reloj del servidor (el sello de tiempo TSA quedó para despu
 | `intentos_fallidos`, `bloqueado_hasta` | Reservados para la fase de firma |
 | `cargado_por` | Admin que subió el archivo |
 
+### Envíos (`solicitudes_firma` y relacionadas)
+
+| Tabla | Contenido |
+|---|---|
+| `solicitudes_firma` | Código, asunto, mensaje, `orden_obligatorio`, estado (`borrador`, `en_curso`, `finalizada`, `cancelada`), fecha límite, recordatorio, creador |
+| `solicitud_firma_documentos` | Cada PDF: nombre, origen (morph a `PdfEquipo`, `PdfCelular`, `PdfMovimiento`, `ReciboEquipo` o nulo si se subió), copia original y actual, hash, versión, páginas |
+| `solicitud_firma_firmantes` | Usuario y `orden` |
+| `solicitud_firma_firmas` | Recuadro de cada firmante en cada documento (se llena en la fase 4) |
+| `solicitud_firma_versiones` | Historial de archivos de cada documento (fases 4 y 5) |
+
 ### `firma_settings`
 
 `requiere_2fa_al_firmar` (false), `intentos_maximos` (5), `minutos_bloqueo` (15),
@@ -228,6 +272,12 @@ La fecha la pone el reloj del servidor (el sello de tiempo TSA quedó para despu
 | `app/Notifications/Firma/` | Notificaciones |
 | `app/Policies/CertificadoFirmaPolicy.php` | Permisos Shield |
 | `resources/firma/documento-prueba.pdf` | PDF base de "Probar mi firma" |
+| `app/Filament/Clusters/Firmas/FirmasCluster.php` | Cluster *Firma digital* del menú lateral |
+| `app/Filament/Resources/SolicitudesFirma/` | Recurso de envíos (asistente, lista, detalle) |
+| `app/Models/SolicitudFirma*.php` | Envío, documentos, firmantes, firmas (recuadros) y versiones |
+| `app/Policies/SolicitudFirmaPolicy.php` | Quién ve, prepara y elimina envíos |
+| `app/Http/Controllers/Firma/DocumentoFirmaController.php` | Ver / descargar los PDF del envío |
+| `app/Rules/FirmanteDisponible.php` | Validación: firmante con firma activa y vigente |
 
 ---
 
@@ -290,7 +340,8 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 2. Levantar el contenedor: `vendor/bin/sail up -d --build firmador`.
 3. `vendor/bin/sail artisan migrate`.
 4. Permisos: `vendor/bin/sail artisan db:seed --class=RolesPermissionsSeeder` (le da todo a
-   `super_admin`) y asignar `*:CertificadoFirma` / `View:FirmaDigital` a otros roles si hace falta.
+   `super_admin`) y asignar `*:CertificadoFirma`, `View:FirmaDigital` y `Create:SolicitudFirma`
+   (quién prepara envíos) a otros roles si hace falta.
 5. Reiniciar el worker: `vendor/bin/sail artisan queue:restart`.
 6. **Respaldar `FIRMA_ENCRYPTION_KEY`** por separado de `storage/app/private`: sin ella no se
    pueden abrir los `.p12` y todos los usuarios tendrían que recibir el archivo de nuevo.

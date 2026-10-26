@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Firma\DocumentoFirmaController;
 use App\Http\Controllers\MovimientoFormularioPdfController;
 use App\Http\Controllers\PdfPreviewController;
 use Illuminate\Support\Facades\Route;
@@ -45,4 +46,9 @@ Route::prefix('pdf/preview')->middleware('auth')->name('pdf.preview.')->group(fu
     Route::get('/nota-salida', [PdfPreviewController::class, 'notaSalida'])->name('nota-salida');
     Route::get('/recepcion-externa', [PdfPreviewController::class, 'recepcionExterna'])->name('recepcion-externa');
     Route::get('/alta-baja', [MovimientoFormularioPdfController::class, 'previewPdf'])->name('alta-baja');
+});
+
+Route::prefix('firma/documentos')->middleware('auth')->name('firma.documentos.')->group(function () {
+    Route::get('/{documento}/ver', [DocumentoFirmaController::class, 'ver'])->name('ver');
+    Route::get('/{documento}/descargar', [DocumentoFirmaController::class, 'descargar'])->name('descargar');
 });

@@ -48,6 +48,7 @@ use App\Models\Software;
 use App\Models\SoftwareArea;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
+use App\Models\SolicitudFirma;
 use App\Models\TarjetaVideo;
 use App\Models\User;
 use App\Models\UsuarioExterno;
@@ -194,6 +195,7 @@ enum DominioActividad: string implements HasLabel
             PdfMovimiento::class => self::Documentos,
 
             CertificadoFirma::class => self::FirmaDigital,
+            SolicitudFirma::class => self::FirmaDigital,
         ];
     }
 }

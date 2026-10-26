@@ -77,6 +77,46 @@ class FirmaDigitalException extends Exception
         return new self('No se pudo abrir tu firma con la contraseña del sistema. Reactívala desde Mi firma digital.');
     }
 
+    public static function sinDocumentos(): self
+    {
+        return new self('Elige al menos un documento del sistema o sube un PDF.');
+    }
+
+    public static function demasiadosDocumentos(int $maximo): self
+    {
+        return new self("Un envío puede tener como máximo {$maximo} documentos.");
+    }
+
+    public static function documentoNoDisponible(string $nombre): self
+    {
+        return new self("El archivo de \"{$nombre}\" ya no está disponible en el sistema. Genéralo de nuevo.");
+    }
+
+    public static function pdfCifrado(string $nombre): self
+    {
+        return new self("\"{$nombre}\" está protegido con contraseña y no se puede firmar.");
+    }
+
+    public static function pdfInvalido(string $nombre): self
+    {
+        return new self("\"{$nombre}\" no es un PDF válido o está dañado.");
+    }
+
+    public static function sinFirmantes(): self
+    {
+        return new self('Elige al menos un firmante.');
+    }
+
+    public static function firmanteRepetido(): self
+    {
+        return new self('Un firmante aparece más de una vez.');
+    }
+
+    public static function firmanteSinFirmaActiva(string $nombres): self
+    {
+        return new self("No tienen una firma digital activa y vigente: {$nombres}.");
+    }
+
     public static function firmadorNoDisponible(): self
     {
         return new self('El servicio de firma no está disponible. Intenta nuevamente en unos minutos.');
