@@ -20,6 +20,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
@@ -289,18 +290,29 @@ class ManageUserSeguridad extends EditRecord
 
         foreach (TipoEventoNotificacion::cases() as $tipo) {
             $toggles = [];
+            $aviso = $tipo->avisoAlDesactivar();
 
             foreach (CanalNotificacion::cases() as $canal) {
                 $toggles[] = Toggle::make($this->prefKey($tipo->value, $canal->value))
                     ->label($canal->getLabel())
                     ->default(true)
                     ->dehydrated(false)
-                    ->inline(false);
+                    ->inline(false)
+                    ->live(condition: $aviso !== null);
+            }
+
+            if ($aviso !== null) {
+                $toggles[] = Callout::make('Qué pasa si lo desactivas')
+                    ->warning()
+                    ->description($aviso)
+                    ->columnSpanFull()
+                    ->visible(fn (Get $get): bool => collect(CanalNotificacion::cases())
+                        ->contains(fn (CanalNotificacion $canal): bool => ! $get($this->prefKey($tipo->value, $canal->value))));
             }
 
             $fieldsets[] = Fieldset::make($tipo->getLabel())
                 ->schema($toggles)
-                ->columns(count($toggles));
+                ->columns(count(CanalNotificacion::cases()));
         }
 
         return Tab::make('Notificaciones')

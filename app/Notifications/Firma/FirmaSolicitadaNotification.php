@@ -4,6 +4,8 @@ namespace App\Notifications\Firma;
 
 use App\Filament\Resources\SolicitudesFirma\SolicitudFirmaResource;
 use App\Models\SolicitudFirma;
+use App\Models\User;
+use App\Notifications\Firma\Concerns\RespetaPreferenciaFirma;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -12,15 +14,20 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Aviso a un firmante de que tiene documentos por firmar. Siempre por campana y
- * correo. El correo no adjunta los PDF: solo lleva el enlace al sistema.
+ * Aviso a un firmante de que tiene documentos por firmar, o recordatorio de que
+ * siguen pendientes. Por campana y correo, según la preferencia "Firma digital".
+ * El correo no adjunta los PDF: solo lleva el enlace al sistema.
  */
 class FirmaSolicitadaNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use RespetaPreferenciaFirma;
 
-    public function __construct(public SolicitudFirma $solicitud)
-    {
+    public function __construct(
+        public SolicitudFirma $solicitud,
+        public bool $esRecordatorio = false,
+        public bool $vencido = false,
+    ) {
         $this->afterCommit();
     }
 
@@ -29,7 +36,7 @@ class FirmaSolicitadaNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $this->canalesPermitidos($notifiable, ['database', 'mail']);
     }
 
     /**
@@ -38,10 +45,10 @@ class FirmaSolicitadaNotification extends Notification implements ShouldQueue
     public function toDatabase(object $notifiable): array
     {
         return FilamentNotification::make()
-            ->title($this->titulo())
+            ->title($this->titulo($notifiable))
             ->body("{$this->solicitud->creador?->name} te envió: {$this->solicitud->asunto}".$this->textoFechaLimite())
             ->icon('heroicon-o-pencil-square')
-            ->iconColor('info')
+            ->iconColor($this->vencido ? 'danger' : ($this->esRecordatorio ? 'warning' : 'info'))
             ->actions([
                 Action::make('revisar')
                     ->label('Revisar y firmar')
@@ -55,8 +62,8 @@ class FirmaSolicitadaNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $correo = (new MailMessage)
-            ->subject("[Sistema ICU] {$this->titulo()}: {$this->solicitud->asunto}")
-            ->greeting($this->titulo())
+            ->subject("[Sistema ICU] {$this->titulo($notifiable)}: {$this->solicitud->asunto}")
+            ->greeting($this->titulo($notifiable))
             ->line("**{$this->solicitud->creador?->name}** te envió **{$this->solicitud->asunto}** ({$this->solicitud->codigo}).");
 
         if (filled($this->solicitud->mensaje)) {
@@ -64,7 +71,11 @@ class FirmaSolicitadaNotification extends Notification implements ShouldQueue
         }
 
         if ($this->solicitud->fecha_limite !== null) {
-            $correo->line('**Fecha límite:** '.$this->solicitud->fecha_limite->format('d/m/Y'));
+            $correo->line('**Fecha límite:** '.$this->solicitud->fecha_limite->format('d/m/Y').($this->vencido ? ' (vencida)' : ''));
+        }
+
+        if ($this->esRecordatorio) {
+            $correo->line('Este recordatorio se repite cada '.$this->solicitud->recordatorio_cada_horas.' horas, en horario hábil, mientras tengas firmas pendientes.');
         }
 
         return $correo
@@ -73,13 +84,23 @@ class FirmaSolicitadaNotification extends Notification implements ShouldQueue
             ->line('Este es un aviso automático del Sistema ICU.');
     }
 
-    private function titulo(): string
+    /**
+     * Cuenta lo que le falta firmar a esta persona (en un recordatorio pueden ser menos que al inicio).
+     */
+    private function titulo(object $notifiable): string
     {
-        $cantidad = $this->solicitud->documentos()->count();
+        $pendientes = $notifiable instanceof User ? $this->solicitud->firmasPendientesDe($notifiable)->count() : 0;
+        $cantidad = $pendientes > 0 ? $pendientes : $this->solicitud->documentos()->count();
 
-        return $cantidad === 1
+        $titulo = $cantidad === 1
             ? 'Tienes un documento por firmar'
             : "Tienes {$cantidad} documentos por firmar";
+
+        return match (true) {
+            $this->vencido => "Plazo vencido: {$titulo}",
+            $this->esRecordatorio => "Recordatorio: {$titulo}",
+            default => $titulo,
+        };
     }
 
     private function textoFechaLimite(): string

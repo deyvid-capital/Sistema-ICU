@@ -5,6 +5,7 @@ namespace App\Notifications\Firma;
 use App\Filament\Pages\MiFirmaDigital;
 use App\Filament\Resources\CertificadosFirma\CertificadoFirmaResource;
 use App\Models\User;
+use App\Notifications\Firma\Concerns\RespetaPreferenciaFirma;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -15,11 +16,12 @@ use Illuminate\Notifications\Notification;
 /**
  * La contraseña del sistema se restableció sin pasar por Mi perfil y la firma quedó
  * en pausa. Una versión para el titular (cómo reactivarla) y otra para los admins
- * (a quién guiar). Siempre por campana y correo.
+ * (a quién guiar). Por campana y correo, según la preferencia "Firma digital".
  */
 class FirmaRequiereReactivacionNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use RespetaPreferenciaFirma;
 
     public function __construct(
         public bool $paraAdministrador,
@@ -46,7 +48,7 @@ class FirmaRequiereReactivacionNotification extends Notification implements Shou
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $this->canalesPermitidos($notifiable, ['database', 'mail']);
     }
 
     /**

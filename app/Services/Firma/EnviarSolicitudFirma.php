@@ -9,7 +9,7 @@ use App\Exceptions\FirmadorException;
 use App\Models\SolicitudFirma;
 use App\Models\SolicitudFirmaDocumento;
 use App\Models\SolicitudFirmaFirmante;
-use App\Notifications\Firma\FirmaSolicitadaNotification;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -24,6 +24,7 @@ class EnviarSolicitudFirma
     public function __construct(
         private FirmadorClient $firmador,
         private GuardarPosicionesFirma $posiciones,
+        private AvisosSolicitudFirma $avisos,
     ) {}
 
     /**
@@ -115,8 +116,9 @@ class EnviarSolicitudFirma
             $firmantes = $firmantes->take(1);
         }
 
-        $firmantes->each(fn (SolicitudFirmaFirmante $firmante) => $firmante->usuario?->notify(
-            new FirmaSolicitadaNotification($solicitud),
-        ));
+        $this->avisos->pedirFirma(
+            $solicitud,
+            $firmantes->map(fn (SolicitudFirmaFirmante $firmante): ?User => $firmante->usuario),
+        );
     }
 }

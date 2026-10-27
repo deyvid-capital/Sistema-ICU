@@ -20,7 +20,10 @@ class FirmarLote
 {
     public const MAX_DOCUMENTOS = 20;
 
-    public function __construct(private FirmarDocumento $firmarDocumento) {}
+    public function __construct(
+        private FirmarDocumento $firmarDocumento,
+        private AvisosSolicitudFirma $avisos,
+    ) {}
 
     /**
      * @param  list<int>|null  $documentoIds  Limita a estos documentos (null = todos los pendientes).
@@ -47,7 +50,8 @@ class FirmarLote
             }
         }
 
-        FirmarDocumento::avisarSiguientes($solicitud, $siguientes);
+        $this->avisos->pedirFirma($solicitud, $siguientes);
+        $this->avisos->firmaRealizada($solicitud, $usuario, $firmados);
 
         return new ResultadoFirmaLote($firmados, $fallidos);
     }

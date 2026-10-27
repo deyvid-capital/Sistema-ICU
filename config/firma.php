@@ -64,4 +64,21 @@ return [
         'abreviatura_zona' => 'BOT',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Avisos programados
+    |--------------------------------------------------------------------------
+    |
+    | Los recordatorios solo salen en horario hábil (hora de Bolivia, lunes a
+    | viernes). Los avisos de vencimiento del certificado, a estos días.
+    |
+    */
+
+    'avisos' => [
+        'zona_horaria' => 'America/La_Paz',
+        'hora_inicio' => 8,
+        'hora_fin' => 19,
+        'dias_vencimiento' => [30, 15, 7],
+    ],
+
 ];

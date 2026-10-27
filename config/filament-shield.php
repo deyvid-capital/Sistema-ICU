@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Filament\Resources\Roles\RoleResource;
+use App\Filament\Resources\SolicitudesFirma\SolicitudFirmaResource;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -179,6 +180,10 @@ return [
             ],
             UserResource::class => [
                 'manageSecurity',
+            ],
+            // Cancelar envíos de otros usuarios (el creador siempre cancela los suyos).
+            SolicitudFirmaResource::class => [
+                'cancel',
             ],
         ],
         'exclude' => [

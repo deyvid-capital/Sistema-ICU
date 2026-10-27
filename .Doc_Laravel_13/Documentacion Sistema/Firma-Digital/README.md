@@ -13,7 +13,8 @@ Este documento describe **lo que ya está construido**:
 | 3. Preparar envíos | ✅ | Envíos a firmar en borrador: documentos (del sistema o subidos), firmantes, orden opcional, plazo y recordatorio |
 | 4. Canvas de posiciones y envío | ✅ | Se ubican los recuadros sobre cada PDF y se envía a los firmantes |
 | 5. Firma | ✅ | Firmar con la contraseña del sistema (uno o varios), orden por documento, rechazo, cancelación, reemplazo de firmantes |
-| 6–8. Recordatorios, integración, endurecimiento | ⏳ | Ver el plan |
+| 6. Notificaciones y recordatorios | ✅ | Avisos de avance (firmó, finalizado, rechazado, cancelado), recordatorios programados, vencimiento de certificados, interruptor por usuario |
+| 7–8. Integración, endurecimiento | ⏳ | Ver el plan |
 
 > **Regla de oro:** la firma nunca es automática. El titular firma escribiendo **su contraseña
 > del sistema** (la misma del login). Ninguna contraseña se guarda en texto plano.
@@ -36,7 +37,9 @@ Este documento describe **lo que ya está construido**:
 | Recurso `CertificadoFirmaResource` | Pantalla del admin (cluster Configuración) |
 | Página `FirmaDigital` | Ajustes de firma (cluster Configuración) |
 | Página `MiFirmaDigital` | Pantalla de cada usuario: activar, reactivar, probar |
-| Notificaciones `App\Notifications\Firma\*` | Activación pendiente y reactivación requerida (campana + correo) |
+| Notificaciones `App\Notifications\Firma\*` | Todos los avisos de firma (ver §2.5); respetan la preferencia **Firma digital** de cada usuario |
+| `App\Services\Firma\AvisosSolicitudFirma` | Decide quién recibe cada aviso de un envío |
+| Comandos `firmas:enviar-recordatorios` / `firmas:avisar-vencimientos` | Tareas programadas (servicio `scheduler`) |
 | Recurso `SolicitudFirmaResource` (menú lateral **Firma digital**) | Preparar y ver envíos a firmar |
 | `App\Services\Firma\CrearSolicitudFirma` / `DocumentosFirmables` | Crear el envío con copias privadas de los PDF / buscar PDF del sistema |
 
@@ -171,6 +174,56 @@ servicio de generación también lo rechaza): lo firmado debe coincidir con lo q
 
 ---
 
+### 2.5 Notificaciones
+
+Todos los avisos de firma digital llegan por **campana** y/o **correo**. El correo nunca adjunta
+los PDF, solo trae el enlace.
+
+| Aviso | Quién lo recibe | Campana | Correo |
+|---|---|---|---|
+| Activa tu firma / activa la renovación | Titular, al cargar o renovar su `.p12` | ✅ | ✅ |
+| Debes reactivar tu firma | Titular + admins y super admins | ✅ | ✅ |
+| Tienes documentos por firmar | Orden libre: todos al enviar. Con orden: el siguiente cuando le toca. También al reemplazar un firmante o quitar el orden | ✅ | ✅ |
+| Recordatorio (o **Plazo vencido**) | Firmantes que pueden firmar ahora | ✅ | ✅ |
+| X firmó en SF-… | Creador (una sola vez aunque firme varios documentos con "Firmar todos"). No se envía si con esa firma el envío terminó | ✅ | — |
+| Envío completado / finalizado con rechazos | Creador y todos los firmantes | ✅ | ✅ |
+| X rechazó «documento» | Creador y los demás firmantes de ese documento | ✅ | ✅ |
+| Envío cancelado | Quienes todavía tenían firmas pendientes | ✅ | — |
+| Plazo vencido (copia) | Creador, cada vez que se recuerda con el plazo vencido | ✅ | ✅ |
+| Tu firma vence en N días | Titular + admins, a los 30, 15 y 7 días | ✅ | ✅ |
+
+Quien provoca el aviso no se lo recibe a sí mismo (por ejemplo, el creador que también firma).
+
+**Interruptor por usuario.** En *Usuarios → (usuario) → Seguridad → Notificaciones* hay un grupo
+**Firma digital** con *Campana* y *Correo*. Ya no hay avisos "obligatorios": todos respetan ese
+interruptor (útil en pruebas para no mandar correos reales). Al apagar un canal aparece un aviso
+amarillo que explica qué pasa:
+
+- Ese usuario deja de recibir **por ese canal** todos los avisos de la tabla de arriba, incluidos
+  los que le llegan como admin sobre otros usuarios.
+- **Nada se bloquea:** sus firmas pendientes siguen esperando y las ve en *Firma digital →
+  Pendientes de mi firma*.
+- Al volver a encenderlo **no** se reenvían los avisos que se omitieron.
+
+Implementación: `TipoEventoNotificacion::FirmaDigital` + el trait
+`App\Notifications\Firma\Concerns\RespetaPreferenciaFirma`, que filtra los canales en `via()`.
+
+**Recordatorios** (`firmas:enviar-recordatorios`, cada hora):
+
+- Solo envíos en curso con *Recordatorio cada (horas)* definido.
+- Solo a quien **puede firmar ahora**: en orden libre, a todos los pendientes; con orden, solo al que le toca.
+- Cuando pasaron esas horas desde el último aviso a esa persona (el de "te toca" también cuenta,
+  así no llega un recordatorio justo después del aviso de turno).
+- Solo de **lunes a viernes, de 08:00 a 19:00, hora de Bolivia** (`config/firma.php` → `avisos`).
+- Si ya pasó la fecha límite (el mismo día límite todavía no cuenta), el recordatorio dice
+  **Plazo vencido** y se manda una copia al creador con la lista de quienes faltan.
+
+**Vencimiento del certificado** (`firmas:avisar-vencimientos`, a diario a las 08:00): firmas
+activas o por reactivar que vencen en 30, 15 o 7 días. Cada umbral se avisa una sola vez
+(`certificados_firma.aviso_vencimiento_dias`). No se avisa si el admin ya subió la renovación.
+
+---
+
 ## 3. Estados de una firma
 
 | Estado | Significado | Puede firmar |
@@ -288,7 +341,8 @@ La fecha la pone el reloj del servidor (el sello de tiempo TSA quedó para despu
 | `nombre_en_sello`, `cargo_en_sello` | Texto del sello (editable por el admin) |
 | `estado` | Ver §3 |
 | `reemplaza_a_id` | Firma que reemplaza la renovación |
-| `intentos_fallidos`, `bloqueado_hasta` | Reservados para la fase de firma |
+| `intentos_fallidos`, `bloqueado_hasta` | Contraseña incorrecta al firmar y bloqueo temporal |
+| `aviso_vencimiento_dias` | Último aviso de vencimiento enviado (30, 15 o 7), para no repetirlo |
 | `cargado_por` | Admin que subió el archivo |
 
 ### Envíos (`solicitudes_firma` y relacionadas)
@@ -297,7 +351,7 @@ La fecha la pone el reloj del servidor (el sello de tiempo TSA quedó para despu
 |---|---|
 | `solicitudes_firma` | Código, asunto, mensaje, `orden_obligatorio`, estado (`borrador`, `en_curso`, `finalizada`, `cancelada`), fecha límite, recordatorio, creador |
 | `solicitud_firma_documentos` | Cada PDF: nombre, origen (morph a `PdfEquipo`, `PdfCelular`, `PdfMovimiento`, `ReciboEquipo` o nulo si se subió), copia original y actual, hash, versión, páginas |
-| `solicitud_firma_firmantes` | Usuario y `orden` |
+| `solicitud_firma_firmantes` | Usuario, `orden` y `ultimo_recordatorio_at` (último aviso o recordatorio a esa persona) |
 | `solicitud_firma_firmas` | Recuadro de cada firmante en cada documento (se llena en la fase 4) |
 | `solicitud_firma_versiones` | Historial de archivos de cada documento (fases 4 y 5) |
 
@@ -335,7 +389,13 @@ La fecha la pone el reloj del servidor (el sello de tiempo TSA quedó para despu
 | `resources/js/firma/canvas-firmas.js` | Canvas (pdf.js + Alpine) |
 | `app/Filament/Resources/SolicitudesFirma/Pages/ConfigurarPosicionesFirma.php` + vista `configurar-posiciones.blade.php` | Pantalla del canvas |
 | `app/Services/Firma/GuardarPosicionesFirma.php`, `EnviarSolicitudFirma.php`, `PosicionesFirmaAnteriores.php` | Guardar, enviar y sugerir posiciones |
-| `app/Notifications/Firma/FirmaSolicitadaNotification.php` | Aviso al firmante (campana + correo, solo enlace, sin adjuntos) |
+| `app/Notifications/Firma/FirmaSolicitadaNotification.php` | Aviso al firmante y recordatorios (campana + correo, solo enlace, sin adjuntos) |
+| `app/Notifications/Firma/SolicitudFirmaNotification.php` + `app/Enums/EventoSolicitudFirma.php` | Avisos de avance del envío (firmó, finalizado, rechazado, cancelado, plazo vencido) |
+| `app/Notifications/Firma/CertificadoPorVencerNotification.php` | Vencimiento del certificado (titular y admins) |
+| `app/Notifications/Firma/Concerns/RespetaPreferenciaFirma.php` | Filtra canales con la preferencia *Firma digital* |
+| `app/Services/Firma/AvisosSolicitudFirma.php` | Destinatarios de cada aviso de un envío |
+| `app/Console/Commands/EnviarRecordatoriosFirmaCommand.php`, `AvisarVencimientosFirmaCommand.php` | Tareas programadas |
+| `routes/console.php` | Horarios del scheduler |
 | `app/Services/Firma/AbrirCredencialesFirma.php`, `CredencialesFirma.php` | Contraseña, 2FA, intentos y apertura del .p12 en memoria |
 | `app/Services/Firma/FirmarDocumento.php`, `FirmarLote.php` | Firma con bloqueo, verificación y versiones |
 | `app/Services/Firma/RechazarFirma.php`, `CancelarSolicitudFirma.php`, `AjustarFirmantesEnCurso.php` | Rechazo, cancelación, reemplazo y quitar orden |
@@ -373,6 +433,33 @@ vendor/bin/sail artisan queue:restart     # o: docker restart sistema-icu-worker
 vendor/bin/sail artisan queue:retry all   # reintenta los trabajos fallidos
 ```
 
+### 9.5 Recordatorios y tareas programadas
+
+Las tareas corren en el contenedor **`scheduler`** (`schedule:work`). **No usa cron ni crontab:**
+`schedule:work` es un proceso PHP que queda vivo y, al empezar cada minuto, ejecuta `schedule:run`;
+este revisa `routes/console.php` y lanza las tareas que toquen. Docker lo reinicia si se cae
+(`restart: unless-stopped`). Si el contenedor está apagado, las tareas de ese momento **no** se
+recuperan después; los avisos de vencimiento sí se ponen al día al día siguiente, porque usan
+umbrales ("30 días o menos") y no una fecha exacta.
+
+En un servidor **sin Docker** se reemplaza por la entrada clásica de crontab:
+
+```cron
+* * * * * cd /ruta/del/proyecto && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Los horarios se ven en UTC en `schedule:list` (`0 12 * * *` = 08:00 en Bolivia).
+
+Para revisarlas o probarlas a mano:
+
+```bash
+vendor/bin/sail artisan schedule:list
+vendor/bin/sail artisan firmas:enviar-recordatorios --fuera-de-horario   # ignora el horario hábil
+vendor/bin/sail artisan firmas:avisar-vencimientos
+```
+
+Si alguien no recibe avisos, revisar primero *Usuarios → Seguridad → Notificaciones → Firma digital*.
+
 ---
 
 ## 10. Tests
@@ -403,9 +490,12 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 2. Levantar el contenedor: `vendor/bin/sail up -d --build firmador`.
 3. `vendor/bin/sail artisan migrate`.
 4. Permisos: `vendor/bin/sail artisan db:seed --class=RolesPermissionsSeeder` (le da todo a
-   `super_admin`) y asignar `*:CertificadoFirma`, `View:FirmaDigital` y `Create:SolicitudFirma`
-   (quién prepara envíos) a otros roles si hace falta.
+   `super_admin`) y asignar `*:CertificadoFirma`, `View:FirmaDigital`, `Create:SolicitudFirma`
+   (quién prepara envíos) y `Cancel:SolicitudFirma` (cancelar envíos ajenos) a otros roles si hace
+   falta. `Cancel:SolicitudFirma` está declarado en `config/filament-shield.php` (`resources.manage`),
+   así aparece en la pantalla de roles y no se pierde al guardar un rol.
 5. Compilar el frontend (incluye el canvas): `vendor/bin/sail pnpm install && vendor/bin/sail pnpm run build`.
 6. Reiniciar el worker: `vendor/bin/sail artisan queue:restart`.
-7. **Respaldar `FIRMA_ENCRYPTION_KEY`** por separado de `storage/app/private`: sin ella no se
+7. Levantar el scheduler: `vendor/bin/sail up -d scheduler`.
+8. **Respaldar `FIRMA_ENCRYPTION_KEY`** por separado de `storage/app/private`: sin ella no se
    pueden abrir los `.p12` y todos los usuarios tendrían que recibir el archivo de nuevo.

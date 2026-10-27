@@ -9,7 +9,9 @@ Se reutiliza lo que ya existe:
 
 ## Tipos de evento nuevos
 
-Se agregan a `TipoEventoNotificacion`. Los marcados con 🔒 **siempre** se envían por los dos canales y no se pueden apagar en las preferencias.
+Todos se agrupan en un solo tipo, `TipoEventoNotificacion::FirmaDigital`, con un interruptor por canal en *Usuarios → Seguridad → Notificaciones*.
+
+> **Cambio (fase 6):** al principio los eventos marcados con 🔒 se enviaban siempre. Se decidió que **todos** respeten el interruptor, para poder desactivar los correos en pruebas. Al apagar un canal, la pantalla muestra un aviso: no se bloquea ninguna firma, las pendientes siguen en *Pendientes de mi firma* y los avisos omitidos no se reenvían al volver a encenderlo.
 
 | Evento | Destinatarios | Campana | Correo |
 |---|---|---|---|
@@ -35,6 +37,7 @@ Se dispara cuando la contraseña del sistema cambia **por fuera** de *Mi perfil*
 > Por seguridad, tu firma digital quedó en pausa hasta que la reactives.
 >
 > **Cómo reactivarla (2 minutos):**
+>
 > 1. Entra al sistema con tu nueva contraseña.
 > 2. Ve a **Menú de usuario → Mi firma digital → Reactivar**.
 > 3. Paso 1: escribe la contraseña de tu archivo **.p12** (la de Digicert/Viafirma, **no** la del sistema).
@@ -80,7 +83,7 @@ Schedule::command('firmas:avisar-vencimientos')->dailyAt('08:00')->timezone('Ame
 
 2. `compose.yaml`: un servicio `scheduler` con la misma imagen que `worker` y el comando `php artisan schedule:work`.
 
-**Reglas de `firmas:enviar-recordatorios`:**
+**Reglas de** `firmas:enviar-recordatorios`**:**
 
 - Solo envíos con `recordatorio_cada_horas` definido.
 - Solo firmantes con firmas pendientes que **pueden firmar ahora**: en orden libre, todos los pendientes; con orden, solo al que le toca.
@@ -88,4 +91,4 @@ Schedule::command('firmas:avisar-vencimientos')->dailyAt('08:00')->timezone('Ame
 - Solo entre 08:00 y 19:00, hora de Bolivia, de lunes a viernes.
 - Si se pasó la `fecha_limite`, el aviso se marca como **vencido** y se copia al creador.
 
-**`firmas:avisar-vencimientos`:** certificados activos que vencen en 30, 15 o 7 días.
+`firmas:avisar-vencimientos`**:** certificados activos que vencen en 30, 15 o 7 días.

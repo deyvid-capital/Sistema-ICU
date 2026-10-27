@@ -8,7 +8,6 @@ use App\Models\SolicitudFirma;
 use App\Models\SolicitudFirmaFirma;
 use App\Models\SolicitudFirmaFirmante;
 use App\Models\User;
-use App\Notifications\Firma\FirmaSolicitadaNotification;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -17,6 +16,8 @@ use Illuminate\Support\Facades\DB;
  */
 class AjustarFirmantesEnCurso
 {
+    public function __construct(private AvisosSolicitudFirma $avisos) {}
+
     /**
      * El nuevo firmante hereda el lugar y los recuadros del anterior.
      *
@@ -45,7 +46,7 @@ class AjustarFirmantesEnCurso
         DB::transaction(fn () => $firmante->update(['usuario_id' => $nuevo->getKey(), 'ultimo_recordatorio_at' => null]));
 
         if ($firmante->firmas()->with(['documento.solicitud', 'firmante'])->get()->contains(fn (SolicitudFirmaFirma $firma): bool => $firma->leToca())) {
-            $nuevo->notify(new FirmaSolicitadaNotification($solicitud));
+            $this->avisos->pedirFirma($solicitud, collect([$nuevo]));
         }
     }
 
@@ -70,7 +71,7 @@ class AjustarFirmantesEnCurso
 
         $solicitud->update(['orden_obligatorio' => false]);
 
-        FirmarDocumento::avisarSiguientes(
+        $this->avisos->pedirFirma(
             $solicitud,
             $esperaban->map(fn (SolicitudFirmaFirma $firma): ?User => $firma->firmante->usuario)->filter()->values(),
         );

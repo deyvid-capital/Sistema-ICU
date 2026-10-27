@@ -67,6 +67,28 @@ services:
             - redis
         restart: unless-stopped
         mem_limit: 768m
+    scheduler:
+        # Tareas programadas (routes/console.php): recordatorios de firma cada hora y
+        # avisos de vencimiento de certificados a las 08:00. Misma imagen y usuario que worker.
+        image: 'sail-8.5/app'
+        command:
+            - php
+            - /var/www/html/artisan
+            - schedule:work
+        environment:
+            WWWUSER: '${WWWUSER}'
+            SUPERVISOR_PHP_USER: sail
+            LARAVEL_SAIL: 1
+            HOME: /home/sail
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - pgsql
+            - redis
+        restart: unless-stopped
+        mem_limit: 256m
     pgsql:
         image: 'postgres:18-alpine'
         ports:

@@ -85,10 +85,13 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 
 ## Fase 6: Notificaciones y recordatorios
 
-- [ ] Nuevos `TipoEventoNotificacion`, `SolicitudFirmaNotification` y `FirmaRequiereReactivacionNotification`.
-- [ ] Comandos `firmas:enviar-recordatorios` y `firmas:avisar-vencimientos`.
-- [ ] `Schedule` en `routes/console.php` + servicio `scheduler` en `compose.yaml`.
-- [ ] **Pruebas:** `Notification::fake()` por evento, eventos 🔒 que ignoran las preferencias, recordatorio según la configuración del envío y el modo de orden, solo en horario hábil, avisos a 30, 15 y 7 días, contenido del correo de reactivación (usuario y admins).
+- [x] `TipoEventoNotificacion::FirmaDigital`: interruptor por usuario (campana / correo) en *Usuarios → Seguridad → Notificaciones*, con aviso de qué pasa al apagarlo. **Cambio respecto al plan:** ya no hay eventos 🔒; todos los avisos de firma respetan el interruptor (pedido para poder probar sin mandar correos reales).
+- [x] `SolicitudFirmaNotification` (+ `EventoSolicitudFirma`): firmó, finalizado, rechazado, cancelado, plazo vencido. `FirmaSolicitadaNotification` también hace de recordatorio. `CertificadoPorVencerNotification`.
+- [x] `AvisosSolicitudFirma`: destinatarios de cada evento, sin avisarse a uno mismo; "Firmar todos" avisa una sola vez.
+- [x] Comandos `firmas:enviar-recordatorios` (con `--fuera-de-horario` para pruebas) y `firmas:avisar-vencimientos` (columna `aviso_vencimiento_dias` para no repetir).
+- [x] `Schedule` en `routes/console.php` + servicio `scheduler` en `compose.yaml`.
+- [x] `Cancel:SolicitudFirma` declarado en `config/filament-shield.php` para que la pantalla de roles no lo borre al guardar.
+- [x] **Pruebas:** `NotificacionesFirmaTest` (19) y `SeguridadGuardadoTest::test_apagar_y_volver_a_encender_los_avisos_de_firma_digital`.
 
 ## Fase 7: Integración con documentos existentes
 

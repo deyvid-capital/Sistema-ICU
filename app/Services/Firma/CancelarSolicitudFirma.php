@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  */
 class CancelarSolicitudFirma
 {
+    public function __construct(private AvisosSolicitudFirma $avisos) {}
+
     /**
      * @throws FirmaDigitalException
      */
@@ -35,6 +37,8 @@ class CancelarSolicitudFirma
                 'cancelada_por' => $usuario->getKey(),
                 'motivo_cancelacion' => $motivo,
             ]);
+
+            $this->avisos->cancelada($solicitud, $usuario, $motivo);
         });
     }
 }

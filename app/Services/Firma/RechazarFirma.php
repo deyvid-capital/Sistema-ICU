@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  */
 class RechazarFirma
 {
+    public function __construct(private AvisosSolicitudFirma $avisos) {}
+
     /**
      * @throws FirmaDigitalException
      */
@@ -34,10 +36,15 @@ class RechazarFirma
             throw FirmaDigitalException::firmaNoPendiente();
         }
 
-        DB::transaction(function () use ($firma, $motivo): void {
+        DB::transaction(function () use ($firma, $usuario, $motivo): void {
             $firma->update(['estado' => EstadoFirma::Rechazado, 'motivo_rechazo' => $motivo]);
             $firma->documento->update(['estado' => EstadoDocumentoFirma::Rechazado]);
-            $firma->documento->solicitud->finalizarSiCorresponde();
+
+            $this->avisos->rechazada($firma, $usuario, $motivo);
+
+            if ($firma->documento->solicitud->finalizarSiCorresponde()) {
+                $this->avisos->finalizada($firma->documento->solicitud);
+            }
         });
     }
 }

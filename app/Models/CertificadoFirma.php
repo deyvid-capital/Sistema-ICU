@@ -77,6 +77,7 @@ class CertificadoFirma extends Model
             'activado_at' => 'datetime',
             'bloqueado_hasta' => 'datetime',
             'intentos_fallidos' => 'integer',
+            'aviso_vencimiento_dias' => 'integer',
         ];
     }
 

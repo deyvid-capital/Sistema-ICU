@@ -7,12 +7,10 @@ use App\Enums\EstadoFirma;
 use App\Exceptions\FirmaDigitalException;
 use App\Exceptions\FirmadorException;
 use App\Filament\Resources\SolicitudesFirma\SolicitudFirmaResource;
-use App\Models\SolicitudFirma;
 use App\Models\SolicitudFirmaDocumento;
 use App\Models\SolicitudFirmaFirma;
 use App\Models\User;
 use App\Notifications\CriticalEventNotification;
-use App\Notifications\Firma\FirmaSolicitadaNotification;
 use App\Support\Notifications\NotifyAdmins;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -34,7 +32,10 @@ class FirmarDocumento
 
     private const INTENTOS = 2;
 
-    public function __construct(private FirmadorClient $firmador) {}
+    public function __construct(
+        private FirmadorClient $firmador,
+        private AvisosSolicitudFirma $avisos,
+    ) {}
 
     /**
      * @throws FirmaDigitalException
@@ -42,8 +43,10 @@ class FirmarDocumento
     public function __invoke(SolicitudFirmaFirma $firma, User $usuario, CredencialesFirma $credenciales): SolicitudFirmaDocumento
     {
         $siguientes = $this->firmarSinAvisar($firma, $usuario, $credenciales);
+        $solicitud = $firma->documento->solicitud;
 
-        self::avisarSiguientes($firma->documento->solicitud, $siguientes);
+        $this->avisos->pedirFirma($solicitud, $siguientes);
+        $this->avisos->firmaRealizada($solicitud, $usuario, [$firma->documento->nombre]);
 
         return $firma->documento->refresh();
     }
@@ -78,15 +81,6 @@ class FirmarDocumento
         } finally {
             $bloqueo->release();
         }
-    }
-
-    /**
-     * @param  Collection<int, User>  $usuarios
-     */
-    public static function avisarSiguientes(SolicitudFirma $solicitud, Collection $usuarios): void
-    {
-        $usuarios->unique(fn (User $usuario): string => (string) $usuario->getKey())
-            ->each(fn (User $usuario) => $usuario->notify(new FirmaSolicitadaNotification($solicitud)));
     }
 
     /**
@@ -226,7 +220,10 @@ class FirmarDocumento
         ]);
 
         $documento->refresh()->completarSiCorresponde();
-        $documento->solicitud->finalizarSiCorresponde();
+
+        if ($documento->solicitud->finalizarSiCorresponde()) {
+            $this->avisos->finalizada($documento->solicitud);
+        }
 
         return true;
     }

@@ -3,6 +3,7 @@
 namespace App\Notifications\Firma;
 
 use App\Filament\Pages\MiFirmaDigital;
+use App\Notifications\Firma\Concerns\RespetaPreferenciaFirma;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -12,11 +13,12 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Aviso al titular de que el admin cargó (o renovó) su .p12 y debe activarlo.
- * Siempre por campana y correo: no depende de las preferencias de notificación.
+ * Por campana y correo, según la preferencia "Firma digital" del usuario.
  */
 class FirmaActivacionPendienteNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use RespetaPreferenciaFirma;
 
     public function __construct(public bool $esRenovacion = false)
     {
@@ -28,7 +30,7 @@ class FirmaActivacionPendienteNotification extends Notification implements Shoul
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return $this->canalesPermitidos($notifiable, ['database', 'mail']);
     }
 
     /**
