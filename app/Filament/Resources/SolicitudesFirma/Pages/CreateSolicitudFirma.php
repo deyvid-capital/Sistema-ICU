@@ -11,13 +11,17 @@ use App\Services\Firma\DocumentosFirmables;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Wizard;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class CreateSolicitudFirma extends CreateRecord
 {
-    use HasWizard;
+    use HasWizard {
+        getWizardComponent as protected wizardDeFilament;
+    }
 
     protected static string $resource = SolicitudFirmaResource::class;
 
@@ -29,11 +33,27 @@ class CreateSolicitudFirma extends CreateRecord
     }
 
     /**
+     * Asistente dentro de una tarjeta, con la barra de pasos arriba (Filament lo
+     * deja sin tarjeta por defecto en las páginas de creación).
+     */
+    public function getWizardComponent(): Component
+    {
+        /** @var Wizard $wizard */
+        $wizard = $this->wizardDeFilament();
+
+        return $wizard->contained();
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     protected function handleRecordCreation(array $data): Model
     {
         $subidos = $this->archivosSubidos($data['documentos_subidos'] ?? []);
+
+        if (! ($data['con_fecha_limite'] ?? false)) {
+            $data['fecha_limite'] = null;
+        }
 
         try {
             return app(CrearSolicitudFirma::class)(

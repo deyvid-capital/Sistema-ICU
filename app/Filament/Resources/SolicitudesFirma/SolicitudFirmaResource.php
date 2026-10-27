@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\SolicitudesFirma;
 
-use App\Filament\Clusters\Firmas\FirmasCluster;
 use App\Filament\Resources\SolicitudesFirma\Pages\ConfigurarPosicionesFirma;
 use App\Filament\Resources\SolicitudesFirma\Pages\CreateSolicitudFirma;
 use App\Filament\Resources\SolicitudesFirma\Pages\ListSolicitudesFirma;
@@ -26,21 +25,35 @@ class SolicitudFirmaResource extends Resource
 {
     protected static ?string $model = SolicitudFirma::class;
 
-    protected static ?string $cluster = FirmasCluster::class;
+    /**
+     * Mismo URL que tenía cuando vivía en un cluster (/admin/firmas/solicitudes).
+     */
+    protected static ?string $slug = 'firmas/solicitudes';
 
-    protected static ?string $slug = 'solicitudes';
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCheck;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPencilSquare;
 
     protected static ?string $recordTitleAttribute = 'codigo';
 
-    protected static ?string $navigationLabel = 'Envíos a firmar';
+    protected static ?string $navigationLabel = 'Firma digital';
 
     protected static ?string $modelLabel = 'envío a firmar';
 
     protected static ?string $pluralModelLabel = 'envíos a firmar';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 7;
+
+    /**
+     * Filament pone mayúscula a cada palabra ("Envíos A Firmar"); aquí solo a la primera.
+     */
+    public static function getTitleCaseModelLabel(): string
+    {
+        return 'Envío a firmar';
+    }
+
+    public static function getTitleCasePluralModelLabel(): string
+    {
+        return 'Envíos a firmar';
+    }
 
     public static function infolist(Schema $schema): Schema
     {

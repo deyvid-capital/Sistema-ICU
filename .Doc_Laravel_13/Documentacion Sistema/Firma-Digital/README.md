@@ -37,7 +37,7 @@ Este documento describe **lo que ya está construido**:
 | Página `FirmaDigital` | Ajustes de firma (cluster Configuración) |
 | Página `MiFirmaDigital` | Pantalla de cada usuario: activar, reactivar, probar |
 | Notificaciones `App\Notifications\Firma\*` | Activación pendiente y reactivación requerida (campana + correo) |
-| Recurso `SolicitudFirmaResource` (cluster **Firma digital**) | Preparar y ver envíos a firmar |
+| Recurso `SolicitudFirmaResource` (menú lateral **Firma digital**) | Preparar y ver envíos a firmar |
 | `App\Services\Firma\CrearSolicitudFirma` / `DocumentosFirmables` | Crear el envío con copias privadas de los PDF / buscar PDF del sistema |
 
 ---
@@ -90,7 +90,7 @@ firmado (documento base: `resources/firma/documento-prueba.pdf`). No guarda nada
 
 ### 2.3 Envíos a firmar
 
-Menú lateral **Firma digital → Envíos a firmar**.
+Menú lateral **Firma digital** (una sola entrada, sin sub-navegación).
 
 **Preparar envío** (asistente de 3 pasos):
 
@@ -98,7 +98,10 @@ Menú lateral **Firma digital → Envíos a firmar**.
    bajas, recibos) y/o subir PDF. Máximo 20 por envío.
 2. **Firmantes** — solo aparecen usuarios con firma **activa y vigente**. *Exigir orden de firma*
    (apagado por defecto): si se enciende, la lista se ordena arrastrando.
-3. **Detalles** — asunto, mensaje, fecha límite y recordatorio (prellenados con *Ajustes de firma*).
+3. **Detalles** — asunto, mensaje y recordatorio. La **fecha límite es opcional**: interruptor *Definir fecha límite*
+   (apagado por defecto = sin fecha). Al encenderlo se muestra un aviso explicativo y la fecha pasa a ser
+   obligatoria, prellenada con el plazo de *Ajustes de firma*. No bloquea la firma al vencer: es una referencia
+   para avisos y recordatorios.
 
 Al guardar, el envío queda en **borrador** con código `SF-AAAA-NNNNN`. Cada PDF se copia al disco
 privado (`firma-digital/solicitudes/{codigo}/{documento}/original.pdf`) con su hash y el tamaño de
@@ -324,7 +327,6 @@ La fecha la pone el reloj del servidor (el sello de tiempo TSA quedó para despu
 | `app/Notifications/Firma/` | Notificaciones |
 | `app/Policies/CertificadoFirmaPolicy.php` | Permisos Shield |
 | `resources/firma/documento-prueba.pdf` | PDF base de "Probar mi firma" |
-| `app/Filament/Clusters/Firmas/FirmasCluster.php` | Cluster *Firma digital* del menú lateral |
 | `app/Filament/Resources/SolicitudesFirma/` | Recurso de envíos (asistente, lista, detalle) |
 | `app/Models/SolicitudFirma*.php` | Envío, documentos, firmantes, firmas (recuadros) y versiones |
 | `app/Policies/SolicitudFirmaPolicy.php` | Quién ve, prepara y elimina envíos |

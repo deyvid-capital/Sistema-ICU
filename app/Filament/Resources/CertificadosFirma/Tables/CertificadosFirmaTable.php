@@ -38,7 +38,8 @@ class CertificadosFirmaTable
                 TextColumn::make('titular_cn')
                     ->label('Titular del certificado')
                     ->searchable()
-                    ->placeholder('Se completa al activar'),
+                    ->placeholder('Se completa al activar')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('titular_documento')
                     ->label('CI')
                     ->searchable()
@@ -46,7 +47,7 @@ class CertificadosFirmaTable
                 TextColumn::make('cargo_en_sello')
                     ->label('Cargo en sello')
                     ->placeholder('—')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('emisor')
                     ->label('Emisor')
                     ->placeholder('—')

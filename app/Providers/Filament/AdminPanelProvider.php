@@ -11,7 +11,6 @@ use App\Filament\Clusters\Configuracion\Pages\FirmaDigital;
 use App\Filament\Clusters\Configuracion\Pages\Marca;
 use App\Filament\Clusters\Configuracion\Pages\TemaColores;
 use App\Filament\Clusters\Equipos\EquiposCluster;
-use App\Filament\Clusters\Firmas\FirmasCluster;
 use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Clusters\Software\SoftwareCluster;
@@ -161,7 +160,6 @@ class AdminPanelProvider extends PanelProvider
                 EquiposCluster::class,
                 AsignacionCluster::class,
                 CelularesCluster::class,
-                FirmasCluster::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

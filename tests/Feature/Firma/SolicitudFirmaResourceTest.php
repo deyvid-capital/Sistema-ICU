@@ -125,6 +125,44 @@ class SolicitudFirmaResourceTest extends TestCase
         $this->assertSame([$pedro->id, $juanito->id], $solicitud->firmantes->pluck('usuario_id')->all());
     }
 
+    public function test_por_defecto_el_envio_no_tiene_fecha_limite(): void
+    {
+        Livewire::test(CreateSolicitudFirma::class)
+            ->assertSchemaStateSet(['con_fecha_limite' => false])
+            ->fillForm([
+                'documentos_subidos' => [UploadedFile::fake()->createWithContent('acta.pdf', $this->pdfDePrueba())],
+                'firmantes' => [(string) $this->firmante('Juanito')->id],
+                'asunto' => 'Sin plazo',
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertNull(SolicitudFirma::query()->sole()->fecha_limite);
+    }
+
+    public function test_al_activar_la_fecha_limite_es_obligatoria_y_se_guarda(): void
+    {
+        $firmante = (string) $this->firmante('Juanito')->id;
+        $datos = [
+            'documentos_subidos' => [UploadedFile::fake()->createWithContent('acta.pdf', $this->pdfDePrueba())],
+            'firmantes' => [$firmante],
+            'asunto' => 'Con plazo',
+            'con_fecha_limite' => true,
+        ];
+
+        Livewire::test(CreateSolicitudFirma::class)
+            ->fillForm([...$datos, 'fecha_limite' => null])
+            ->call('create')
+            ->assertHasFormErrors(['fecha_limite' => 'required']);
+
+        Livewire::test(CreateSolicitudFirma::class)
+            ->fillForm([...$datos, 'fecha_limite' => today()->addDays(10)->toDateString()])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertTrue(SolicitudFirma::query()->sole()->fecha_limite->isSameDay(today()->addDays(10)));
+    }
+
     public function test_exige_al_menos_un_documento(): void
     {
         Livewire::test(CreateSolicitudFirma::class)

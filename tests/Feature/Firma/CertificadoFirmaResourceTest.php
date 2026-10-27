@@ -50,8 +50,7 @@ class CertificadoFirmaResourceTest extends TestCase
         $this->get(CertificadoFirmaResource::getUrl(panel: 'admin'))->assertSuccessful();
 
         Livewire::test(ListCertificadosFirma::class)
-            ->assertCanSeeTableRecords([$activo, $pendiente])
-            ->assertSee('Se completa al activar');
+            ->assertCanSeeTableRecords([$activo, $pendiente]);
     }
 
     public function test_el_historial_se_oculta_por_defecto(): void

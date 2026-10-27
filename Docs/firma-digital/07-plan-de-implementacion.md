@@ -47,7 +47,7 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 ## Fase 3: Envíos y preparación (Pantalla 2, sin canvas) ✅
 
 - [x] Migración `create_solicitudes_firma_tables` (solicitudes, documentos, firmantes, firmas y versiones), modelos, enums (`EstadoSolicitudFirma`, `EstadoDocumentoFirma`, `EstadoFirma`) y factories.
-- [x] Cluster **Firma digital** (`/admin/firmas`) con `SolicitudFirmaResource` (*Envíos a firmar*): asistente de 3 pasos (documentos del sistema y/o PDF subidos → firmantes con "Exigir orden" opcional → asunto, mensaje, fecha límite y recordatorio con los valores por defecto de la configuración).
+- [x] `SolicitudFirmaResource` (*Envíos a firmar*, entrada **Firma digital** del menú lateral, `/admin/firmas/solicitudes`; sin cluster): asistente de 3 pasos (documentos del sistema y/o PDF subidos → firmantes con "Exigir orden" opcional → asunto, mensaje, fecha límite y recordatorio con los valores por defecto de la configuración).
 - [x] `DocumentosFirmables`: buscador de PDF ya generados (equipos, celulares, altas/bajas, recibos) y lectura de su archivo.
 - [x] `CrearSolicitudFirma`: valida PDF con el firmador (cifrado o dañado → error claro), guarda una copia privada de cada uno (snapshot + hash + páginas), firmantes en orden y código `SF-AAAA-NNNNN`. Si algo falla no queda nada.
 - [x] El envío queda en **borrador**. El creador puede eliminarlo (`EliminarBorradorSolicitudFirma` borra también las copias).

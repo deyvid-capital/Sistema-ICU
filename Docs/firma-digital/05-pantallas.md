@@ -63,7 +63,7 @@ Todas se construyen en el panel Filament existente (`/admin`) y siguen las conve
 
 ## Pantalla 2: Preparar envío a firmar
 
-**Ruta:** `/admin/firmas/solicitudes/crear`. Es un resource `SolicitudFirmaResource` en un cluster nuevo, **Firmas**, con la página Create como **Wizard**.
+**Ruta:** `/admin/firmas/solicitudes/crear`. Es un resource `SolicitudFirmaResource`, entrada **Firma digital** del menú lateral (sin cluster), con la página Create como **Wizard**.
 
 **Paso 1: Documentos (uno o varios).** Dos pestañas (`Tabs`):
 

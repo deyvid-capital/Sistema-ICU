@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Icons\Heroicon;
@@ -121,12 +122,23 @@ class SolicitudFirmaWizard
                     ->label('Mensaje para los firmantes')
                     ->rows(3)
                     ->maxLength(2000),
+                Toggle::make('con_fecha_limite')
+                    ->label('Definir fecha límite')
+                    ->helperText('Apagado: el envío no tiene fecha límite.')
+                    ->default(false)
+                    ->live(),
+                Callout::make('¿Para qué sirve la fecha límite?')
+                    ->info()
+                    ->description('Es una referencia para los firmantes: aparece en el aviso y en los recordatorios. Al vencer no se bloquea la firma; los recordatorios siguientes se marcan como vencidos y se copian a quien creó el envío.')
+                    ->visible(fn (Get $get): bool => (bool) $get('con_fecha_limite')),
                 DatePicker::make('fecha_limite')
                     ->label('Fecha límite')
                     ->native(false)
                     ->displayFormat('d/m/Y')
                     ->minDate(today())
-                    ->default(today()->addDays($ajustes->plazo_dias_por_defecto)),
+                    ->default(today()->addDays($ajustes->plazo_dias_por_defecto))
+                    ->required()
+                    ->visible(fn (Get $get): bool => (bool) $get('con_fecha_limite')),
                 TextInput::make('recordatorio_cada_horas')
                     ->label('Recordatorio cada (horas)')
                     ->helperText('Déjalo vacío para no enviar recordatorios.')
