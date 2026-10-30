@@ -7,6 +7,7 @@ use App\Jobs\GenerateMovimientoFormularioPdfJob;
 use App\Models\Concerns\HasDocumentoOficialMovimientoPdf;
 use App\Models\Movimiento;
 use App\Services\Firma\DocumentosEnFirma;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Alignment;
@@ -30,7 +31,17 @@ class MovimientoFormularioPdfActions
             self::generate($tipo),
             self::view($tipo),
             self::download($tipo),
+            FirmaEnOrigenActions::enviarAFirmar(self::resolverPdf()),
+            FirmaEnOrigenActions::subirFirmado(self::resolverPdf()),
         ];
+    }
+
+    /**
+     * PDF oficial del movimiento (para el estado de firma).
+     */
+    public static function resolverPdf(): Closure
+    {
+        return fn (Model $record): mixed => self::usesDocumentoOficial($record) ? $record->documentoOficial() : null;
     }
 
     public static function preview(MovimientoFormularioPdfTipo $tipo): Action
@@ -61,6 +72,9 @@ class MovimientoFormularioPdfActions
 
     public static function generate(MovimientoFormularioPdfTipo $tipo): Action
     {
+        $resolverPdf = self::resolverPdf();
+        $firmado = fn (Model $record): bool => $resolverPdf($record)?->estaFirmado() ?? false;
+
         return Action::make('generarPdf')
             ->label(fn (Movimiento $record): string => self::usesDocumentoOficial($record) && $record->hasDocumentoOficial()
                 ? 'Volver a generar PDF'
@@ -69,18 +83,25 @@ class MovimientoFormularioPdfActions
             ->color('primary')
             ->visible(fn (Model $record): bool => $record instanceof Movimiento
                 && (! method_exists($record, 'trashed') || ! $record->trashed()))
+            ->disabled(fn (Model $record): bool => app(DocumentosEnFirma::class)->envioEnCurso($record) !== null)
+            ->tooltip(fn (Model $record): ?string => ($envio = app(DocumentosEnFirma::class)->envioEnCurso($record)) !== null
+                ? app(DocumentosEnFirma::class)->mensaje($envio)
+                : null)
             ->modalIcon(Heroicon::OutlinedDocumentArrowDown)
-            ->modalHeading('Generar PDF')
+            ->modalHeading(fn (Model $record): string => $firmado($record) ? 'Regenerar documento firmado' : 'Generar PDF')
             ->modalDescription(fn (Movimiento $record): string => self::usesDocumentoOficial($record) && $record->hasDocumentoOficial()
                 ? 'Se reemplazará el PDF oficial existente ('.$tipo->nombreOficial().').'
                 : 'Se generará y guardará el documento «'.$tipo->nombreOficial().'».')
             ->modalSubmitActionLabel('Generar y guardar')
-            ->requiresConfirmation()
-            ->action(function (Movimiento $record) use ($tipo): void {
+            ->modalSubmitAction(fn (Action $action, Model $record): Action => $action->color($firmado($record) ? 'danger' : 'primary'))
+            ->requiresConfirmation(fn (?Model $record): bool => ! ($record !== null && $firmado($record)))
+            ->schema(fn (): array => FirmaEnOrigenActions::advertencia($resolverPdf))
+            ->action(function (Movimiento $record, array $data) use ($tipo): void {
                 GenerateMovimientoFormularioPdfJob::dispatch(
                     $record,
                     $tipo,
                     auth()->id(),
+                    FirmaEnOrigenActions::confirmado($data),
                 );
 
                 Notification::make()

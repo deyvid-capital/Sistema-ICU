@@ -39,6 +39,7 @@ class RechazarFirma
         DB::transaction(function () use ($firma, $usuario, $motivo): void {
             $firma->update(['estado' => EstadoFirma::Rechazado, 'motivo_rechazo' => $motivo]);
             $firma->documento->update(['estado' => EstadoDocumentoFirma::Rechazado]);
+            $firma->documento->origenVinculado()?->marcarRechazado();
 
             $this->avisos->rechazada($firma, $usuario, $motivo);
 

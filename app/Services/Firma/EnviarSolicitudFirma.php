@@ -38,7 +38,11 @@ class EnviarSolicitudFirma
 
         $this->posiciones->validarCompletas($solicitud);
 
-        $documentos = $solicitud->documentos()->with('firmas')->get();
+        $documentos = $solicitud->documentos()->with(['firmas', 'origen'])->get();
+
+        foreach ($documentos as $documento) {
+            CrearSolicitudFirma::validarOrigenFirmable($documento->origen, $documento->nombre);
+        }
         $disco = Storage::disk(SolicitudFirmaDocumento::DISCO);
         $preparados = [];
 
@@ -64,6 +68,12 @@ class EnviarSolicitudFirma
                         'archivo' => $preparados[$documento->id]['ruta'],
                         'hash_sha256' => $preparados[$documento->id]['hash'],
                     ]);
+
+                    $origen = $documento->origen;
+
+                    if ($origen !== null && method_exists($origen, 'marcarEnFirma')) {
+                        $origen->marcarEnFirma($documento);
+                    }
                 }
 
                 $solicitud->update([

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasIcuMedia;
+use App\Services\Archivos\ArchivosService;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 
@@ -62,6 +63,14 @@ class AppearanceSetting extends Model implements HasMedia
     protected function coleccionesConConversion(): array
     {
         return ['logo_claro', 'logo_oscuro'];
+    }
+
+    /**
+     * La marca se muestra sin sesión (login, pestaña del navegador): siempre en el disco público.
+     */
+    protected function discoMedia(): string
+    {
+        return app(ArchivosService::class)->discoPublico();
     }
 
     public function clearBrandMedia(): void

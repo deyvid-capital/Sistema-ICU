@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EstadoDocumentoFirma;
 use App\Enums\EstadoFirma;
+use App\Models\Concerns\TieneEstadoFirma;
 use Database\Factories\SolicitudFirmaDocumentoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -59,6 +60,20 @@ class SolicitudFirmaDocumento extends Model
     public function origen(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * El PDF de origen, si su estado de firma depende de este documento.
+     */
+    public function origenVinculado(): ?Model
+    {
+        $origen = $this->origen;
+
+        return $origen !== null
+            && in_array(TieneEstadoFirma::class, class_uses_recursive($origen), true)
+            && $origen->getAttribute('firma_documento_id') === $this->getKey()
+                ? $origen
+                : null;
     }
 
     public function firmas(): HasMany

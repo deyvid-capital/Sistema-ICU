@@ -13,10 +13,10 @@ class ReciboEquipoDeletesStoredDocumentTest extends TestCase
 
     public function test_soft_deleting_keeps_stored_document_for_restore(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'recibo-equipos/recibo-test.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $recibo = ReciboEquipo::factory()->create(['url' => $path]);
 
@@ -24,43 +24,43 @@ class ReciboEquipoDeletesStoredDocumentTest extends TestCase
 
         $this->assertTrue($recibo->trashed());
         $this->assertFalse($recibo->storedDocumentWasDeleted);
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('local')->assertExists($path);
     }
 
     public function test_restoring_keeps_access_to_stored_document(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'recibo-equipos/recibo-restore.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $recibo = ReciboEquipo::factory()->create(['url' => $path]);
         $recibo->delete();
         $recibo->restore();
 
         $this->assertFalse($recibo->trashed());
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('local')->assertExists($path);
     }
 
     public function test_force_deleting_removes_stored_document_when_file_exists(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'recibo-equipos/recibo-force.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $recibo = ReciboEquipo::factory()->create(['url' => $path]);
         $recibo->delete();
         $recibo->forceDelete();
 
         $this->assertTrue($recibo->storedDocumentWasDeleted);
-        Storage::disk('public')->assertMissing($path);
+        Storage::disk('local')->assertMissing($path);
         $this->assertDatabaseMissing('recibos_equipos', ['id' => $recibo->id]);
     }
 
     public function test_force_deleting_without_file_does_not_flag_document_as_deleted(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $recibo = ReciboEquipo::factory()->create([
             'url' => 'recibo-equipos/inexistente.pdf',

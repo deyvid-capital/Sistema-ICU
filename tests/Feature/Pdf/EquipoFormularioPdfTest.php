@@ -27,7 +27,7 @@ class EquipoFormularioPdfTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('public');
+        Storage::fake('local');
 
         $this->mock(BrowsershotPdfFactory::class, function ($mock): void {
             $mock->shouldReceive('fromView')
@@ -55,7 +55,7 @@ class EquipoFormularioPdfTest extends TestCase
         $this->assertSame(EquipoFormularioPdfTipo::Entrega->nombreOficial(), $pdf->nombre);
         $this->assertSame('pdf-equipos/entrega/FUE-001-2024.pdf', $pdf->url);
         $this->assertTrue($entrega->fresh()->hasDocumentoOficial());
-        Storage::disk('public')->assertExists($pdf->url);
+        Storage::disk('local')->assertExists($pdf->url);
     }
 
     public function test_it_replaces_existing_oficial_pdf_on_regenerate_when_numero_changes(): void
@@ -82,8 +82,8 @@ class EquipoFormularioPdfTest extends TestCase
         $this->assertSame($first->id, $second->id);
         $this->assertSame('pdf-equipos/entrega/FUE-003-2024.pdf', $second->url);
         $this->assertNotSame($oldPath, $second->url);
-        Storage::disk('public')->assertMissing($oldPath);
-        Storage::disk('public')->assertExists($second->url);
+        Storage::disk('local')->assertMissing($oldPath);
+        Storage::disk('local')->assertExists($second->url);
         $this->assertSame(1, $entrega->pdfs()->where('nombre', EquipoFormularioPdfTipo::Entrega->nombreOficial())->count());
     }
 
@@ -110,7 +110,7 @@ class EquipoFormularioPdfTest extends TestCase
         $this->assertSame($first->id, $second->id);
         $this->assertSame($first->url, $second->url);
         $this->assertSame('pdf-equipos/entrega/FUE-010-2024.pdf', $second->url);
-        Storage::disk('public')->assertExists($second->url);
+        Storage::disk('local')->assertExists($second->url);
         $this->assertSame(1, $entrega->pdfs()->where('nombre', EquipoFormularioPdfTipo::Entrega->nombreOficial())->count());
     }
 
@@ -127,7 +127,7 @@ class EquipoFormularioPdfTest extends TestCase
 
         $this->assertTrue($nota->fresh()->hasDocumentoOficial());
         $this->assertSame('pdf-equipos/nota-salida/NotaSalida-003-2024.pdf', $pdf->url);
-        Storage::disk('public')->assertExists($pdf->url);
+        Storage::disk('local')->assertExists($pdf->url);
     }
 
     public function test_data_mapper_builds_entrega_documento_payload(): void

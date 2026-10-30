@@ -35,7 +35,7 @@ class RecibosEquipoRelationManagerTest extends TestCase
 
     public function test_creating_a_recibo_through_the_equipo_relation_manager_sets_equipo_id(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $equipo = Equipo::factory()->create();
 
@@ -56,12 +56,12 @@ class RecibosEquipoRelationManagerTest extends TestCase
 
     public function test_pdf_preview_modal_is_not_available_through_the_relation_manager(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $equipo = Equipo::factory()->create();
 
         $path = 'recibo-equipos/recibo.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $recibo = ReciboEquipo::factory()->create([
             'equipo_id' => $equipo->service_tag,
@@ -79,10 +79,10 @@ class RecibosEquipoRelationManagerTest extends TestCase
 
     public function test_pdf_preview_modal_is_available_from_the_standalone_recibo_resource(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'recibo-equipos/recibo.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $recibo = ReciboEquipo::factory()->create(['url' => $path]);
 

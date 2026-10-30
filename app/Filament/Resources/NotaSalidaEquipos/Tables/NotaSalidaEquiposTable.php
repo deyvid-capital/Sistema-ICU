@@ -4,6 +4,7 @@ namespace App\Filament\Resources\NotaSalidaEquipos\Tables;
 
 use App\Enums\EquipoFormularioPdfTipo;
 use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\Equipos\RelationManagers\NotasSalidaRelationManager as EquipoNotasSalidaRelationManager;
 use App\Filament\Resources\NotaSalidaEquipos\NotaSalidaEquipoResource;
 use App\Filament\Resources\UsuarioExternos\RelationManagers\NotasSalidaRelationManager as UsuarioExternoNotasSalidaRelationManager;
@@ -66,8 +67,10 @@ class NotaSalidaEquiposTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
+                FirmaEnOrigenActions::columnaEstado(EquipoFormularioPdfActions::resolverPdf()),
             ])
             ->filters([
+                FirmaEnOrigenActions::filtroEstado('pdfs'),
                 TrashedFilter::make()
                     ->label('Estado del registro'),
             ])

@@ -7,6 +7,7 @@ use App\Exceptions\MovimientoFormularioPdfException;
 use App\Models\Movimiento;
 use App\Models\PdfMovimiento;
 use App\Services\Firma\DocumentosEnFirma;
+use App\Services\Firma\ReemplazoDocumentoFirmado;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -24,12 +25,18 @@ class GenerateMovimientoFormularioPdf
      * @throws MovimientoFormularioPdfException
      * @throws Throwable
      */
-    public function execute(Model $record, MovimientoFormularioPdfTipo $tipo = MovimientoFormularioPdfTipo::AltaBaja): PdfMovimiento
+    public function execute(Model $record, MovimientoFormularioPdfTipo $tipo = MovimientoFormularioPdfTipo::AltaBaja, bool $reemplazarFirmado = false): PdfMovimiento
     {
         $enFirma = app(DocumentosEnFirma::class);
 
         if (($envio = $enFirma->envioEnCurso($record)) !== null) {
             throw new MovimientoFormularioPdfException($enFirma->mensaje($envio));
+        }
+
+        $oficial = $record->pdfs()->where('nombre', $tipo->nombreOficial())->latest('id')->first();
+
+        if (($motivo = app(ReemplazoDocumentoFirmado::class)->impedimento($oficial, $reemplazarFirmado)) !== null) {
+            throw new MovimientoFormularioPdfException($motivo);
         }
 
         $this->validator->validate($record, $tipo);
@@ -66,6 +73,8 @@ class GenerateMovimientoFormularioPdf
                     'fecha' => $fecha,
                     'url' => $path,
                 ]);
+
+                app(ReemplazoDocumentoFirmado::class)->despuesDeRegenerar($existing);
 
                 return $existing->refresh();
             }

@@ -6,6 +6,7 @@ use App\Enums\EstadoDocumentoFirma;
 use App\Enums\EstadoSolicitudFirma;
 use App\Exceptions\FirmaDigitalException;
 use App\Models\SolicitudFirma;
+use App\Models\SolicitudFirmaDocumento;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -27,8 +28,12 @@ class CancelarSolicitudFirma
         }
 
         DB::transaction(function () use ($solicitud, $usuario, $motivo): void {
+            $enCurso = $solicitud->documentos()->where('estado', EstadoDocumentoFirma::EnCurso)->get();
+
+            $enCurso->each(fn (SolicitudFirmaDocumento $documento) => $documento->origenVinculado()?->marcarSinFirma());
+
             $solicitud->documentos()
-                ->where('estado', EstadoDocumentoFirma::EnCurso)
+                ->whereKey($enCurso->modelKeys())
                 ->update(['estado' => EstadoDocumentoFirma::Cancelado]);
 
             $solicitud->update([

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsIcuActivity;
+use App\Models\Concerns\TieneEstadoFirma;
 use App\Services\Archivos\ArchivosService;
 use Database\Factories\PdfEquipoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,8 +20,7 @@ class PdfEquipo extends Model
 
     use LogsIcuActivity;
     use SoftDeletes;
-
-    public const DOCUMENT_DISK = 'public';
+    use TieneEstadoFirma;
 
     public static function documentDisk(): string
     {
@@ -70,7 +70,7 @@ class PdfEquipo extends Model
             return null;
         }
 
-        return Storage::disk(self::documentDisk())->url($this->url);
+        return route('archivos.pdf.ver', ['tipo' => 'pdf_equipo', 'id' => $this->getKey()]);
     }
 
     public function storedDocumentFilename(): ?string

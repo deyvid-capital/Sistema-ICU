@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsIcuActivity;
+use App\Models\Concerns\TieneEstadoFirma;
 use App\Services\Archivos\ArchivosService;
 use Database\Factories\PdfCelularFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,8 +18,7 @@ class PdfCelular extends Model
     use HasFactory;
 
     use LogsIcuActivity;
-
-    public const DOCUMENT_DISK = 'public';
+    use TieneEstadoFirma;
 
     public static function documentDisk(): string
     {
@@ -68,7 +68,7 @@ class PdfCelular extends Model
             return null;
         }
 
-        return Storage::disk(self::documentDisk())->url($this->url);
+        return route('archivos.pdf.ver', ['tipo' => 'pdf_celular', 'id' => $this->getKey()]);
     }
 
     public function storedDocumentFilename(): ?string

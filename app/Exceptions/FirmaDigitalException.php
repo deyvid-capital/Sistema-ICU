@@ -87,6 +87,11 @@ class FirmaDigitalException extends Exception
         return new self("Un envío puede tener como máximo {$maximo} documentos.");
     }
 
+    public static function documentoNoFirmable(string $nombre, string $estado): self
+    {
+        return new self("«{$nombre}» no se puede enviar a firmar: está {$estado}. Si hay que corregirlo, regénéralo primero.");
+    }
+
     public static function documentoNoDisponible(string $nombre): self
     {
         return new self("El archivo de \"{$nombre}\" ya no está disponible en el sistema. Genéralo de nuevo.");

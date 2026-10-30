@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Movimientos\Tables;
 
 use App\Filament\Actions\GuiaImportAction;
 use App\Filament\Imports\MovimientoImporter;
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\Concerns\MovimientoFormularioPdfActions;
 use App\Filament\Resources\Movimientos\MovimientoResource;
 use App\Models\Movimiento;
@@ -77,8 +78,10 @@ class MovimientosTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
+                FirmaEnOrigenActions::columnaEstado(MovimientoFormularioPdfActions::resolverPdf()),
             ])
             ->filters([
+                FirmaEnOrigenActions::filtroEstado('pdfs'),
                 SelectFilter::make('tipo')
                     ->label('Tipo de movimiento')
                     ->options([

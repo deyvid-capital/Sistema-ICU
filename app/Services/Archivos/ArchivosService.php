@@ -10,10 +10,24 @@ use Throwable;
 /**
  * Resuelve disco, carpetas y límites de archivos combinando config/archivos.php
  * con la fila opcional en media_settings.
+ *
+ * Hay dos grupos de archivos:
+ * - Públicos (logos y favicon): siempre en el disco `public`, porque el navegador los pide sin sesión.
+ * - Confidenciales (PDF, capturas de mantenimiento): en `local` (privado) o `s3`, nunca en `public`.
+ *   Se sirven con rutas protegidas o URL temporales firmadas.
  */
 class ArchivosService
 {
     public const CACHE_KEY = 'archivos.resueltos';
+
+    public const DISCO_PUBLICO = 'public';
+
+    /**
+     * Discos permitidos para los archivos confidenciales.
+     *
+     * @var list<string>
+     */
+    public const DISCOS_CONFIDENCIALES = ['local', 's3'];
 
     /**
      * @var array<string, mixed>|null
@@ -35,9 +49,23 @@ class ArchivosService
         Cache::forget(self::CACHE_KEY);
     }
 
+    /**
+     * Disco de los archivos confidenciales. Un valor no permitido (p. ej. `public`
+     * de una configuración anterior) cae en `local`.
+     */
     public function disco(): string
     {
-        return (string) $this->resolver()['disco'];
+        $disco = (string) $this->resolver()['disco'];
+
+        return in_array($disco, self::DISCOS_CONFIDENCIALES, true) ? $disco : 'local';
+    }
+
+    /**
+     * Disco de los archivos públicos (logos y favicon).
+     */
+    public function discoPublico(): string
+    {
+        return self::DISCO_PUBLICO;
     }
 
     public function prefijo(): string
@@ -85,9 +113,12 @@ class ArchivosService
         return (int) $this->resolver()['max_favicon_kb'];
     }
 
+    /**
+     * Visibilidad de los archivos confidenciales: siempre privada.
+     */
     public function visibilidad(): string
     {
-        return (string) $this->resolver()['visibilidad'];
+        return 'private';
     }
 
     public function directorioPdf(string $clave): string
@@ -128,7 +159,6 @@ class ArchivosService
             'max_pdf_kb' => $fila?->max_pdf_kb ?: config('archivos.max_pdf_kb'),
             'max_logo_kb' => $fila?->max_logo_kb ?: config('archivos.max_logo_kb'),
             'max_favicon_kb' => $fila?->max_favicon_kb ?: config('archivos.max_favicon_kb'),
-            'visibilidad' => $fila?->visibilidad ?: config('archivos.visibilidad'),
         ];
     }
 

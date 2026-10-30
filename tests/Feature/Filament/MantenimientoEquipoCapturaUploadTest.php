@@ -51,7 +51,7 @@ class MantenimientoEquipoCapturaUploadTest extends TestCase
 
     public function test_it_stores_captures_in_media_library_named_by_moment_and_service_tag(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $equipo = Equipo::factory()->create(['service_tag' => 'ST100001']);
 
@@ -77,7 +77,7 @@ class MantenimientoEquipoCapturaUploadTest extends TestCase
 
     public function test_it_rejects_images_over_configured_max(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $equipo = Equipo::factory()->create(['service_tag' => 'ST100002']);
 
@@ -95,7 +95,7 @@ class MantenimientoEquipoCapturaUploadTest extends TestCase
 
     public function test_it_rejects_files_that_are_not_png_or_jpg(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $equipo = Equipo::factory()->create(['service_tag' => 'ST100003']);
 

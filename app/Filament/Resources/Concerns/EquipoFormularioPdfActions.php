@@ -30,12 +30,27 @@ class EquipoFormularioPdfActions
     public static function make(EquipoFormularioPdfTipo $tipo, ?Closure $resolveDocument = null): array
     {
         $resolve = $resolveDocument ?? fn (Model $record): Model => $record;
+        $resolverPdf = self::resolverPdf($resolve);
 
         return [
             self::generate($tipo, $resolve),
             self::view($tipo, $resolve),
             self::download($tipo, $resolve),
+            FirmaEnOrigenActions::enviarAFirmar($resolverPdf),
+            FirmaEnOrigenActions::subirFirmado($resolverPdf),
         ];
+    }
+
+    /**
+     * PDF oficial del registro (o del documento que devuelve `$resolveDocument`), para el estado de firma.
+     *
+     * @param  Closure(Model): (?Model)|null  $resolveDocument
+     */
+    public static function resolverPdf(?Closure $resolveDocument = null): Closure
+    {
+        $resolveDocument ??= fn (Model $record): Model => $record;
+
+        return fn (Model $record): mixed => self::documentoOficial($resolveDocument($record));
     }
 
     /**
@@ -59,9 +74,10 @@ class EquipoFormularioPdfActions
     public static function generate(EquipoFormularioPdfTipo $tipo, ?Closure $resolveDocument = null): Action
     {
         $resolveDocument ??= fn (Model $record): Model => $record;
-        $schema = self::generateSchema($tipo);
+        $resolverPdf = self::resolverPdf($resolveDocument);
+        $firmado = fn (Model $record): bool => $resolverPdf($record)?->estaFirmado() ?? false;
 
-        $action = Action::make('generarPdf')
+        return Action::make('generarPdf')
             ->label(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
                 ? 'Volver a generar PDF'
                 : 'Generar PDF')
@@ -71,15 +87,23 @@ class EquipoFormularioPdfActions
             ->disabled(fn (Model $record): bool => self::enFirmaDigital($resolveDocument($record)) !== null)
             ->tooltip(fn (Model $record): ?string => self::enFirmaDigital($resolveDocument($record)))
             ->modalIcon(Heroicon::OutlinedDocumentArrowDown)
-            ->modalHeading(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
-                ? 'Volver a generar PDF'
-                : 'Generar PDF')
+            ->modalHeading(fn (Model $record): string => match (true) {
+                $firmado($record) => 'Regenerar documento firmado',
+                self::documentHasOficial($resolveDocument($record)) => 'Volver a generar PDF',
+                default => 'Generar PDF',
+            })
             ->modalDescription(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
                 ? 'Se reemplazará el PDF oficial existente ('.$tipo->nombreOficial().').'
                 : 'Se generará y guardará el documento «'.$tipo->nombreOficial().'».')
             ->modalSubmitActionLabel(fn (Model $record): string => self::documentHasOficial($resolveDocument($record))
                 ? 'Volver a generar'
                 : 'Generar y guardar')
+            ->modalSubmitAction(fn (Action $action, Model $record): Action => $action->color($firmado($record) ? 'danger' : 'primary'))
+            // Sin campos que capturar se usa el modal de confirmación. requiresConfirmation()
+            // oculta los campos del schema, así que se apaga cuando hay que pedir el firmante
+            // o la confirmación de que se pierden las firmas.
+            ->requiresConfirmation(fn (?Model $record): bool => self::generateSchema($tipo) === [] && ! ($record !== null && $firmado($record)))
+            ->schema(fn (): array => [...self::generateSchema($tipo), ...FirmaEnOrigenActions::advertencia($resolverPdf)])
             ->action(function (Model $record, array $data) use ($tipo, $resolveDocument): void {
                 $document = $resolveDocument($record);
 
@@ -90,6 +114,7 @@ class EquipoFormularioPdfActions
                     $tipo,
                     auth()->id(),
                     $data['firmante_id'] ?? null,
+                    FirmaEnOrigenActions::confirmado($data),
                 );
 
                 Notification::make()
@@ -98,17 +123,6 @@ class EquipoFormularioPdfActions
                     ->info()
                     ->send();
             });
-
-        // Cuando hay campos que capturar (p. ej. el firmante), el modal con schema
-        // ya actúa como confirmación. requiresConfirmation() no debe combinarse con
-        // un schema porque oculta los campos del formulario.
-        if ($schema === []) {
-            $action->requiresConfirmation();
-        } else {
-            $action->schema($schema);
-        }
-
-        return $action;
     }
 
     /**

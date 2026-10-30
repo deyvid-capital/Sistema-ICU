@@ -27,7 +27,7 @@ class DocumentosEnFirma
         return SolicitudFirmaDocumento::query()
             ->where('estado', EstadoDocumentoFirma::EnCurso)
             ->where('origen_type', $pdfs->first()->getMorphClass())
-            ->whereIn('origen_id', $pdfs->modelKeys())
+            ->whereIn('origen_id', $pdfs->map(fn (Model $pdf): mixed => $pdf->getKey())->all())
             ->with('solicitud')
             ->first()
             ?->solicitud;

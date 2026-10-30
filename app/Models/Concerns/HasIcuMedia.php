@@ -12,6 +12,11 @@ trait HasIcuMedia
     use InteractsWithMedia;
 
     /**
+     * Vigencia de las URL firmadas de imágenes confidenciales.
+     */
+    private const MINUTOS_URL_TEMPORAL = 30;
+
+    /**
      * Conversiones compartidas: thumb siempre; webp si supera el umbral (raster).
      */
     public function registerMediaConversions(?Media $media = null): void
@@ -63,7 +68,7 @@ trait HasIcuMedia
         $path = $this->getAttribute($collection);
 
         return filled($path)
-            && Storage::disk(app(ArchivosService::class)->disco())->exists($path);
+            && Storage::disk($this->discoMedia())->exists($path);
     }
 
     public function storedImageUrl(string $collection, string $conversion = ''): ?string
@@ -77,7 +82,10 @@ trait HasIcuMedia
                 $conversion = '';
             }
 
-            $url = $this->getFirstMediaUrl($collection, $conversion);
+            $media = $this->getFirstMedia($collection);
+            $url = $media->disk === app(ArchivosService::class)->discoPublico()
+                ? $media->getUrl($conversion)
+                : $media->getTemporaryUrl(now()->addMinutes(self::MINUTOS_URL_TEMPORAL), $conversion);
 
             return filled($url) ? $url : null;
         }
@@ -88,9 +96,16 @@ trait HasIcuMedia
             return null;
         }
 
-        $disk = Storage::disk(app(ArchivosService::class)->disco());
+        $disco = $this->discoMedia();
+        $disk = Storage::disk($disco);
 
-        return $disk->exists($path) ? $disk->url($path) : null;
+        if (! $disk->exists($path)) {
+            return null;
+        }
+
+        return $disco === app(ArchivosService::class)->discoPublico()
+            ? $disk->url($path)
+            : $disk->temporaryUrl($path, now()->addMinutes(self::MINUTOS_URL_TEMPORAL));
     }
 
     /**
@@ -109,7 +124,7 @@ trait HasIcuMedia
             return false;
         }
 
-        $disk = Storage::disk(app(ArchivosService::class)->disco());
+        $disk = Storage::disk($this->discoMedia());
 
         if ($disk->exists($path)) {
             $disk->delete($path);
@@ -134,7 +149,7 @@ trait HasIcuMedia
     }
 
     /**
-     * Disco configurado para nuevas colecciones de este modelo.
+     * Disco de las colecciones de este modelo: el confidencial por defecto.
      */
     protected function discoMedia(): string
     {

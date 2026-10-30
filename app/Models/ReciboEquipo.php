@@ -19,8 +19,6 @@ class ReciboEquipo extends Model
     use LogsIcuActivity;
     use SoftDeletes;
 
-    public const DOCUMENT_DISK = 'public';
-
     public static function documentDisk(): string
     {
         return app(ArchivosService::class)->disco();
@@ -70,7 +68,7 @@ class ReciboEquipo extends Model
             return null;
         }
 
-        return Storage::disk(self::documentDisk())->url($this->url);
+        return route('archivos.pdf.ver', ['tipo' => 'recibo_equipo', 'id' => $this->getKey()]);
     }
 
     public function storedDocumentFilename(): ?string

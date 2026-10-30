@@ -242,7 +242,10 @@ return [
     */
 
     'custom_permissions' => [
-        //
+        // Subir un PDF firmado a mano (escaneo) en su módulo de origen.
+        'UploadSigned:PdfEquipo' => 'Subir PDF de equipo firmado a mano',
+        'UploadSigned:PdfCelular' => 'Subir PDF de celular firmado a mano',
+        'UploadSigned:PdfMovimiento' => 'Subir PDF de movimiento firmado a mano',
     ],
 
     /*

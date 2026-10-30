@@ -105,6 +105,24 @@ class CrearSolicitudFirma
         if (count($documentos) > self::MAX_DOCUMENTOS) {
             throw FirmaDigitalException::demasiadosDocumentos(self::MAX_DOCUMENTOS);
         }
+
+        foreach ($documentos as $documento) {
+            self::validarOrigenFirmable($documento['origen'] ?? null, $documento['nombre']);
+        }
+    }
+
+    /**
+     * Un PDF del sistema solo se envía si no está ya en firma ni firmado.
+     *
+     * @throws FirmaDigitalException
+     */
+    public static function validarOrigenFirmable(?Model $origen, string $nombre): void
+    {
+        if ($origen === null || ! method_exists($origen, 'esFirmable') || $origen->esFirmable()) {
+            return;
+        }
+
+        throw FirmaDigitalException::documentoNoFirmable($nombre, mb_strtolower($origen->estado_firma->getLabel()));
     }
 
     /**

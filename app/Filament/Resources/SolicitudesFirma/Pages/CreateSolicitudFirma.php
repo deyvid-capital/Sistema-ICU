@@ -25,7 +25,7 @@ class CreateSolicitudFirma extends CreateRecord
 
     protected static string $resource = SolicitudFirmaResource::class;
 
-    protected static ?string $title = 'Preparar envío a firmar';
+    protected static ?string $title = 'Preparar Documento(s) a firmar';
 
     protected function getSteps(): array
     {
@@ -42,6 +42,22 @@ class CreateSolicitudFirma extends CreateRecord
         $wizard = $this->wizardDeFilament();
 
         return $wizard->contained();
+    }
+
+    /**
+     * "Enviar a firmar" desde un módulo llega con ?documentos=pdf_equipo:1,pdf_movimiento:4.
+     */
+    protected function afterFill(): void
+    {
+        $catalogo = app(DocumentosFirmables::class);
+        $claves = array_values(array_filter(
+            explode(',', (string) request()->query('documentos', '')),
+            fn (string $clave): bool => $clave !== '' && $catalogo->esElegible($clave),
+        ));
+
+        if ($claves !== []) {
+            $this->data['documentos_sistema'] = array_slice($claves, 0, CrearSolicitudFirma::MAX_DOCUMENTOS);
+        }
     }
 
     /**

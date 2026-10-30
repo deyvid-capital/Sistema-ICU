@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PdfCelulars\Tables;
 
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\EntregaCelulars\RelationManagers\PdfsRelationManager as EntregaCelularPdfsRelationManager;
 use App\Filament\Resources\PdfCelulars\PdfCelularResource;
 use App\Filament\Resources\RecepcionCelulars\RelationManagers\PdfsRelationManager as RecepcionCelularPdfsRelationManager;
@@ -59,9 +60,10 @@ class PdfCelularsTable
                     ->url(fn (?string $state): ?string => filled($state) ? Storage::disk(PdfCelular::documentDisk())->url($state) : null)
                     ->openUrlInNewTab()
                     ->placeholder('—'),
+                FirmaEnOrigenActions::columnaEstado(),
             ])
             ->filters([
-                //
+                FirmaEnOrigenActions::filtroEstado(null),
             ])
             ->recordActions([
                 ActionGroup::make([
@@ -78,6 +80,7 @@ class PdfCelularsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    FirmaEnOrigenActions::enviarAFirmarMasivo(),
                     DeleteBulkAction::make()
                         ->label('Eliminar seleccionados')
                         ->successNotificationTitle('PDFs eliminados correctamente'),

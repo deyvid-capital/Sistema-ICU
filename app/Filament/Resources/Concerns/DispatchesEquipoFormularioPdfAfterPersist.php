@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Concerns;
 use App\Enums\EquipoFormularioPdfTipo;
 use App\Jobs\GenerateEquipoFormularioPdfJob;
 use App\Models\Concerns\HasDocumentoOficialPdf;
+use App\Services\Firma\ReemplazoDocumentoFirmado;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
@@ -81,6 +82,19 @@ trait DispatchesEquipoFormularioPdfAfterPersist
                 ->warning()
                 ->title('Sin formulario de entrega')
                 ->body('Complete la pestaña Entrega (fecha) para poder generar el PDF.')
+                ->send();
+
+            return;
+        }
+
+        $oficial = in_array(HasDocumentoOficialPdf::class, class_uses_recursive($record), true) ? $record->documentoOficial() : null;
+
+        if (($motivo = app(ReemplazoDocumentoFirmado::class)->impedimento($oficial, confirmado: false)) !== null) {
+            Notification::make()
+                ->warning()
+                ->title('Se guardaron los cambios, pero el PDF no se regeneró')
+                ->body($motivo.' Usa «Volver a generar PDF» en el menú de acciones.')
+                ->persistent()
                 ->send();
 
             return;

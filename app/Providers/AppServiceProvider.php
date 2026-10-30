@@ -69,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
 
         config([
             'media-library.path_generator' => IcuPathGenerator::class,
-            'media-library.disk_name' => config('archivos.disco', env('ARCHIVOS_DISK', 'public')),
+            'media-library.disk_name' => config('archivos.disco', 'local'),
         ]);
 
         Gate::policy(Activity::class, ActivityPolicy::class);

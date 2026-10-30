@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\PdfEquipos\Actions;
 
 use App\Enums\EquipoFormularioPdfTipo;
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Jobs\GenerateEquipoFormularioPdfJob;
 use App\Models\PdfEquipo;
 use App\Models\User;
+use App\Services\Firma\DocumentosEnFirma;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
@@ -13,6 +15,7 @@ use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PdfEquipoDocumentActions
@@ -22,9 +25,13 @@ class PdfEquipoDocumentActions
      */
     public static function make(): array
     {
+        $propio = fn (Model $record): Model => $record;
+
         return [
             self::view(),
             self::download(),
+            FirmaEnOrigenActions::enviarAFirmar($propio),
+            FirmaEnOrigenActions::subirFirmado($propio),
         ];
     }
 
@@ -36,20 +43,25 @@ class PdfEquipoDocumentActions
             ->color('primary')
             ->visible(fn (PdfEquipo $record): bool => self::resolveTipo($record) !== null
                 && $record->documento !== null)
+            ->disabled(fn (PdfEquipo $record): bool => app(DocumentosEnFirma::class)->envioEnCurso($record) !== null)
+            ->modalSubmitAction(fn (Action $action, PdfEquipo $record): Action => $action->color($record->estaFirmado() ? 'danger' : 'primary'))
             ->modalIcon(Heroicon::OutlinedArrowPath)
             ->modalHeading('Generar PDF de nuevo')
             ->modalDescription('Se generará nuevamente el documento en segundo plano y reemplazará el archivo actual. Se te avisará cuando esté listo.')
             ->modalSubmitActionLabel('Generar y guardar')
-            ->schema(fn (PdfEquipo $record): array => self::resolveTipo($record) === EquipoFormularioPdfTipo::NotaRecepcion
-                ? [
-                    Select::make('firmante_id')
-                        ->label('Usuario que firma')
-                        ->helperText('Aparecerá como firma derecha del documento. No se guarda en la base de datos.')
-                        ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all())
-                        ->searchable()
-                        ->preload(),
-                ]
-                : [])
+            ->schema(fn (PdfEquipo $record): array => [
+                ...(self::resolveTipo($record) === EquipoFormularioPdfTipo::NotaRecepcion
+                    ? [
+                        Select::make('firmante_id')
+                            ->label('Usuario que firma')
+                            ->helperText('Aparecerá como firma derecha del documento. No se guarda en la base de datos.')
+                            ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all())
+                            ->searchable()
+                            ->preload(),
+                    ]
+                    : []),
+                ...FirmaEnOrigenActions::advertencia(fn (Model $record): Model => $record),
+            ])
             ->action(function (PdfEquipo $record, array $data): void {
                 $tipo = self::resolveTipo($record);
                 $documento = $record->documento;
@@ -61,6 +73,7 @@ class PdfEquipoDocumentActions
                     $tipo,
                     auth()->id(),
                     $data['firmante_id'] ?? null,
+                    FirmaEnOrigenActions::confirmado($data),
                 );
 
                 Notification::make()

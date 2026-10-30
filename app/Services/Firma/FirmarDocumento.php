@@ -7,6 +7,7 @@ use App\Enums\EstadoFirma;
 use App\Exceptions\FirmaDigitalException;
 use App\Exceptions\FirmadorException;
 use App\Filament\Resources\SolicitudesFirma\SolicitudFirmaResource;
+use App\Jobs\Firma\PublicarDocumentoFirmado;
 use App\Models\SolicitudFirmaDocumento;
 use App\Models\SolicitudFirmaFirma;
 use App\Models\User;
@@ -220,6 +221,10 @@ class FirmarDocumento
         ]);
 
         $documento->refresh()->completarSiCorresponde();
+
+        if ($documento->estado === EstadoDocumentoFirma::Completado) {
+            PublicarDocumentoFirmado::dispatch($documento);
+        }
 
         if ($documento->solicitud->finalizarSiCorresponde()) {
             $this->avisos->finalizada($documento->solicitud);

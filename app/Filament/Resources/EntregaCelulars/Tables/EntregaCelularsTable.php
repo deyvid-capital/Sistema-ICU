@@ -4,6 +4,7 @@ namespace App\Filament\Resources\EntregaCelulars\Tables;
 
 use App\Enums\CelularFormularioPdfTipo;
 use App\Filament\Resources\Concerns\CelularFormularioPdfActions;
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\EntregaCelulars\EntregaCelularResource;
 use App\Models\EntregaCelular;
 use Filament\Actions\ActionGroup;
@@ -63,8 +64,10 @@ class EntregaCelularsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
+                FirmaEnOrigenActions::columnaEstado(CelularFormularioPdfActions::resolverPdf()),
             ])
             ->filters([
+                FirmaEnOrigenActions::filtroEstado('pdfs'),
                 TrashedFilter::make()
                     ->label('Estado del registro'),
             ])

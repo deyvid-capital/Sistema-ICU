@@ -23,7 +23,7 @@ class ArchivosServiceTest extends TestCase
     public function test_fila_guardada_tiene_prioridad(): void
     {
         MediaSetting::create([
-            'disco' => 'public',
+            'disco' => 's3',
             'prefijo' => 'custom',
             'umbral_webp_kb' => 750,
             'calidad_webp' => 70,
@@ -37,10 +37,22 @@ class ArchivosServiceTest extends TestCase
 
         $servicio = new ArchivosService;
 
+        $this->assertSame('s3', $servicio->disco());
         $this->assertSame('custom', $servicio->prefijo());
         $this->assertSame(750, $servicio->umbralWebpKb());
         $this->assertSame(750 * 1024, $servicio->umbralWebpBytes());
         $this->assertSame('private', $servicio->visibilidad());
         $this->assertSame('pdf-equipos', $servicio->directorioPdf('pdf_equipos'));
+    }
+
+    public function test_los_confidenciales_nunca_usan_el_disco_publico(): void
+    {
+        MediaSetting::create(['disco' => 'public', 'visibilidad' => 'public']);
+
+        $servicio = new ArchivosService;
+
+        $this->assertSame('local', $servicio->disco());
+        $this->assertSame('private', $servicio->visibilidad());
+        $this->assertSame('public', $servicio->discoPublico());
     }
 }

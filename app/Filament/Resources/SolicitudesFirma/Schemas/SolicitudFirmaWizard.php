@@ -16,6 +16,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Callout;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Icons\Heroicon;
@@ -44,14 +45,31 @@ class SolicitudFirmaWizard
             ->description('Uno o varios PDF')
             ->icon(Heroicon::OutlinedDocumentDuplicate)
             ->schema([
+                Grid::make(['default' => 1, 'md' => 2])->schema([
+                    Select::make('categoria_documentos')
+                        ->label('Categoría')
+                        ->placeholder('Todas las categorías')
+                        ->options(DocumentosFirmables::categorias())
+                        ->native(false)
+                        ->live()
+                        ->dehydrated(false),
+                    Toggle::make('mostrar_firmados')
+                        ->label('Mostrar firmados')
+                        ->helperText('Se ven para consultar, pero no se pueden volver a enviar.')
+                        ->default(false)
+                        ->inline(false)
+                        ->live()
+                        ->dehydrated(false),
+                ]),
                 Select::make('documentos_sistema')
                     ->label('Documentos del sistema')
-                    ->helperText('Escribe el número o nombre del formulario (entregas, recepciones, altas y bajas, notas, recibos).')
+                    ->helperText('Del más reciente al más antiguo. Escribe el número o el nombre del archivo para buscar. No aparecen los que están en firma o ya firmados.')
                     ->multiple()
                     ->searchable()
-                    ->options(fn (): array => app(DocumentosFirmables::class)->buscar(null, 5))
-                    ->getSearchResultsUsing(fn (string $search): array => app(DocumentosFirmables::class)->buscar($search))
+                    ->options(fn (Get $get): array => app(DocumentosFirmables::class)->buscar(null, $get('categoria_documentos'), (bool) $get('mostrar_firmados'), 10))
+                    ->getSearchResultsUsing(fn (string $search, Get $get): array => app(DocumentosFirmables::class)->buscar($search, $get('categoria_documentos'), (bool) $get('mostrar_firmados')))
                     ->getOptionLabelsUsing(fn (array $values): array => app(DocumentosFirmables::class)->etiquetas($values))
+                    ->disableOptionWhen(fn (string $value): bool => ! app(DocumentosFirmables::class)->esElegible($value))
                     ->maxItems(CrearSolicitudFirma::MAX_DOCUMENTOS)
                     ->requiredWithout('documentos_subidos')
                     ->validationMessages(['required_without' => 'Elige al menos un documento del sistema o sube un PDF.']),

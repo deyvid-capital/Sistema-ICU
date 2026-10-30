@@ -14,7 +14,8 @@ Este documento describe **lo que ya está construido**:
 | 4. Canvas de posiciones y envío | ✅ | Se ubican los recuadros sobre cada PDF y se envía a los firmantes |
 | 5. Firma | ✅ | Firmar con la contraseña del sistema (uno o varios), orden por documento, rechazo, cancelación, reemplazo de firmantes |
 | 6. Notificaciones y recordatorios | ✅ | Avisos de avance (firmó, finalizado, rechazado, cancelado), recordatorios programados, vencimiento de certificados, interruptor por usuario |
-| 7–8. Integración, endurecimiento | ⏳ | Ver el plan |
+| 7. Integración con los módulos y documentos en su origen | ✅ | Enviar a firmar desde los módulos, estado de firma, el firmado reemplaza al original, subir firmado a mano, almacenamiento confidencial (ver §2.6 y §2.7) |
+| 8. Endurecimiento | ⏳ | Ver el plan |
 
 > **Regla de oro:** la firma nunca es automática. El titular firma escribiendo **su contraseña
 > del sistema** (la misma del login). Ninguna contraseña se guarda en texto plano.
@@ -221,6 +222,44 @@ Implementación: `TipoEventoNotificacion::FirmaDigital` + el trait
 **Vencimiento del certificado** (`firmas:avisar-vencimientos`, a diario a las 08:00): firmas
 activas o por reactivar que vencen en 30, 15 o 7 días. Cada umbral se avisa una sola vez
 (`certificados_firma.aviso_vencimiento_dias`). No se avisa si el admin ya subió la renovación.
+
+---
+
+### 2.6 Documentos firmados en su módulo de origen
+
+Detalle y decisiones: [`Docs/firma-digital/09-documentos-firmados-en-origen.md`](../../../Docs/firma-digital/09-documentos-firmados-en-origen.md).
+Aplica a los PDF de **equipos, celulares y movimientos**. Los recibos de equipo son facturas escaneadas y **no** se firman.
+
+| Estado (`estado_firma`) | Cuándo | ¿Se puede enviar a firmar? |
+|---|---|---|
+| Sin firma | Nunca se envió, se canceló el envío o se regeneró | Sí |
+| En firma 1/3 | Hay un envío en curso (el contador sale de las firmas del documento) | No |
+| Firmado | Todos firmaron **ese** documento; el firmado reemplazó al original | No |
+| Firmado a mano | Se subió un escaneo firmado en papel | No |
+| Rechazado | El último envío lo rechazó; el original no cambia | Sí |
+
+- **Publicación.** Al completarse un documento, el job `PublicarDocumentoFirmado` (en cola, sin credenciales) copia el firmado en la **misma ruta** del original y marca *Firmado*. Verifica hashes y es idempotente. El original sin firmar queda en la carpeta privada del envío. Si la cola falla: `vendor/bin/sail artisan firmas:sincronizar-origen`.
+- **En los módulos** (entregas, recepciones, notas, celulares, movimientos, asignaciones, *PdfEquipos*, *PdfCelulares*):
+  - columna **Firma** y filtro por estado;
+  - **Enviar a firmar** (también masivo en *PdfEquipos* / *PdfCelulares*), que abre el asistente con el documento ya elegido;
+  - **Subir firmado a mano**, con el permiso `UploadSigned:PdfEquipo`, `UploadSigned:PdfCelular` o `UploadSigned:PdfMovimiento` (pantalla de roles → *Permisos personalizados*).
+- **Regenerar un PDF firmado** (o subir un escaneo encima) muestra quién firmó y cuándo, y exige marcar *"Entiendo que se perderán las firmas de este documento"*. Mientras está en firma no se puede. "Guardar y generar PDF" guarda los cambios pero no regenera un firmado: indica que se use "Volver a generar PDF". La regla vive en `ReemplazoDocumentoFirmado` y se repite en los servicios `Generate*FormularioPdf`.
+- **Asistente, paso Documentos:** filtro de categoría (Equipos: entrega, recepción, notas; Celulares: entrega, recepción; Movimientos: alta, baja), del más reciente al más antiguo, sin los que están en firma o firmados. *Mostrar firmados* los muestra para consultar, pero no se pueden elegir. El servidor vuelve a validarlo al crear y al enviar.
+
+### 2.7 Almacenamiento: público y confidencial
+
+| Grupo | Qué | Disco |
+|---|---|---|
+| Público | Logo claro, logo oscuro, favicon | `public`, siempre (se ven sin sesión) |
+| Confidencial | PDF de equipos, celulares, movimientos, recibos; capturas de mantenimiento | `local` (privado, por defecto) o `s3`, en *Configuración → Archivos*. **Nunca `public`** |
+| Firma digital | `.p12` cifrados y versiones de los envíos | `local`, siempre |
+
+- **Cómo se ven:**
+  - Los PDF confidenciales se abren con la ruta protegida `/archivos/pdf/{tipo}/{id}/ver|descargar` (`DocumentoPdfController`), que exige sesión y permiso de ver el PDF o el registro al que pertenece.
+  - Las capturas de mantenimiento se ven con URL temporales firmadas (30 min).
+- **Las columnas `url` no cambian:** guardan la ruta relativa dentro del disco.
+- **Mover lo existente:** `vendor/bin/sail artisan archivos:mover --simular` muestra qué movería; sin `--simular`, lo mueve. Lleva lo confidencial al disco configurado y la marca a `public`. Copia, verifica y recién entonces borra. Si una ruta existe en los dos discos con contenido distinto, no la toca y avisa para revisarla a mano.
+- **Invitados:** las rutas web con `auth` redirigen al login del panel (`bootstrap/app.php`).
 
 ---
 
@@ -460,6 +499,12 @@ vendor/bin/sail artisan firmas:avisar-vencimientos
 
 Si alguien no recibe avisos, revisar primero *Usuarios → Seguridad → Notificaciones → Firma digital*.
 
+### 9.6 Cambiar el disco confidencial (local ↔ s3)
+
+1. Configurar las variables `AWS_*` en el `.env` (para s3).
+2. *Configuración → Archivos → Disco de archivos confidenciales*.
+3. `vendor/bin/sail artisan archivos:mover --simular` y luego `vendor/bin/sail artisan archivos:mover`.
+
 ---
 
 ## 10. Tests
@@ -497,5 +542,6 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 5. Compilar el frontend (incluye el canvas): `vendor/bin/sail pnpm install && vendor/bin/sail pnpm run build`.
 6. Reiniciar el worker: `vendor/bin/sail artisan queue:restart`.
 7. Levantar el scheduler: `vendor/bin/sail up -d scheduler`.
-8. **Respaldar `FIRMA_ENCRYPTION_KEY`** por separado de `storage/app/private`: sin ella no se
+8. Almacenamiento: `ARCHIVOS_DISK=local` (o `s3`) y mover lo existente con `vendor/bin/sail artisan archivos:mover`. Publicar lo ya firmado con `vendor/bin/sail artisan firmas:sincronizar-origen`.
+9. **Respaldar `FIRMA_ENCRYPTION_KEY`** por separado de `storage/app/private`: sin ella no se
    pueden abrir los `.p12` y todos los usuarios tendrían que recibir el archivo de nuevo.

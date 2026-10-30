@@ -16,10 +16,10 @@ class FormularioEquipoForceDeletesPdfDocumentsTest extends TestCase
 
     public function test_soft_deleting_formulario_keeps_pdf_file_for_restore(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'pdf-equipos/entrega/FUE-001-2026.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $entrega = EntregaEquipo::factory()->create(['numero' => '001-2026']);
         $pdf = $entrega->pdfs()->create([
@@ -32,15 +32,15 @@ class FormularioEquipoForceDeletesPdfDocumentsTest extends TestCase
 
         $this->assertTrue($entrega->trashed());
         $this->assertNotNull(PdfEquipo::withTrashed()->find($pdf->id));
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('local')->assertExists($path);
     }
 
     public function test_force_deleting_entrega_removes_pdf_records_and_files(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'pdf-equipos/entrega/FUE-002-2026.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $entrega = EntregaEquipo::factory()->create(['numero' => '002-2026']);
         $pdf = $entrega->pdfs()->create([
@@ -52,17 +52,17 @@ class FormularioEquipoForceDeletesPdfDocumentsTest extends TestCase
         $entrega->delete();
         $entrega->forceDelete();
 
-        Storage::disk('public')->assertMissing($path);
+        Storage::disk('local')->assertMissing($path);
         $this->assertDatabaseMissing('pdf_equipos', ['id' => $pdf->id]);
         $this->assertDatabaseMissing('entregas_equipos', ['id' => $entrega->id]);
     }
 
     public function test_force_deleting_nota_salida_removes_soft_deleted_pdfs_too(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'pdf-equipos/nota-salida/NotaSalida-003-2026.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $nota = NotaSalidaEquipo::factory()->create(['numero' => '003-2026']);
         $pdf = $nota->pdfs()->create([
@@ -73,11 +73,11 @@ class FormularioEquipoForceDeletesPdfDocumentsTest extends TestCase
 
         $pdf->delete();
         $this->assertTrue($pdf->trashed());
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('local')->assertExists($path);
 
         $nota->forceDelete();
 
-        Storage::disk('public')->assertMissing($path);
+        Storage::disk('local')->assertMissing($path);
         $this->assertDatabaseMissing('pdf_equipos', ['id' => $pdf->id]);
         $this->assertDatabaseMissing('notas_salida_equipos', ['id' => $nota->id]);
     }

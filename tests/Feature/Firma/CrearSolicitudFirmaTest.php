@@ -89,7 +89,7 @@ class CrearSolicitudFirmaTest extends TestCase
 
     public function test_enlaza_el_documento_del_sistema_de_origen(): void
     {
-        Storage::disk('public')->put('pdf-equipos/entrega/FUE-0042.pdf', $this->pdfDePrueba());
+        Storage::disk('local')->put('pdf-equipos/entrega/FUE-0042.pdf', $this->pdfDePrueba());
         $pdf = PdfEquipo::factory()->create(['url' => 'pdf-equipos/entrega/FUE-0042.pdf']);
         $catalogo = app(DocumentosFirmables::class);
 

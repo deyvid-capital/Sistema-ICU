@@ -41,12 +41,13 @@ class GenerateEquipoFormularioPdfJob implements ShouldQueue
         public EquipoFormularioPdfTipo $tipo,
         public ?string $actorId = null,
         public ?string $firmanteId = null,
+        public bool $reemplazarFirmado = false,
     ) {}
 
     public function handle(GenerateEquipoFormularioPdf $service): void
     {
         try {
-            $pdf = $service->execute($this->record, $this->tipo, $this->firmanteId);
+            $pdf = $service->execute($this->record, $this->tipo, $this->firmanteId, $this->reemplazarFirmado);
         } catch (EquipoFormularioPdfException $exception) {
             // Error de validación/datos: reintentar no ayuda.
             $this->fail($exception);

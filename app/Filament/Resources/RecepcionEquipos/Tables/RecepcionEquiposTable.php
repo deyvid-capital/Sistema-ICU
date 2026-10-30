@@ -4,6 +4,7 @@ namespace App\Filament\Resources\RecepcionEquipos\Tables;
 
 use App\Enums\EquipoFormularioPdfTipo;
 use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\RecepcionEquipos\RecepcionEquipoResource;
 use App\Models\RecepcionEquipo;
 use Filament\Actions\ActionGroup;
@@ -63,8 +64,10 @@ class RecepcionEquiposTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
+                FirmaEnOrigenActions::columnaEstado(EquipoFormularioPdfActions::resolverPdf()),
             ])
             ->filters([
+                FirmaEnOrigenActions::filtroEstado('pdfs'),
                 TrashedFilter::make()
                     ->label('Estado del registro'),
             ])

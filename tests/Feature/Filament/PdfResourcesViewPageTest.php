@@ -23,7 +23,7 @@ class PdfResourcesViewPageTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('public');
+        Storage::fake('local');
         Gate::before(fn () => true);
 
         $this->actingAs(User::factory()->create());
@@ -36,7 +36,7 @@ class PdfResourcesViewPageTest extends TestCase
             'url' => 'pdf-equipos/entrega/FUE-001-2026.pdf',
         ]);
 
-        Storage::disk('public')->put($pdf->url, '%PDF-1.4 test');
+        Storage::disk('local')->put($pdf->url, '%PDF-1.4 test');
 
         Livewire::test(ViewPdfEquipo::class, ['record' => $pdf->getKey()])
             ->assertOk()
@@ -50,7 +50,7 @@ class PdfResourcesViewPageTest extends TestCase
             'url' => 'pdf-celulares/entrega/FUC-001-2026.pdf',
         ]);
 
-        Storage::disk('public')->put($pdf->url, '%PDF-1.4 test');
+        Storage::disk('local')->put($pdf->url, '%PDF-1.4 test');
 
         Livewire::test(ViewPdfCelular::class, ['record' => $pdf->getKey()])
             ->assertOk()

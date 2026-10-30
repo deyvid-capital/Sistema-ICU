@@ -13,10 +13,10 @@ class ReciboEquipoStoredDocumentTest extends TestCase
 
     public function test_has_stored_document_returns_true_when_file_exists(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'recibo-equipos/recibo.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $recibo = ReciboEquipo::factory()->create(['url' => $path]);
 
@@ -27,7 +27,7 @@ class ReciboEquipoStoredDocumentTest extends TestCase
 
     public function test_has_stored_document_returns_false_when_file_is_missing(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $recibo = ReciboEquipo::factory()->create([
             'url' => 'recibo-equipos/inexistente.pdf',
@@ -39,10 +39,10 @@ class ReciboEquipoStoredDocumentTest extends TestCase
 
     public function test_download_stored_document_returns_streamed_response(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'recibo-equipos/descarga.pdf';
-        Storage::disk('public')->put($path, 'contenido-pdf');
+        Storage::disk('local')->put($path, 'contenido-pdf');
 
         $recibo = ReciboEquipo::factory()->create(['url' => $path]);
         $response = $recibo->downloadStoredDocument();

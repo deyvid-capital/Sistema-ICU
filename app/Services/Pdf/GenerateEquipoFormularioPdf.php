@@ -6,6 +6,7 @@ use App\Enums\EquipoFormularioPdfTipo;
 use App\Exceptions\EquipoFormularioPdfException;
 use App\Models\PdfEquipo;
 use App\Services\Firma\DocumentosEnFirma;
+use App\Services\Firma\ReemplazoDocumentoFirmado;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -23,12 +24,18 @@ class GenerateEquipoFormularioPdf
      * @throws EquipoFormularioPdfException
      * @throws Throwable
      */
-    public function execute(Model $record, EquipoFormularioPdfTipo $tipo, ?string $firmanteId = null): PdfEquipo
+    public function execute(Model $record, EquipoFormularioPdfTipo $tipo, ?string $firmanteId = null, bool $reemplazarFirmado = false): PdfEquipo
     {
         $enFirma = app(DocumentosEnFirma::class);
 
         if (($envio = $enFirma->envioEnCurso($record)) !== null) {
             throw new EquipoFormularioPdfException($enFirma->mensaje($envio));
+        }
+
+        $oficial = $record->pdfs()->where('nombre', $tipo->nombreOficial())->latest('id')->first();
+
+        if (($motivo = app(ReemplazoDocumentoFirmado::class)->impedimento($oficial, $reemplazarFirmado)) !== null) {
+            throw new EquipoFormularioPdfException($motivo);
         }
 
         $this->validator->validate($record, $tipo);
@@ -62,6 +69,8 @@ class GenerateEquipoFormularioPdf
                     'fecha' => $fecha,
                     'url' => $path,
                 ]);
+
+                app(ReemplazoDocumentoFirmado::class)->despuesDeRegenerar($existing);
 
                 return $existing->refresh();
             }

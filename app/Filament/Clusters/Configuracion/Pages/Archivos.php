@@ -55,7 +55,7 @@ class Archivos extends Page implements HasForms
         $servicio = app(ArchivosService::class)->resolver();
 
         $this->form->fill([
-            'disco' => $configuracion->disco ?: $servicio['disco'],
+            'disco' => app(ArchivosService::class)->disco(),
             'prefijo' => $configuracion->prefijo ?: $servicio['prefijo'],
             'umbral_webp_kb' => $configuracion->umbral_webp_kb ?: $servicio['umbral_webp_kb'],
             'calidad_webp' => $configuracion->calidad_webp ?: $servicio['calidad_webp'],
@@ -64,7 +64,6 @@ class Archivos extends Page implements HasForms
             'max_pdf_kb' => $configuracion->max_pdf_kb ?: $servicio['max_pdf_kb'],
             'max_logo_kb' => $configuracion->max_logo_kb ?: $servicio['max_logo_kb'],
             'max_favicon_kb' => $configuracion->max_favicon_kb ?: $servicio['max_favicon_kb'],
-            'visibilidad' => $configuracion->visibilidad ?: $servicio['visibilidad'],
         ]);
     }
 
@@ -73,17 +72,18 @@ class Archivos extends Page implements HasForms
         return $schema
             ->components([
                 Section::make('Dónde se guardan')
-                    ->description('Disco de Laravel y prefijo de carpetas. Cambiar a s3 requiere las variables AWS_* en el entorno.')
+                    ->description('Los documentos e imágenes confidenciales (PDF, capturas de mantenimiento) van a un disco privado. Los logos y el favicon van siempre al disco público, porque se muestran sin iniciar sesión.')
                     ->icon(Heroicon::OutlinedCloudArrowUp)
                     ->schema([
                         Grid::make(2)->schema([
                             Select::make('disco')
-                                ->label('Disco')
+                                ->label('Disco de archivos confidenciales')
                                 ->options([
-                                    'public' => 'public (local)',
-                                    'local' => 'local (privado)',
-                                    's3' => 's3 (nube)',
+                                    'local' => 'local (privado en el servidor)',
+                                    's3' => 's3 (nube, privado)',
                                 ])
+                                ->in(ArchivosService::DISCOS_CONFIDENCIALES)
+                                ->helperText('Cambiar a s3 requiere las variables AWS_* en el entorno. Después de cambiarlo, mueve los archivos existentes con: php artisan archivos:mover')
                                 ->required()
                                 ->native(false),
                             TextInput::make('prefijo')
@@ -95,14 +95,6 @@ class Archivos extends Page implements HasForms
                                 ->validationMessages([
                                     'regex' => 'Solo letras, números, guiones, guiones bajos y barras.',
                                 ]),
-                            Select::make('visibilidad')
-                                ->label('Visibilidad')
-                                ->options([
-                                    'public' => 'Pública',
-                                    'private' => 'Privada',
-                                ])
-                                ->required()
-                                ->native(false),
                         ]),
                     ]),
 
@@ -186,6 +178,7 @@ class Archivos extends Page implements HasForms
     public function guardar(): void
     {
         $datos = $this->form->getState();
+        $datos['visibilidad'] = app(ArchivosService::class)->visibilidad();
 
         $configuracion = MediaSetting::query()->first() ?? new MediaSetting;
         $original = $configuracion->getOriginal();

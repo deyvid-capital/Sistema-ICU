@@ -39,12 +39,13 @@ class GenerateMovimientoFormularioPdfJob implements ShouldQueue
         public Movimiento $record,
         public MovimientoFormularioPdfTipo $tipo = MovimientoFormularioPdfTipo::AltaBaja,
         public ?string $actorId = null,
+        public bool $reemplazarFirmado = false,
     ) {}
 
     public function handle(GenerateMovimientoFormularioPdf $service): void
     {
         try {
-            $service->execute($this->record, $this->tipo);
+            $service->execute($this->record, $this->tipo, $this->reemplazarFirmado);
         } catch (MovimientoFormularioPdfException $exception) {
             $this->fail($exception);
 

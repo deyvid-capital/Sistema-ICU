@@ -40,7 +40,7 @@ class ArchivosPageTest extends TestCase
     {
         Livewire::test(Archivos::class)
             ->fillForm([
-                'disco' => 'public',
+                'disco' => 's3',
                 'prefijo' => 'icu-test',
                 'umbral_webp_kb' => 600,
                 'calidad_webp' => 75,
@@ -49,7 +49,6 @@ class ArchivosPageTest extends TestCase
                 'max_pdf_kb' => 8192,
                 'max_logo_kb' => 1024,
                 'max_favicon_kb' => 256,
-                'visibilidad' => 'public',
             ])
             ->call('guardar')
             ->assertHasNoFormErrors();
@@ -63,9 +62,19 @@ class ArchivosPageTest extends TestCase
         $servicio = app(ArchivosService::class);
         $servicio->olvidar();
 
+        $this->assertSame('s3', $servicio->disco());
+        $this->assertSame('private', MediaSetting::query()->first()->visibilidad);
         $this->assertSame('icu-test', $servicio->prefijo());
         $this->assertSame(600, $servicio->umbralWebpKb());
         $this->assertSame(75, $servicio->calidadWebp());
         $this->assertNotNull(MediaSetting::query()->first());
+    }
+
+    public function test_no_se_puede_elegir_el_disco_publico_para_confidenciales(): void
+    {
+        Livewire::test(Archivos::class)
+            ->fillForm(['disco' => 'public'])
+            ->call('guardar')
+            ->assertHasFormErrors(['disco']);
     }
 }

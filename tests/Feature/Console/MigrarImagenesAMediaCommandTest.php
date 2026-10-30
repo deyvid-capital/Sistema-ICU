@@ -17,6 +17,7 @@ class MigrarImagenesAMediaCommandTest extends TestCase
     public function test_migra_capturas_y_logos_desde_columnas_path(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
 
         $antes = 'mantenimiento-equipos/antes_ST1_2026-01-01.png';
         $logo = 'apariencia/logo-claro.png';
@@ -34,7 +35,7 @@ class MigrarImagenesAMediaCommandTest extends TestCase
             'logo_claro' => $logo,
         ]);
 
-        $exit = Artisan::call('icu:migrar-imagenes-a-media');
+        $exit = Artisan::call('icu:migrar-imagenes-a-media', ['--disk' => 'public']);
 
         $this->assertSame(0, $exit);
 
@@ -50,6 +51,7 @@ class MigrarImagenesAMediaCommandTest extends TestCase
     public function test_es_idempotente_si_ya_hay_media(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
 
         $antes = 'mantenimiento-equipos/antes_ST1_2026-01-01.png';
         $this->putFakeImage($antes);
@@ -58,8 +60,8 @@ class MigrarImagenesAMediaCommandTest extends TestCase
             'cap_antes' => $antes,
         ]);
 
-        Artisan::call('icu:migrar-imagenes-a-media');
-        Artisan::call('icu:migrar-imagenes-a-media');
+        Artisan::call('icu:migrar-imagenes-a-media', ['--disk' => 'public']);
+        Artisan::call('icu:migrar-imagenes-a-media', ['--disk' => 'public']);
 
         $mantenimiento->refresh();
 

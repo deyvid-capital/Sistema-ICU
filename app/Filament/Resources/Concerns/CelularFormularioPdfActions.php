@@ -6,6 +6,7 @@ use App\Enums\CelularFormularioPdfTipo;
 use App\Jobs\GenerateCelularFormularioPdfJob;
 use App\Models\Concerns\HasDocumentoOficialCelularPdf;
 use App\Services\Firma\DocumentosEnFirma;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Alignment;
@@ -26,11 +27,24 @@ class CelularFormularioPdfActions
             self::generate($tipo),
             self::view($tipo),
             self::download($tipo),
+            FirmaEnOrigenActions::enviarAFirmar(self::resolverPdf()),
+            FirmaEnOrigenActions::subirFirmado(self::resolverPdf()),
         ];
+    }
+
+    /**
+     * PDF oficial del registro (para el estado de firma).
+     */
+    public static function resolverPdf(): Closure
+    {
+        return fn (Model $record): mixed => self::usesDocumentoOficial($record) ? $record->documentoOficial() : null;
     }
 
     public static function generate(CelularFormularioPdfTipo $tipo): Action
     {
+        $resolverPdf = self::resolverPdf();
+        $firmado = fn (Model $record): bool => $resolverPdf($record)?->estaFirmado() ?? false;
+
         return Action::make('generarPdf')
             ->label('Generar PDF')
             ->icon(Heroicon::OutlinedDocumentArrowDown)
@@ -41,17 +55,20 @@ class CelularFormularioPdfActions
                 ? app(DocumentosEnFirma::class)->mensaje($envio)
                 : null)
             ->modalIcon(Heroicon::OutlinedDocumentArrowDown)
-            ->modalHeading('Generar PDF')
+            ->modalHeading(fn (Model $record): string => $firmado($record) ? 'Regenerar documento firmado' : 'Generar PDF')
             ->modalDescription(fn (Model $record): string => self::usesDocumentoOficial($record) && $record->hasDocumentoOficial()
                 ? 'Se reemplazará el PDF oficial existente ('.$tipo->nombreOficial().').'
                 : 'Se generará y guardará el documento «'.$tipo->nombreOficial().'».')
             ->modalSubmitActionLabel('Generar y guardar')
-            ->requiresConfirmation()
-            ->action(function (Model $record) use ($tipo): void {
+            ->modalSubmitAction(fn (Action $action, Model $record): Action => $action->color($firmado($record) ? 'danger' : 'primary'))
+            ->requiresConfirmation(fn (?Model $record): bool => ! ($record !== null && $firmado($record)))
+            ->schema(fn (): array => FirmaEnOrigenActions::advertencia($resolverPdf))
+            ->action(function (Model $record, array $data) use ($tipo): void {
                 GenerateCelularFormularioPdfJob::dispatch(
                     $record,
                     $tipo,
                     auth()->id(),
+                    FirmaEnOrigenActions::confirmado($data),
                 );
 
                 Notification::make()

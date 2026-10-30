@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Archivos\DocumentoPdfController;
 use App\Http\Controllers\Firma\DocumentoFirmaController;
 use App\Http\Controllers\MovimientoFormularioPdfController;
 use App\Http\Controllers\PdfPreviewController;
@@ -47,6 +48,14 @@ Route::prefix('pdf/preview')->middleware('auth')->name('pdf.preview.')->group(fu
     Route::get('/recepcion-externa', [PdfPreviewController::class, 'recepcionExterna'])->name('recepcion-externa');
     Route::get('/alta-baja', [MovimientoFormularioPdfController::class, 'previewPdf'])->name('alta-baja');
 });
+
+Route::prefix('archivos/pdf')->middleware('auth')->name('archivos.pdf.')
+    ->whereIn('tipo', array_keys(DocumentoPdfController::TIPOS))
+    ->whereNumber('id')
+    ->group(function () {
+        Route::get('/{tipo}/{id}/ver', [DocumentoPdfController::class, 'ver'])->name('ver');
+        Route::get('/{tipo}/{id}/descargar', [DocumentoPdfController::class, 'descargar'])->name('descargar');
+    });
 
 Route::prefix('firma/documentos')->middleware('auth')->name('firma.documentos.')->group(function () {
     Route::get('/{documento}/ver', [DocumentoFirmaController::class, 'ver'])->name('ver');

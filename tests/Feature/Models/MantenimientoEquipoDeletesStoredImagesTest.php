@@ -14,7 +14,7 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
 
     public function test_soft_deleting_keeps_stored_images_for_restore(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $mantenimiento = $this->mantenimientoConMedia();
 
@@ -27,7 +27,7 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
 
     public function test_force_deleting_removes_media(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $mantenimiento = $this->mantenimientoConMedia();
         $antesId = $mantenimiento->getFirstMedia('cap_antes')?->id;
@@ -43,7 +43,7 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
 
     public function test_force_deleting_without_files_does_not_fail(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $mantenimiento = MantenimientoEquipo::factory()->create([
             'cap_antes' => 'mantenimiento-equipos/inexistente.png',
@@ -57,7 +57,7 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
 
     public function test_replacing_media_keeps_single_file_in_collection(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $mantenimiento = $this->mantenimientoConMedia();
         $oldId = $mantenimiento->getFirstMedia('cap_antes')?->id;
@@ -76,10 +76,10 @@ class MantenimientoEquipoDeletesStoredImagesTest extends TestCase
 
     public function test_legacy_column_fallback_still_reports_stored_image(): void
     {
-        Storage::fake('public');
+        Storage::fake('local');
 
         $path = 'mantenimiento-equipos/antes_ST100001_2026-08-01.png';
-        Storage::disk('public')->put($path, 'imagen-antes');
+        Storage::disk('local')->put($path, 'imagen-antes');
 
         $mantenimiento = MantenimientoEquipo::factory()->create([
             'cap_antes' => $path,

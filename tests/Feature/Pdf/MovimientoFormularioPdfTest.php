@@ -39,7 +39,7 @@ class MovimientoFormularioPdfTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('public');
+        Storage::fake('local');
 
         $this->mock(BrowsershotPdfFactory::class, function ($mock): void {
             $mock->shouldReceive('fromView')
@@ -209,7 +209,7 @@ class MovimientoFormularioPdfTest extends TestCase
         $this->assertSame(MovimientoFormularioPdfTipo::AltaBaja->nombreOficial(), $pdf->nombre);
         $this->assertSame('pdf-movimientos/FUA-Ana Pérez-18-04-2026.pdf', $pdf->url);
         $this->assertTrue($movimiento->fresh()->hasDocumentoOficial());
-        Storage::disk('public')->assertExists($pdf->url);
+        Storage::disk('local')->assertExists($pdf->url);
     }
 
     public function test_baja_filename_uses_fub_prefix_with_first_name_and_first_surname(): void

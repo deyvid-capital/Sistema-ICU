@@ -14,7 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Las rutas web con `auth` (PDF protegidos, vistas previas) mandan al login del
+        // panel: no existe una ruta `login` genérica.
+        $middleware->redirectGuestsTo(fn (): string => route('filament.admin.auth.login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

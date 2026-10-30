@@ -52,6 +52,7 @@ flowchart LR
 | 6 | [Notificaciones](06-notificaciones.md) | Campana, correo, recordatorios, vencimientos y reactivación |
 | 7 | [Plan de implementación](07-plan-de-implementacion.md) | Fases, tareas y pruebas, en orden |
 | 8 | [Decisiones y riesgos](08-decisiones-pendientes.md) | Decisiones tomadas, lo que falta y los riesgos |
+| 9 | [Documentos firmados en su origen](09-documentos-firmados-en-origen.md) | Propuesta: estado de firma en los PDF de origen, publicar el firmado, escaneos, regenerar con advertencia, filtros del asistente |
 
 ## Prueba de concepto (ya validada)
 

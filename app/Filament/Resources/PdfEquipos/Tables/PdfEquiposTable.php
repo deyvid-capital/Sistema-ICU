@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PdfEquipos\Tables;
 
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\EntregaEquipos\RelationManagers\PdfsRelationManager as EntregaPdfsRelationManager;
 use App\Filament\Resources\PdfEquipos\Actions\PdfEquipoDocumentActions;
 use App\Filament\Resources\PdfEquipos\PdfEquipoResource;
@@ -69,8 +70,10 @@ class PdfEquiposTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
+                FirmaEnOrigenActions::columnaEstado(),
             ])
             ->filters([
+                FirmaEnOrigenActions::filtroEstado(null),
                 TrashedFilter::make()
                     ->label('Estado del registro'),
             ])
@@ -103,6 +106,7 @@ class PdfEquiposTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    FirmaEnOrigenActions::enviarAFirmarMasivo(),
                     DeleteBulkAction::make()
                         ->label('Eliminar seleccionados')
                         ->successNotificationTitle('PDFs eliminados. Los archivos se conservan por si deseas restaurarlos.'),

@@ -7,12 +7,13 @@ return [
     | Disco de archivos
     |--------------------------------------------------------------------------
     |
-    | Nombre del disco de Laravel (filesystems.php). Por defecto "public".
-    | Para S3 u otro proveedor compatible: ARCHIVOS_DISK=s3 y las AWS_*.
+    | Disco de los archivos CONFIDENCIALES (PDF, capturas de mantenimiento):
+    | "local" (privado, por defecto) o "s3" (ARCHIVOS_DISK=s3 y las AWS_*).
+    | Nunca "public". Los logos y el favicon van siempre al disco "public".
     |
     */
 
-    'disco' => env('ARCHIVOS_DISK', 'public'),
+    'disco' => env('ARCHIVOS_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -47,14 +48,6 @@ return [
     'max_logo_kb' => (int) env('ARCHIVOS_MAX_LOGO_KB', 2048),
 
     'max_favicon_kb' => (int) env('ARCHIVOS_MAX_FAVICON_KB', 512),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Visibilidad por defecto en el disco
-    |--------------------------------------------------------------------------
-    */
-
-    'visibilidad' => env('ARCHIVOS_VISIBILIDAD', 'public'),
 
     /*
     |--------------------------------------------------------------------------

@@ -263,7 +263,7 @@ class TemaService
 
     protected function url(string $archivo): string
     {
-        return Storage::disk(app(ArchivosService::class)->disco())->url($archivo);
+        return Storage::disk(app(ArchivosService::class)->discoPublico())->url($archivo);
     }
 
     /**

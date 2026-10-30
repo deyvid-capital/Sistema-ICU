@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AsignacionEquipos\Tables;
 use App\Filament\Actions\ActivityTimelineAction;
 use App\Filament\Resources\AsignacionEquipos\AsignacionEquipoResource;
 use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationManager;
 use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
 use App\Models\AsignacionEquipo;
@@ -31,6 +32,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class AsignacionEquiposTable
 {
@@ -91,8 +93,10 @@ class AsignacionEquiposTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('—'),
+                FirmaEnOrigenActions::columnaEstado(EquipoFormularioPdfActions::resolverPdf(fn (Model $record): ?Model => $record->entrega)),
             ])
             ->filters([
+                FirmaEnOrigenActions::filtroEstado('entrega.pdfs'),
                 SelectFilter::make('usuario_id')
                     ->label('Usuario')
                     ->relationship('usuario', 'name')

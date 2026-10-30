@@ -26,7 +26,7 @@ class CelularFormularioPdfTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake('public');
+        Storage::fake('local');
 
         $this->mock(BrowsershotPdfFactory::class, function ($mock): void {
             $mock->shouldReceive('fromView')
@@ -54,7 +54,7 @@ class CelularFormularioPdfTest extends TestCase
         $this->assertSame(CelularFormularioPdfTipo::Entrega->nombreOficial(), $pdf->nombre);
         $this->assertSame('pdf-celulares/entrega/FUC-001-2026.pdf', $pdf->url);
         $this->assertTrue($entrega->fresh()->hasDocumentoOficial());
-        Storage::disk('public')->assertExists($pdf->url);
+        Storage::disk('local')->assertExists($pdf->url);
     }
 
     public function test_defaults_without_firmantes_use_ti_administrador_and_assigned_user(): void

@@ -111,11 +111,11 @@ class EntregaEquipoPdfFormActionsTest extends TestCase
     public function test_save_and_generate_pdf_still_dispatches_when_documento_oficial_exists(): void
     {
         Bus::fake([GenerateEquipoFormularioPdfJob::class]);
-        Storage::fake('public');
+        Storage::fake('local');
 
         $entrega = EntregaEquipo::factory()->create(['numero' => '013-2026']);
         $path = EquipoFormularioPdfTipo::Entrega->pdfRelativePath('013-2026');
-        Storage::disk('public')->put($path, '%PDF-1.4 mock');
+        Storage::disk('local')->put($path, '%PDF-1.4 mock');
 
         PdfEquipo::factory()->create([
             'nombre' => EquipoFormularioPdfTipo::Entrega->nombreOficial(),

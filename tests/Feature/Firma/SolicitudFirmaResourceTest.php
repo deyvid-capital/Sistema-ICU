@@ -74,7 +74,7 @@ class SolicitudFirmaResourceTest extends TestCase
     {
         $juanito = $this->firmante('Juanito');
         $carlos = $this->firmante('Carlos');
-        Storage::disk('public')->put('pdf-equipos/entrega/FUE-0042.pdf', $this->pdfDePrueba());
+        Storage::disk('local')->put('pdf-equipos/entrega/FUE-0042.pdf', $this->pdfDePrueba());
         $pdf = PdfEquipo::factory()->create(['url' => 'pdf-equipos/entrega/FUE-0042.pdf']);
 
         Livewire::test(CreateSolicitudFirma::class)

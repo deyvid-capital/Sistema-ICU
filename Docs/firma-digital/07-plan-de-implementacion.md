@@ -95,10 +95,18 @@ docker run --rm -u root -v "$PWD/tests:/app/tests:ro" -v "$PWD/requirements-dev.
 
 ## Fase 7: Integración con documentos existentes
 
-- [ ] Acción **"Enviar a firmar"** en las vistas y como acción masiva en las tablas de `PdfEquipo`, `PdfCelular` y `PdfMovimiento`, que abre el wizard con los documentos preseleccionados.
-- [ ] Badge de estado de firma en esas tablas ("Firmado" o "En firma 1/2").
-- [ ] Posiciones predeterminadas por plantilla: los recuadros sobre las líneas de firma izquierda/centro/derecha de las Blade actuales.
-- [ ] **Pruebas:** la acción aparece con permiso, la acción masiva crea un envío con N documentos y la regeneración se bloquea en curso.
+Se fusionó con el [documento 9](09-documentos-firmados-en-origen.md) (documentos firmados en su origen y almacenamiento confidencial).
+
+- [x] Acción **"Enviar a firmar"** en los módulos de origen (entregas, recepciones, notas, celulares, movimientos, asignaciones) y en *PdfEquipos* / *PdfCelulares*, más una **acción masiva** en esas dos tablas. Abre el asistente con los documentos preseleccionados (`?documentos=pdf_equipo:1,…`).
+- [x] Columna **"Firma"** (Sin firma, En firma 1/2, Firmado, Firmado a mano, Rechazado) y filtro por estado en esas tablas.
+- [x] Estado de firma en los PDF de origen (`estado_firma`, `firmado_at`, `firma_documento_id`, `hash_sha256`), con el enum `EstadoFirmaOrigen` y el trait `TieneEstadoFirma`.
+- [x] Al completarse un documento, el job `PublicarDocumentoFirmado` copia el firmado sobre el original (misma ruta). Los rechazados no se publican. `firmas:sincronizar-origen` hace el backfill y la reparación.
+- [x] **"Subir firmado a mano"** con permisos `UploadSigned:PdfEquipo|PdfCelular|PdfMovimiento`.
+- [x] Una sola regla para reemplazar un PDF (`ReemplazoDocumentoFirmado`): bloqueado en firma; si está firmado, modal con la lista de firmas y casilla obligatoria. "Guardar y generar PDF" no regenera un firmado.
+- [x] Asistente: filtro por categoría, del más reciente al más antiguo, firmados ocultos (con "Mostrar firmados" para consultar, sin poder elegirlos) y validación en el servidor. Los recibos de equipo quedan fuera de la firma.
+- [x] Almacenamiento: marca en `public`; PDF y capturas en el disco confidencial (`local` o `s3`), servidos con la ruta protegida `archivos.pdf.*` o URL temporales; comando `archivos:mover`.
+- [ ] Posiciones predeterminadas por plantilla (pendiente; hoy se usa "Usar posiciones de la última vez").
+- [x] **Pruebas:** `DocumentosEnOrigenTest` (9), `FirmaEnModulosTest` (6), `AlmacenamientoConfidencialTest` (8), más ajustes en las pruebas de almacenamiento.
 
 ## Fase 8: Endurecimiento y salida a producción
 

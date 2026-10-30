@@ -3,14 +3,17 @@
 namespace App\Filament\Resources\PdfCelulars\Actions;
 
 use App\Enums\CelularFormularioPdfTipo;
+use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Jobs\GenerateCelularFormularioPdfJob;
 use App\Models\PdfCelular;
+use App\Services\Firma\DocumentosEnFirma;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PdfCelularDocumentActions
@@ -20,9 +23,13 @@ class PdfCelularDocumentActions
      */
     public static function make(): array
     {
+        $propio = fn (Model $record): Model => $record;
+
         return [
             self::view(),
             self::download(),
+            FirmaEnOrigenActions::enviarAFirmar($propio),
+            FirmaEnOrigenActions::subirFirmado($propio),
         ];
     }
 
@@ -66,12 +73,15 @@ class PdfCelularDocumentActions
             ->color('primary')
             ->visible(fn (PdfCelular $record): bool => self::resolveTipo($record) !== null
                 && $record->documento !== null)
+            ->disabled(fn (PdfCelular $record): bool => app(DocumentosEnFirma::class)->envioEnCurso($record) !== null)
+            ->modalSubmitAction(fn (Action $action, PdfCelular $record): Action => $action->color($record->estaFirmado() ? 'danger' : 'primary'))
             ->modalIcon(Heroicon::OutlinedArrowPath)
             ->modalHeading('Generar PDF de nuevo')
             ->modalDescription('Se generará nuevamente el documento en segundo plano y reemplazará el archivo actual. Se te avisará cuando esté listo.')
             ->modalSubmitActionLabel('Generar y guardar')
-            ->requiresConfirmation()
-            ->action(function (PdfCelular $record): void {
+            ->requiresConfirmation(fn (?PdfCelular $record): bool => ! ($record?->estaFirmado() ?? false))
+            ->schema(fn (): array => FirmaEnOrigenActions::advertencia(fn (Model $record): Model => $record))
+            ->action(function (PdfCelular $record, array $data): void {
                 $tipo = self::resolveTipo($record);
                 $documento = $record->documento;
 
@@ -81,6 +91,7 @@ class PdfCelularDocumentActions
                     $documento,
                     $tipo,
                     auth()->id(),
+                    FirmaEnOrigenActions::confirmado($data),
                 );
 
                 Notification::make()

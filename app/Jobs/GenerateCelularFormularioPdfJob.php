@@ -40,12 +40,13 @@ class GenerateCelularFormularioPdfJob implements ShouldQueue
         public Model $record,
         public CelularFormularioPdfTipo $tipo,
         public ?string $actorId = null,
+        public bool $reemplazarFirmado = false,
     ) {}
 
     public function handle(GenerateCelularFormularioPdf $service): void
     {
         try {
-            $pdf = $service->execute($this->record, $this->tipo);
+            $pdf = $service->execute($this->record, $this->tipo, $this->reemplazarFirmado);
         } catch (CelularFormularioPdfException $exception) {
             // Error de validación/datos: reintentar no ayuda.
             $this->fail($exception);

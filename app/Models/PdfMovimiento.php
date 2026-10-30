@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsIcuActivity;
+use App\Models\Concerns\TieneEstadoFirma;
 use App\Services\Archivos\ArchivosService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,8 +13,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class PdfMovimiento extends Model
 {
     use LogsIcuActivity;
-
-    public const DOCUMENT_DISK = 'public';
+    use TieneEstadoFirma;
 
     public static function documentDisk(): string
     {
@@ -65,7 +65,7 @@ class PdfMovimiento extends Model
             return null;
         }
 
-        return Storage::disk(self::documentDisk())->url($this->url);
+        return route('archivos.pdf.ver', ['tipo' => 'pdf_movimiento', 'id' => $this->getKey()]);
     }
 
     public function storedDocumentFilename(): ?string

@@ -2,6 +2,7 @@
     $servicio = app(\App\Services\Archivos\ArchivosService::class);
     $prefijo = $servicio->prefijo();
     $disco = $servicio->disco();
+    $publicas = ['logo_claro', 'logo_oscuro', 'favicon'];
 @endphp
 
 <div class="space-y-6 text-sm">
@@ -12,7 +13,7 @@
                 <li class="flex flex-col gap-1 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                     <span class="font-medium text-gray-950 dark:text-white">{{ $meta['etiqueta'] }}</span>
                     <span class="font-mono text-xs text-gray-500 dark:text-gray-400">
-                        {{ $disco }}:{{ $prefijo }}/{{ $coleccion }}/{{ $meta['modelo'] }}/…
+                        {{ in_array($coleccion, $publicas, true) ? $servicio->discoPublico() : $disco }}:{{ $prefijo }}/{{ $coleccion }}/{{ $meta['modelo'] }}/…
                         @if (! empty($meta['conversiones']))
                             · thumb/webp
                         @endif

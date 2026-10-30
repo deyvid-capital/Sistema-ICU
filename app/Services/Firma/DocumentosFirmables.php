@@ -2,17 +2,20 @@
 
 namespace App\Services\Firma;
 
+use App\Enums\CelularFormularioPdfTipo;
+use App\Enums\EquipoFormularioPdfTipo;
+use App\Enums\EstadoFirmaOrigen;
 use App\Exceptions\FirmaDigitalException;
 use App\Models\PdfCelular;
 use App\Models\PdfEquipo;
 use App\Models\PdfMovimiento;
-use App\Models\ReciboEquipo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Documentos PDF ya generados en el sistema que se pueden enviar a firmar.
+ * Documentos PDF ya generados en el sistema que se pueden enviar a firmar: equipos,
+ * celulares y movimientos (los recibos de equipo son facturas escaneadas y no se firman).
  *
  * Cada documento se identifica con una clave "origen:id" (p. ej. "pdf_equipo:12")
  * para usarla como valor de un Select.
@@ -20,41 +23,67 @@ use Illuminate\Support\Facades\Storage;
 class DocumentosFirmables
 {
     /**
-     * @var array<string, array{0: class-string<Model>, 1: string, 2: bool}> origen => [modelo, etiqueta, tiene columna nombre]
+     * @var array<string, array{0: class-string<PdfEquipo|PdfCelular|PdfMovimiento>, 1: string}> origen => [modelo, etiqueta]
      */
     private const ORIGENES = [
-        'pdf_equipo' => [PdfEquipo::class, 'Equipos', true],
-        'pdf_celular' => [PdfCelular::class, 'Celulares', true],
-        'pdf_movimiento' => [PdfMovimiento::class, 'Altas y bajas', true],
-        'recibo_equipo' => [ReciboEquipo::class, 'Recibos de equipos', false],
+        'pdf_equipo' => [PdfEquipo::class, 'Equipos'],
+        'pdf_celular' => [PdfCelular::class, 'Celulares'],
+        'pdf_movimiento' => [PdfMovimiento::class, 'Movimientos'],
     ];
 
     /**
+     * Categorías para filtrar en el asistente.
+     *
      * @return array<string, string> clave => etiqueta
      */
-    public function buscar(?string $busqueda, int $limitePorOrigen = 15): array
+    public static function categorias(): array
     {
-        $resultados = [];
+        return [
+            'equipo_'.EquipoFormularioPdfTipo::Entrega->value => 'Equipos · Entrega',
+            'equipo_'.EquipoFormularioPdfTipo::Recepcion->value => 'Equipos · Recepción',
+            'equipo_'.EquipoFormularioPdfTipo::NotaSalida->value => 'Equipos · Nota de salida',
+            'equipo_'.EquipoFormularioPdfTipo::NotaRecepcion->value => 'Equipos · Nota de recepción externa',
+            'celular_'.CelularFormularioPdfTipo::Entrega->value => 'Celulares · Entrega',
+            'celular_'.CelularFormularioPdfTipo::Recepcion->value => 'Celulares · Recepción',
+            'movimiento_alta' => 'Movimientos · Alta',
+            'movimiento_baja' => 'Movimientos · Baja',
+        ];
+    }
 
-        foreach (self::ORIGENES as $origen => [$modelo, , $tieneNombre]) {
-            $modelo::query()
+    /**
+     * Del más reciente al más antiguo. Sin categoría busca en todos los orígenes.
+     *
+     * @return array<string, string> clave => etiqueta
+     */
+    public function buscar(?string $busqueda, ?string $categoria = null, bool $incluirFirmados = false, int $limite = 30): array
+    {
+        $documentos = collect();
+
+        foreach (self::ORIGENES as $origen => [$modelo]) {
+            $consulta = $this->filtrarCategoria($modelo::query(), $origen, $categoria);
+
+            if ($consulta === null) {
+                continue;
+            }
+
+            $documentos = $documentos->merge($consulta
                 ->whereNotNull('url')
-                ->when(filled($busqueda), fn (Builder $query) => $query->where(function (Builder $query) use ($busqueda, $tieneNombre): void {
-                    $query->whereLike('url', "%{$busqueda}%");
-
-                    if ($tieneNombre) {
-                        $query->orWhereLike('nombre', "%{$busqueda}%");
-                    }
-                }))
-                ->latest('id')
-                ->limit($limitePorOrigen)
+                ->when(! $incluirFirmados, fn (Builder $query) => $query->firmables())
+                ->when(filled($busqueda), fn (Builder $query) => $query->where(fn (Builder $query) => $query
+                    ->whereLike('url', "%{$busqueda}%")
+                    ->orWhereLike('nombre', "%{$busqueda}%")))
+                ->orderByDesc('fecha')
+                ->orderByDesc('id')
+                ->limit($limite)
                 ->get()
-                ->each(function (Model $documento) use ($origen, &$resultados): void {
-                    $resultados["{$origen}:{$documento->getKey()}"] = $this->etiqueta($documento);
-                });
+                ->map(fn (Model $documento): array => ['clave' => "{$origen}:{$documento->getKey()}", 'documento' => $documento]));
         }
 
-        return $resultados;
+        return $documentos
+            ->sortByDesc(fn (array $item): string => ($item['documento']->getAttribute('fecha')?->format('Y-m-d') ?? '').sprintf('%010d', $item['documento']->getKey()))
+            ->take($limite)
+            ->mapWithKeys(fn (array $item): array => [$item['clave'] => $this->etiqueta($item['documento'])])
+            ->all();
     }
 
     /**
@@ -76,7 +105,7 @@ class DocumentosFirmables
         return $etiquetas;
     }
 
-    public function resolver(string $clave): ?Model
+    public function resolver(string $clave): PdfEquipo|PdfCelular|PdfMovimiento|null
     {
         [$origen, $id] = array_pad(explode(':', $clave, 2), 2, null);
         $modelo = self::ORIGENES[$origen][0] ?? null;
@@ -84,12 +113,32 @@ class DocumentosFirmables
         return $modelo === null || $id === null ? null : $modelo::query()->find($id);
     }
 
+    public static function clave(Model $documento): ?string
+    {
+        foreach (self::ORIGENES as $origen => [$modelo]) {
+            if ($documento instanceof $modelo) {
+                return "{$origen}:{$documento->getKey()}";
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Se puede elegir: existe y no está en firma ni firmado.
+     */
+    public function esElegible(string $clave): bool
+    {
+        return $this->resolver($clave)?->esFirmable() ?? false;
+    }
+
     public function etiqueta(Model $documento): string
     {
-        $origen = $this->origenDe($documento);
         $fecha = $documento->getAttribute('fecha')?->format('d/m/Y');
+        $estado = $documento->getAttribute('estado_firma');
+        $marca = $estado instanceof EstadoFirmaOrigen && $estado !== EstadoFirmaOrigen::SinFirma ? " · {$estado->getLabel()}" : '';
 
-        return self::ORIGENES[$origen][1].' · '.$this->nombre($documento).($fecha ? " · {$fecha}" : '');
+        return $this->etiquetaOrigen($documento::class).' · '.$this->nombre($documento).($fecha ? " · {$fecha}" : '').$marca;
     }
 
     public function nombre(Model $documento): string
@@ -123,14 +172,23 @@ class DocumentosFirmables
         return 'PDF subido';
     }
 
-    private function origenDe(Model $documento): string
+    /**
+     * @param  Builder<Model>  $consulta
+     * @return Builder<Model>|null null si la categoría no corresponde a este origen.
+     */
+    private function filtrarCategoria(Builder $consulta, string $origen, ?string $categoria): ?Builder
     {
-        foreach (self::ORIGENES as $origen => [$modelo]) {
-            if ($documento instanceof $modelo) {
-                return $origen;
-            }
+        if (blank($categoria)) {
+            return $consulta;
         }
 
-        throw new \InvalidArgumentException('Tipo de documento no firmable: '.$documento::class);
+        [$grupo, $tipo] = array_pad(explode('_', $categoria, 2), 2, '');
+
+        return match (true) {
+            $origen === 'pdf_equipo' && $grupo === 'equipo' => $consulta->where('nombre', EquipoFormularioPdfTipo::from($tipo)->nombreOficial()),
+            $origen === 'pdf_celular' && $grupo === 'celular' => $consulta->where('nombre', CelularFormularioPdfTipo::from($tipo)->nombreOficial()),
+            $origen === 'pdf_movimiento' && $grupo === 'movimiento' => $consulta->whereHas('movimiento', fn (Builder $query) => $query->where('tipo', ucfirst($tipo))),
+            default => null,
+        };
     }
 }

@@ -34,7 +34,7 @@ class MediaSetting extends Model
             'max_pdf_kb' => config('archivos.max_pdf_kb'),
             'max_logo_kb' => config('archivos.max_logo_kb'),
             'max_favicon_kb' => config('archivos.max_favicon_kb'),
-            'visibilidad' => config('archivos.visibilidad'),
+            'visibilidad' => 'private',
         ]);
     }
 }

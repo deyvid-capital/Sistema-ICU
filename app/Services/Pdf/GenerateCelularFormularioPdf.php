@@ -6,6 +6,7 @@ use App\Enums\CelularFormularioPdfTipo;
 use App\Exceptions\CelularFormularioPdfException;
 use App\Models\PdfCelular;
 use App\Services\Firma\DocumentosEnFirma;
+use App\Services\Firma\ReemplazoDocumentoFirmado;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -23,12 +24,18 @@ class GenerateCelularFormularioPdf
      * @throws CelularFormularioPdfException
      * @throws Throwable
      */
-    public function execute(Model $record, CelularFormularioPdfTipo $tipo): PdfCelular
+    public function execute(Model $record, CelularFormularioPdfTipo $tipo, bool $reemplazarFirmado = false): PdfCelular
     {
         $enFirma = app(DocumentosEnFirma::class);
 
         if (($envio = $enFirma->envioEnCurso($record)) !== null) {
             throw new CelularFormularioPdfException($enFirma->mensaje($envio));
+        }
+
+        $oficial = $record->pdfs()->where('nombre', $tipo->nombreOficial())->latest('id')->first();
+
+        if (($motivo = app(ReemplazoDocumentoFirmado::class)->impedimento($oficial, $reemplazarFirmado)) !== null) {
+            throw new CelularFormularioPdfException($motivo);
         }
 
         $this->validator->validate($record, $tipo);
@@ -62,6 +69,8 @@ class GenerateCelularFormularioPdf
                     'fecha' => $fecha,
                     'url' => $path,
                 ]);
+
+                app(ReemplazoDocumentoFirmado::class)->despuesDeRegenerar($existing);
 
                 return $existing->refresh();
             }

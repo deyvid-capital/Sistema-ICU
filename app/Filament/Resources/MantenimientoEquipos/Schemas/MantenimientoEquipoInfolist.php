@@ -54,12 +54,14 @@ class MantenimientoEquipoInfolist
                             ->label('Captura antes')
                             ->collection('cap_antes')
                             ->conversion('thumb')
+                            ->visibility('private')
                             ->placeholder('Sin imagen')
                             ->columnSpan(1),
                         SpatieMediaLibraryImageEntry::make('cap_despues')
                             ->label('Captura después')
                             ->collection('cap_despues')
                             ->conversion('thumb')
+                            ->visibility('private')
                             ->placeholder('Sin imagen')
                             ->columnSpan(1),
                     ]),
