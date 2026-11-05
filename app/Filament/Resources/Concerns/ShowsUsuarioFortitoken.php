@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Concerns;
 
 use App\Models\User;
+use App\Models\UsuarioFortitoken;
 use Filament\Forms\Components\Placeholder;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Utilities\Get;
@@ -11,8 +12,8 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Indicador de solo lectura: si el colaborador tiene FortiToken asignado.
- * El alta/edición del serial vive en Seguridad del usuario.
+ * Indicador de solo lectura de los FortiToken del colaborador (puede tener varios).
+ * El alta/edición vive en Seguridad del usuario.
  */
 trait ShowsUsuarioFortitoken
 {
@@ -31,7 +32,7 @@ trait ShowsUsuarioFortitoken
                     return 'Selecciona un usuario para ver si tiene FortiToken.';
                 }
 
-                $usuario = User::query()->with('fortitoken')->find($usuarioId);
+                $usuario = User::query()->with('fortitokens')->find($usuarioId);
 
                 return self::fortitokenEtiqueta($usuario);
             })
@@ -60,21 +61,22 @@ trait ShowsUsuarioFortitoken
             ->icon(fn (Model $record): Heroicon => self::fortitokenIcon($record->usuario));
     }
 
+    /**
+     * Ej.: "Producción (activo), Contingencia (inactivo)".
+     */
     protected static function fortitokenEtiqueta(?User $usuario): string
     {
         if ($usuario === null) {
             return 'Sin usuario';
         }
 
-        $token = $usuario->fortitoken;
-
-        if ($token === null) {
+        if ($usuario->fortitokens->isEmpty()) {
             return 'Sin FortiToken';
         }
 
-        return $token->estado
-            ? 'Con FortiToken (activo)'
-            : 'Con FortiToken (inactivo)';
+        return $usuario->fortitokens
+            ->map(fn (UsuarioFortitoken $token): string => $token->nombre_token.($token->estado ? ' (activo)' : ' (inactivo)'))
+            ->implode(', ');
     }
 
     protected static function fortitokenEtiquetaCorta(?User $usuario): string
@@ -83,36 +85,48 @@ trait ShowsUsuarioFortitoken
             return '—';
         }
 
-        $token = $usuario->fortitoken;
+        $total = $usuario->fortitokens->count();
 
-        if ($token === null) {
+        if ($total === 0) {
             return 'No';
         }
 
-        return $token->estado ? 'Sí · activo' : 'Sí · inactivo';
+        $activos = $usuario->fortitokens->where('estado', true)->count();
+
+        return $activos === 0
+            ? "Sí · {$total} inactivo".($total > 1 ? 's' : '')
+            : "Sí · {$activos} activo".($activos > 1 ? 's' : '');
     }
 
     protected static function fortitokenColor(?User $usuario): string
     {
-        $token = $usuario?->fortitoken;
-
-        if ($token === null) {
-            return 'gray';
-        }
-
-        return $token->estado ? 'success' : 'warning';
+        return match (self::fortitokenSituacion($usuario)) {
+            'sin' => 'gray',
+            'activo' => 'success',
+            default => 'warning',
+        };
     }
 
     protected static function fortitokenIcon(?User $usuario): Heroicon
     {
-        $token = $usuario?->fortitoken;
+        return match (self::fortitokenSituacion($usuario)) {
+            'sin' => Heroicon::OutlinedXCircle,
+            'activo' => Heroicon::OutlinedCheckCircle,
+            default => Heroicon::OutlinedExclamationCircle,
+        };
+    }
 
-        if ($token === null) {
-            return Heroicon::OutlinedXCircle;
-        }
+    /**
+     * "sin" (ninguno), "activo" (al menos uno activo) o "inactivo" (todos inactivos).
+     */
+    private static function fortitokenSituacion(?User $usuario): string
+    {
+        $tokens = $usuario?->fortitokens;
 
-        return $token->estado
-            ? Heroicon::OutlinedCheckCircle
-            : Heroicon::OutlinedExclamationCircle;
+        return match (true) {
+            $tokens === null || $tokens->isEmpty() => 'sin',
+            $tokens->contains('estado', true) => 'activo',
+            default => 'inactivo',
+        };
     }
 }

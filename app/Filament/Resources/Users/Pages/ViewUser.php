@@ -28,7 +28,7 @@ class ViewUser extends ViewRecord
             'accesosInternet',
             'accesosVirtual.virtual',
             'accesosVirtual.recursoVpn',
-            'fortitoken',
+            'fortitokens',
             'accesosDaza.fondo',
             'accesosSistemas.sistema',
             'accesosSharepoint.sitio',

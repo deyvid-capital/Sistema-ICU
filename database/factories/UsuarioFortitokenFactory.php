@@ -17,6 +17,7 @@ class UsuarioFortitokenFactory extends Factory
     {
         return [
             'usuario_id' => User::query()->inRandomOrder()->value('id') ?? User::factory(),
+            'nombre_token' => fake()->unique()->bothify('Token ##??'),
             'serial' => fake()->bothify('FTK-########'),
             'estado' => true,
         ];

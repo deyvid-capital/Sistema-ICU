@@ -31,7 +31,7 @@ class AccesoVirtualsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['usuario.fortitoken']))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['usuario.fortitokens']))
             ->recordUrl(fn (AccesoVirtual $record): string => $record->trashed()
                 ? AccesoVirtualResource::getUrl('view', ['record' => $record])
                 : AccesoVirtualResource::getUrl('edit', ['record' => $record]))

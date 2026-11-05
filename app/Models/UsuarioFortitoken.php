@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * FortiToken de un colaborador. Puede tener varios (producción, contingencia...),
+ * identificados por `nombre_token`. El serial se guarda cifrado y no se audita.
+ */
 class UsuarioFortitoken extends Model
 {
     use BelongsToUsuario;
@@ -32,6 +36,7 @@ class UsuarioFortitoken extends Model
 
     protected $fillable = [
         'usuario_id',
+        'nombre_token',
         'serial',
         'estado',
     ];

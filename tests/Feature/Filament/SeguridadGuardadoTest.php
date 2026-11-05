@@ -67,7 +67,6 @@ class SeguridadGuardadoTest extends TestCase
             ->assertSee('Firma digital')
             ->assertDontSee('Qué pasa si lo desactivas')
             ->fillForm([
-                'fortitoken_serial' => 'FTK-001',
                 'pref__firma_digital__mail' => false,
             ])
             ->assertSee('Qué pasa si lo desactivas')

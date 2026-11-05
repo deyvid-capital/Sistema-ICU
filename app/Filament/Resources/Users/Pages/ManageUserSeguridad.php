@@ -14,6 +14,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -262,25 +263,51 @@ class ManageUserSeguridad extends EditRecord
             ]);
     }
 
+    /**
+     * Varios FortiToken por colaborador (producción, contingencia...). El repeater
+     * guarda la relación al guardar la página; quitar un token lo da de baja.
+     */
     protected function tabFortitoken(): Tab
     {
         return Tab::make('FortiToken')
             ->icon(Heroicon::OutlinedDevicePhoneMobile)
+            ->badge(fn (): ?int => $this->record->fortitokens()->count() ?: null)
             ->schema([
-                TextInput::make('fortitoken_serial')
-                    ->label('Serial FortiToken')
-                    ->maxLength(100)
-                    ->dehydrated(false)
-                    ->revealable()
-                    ->password()
-                    ->helperText('Se guarda cifrado. Obligatorio si el token está activo.')
-                    ->required(fn (Get $get): bool => (bool) $get('fortitoken_estado')),
-                Toggle::make('fortitoken_estado')
-                    ->label('Activo')
-                    ->default(false)
-                    ->dehydrated(false)
-                    ->live()
-                    ->helperText('Si se desactiva, el serial se conserva pero el token queda marcado como inactivo.'),
+                Repeater::make('fortitokens')
+                    ->hiddenLabel()
+                    ->relationship()
+                    // El serial está en $hidden y no llega en el arreglo del registro.
+                    ->mutateRelationshipDataBeforeFillUsing(fn (array $data): array => [
+                        ...$data,
+                        'serial' => $this->record->fortitokens->firstWhere('id', $data['id'] ?? null)?->serial,
+                    ])
+                    ->schema([
+                        TextInput::make('nombre_token')
+                            ->label('Nombre del token')
+                            ->datalist(['Producción', 'Contingencia'])
+                            ->placeholder('Producción, Contingencia...')
+                            ->required()
+                            ->maxLength(100)
+                            ->distinct(),
+                        TextInput::make('serial')
+                            ->label('Serial FortiToken')
+                            ->password()
+                            ->revealable()
+                            ->required()
+                            ->maxLength(100)
+                            ->helperText('Se guarda cifrado.'),
+                        Toggle::make('estado')
+                            ->label('Activo')
+                            ->default(true)
+                            ->inline(false)
+                            ->helperText('Si se desactiva, el serial se conserva pero el token queda inactivo.'),
+                    ])
+                    ->columns(3)
+                    ->itemLabel(fn (array $state): ?string => $state['nombre_token'] ?? null)
+                    ->addActionLabel('Agregar FortiToken')
+                    ->defaultItems(0)
+                    ->reorderable(false)
+                    ->collapsible(),
             ]);
     }
 
@@ -341,10 +368,6 @@ class ManageUserSeguridad extends EditRecord
             }
         }
 
-        $fortitoken = $this->record->fortitoken;
-        $data['fortitoken_serial'] = $fortitoken?->serial;
-        $data['fortitoken_estado'] = $fortitoken?->estado ?? true;
-
         return $data;
     }
 
@@ -396,39 +419,6 @@ class ManageUserSeguridad extends EditRecord
                 );
             }
         }
-
-        $this->persistirFortitoken();
-    }
-
-    protected function persistirFortitoken(): void
-    {
-        $serial = trim((string) ($this->data['fortitoken_serial'] ?? ''));
-        $estado = (bool) ($this->data['fortitoken_estado'] ?? false);
-        $existente = $this->record->fortitoken()->withTrashed()->first();
-
-        if ($serial === '') {
-            $existente?->delete();
-
-            return;
-        }
-
-        if ($existente !== null) {
-            if ($existente->trashed()) {
-                $existente->restore();
-            }
-
-            $existente->update([
-                'serial' => $serial,
-                'estado' => $estado,
-            ]);
-
-            return;
-        }
-
-        $this->record->fortitoken()->create([
-            'serial' => $serial,
-            'estado' => $estado,
-        ]);
     }
 
     protected function getSavedNotification(): ?Notification

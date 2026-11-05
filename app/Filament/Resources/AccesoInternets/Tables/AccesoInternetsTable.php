@@ -31,7 +31,7 @@ class AccesoInternetsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['usuario.fortitoken']))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['usuario.fortitokens']))
             ->recordUrl(fn (AccesoInternet $record): string => $record->trashed()
                 ? AccesoInternetResource::getUrl('view', ['record' => $record])
                 : AccesoInternetResource::getUrl('edit', ['record' => $record]))

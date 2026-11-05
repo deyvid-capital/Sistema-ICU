@@ -10,6 +10,7 @@ use App\Models\AsignacionEquipo;
 use App\Models\Movimiento;
 use App\Models\SoftwareArea;
 use App\Models\User;
+use App\Models\UsuarioFortitoken;
 use Closure;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -114,18 +115,14 @@ class UserInfolist
                                         TextEntry::make('fortitoken_resumen')
                                             ->label('FortiToken')
                                             ->badge()
-                                            ->state(function (User $record): string {
-                                                $token = $record->fortitoken;
-
-                                                if ($token === null) {
-                                                    return 'No asignado';
-                                                }
-
-                                                return $token->estado ? 'Asignado (activo)' : 'Asignado (inactivo)';
-                                            })
+                                            ->state(fn (User $record): array|string => $record->fortitokens->isEmpty()
+                                                ? 'No asignado'
+                                                : $record->fortitokens
+                                                    ->map(fn (UsuarioFortitoken $token): string => $token->nombre_token.($token->estado ? ' (activo)' : ' (inactivo)'))
+                                                    ->all())
                                             ->color(fn (User $record): string => match (true) {
-                                                $record->fortitoken === null => 'gray',
-                                                $record->fortitoken->estado => 'success',
+                                                $record->fortitokens->isEmpty() => 'gray',
+                                                $record->fortitokens->contains('estado', true) => 'success',
                                                 default => 'warning',
                                             }),
                                         RepeatableEntry::make('accesosInternet')
@@ -733,8 +730,8 @@ class UserInfolist
                 'fortitoken',
                 'FortiToken',
                 Heroicon::OutlinedDevicePhoneMobile,
-                fn (User $record): int => $record->fortitoken !== null ? 1 : 0,
-                fn (User $record): int => ($record->fortitoken?->estado ?? false) ? 1 : 0,
+                fn (User $record): int => $record->fortitokens->count(),
+                fn (User $record): int => $record->fortitokens->where('estado', true)->count(),
             ),
             static::resumenEntry(
                 'vpn',

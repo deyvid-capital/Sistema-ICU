@@ -68,6 +68,7 @@ return [
         'id_area' => 'área',
         'id_cargo' => 'cargo',
         'serial' => 'serial',
+        'nombre_token' => 'nombre del token',
         'modelo' => 'modelo',
         'observacion' => 'observación',
         'observaciones' => 'observaciones',
