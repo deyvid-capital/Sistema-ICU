@@ -15,7 +15,7 @@ Todos se agrupan en un solo tipo, `TipoEventoNotificacion::FirmaDigital`, con un
 
 | Evento | Destinatarios | Campana | Correo |
 |---|---|---|---|
-| 🔒 `firma_activacion_pendiente` | Titular al que se le cargó o renovó un `.p12` | ✅ | ✅ |
+| 🔒 `firma_asignada` | Titular al que el admin activó o renovó un `.p12`: *"Tu firma digital está lista / fue renovada"*. No tiene que activar nada; se vincula en su próximo inicio de sesión | ✅ | ✅ |
 | 🔒 `firma_requiere_reactivacion` | **Usuario + admins + super admins** (ver abajo) | ✅ | ✅ |
 | 🔒 `firma_solicitada` | Orden libre: **todos** los firmantes al enviar. Con orden: el siguiente cuando le toca | ✅ | ✅ |
 | `firma_recordatorio` | Firmantes con firmas pendientes | ✅ | ✅ |
@@ -31,39 +31,36 @@ Se dispara cuando la contraseña del sistema cambia **por fuera** de *Mi perfil*
 
 **Al usuario**
 
-> **Asunto:** [ICU] Debes reactivar tu firma digital
+> **Asunto:** [Sistema ICU] Tu firma digital quedó en pausa
 >
-> Tu contraseña del sistema fue restablecida el 26/10/2026 a las 10:32 (por: recuperación por correo).
-> Por seguridad, tu firma digital quedó en pausa hasta que la reactives.
+> Tu contraseña del sistema fue restablecida el 26/10/2026 a las 10:32 (recuperación por correo).
+> Por seguridad, tu firma digital quedó en pausa.
 >
-> **Cómo reactivarla (2 minutos):**
+> **Para reactivarla** solo inicia sesión con tu **nueva contraseña**: la firma se vuelve a vincular sola y desde ese momento firmas con ella.
 >
-> 1. Entra al sistema con tu nueva contraseña.
-> 2. Ve a **Menú de usuario → Mi firma digital → Reactivar**.
-> 3. Paso 1: escribe la contraseña de tu archivo **.p12** (la de Digicert/Viafirma, **no** la del sistema).
-> 4. Paso 2: confirma tu **nueva contraseña del sistema**.
+> Si ya tienes la sesión abierta, ve a **Menú de usuario → Mi firma digital → Reactivar mi firma** y escribe tu nueva contraseña del sistema.
 >
-> Si no recuerdas la contraseña del .p12, comunícate con el administrador.
->
-> [ Reactivar mi firma ]
+> [ Ver mi firma digital ]
 
 **A admins y super admins**
 
-> **Asunto:** [ICU] Firma digital de Juan Pérez requiere reactivación
+> **Asunto:** [Sistema ICU] Firma digital de Juan Pérez requiere reactivación
 >
-> - **Usuario:** Juan Pérez (CI 1234567), área Tecnología.
+> - **Usuario:** Juan Pérez (CI 1234567).
 > - **Motivo:** contraseña restablecida por *administrador María Gómez* / *recuperación por correo* / *importación*.
 > - **Fecha:** 26/10/2026 10:32.
-> - **Firmas pendientes afectadas:** 2 documentos (SF-2026-00042, SF-2026-00047).
 >
-> **Qué hacer:** el usuario ya recibió las instrucciones. Si necesita ayuda, debe entrar a *Mi firma digital → Reactivar* con la contraseña de su archivo .p12 y su nueva contraseña del sistema. Si perdió la contraseña del .p12, hay que solicitar reposición a Digicert y subir el nuevo archivo en *Configuración → Firmas digitales → Renovar*.
+> **Qué hacer:** nada. La firma se reactiva sola cuando el usuario inicie sesión con su nueva contraseña.
 >
-> [ Ver firma en el sistema ]
+> [ Ver firmas digitales ]
+
+**Firma heredada sin custodia** (activada con el flujo anterior): al usuario se le dice que un administrador debe reactivarla y que no tiene que hacer nada más; a los admins, que entren a *Configuración → Firmas digitales → Reactivar firma* y escriban la contraseña del `.p12`.
 
 ## Clases
 
 - `App\Notifications\Firma\SolicitudFirmaNotification`: una sola clase parametrizada por evento, al estilo de `CriticalEventNotification`. Implementa `ShouldQueue` y `afterCommit()`.
-- `App\Notifications\Firma\FirmaRequiereReactivacionNotification`: dos plantillas (usuario y admin) por las diferencias de contenido.
+- `App\Notifications\Firma\FirmaAsignadaNotification` (antes `FirmaActivacionPendienteNotification`): aviso al titular de firma lista o renovada.
+- `App\Notifications\Firma\FirmaRequiereReactivacionNotification`: dos plantillas (usuario y admin) por las diferencias de contenido, cada una con su variante para firmas sin custodia.
 - `toDatabase()` usa `FilamentNotification::make()->...->actions([Action::make('ver')->url(...)])`.
 - `toMail()` usa Markdown mail.
   - Asunto del envío a firmar: `"[ICU] Tienes {n} documento(s) por firmar: {asunto}"`.

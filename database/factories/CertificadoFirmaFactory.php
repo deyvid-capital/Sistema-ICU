@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * Por defecto crea una firma recién subida (pendiente de activación), sin
+ * Por defecto crea una firma subida sin activar (flujo anterior), sin
  * archivo real ni datos del certificado. Los estados `activo()` y `vencido()`
  * rellenan los datos que se obtienen al activar.
  *
@@ -61,6 +61,17 @@ class CertificadoFirmaFactory extends Factory
             'estado' => EstadoCertificadoFirma::RequiereReactivacion,
             'contrasena_p12_envuelta' => null,
             'contrasena_usuario_huella' => null,
+        ]);
+    }
+
+    /**
+     * Activada por el admin y aún sin vincular con la contraseña del titular.
+     */
+    public function pendienteDeVincular(): static
+    {
+        return $this->activo()->state(fn (): array => [
+            'contrasena_p12_envuelta' => null,
+            'contrasena_p12_custodia' => 'custodia-de-prueba',
         ]);
     }
 

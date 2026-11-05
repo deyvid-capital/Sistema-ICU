@@ -24,6 +24,7 @@ class FirmarDocumentoDePrueba
         private FirmadorClient $firmador,
         private BovedaCertificados $boveda,
         private EnvolturaContrasena $envoltura,
+        private VincularCertificadoFirma $vincular,
     ) {}
 
     /**
@@ -45,6 +46,10 @@ class FirmarDocumentoDePrueba
 
         if (! $certificado->puedeFirmar()) {
             throw FirmaDigitalException::envolturaInvalida();
+        }
+
+        if (blank($certificado->contrasena_p12_envuelta)) {
+            $certificado = ($this->vincular)($usuario, $contrasenaSistema) ?? throw FirmaDigitalException::envolturaInvalida();
         }
 
         $contrasenaP12 = $this->envoltura->desenvolver($certificado->contrasena_p12_envuelta, $contrasenaSistema);

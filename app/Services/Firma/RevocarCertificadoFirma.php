@@ -23,6 +23,7 @@ class RevocarCertificadoFirma
                 'estado' => EstadoCertificadoFirma::Revocado,
                 'archivo' => null,
                 'contrasena_p12_envuelta' => null,
+                'contrasena_p12_custodia' => null,
                 'contrasena_usuario_huella' => null,
             ]);
 

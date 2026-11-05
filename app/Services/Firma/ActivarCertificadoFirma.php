@@ -10,13 +10,13 @@ use App\Models\User;
 use App\Support\Auditoria\AuditorSeguridad;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use SensitiveParameter;
 
 /**
- * Activación (o reactivación / renovación) de una firma por su titular, en dos pasos:
- * 1. Contraseña del .p12: se abre el archivo y se validan los datos del certificado.
- * 2. Contraseña del sistema: con ella se envuelve la contraseña del .p12.
+ * El admin activa la firma con la contraseña del .p12: se abre el archivo, se validan
+ * los datos del certificado contra el titular y la contraseña queda en custodia
+ * (cifrada con FIRMA_ENCRYPTION_KEY). El titular no hace nada: la firma se vincula con
+ * su contraseña del sistema al iniciar sesión (VincularCertificadoFirma).
  *
  * Ver Docs/firma-digital/03-seguridad.md#activación-y-renovación-contraseña-del-p12
  */
@@ -27,25 +27,22 @@ class ActivarCertificadoFirma
     public function __construct(
         private FirmadorClient $firmador,
         private BovedaCertificados $boveda,
-        private EnvolturaContrasena $envoltura,
         private AuditorSeguridad $auditor,
     ) {}
 
     /**
-     * Paso 1: abre el .p12 y valida el certificado. No guarda nada.
+     * Abre el .p12 y valida el certificado contra el titular. No guarda nada.
      *
      * @return array<string, mixed> Datos del certificado devueltos por el firmador.
      *
      * @throws FirmaDigitalException
      */
-    public function validarContrasenaP12(CertificadoFirma $certificado, User $usuario, #[SensitiveParameter] string $contrasenaP12): array
+    public function validar(User $titular, #[SensitiveParameter] string $contenidoP12, #[SensitiveParameter] string $contrasenaP12): array
     {
-        $this->asegurarActivable($certificado, $usuario);
-
         try {
-            $datos = $this->firmador->inspeccionarCertificado($this->boveda->leer($certificado->archivo), $contrasenaP12);
+            $datos = $this->firmador->inspeccionarCertificado($contenidoP12, $contrasenaP12);
         } catch (FirmadorException $exception) {
-            throw $this->traducir($exception, $usuario, $contrasenaP12);
+            throw $this->traducir($exception, $titular);
         }
 
         if (! $datos['clave_corresponde']) {
@@ -60,88 +57,77 @@ class ActivarCertificadoFirma
             throw FirmaDigitalException::sinUsoDeFirma();
         }
 
-        $this->validarDocumento($datos['titular']['documento'] ?? null, $usuario);
-        $this->validarNoDuplicado($datos['huella_sha256'], $usuario);
+        $this->validarDocumento($datos['titular']['documento'] ?? null, $titular);
+        $this->validarNoDuplicado($datos['huella_sha256'], $titular);
 
         return $datos;
     }
 
     /**
-     * Paso 2: vuelve a validar el .p12 (no se confía en el paso 1) y activa la firma.
+     * Activa una firma ya subida: pendiente del flujo anterior o en pausa sin copia en custodia.
      *
      * @throws FirmaDigitalException
      */
-    public function __invoke(
-        CertificadoFirma $certificado,
-        User $usuario,
-        #[SensitiveParameter] string $contrasenaP12,
-        #[SensitiveParameter] string $contrasenaSistema,
-    ): CertificadoFirma {
-        $this->asegurarActivable($certificado, $usuario);
-
-        if (! Hash::check($contrasenaSistema, $usuario->password)) {
-            throw FirmaDigitalException::contrasenaSistemaIncorrecta();
+    public function __invoke(CertificadoFirma $certificado, #[SensitiveParameter] string $contrasenaP12, ?User $administrador = null): CertificadoFirma
+    {
+        if (! in_array($certificado->estado, [EstadoCertificadoFirma::PendienteActivacion, EstadoCertificadoFirma::RequiereReactivacion], true)) {
+            throw FirmaDigitalException::noActivable();
         }
 
-        $datos = $this->validarContrasenaP12($certificado, $usuario, $contrasenaP12);
-        $envuelta = $this->envoltura->envolver($contrasenaP12, $contrasenaSistema);
+        $titular = $certificado->usuario;
+        $datos = $this->validar($titular, $this->boveda->leer($certificado->archivo), $contrasenaP12);
 
-        DB::transaction(function () use ($certificado, $usuario, $datos, $envuelta): void {
-            $this->retirarAnteriores($certificado, $usuario);
+        DB::transaction(fn () => $this->aplicar($certificado, $datos, $contrasenaP12));
 
-            $certificado->update([
-                'estado' => EstadoCertificadoFirma::Activo,
-                'activado_at' => now(),
-                'contrasena_p12_envuelta' => $envuelta,
-                'contrasena_usuario_huella' => $this->envoltura->huellaContrasenaUsuario($usuario->password),
-                'huella_sha256' => $datos['huella_sha256'],
-                'titular_cn' => $datos['titular']['cn'] ?? null,
-                'titular_documento' => $datos['titular']['documento'] ?? null,
-                'titular_tipo_documento' => $datos['titular']['tipo_documento'] ?? null,
-                'titular_cargo' => $datos['titular']['cargo'] ?? null,
-                'titular_organizacion' => $datos['titular']['organizacion'] ?? null,
-                'emisor' => $datos['emisor']['cn'] ?? null,
-                'numero_serie' => $datos['numero_serie'],
-                'vigente_desde' => Carbon::parse($datos['vigente_desde']),
-                'vigente_hasta' => Carbon::parse($datos['vigente_hasta']),
-                'intentos_fallidos' => 0,
-                'bloqueado_hasta' => null,
-            ]);
-        });
-
-        $this->auditor->firmaDigitalActivada($usuario);
+        $this->auditor->firmaDigitalActivada($titular, $administrador);
 
         return $certificado->refresh();
     }
 
     /**
-     * @throws FirmaDigitalException
+     * Deja la firma activa y pendiente de vincular; acepta una firma aún sin guardar.
+     * Las anteriores se retiran antes de guardar (índice único de una activa y una
+     * pendiente por usuario). Debe llamarse dentro de una transacción.
+     *
+     * @param  array<string, mixed>  $datos  Resultado de validar().
      */
-    private function asegurarActivable(CertificadoFirma $certificado, User $usuario): void
+    public function aplicar(CertificadoFirma $certificado, array $datos, #[SensitiveParameter] string $contrasenaP12): void
     {
-        if ($certificado->usuario_id !== $usuario->getKey()) {
-            throw FirmaDigitalException::noPerteneceAlUsuario();
-        }
+        $this->retirarAnteriores($certificado);
 
-        if (! in_array($certificado->estado, [EstadoCertificadoFirma::PendienteActivacion, EstadoCertificadoFirma::RequiereReactivacion], true)) {
-            throw FirmaDigitalException::noActivable();
-        }
+        $certificado->fill([
+            'estado' => EstadoCertificadoFirma::Activo,
+            'activado_at' => now(),
+            'contrasena_p12_envuelta' => null,
+            'contrasena_p12_custodia' => $this->boveda->cifrar($contrasenaP12),
+            'contrasena_usuario_huella' => null,
+            'huella_sha256' => $datos['huella_sha256'],
+            'titular_cn' => $datos['titular']['cn'] ?? null,
+            'titular_documento' => $datos['titular']['documento'] ?? null,
+            'titular_tipo_documento' => $datos['titular']['tipo_documento'] ?? null,
+            'titular_cargo' => $datos['titular']['cargo'] ?? null,
+            'titular_organizacion' => $datos['titular']['organizacion'] ?? null,
+            'emisor' => $datos['emisor']['cn'] ?? null,
+            'numero_serie' => $datos['numero_serie'],
+            'vigente_desde' => Carbon::parse($datos['vigente_desde']),
+            'vigente_hasta' => Carbon::parse($datos['vigente_hasta']),
+            'intentos_fallidos' => 0,
+            'bloqueado_hasta' => null,
+        ])->save();
     }
 
-    private function traducir(FirmadorException $exception, User $usuario, #[SensitiveParameter] string $contrasenaP12): FirmaDigitalException
+    private function traducir(FirmadorException $exception, User $titular): FirmaDigitalException
     {
         if ($exception->esContrasenaIncorrecta()) {
-            $this->auditor->firmaDigitalContrasenaIncorrecta($usuario);
+            $this->auditor->firmaDigitalContrasenaIncorrecta($titular);
 
-            // Error frecuente: escribir la contraseña del sistema en el paso del .p12.
-            return Hash::check($contrasenaP12, $usuario->password)
-                ? FirmaDigitalException::escribioContrasenaDelSistema()
-                : FirmaDigitalException::contrasenaP12Incorrecta();
+            return FirmaDigitalException::contrasenaP12Incorrecta();
         }
 
-        return $exception->codigo === FirmadorException::NO_DISPONIBLE
-            ? FirmaDigitalException::firmadorNoDisponible()
-            : FirmaDigitalException::archivoInvalido();
+        return match ($exception->codigo) {
+            FirmadorException::NO_DISPONIBLE => FirmaDigitalException::firmadorNoDisponible(),
+            default => FirmaDigitalException::archivoInvalido(),
+        };
     }
 
     /**
@@ -150,18 +136,18 @@ class ActivarCertificadoFirma
      *
      * @throws FirmaDigitalException
      */
-    private function validarDocumento(?string $documentoCertificado, User $usuario): void
+    private function validarDocumento(?string $documentoCertificado, User $titular): void
     {
         if (blank($documentoCertificado)) {
             return;
         }
 
-        if (blank($usuario->carnet)) {
+        if (blank($titular->carnet)) {
             throw FirmaDigitalException::usuarioSinCarnet();
         }
 
-        if ($this->numeroDocumento($documentoCertificado) !== $this->numeroDocumento($usuario->carnet)) {
-            throw FirmaDigitalException::documentoNoCoincide($documentoCertificado, $usuario->carnet);
+        if ($this->numeroDocumento($documentoCertificado) !== $this->numeroDocumento($titular->carnet)) {
+            throw FirmaDigitalException::documentoNoCoincide($documentoCertificado, $titular->carnet);
         }
     }
 
@@ -175,12 +161,12 @@ class ActivarCertificadoFirma
     /**
      * @throws FirmaDigitalException
      */
-    private function validarNoDuplicado(string $huella, User $usuario): void
+    private function validarNoDuplicado(string $huella, User $titular): void
     {
         $otro = CertificadoFirma::query()
             ->vigentes()
             ->where('huella_sha256', $huella)
-            ->where('usuario_id', '!=', $usuario->getKey())
+            ->where('usuario_id', '!=', $titular->getKey())
             ->with('usuario')
             ->first();
 
@@ -190,21 +176,26 @@ class ActivarCertificadoFirma
     }
 
     /**
-     * La firma anterior (renovación) o la que requería reactivación queda como historial.
+     * La firma anterior (renovación) o la que estaba en pausa queda como historial;
+     * un .p12 subido y nunca activado se descarta.
      */
-    private function retirarAnteriores(CertificadoFirma $certificado, User $usuario): void
+    private function retirarAnteriores(CertificadoFirma $certificado): void
     {
-        $usuario->certificadosFirma()
-            ->whereKeyNot($certificado->getKey())
-            ->whereIn('estado', [EstadoCertificadoFirma::Activo, EstadoCertificadoFirma::RequiereReactivacion])
+        CertificadoFirma::query()
+            ->where('usuario_id', $certificado->usuario_id)
+            ->when($certificado->exists, fn ($query) => $query->whereKeyNot($certificado->getKey()))
+            ->vigentes()
             ->get()
             ->each(function (CertificadoFirma $anterior): void {
                 $archivo = $anterior->archivo;
 
                 $anterior->update([
-                    'estado' => EstadoCertificadoFirma::Reemplazado,
+                    'estado' => $anterior->estado === EstadoCertificadoFirma::PendienteActivacion
+                        ? EstadoCertificadoFirma::Revocado
+                        : EstadoCertificadoFirma::Reemplazado,
                     'archivo' => null,
                     'contrasena_p12_envuelta' => null,
+                    'contrasena_p12_custodia' => null,
                     'contrasena_usuario_huella' => null,
                 ]);
 

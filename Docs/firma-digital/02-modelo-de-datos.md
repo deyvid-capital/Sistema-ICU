@@ -26,14 +26,15 @@ erDiagram
 
 ### `certificados_firma`: firma `.p12` de cada persona
 
-> Los datos del certificado (`titular_*`, `emisor`, `numero_serie`, vigencia, `huella_sha256`) quedan **vacíos hasta la activación**: dentro del `.p12` están cifrados con su contraseña, que el admin no conoce.
+> Los datos del certificado (`titular_*`, `emisor`, `numero_serie`, vigencia, `huella_sha256`) se leen **al asignar o renovar**, porque el admin escribe la contraseña del `.p12`. Solo quedan vacíos en firmas heredadas `pendiente_activacion` (subidas sin contraseña con el flujo anterior).
 
 | Columna | Tipo | Notas |
 |---|---|---|
 | id | bigint | |
 | usuario_id | uuid FK users | Una firma **activa** por usuario (índice único parcial `WHERE estado = 'activo'`) |
 | archivo | string | `.p12` **original** en el disco privado, cifrado en reposo ([ver seguridad](03-seguridad.md)) |
-| contrasena_p12_envuelta | text, null | Contraseña del `.p12` **cifrada con una llave derivada de la contraseña del sistema** del titular. Incluye la sal y los parámetros de Argon2id, y todo va cifrado además con `FIRMA_ENCRYPTION_KEY`. `null` mientras no se active |
+| contrasena_p12_envuelta | text, null | Contraseña del `.p12` **cifrada con una llave derivada de la contraseña del sistema** del titular. Incluye la sal y los parámetros de Argon2id, y todo va cifrado además con `FIRMA_ENCRYPTION_KEY`. `null` = **pendiente de vincular** (se llena al iniciar sesión o al firmar) o tras un restablecimiento de contraseña |
+| contrasena_p12_custodia | text, null | Contraseña del `.p12` que escribe el admin, cifrada con `FIRMA_ENCRYPTION_KEY`. **Permanente** mientras la firma está vigente; se borra al revocar o reemplazar. `null` en firmas heredadas ([ver contrapartida](03-seguridad.md#contrapartida-de-la-custodia)) |
 | contrasena_usuario_huella | string, null | Marca para detectar que la contraseña del sistema cambió por fuera del perfil (ver [seguridad](03-seguridad.md#cambios-de-contraseña-del-sistema)) |
 | huella_sha256 | string(64), null | Huella del certificado, para detectar duplicados |
 | titular_cn | string | Ej.: `VLADIMIR ADALID CALDERON SARMIENTO` |
@@ -44,7 +45,7 @@ erDiagram
 | numero_serie | string | |
 | vigente_desde / vigente_hasta | timestamp | |
 | nombre_en_sello / cargo_en_sello | string | Editables (tildes, mayúsculas) |
-| estado | enum `EstadoCertificadoFirma` | `pendiente_activacion`, `activo`, `requiere_reactivacion`, `reemplazado`, `revocado` |
+| estado | enum `EstadoCertificadoFirma` | `pendiente_activacion` (solo heredado: subido sin contraseña, lo activa el admin), `activo` (puede estar pendiente de vincular), `requiere_reactivacion`, `reemplazado`, `revocado` |
 | activado_at | timestamp, null | |
 | reemplaza_a_id | FK self, null | Historial de renovaciones (una por año) |
 | intentos_fallidos, bloqueado_hasta | tinyint, timestamp null | Bloqueo tras N contraseñas incorrectas al firmar |

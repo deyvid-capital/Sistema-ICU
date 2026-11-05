@@ -142,7 +142,7 @@ trait FakeFirmador
     }
 
     /**
-     * Firma subida por el admin y pendiente de activación, con el .p12 cifrado en disco.
+     * .p12 subido con el flujo anterior y aún sin activar, cifrado en disco.
      */
     protected function certificadoPendiente(User $titular, array $atributos = []): CertificadoFirma
     {
@@ -154,16 +154,33 @@ trait FakeFirmador
     }
 
     /**
-     * Firma ya activada con la contraseña del sistema actual del titular.
+     * Firma activada por el admin que el titular aún no vinculó (no inició sesión).
+     */
+    protected function certificadoPendienteDeVincular(User $titular, array $atributos = []): CertificadoFirma
+    {
+        return CertificadoFirma::factory()->activo()->create([
+            'usuario_id' => $titular->getKey(),
+            'archivo' => app(BovedaCertificados::class)->guardar($titular, self::CONTENIDO_P12),
+            'contrasena_p12_envuelta' => null,
+            'contrasena_p12_custodia' => app(BovedaCertificados::class)->cifrar(self::CONTRASENA_P12),
+            'estado' => EstadoCertificadoFirma::Activo,
+            ...$atributos,
+        ]);
+    }
+
+    /**
+     * Firma activada y ya vinculada con la contraseña del sistema actual del titular.
      */
     protected function certificadoActivo(User $titular, array $atributos = []): CertificadoFirma
     {
         $envoltura = app(EnvolturaContrasena::class);
+        $boveda = app(BovedaCertificados::class);
 
         return CertificadoFirma::factory()->activo()->create([
             'usuario_id' => $titular->getKey(),
-            'archivo' => app(BovedaCertificados::class)->guardar($titular, self::CONTENIDO_P12),
+            'archivo' => $boveda->guardar($titular, self::CONTENIDO_P12),
             'contrasena_p12_envuelta' => $envoltura->envolver(self::CONTRASENA_P12, self::CONTRASENA_SISTEMA),
+            'contrasena_p12_custodia' => $boveda->cifrar(self::CONTRASENA_P12),
             'contrasena_usuario_huella' => $envoltura->huellaContrasenaUsuario($titular->password),
             'estado' => EstadoCertificadoFirma::Activo,
             ...$atributos,

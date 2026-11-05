@@ -6,12 +6,10 @@
 <x-filament-panels::page>
     @if ($pendiente)
         <x-filament::section icon="heroicon-o-information-circle" icon-color="info">
-            <x-slot name="heading">
-                {{ $pendiente->reemplaza_a_id ? 'Tienes una renovación de tu firma pendiente de activar' : 'Tienes una firma digital pendiente de activar' }}
-            </x-slot>
+            <x-slot name="heading">Tu firma digital está pendiente de activación</x-slot>
             <x-slot name="description">
-                Un administrador cargó tu archivo .p12 el {{ $pendiente->created_at->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}.
-                Presiona <strong>{{ $pendiente->reemplaza_a_id ? 'Activar renovación' : 'Activar mi firma' }}</strong> y ten a mano la contraseña del .p12 (la de Digicert/Viafirma) y tu contraseña del sistema.
+                Un administrador cargó tu archivo .p12 el {{ $pendiente->created_at->timezone(config('app.display_timezone'))->format('d/m/Y H:i') }}
+                y debe activarlo. No tienes que hacer nada: te avisaremos cuando esté lista.
             </x-slot>
         </x-filament::section>
     @endif
@@ -20,8 +18,20 @@
         <x-filament::section icon="heroicon-o-exclamation-triangle" icon-color="warning">
             <x-slot name="heading">Tu firma está en pausa</x-slot>
             <x-slot name="description">
-                Tu contraseña del sistema fue restablecida. Para volver a firmar presiona <strong>Reactivar mi firma</strong>:
-                necesitarás la contraseña de tu archivo .p12 (la de Digicert/Viafirma) y tu contraseña actual del sistema.
+                @if ($enUso->puedeVincularse())
+                    Tu contraseña del sistema fue restablecida. Presiona <strong>Reactivar mi firma</strong> y escribe tu contraseña actual del sistema
+                    (también se reactiva sola la próxima vez que inicies sesión).
+                @else
+                    Tu contraseña del sistema fue restablecida. Un administrador debe reactivar tu firma; ya se le avisó.
+                @endif
+            </x-slot>
+        </x-filament::section>
+    @elseif ($enUso?->estaPendienteDeVincular())
+        <x-filament::section icon="heroicon-o-information-circle" icon-color="info">
+            <x-slot name="heading">Tu firma está lista</x-slot>
+            <x-slot name="description">
+                Un administrador la activó. Firmarás con tu contraseña del sistema: se vincula sola al firmar o al iniciar sesión,
+                o ahora mismo con <strong>Vincular mi firma</strong>.
             </x-slot>
         </x-filament::section>
     @endif

@@ -60,7 +60,7 @@ class AvisarVencimientosFirmaCommand extends Command
     }
 
     /**
-     * Si el admin ya subió el .p12 nuevo, el titular solo tiene que activarlo (ya se le avisó).
+     * .p12 nuevo subido con el flujo anterior y aún sin activar: falta solo que el admin lo active.
      */
     private function tieneRenovacionPendiente(CertificadoFirma $certificado): bool
     {

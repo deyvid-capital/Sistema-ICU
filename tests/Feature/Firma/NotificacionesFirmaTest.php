@@ -8,7 +8,7 @@ use App\Models\CertificadoFirma;
 use App\Models\SolicitudFirma;
 use App\Models\User;
 use App\Notifications\Firma\CertificadoPorVencerNotification;
-use App\Notifications\Firma\FirmaActivacionPendienteNotification;
+use App\Notifications\Firma\FirmaAsignadaNotification;
 use App\Notifications\Firma\FirmaRequiereReactivacionNotification;
 use App\Notifications\Firma\FirmaSolicitadaNotification;
 use App\Notifications\Firma\SolicitudFirmaNotification;
@@ -106,10 +106,10 @@ class NotificacionesFirmaTest extends TestCase
         $usuario = User::factory()->create();
         $this->apagarPreferencia($usuario, 'mail');
 
-        $this->assertSame(['database'], (new FirmaActivacionPendienteNotification)->via($usuario));
+        $this->assertSame(['database'], (new FirmaAsignadaNotification)->via($usuario));
         $this->assertSame(['database'], FirmaRequiereReactivacionNotification::paraTitular('prueba')->via($usuario));
         $this->assertSame(['database'], (new CertificadoPorVencerNotification('X', '01/01/2027', 30))->via($usuario));
-        $this->assertSame(['database', 'mail'], (new FirmaActivacionPendienteNotification)->via(User::factory()->create()));
+        $this->assertSame(['database', 'mail'], (new FirmaAsignadaNotification)->via(User::factory()->create()));
     }
 
     // --- Avance del envío -------------------------------------------------------

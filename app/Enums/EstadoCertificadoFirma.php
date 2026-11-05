@@ -12,12 +12,15 @@ use Filament\Support\Contracts\HasLabel;
  */
 enum EstadoCertificadoFirma: string implements HasColor, HasLabel
 {
-    /** El admin subió el .p12; falta que el titular lo active con sus contraseñas. */
+    /** .p12 subido sin su contraseña (flujo anterior); falta que el admin lo active. */
     case PendienteActivacion = 'pendiente_activacion';
 
     case Activo = 'activo';
 
-    /** La contraseña del sistema se restableció sin conocer la anterior. */
+    /**
+     * La contraseña del sistema se restableció sin conocer la anterior. El titular la
+     * reactiva con su nueva contraseña; sin copia en custodia, la reactiva el admin.
+     */
     case RequiereReactivacion = 'requiere_reactivacion';
 
     /** Sustituido por la renovación anual. */

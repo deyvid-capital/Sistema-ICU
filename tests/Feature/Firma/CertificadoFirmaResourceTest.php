@@ -10,7 +10,7 @@ use App\Models\Cargo;
 use App\Models\CertificadoFirma;
 use App\Models\FirmaSetting;
 use App\Models\User;
-use App\Notifications\Firma\FirmaActivacionPendienteNotification;
+use App\Notifications\Firma\FirmaAsignadaNotification;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -60,7 +60,7 @@ class CertificadoFirmaResourceTest extends TestCase
         Livewire::test(ListCertificadosFirma::class)->assertCanNotSeeTableRecords([$reemplazado]);
     }
 
-    public function test_asignar_firma_sube_el_p12_cifrado_y_avisa_al_titular(): void
+    public function test_asignar_firma_sube_el_p12_cifrado_la_activa_y_avisa_al_titular(): void
     {
         $this->fakeFirmador();
         $cargo = Cargo::factory()->create(['cargo' => 'Oficial de Infraestructura']);
@@ -73,16 +73,19 @@ class CertificadoFirmaResourceTest extends TestCase
                 'nombre_en_sello' => 'Vladimir Adalid Calderón Sarmiento',
                 'cargo_en_sello' => 'Oficial de Infraestructura',
             ])
-            ->fillForm(['p12' => UploadedFile::fake()->createWithContent('firma.p12', self::CONTENIDO_P12)])
+            ->fillForm([
+                'p12' => UploadedFile::fake()->createWithContent('firma.p12', self::CONTENIDO_P12),
+                'contrasena_p12' => self::CONTRASENA_P12,
+            ])
             ->callMountedAction()
             ->assertHasNoFormErrors()
-            ->assertNotified('Firma asignada');
+            ->assertNotified('Firma asignada y activada');
 
         $certificado = $titular->certificadosFirma()->sole();
-        $this->assertSame(EstadoCertificadoFirma::PendienteActivacion, $certificado->estado);
+        $this->assertTrue($certificado->estaPendienteDeVincular());
         $this->assertSame('Vladimir Adalid Calderón Sarmiento', $certificado->nombre_en_sello);
         $this->assertSame($this->admin->id, $certificado->cargado_por);
-        Notification::assertSentTo($titular, FirmaActivacionPendienteNotification::class);
+        Notification::assertSentTo($titular, FirmaAsignadaNotification::class);
     }
 
     public function test_asignar_un_archivo_invalido_muestra_el_error(): void
@@ -94,11 +97,41 @@ class CertificadoFirmaResourceTest extends TestCase
             ->callAction('asignar', [
                 'usuario_id' => $titular->id,
                 'p12' => UploadedFile::fake()->createWithContent('firma.p12', 'basura'),
+                'contrasena_p12' => self::CONTRASENA_P12,
                 'nombre_en_sello' => 'X',
             ])
             ->assertNotified('No se pudo cargar la firma');
 
         $this->assertDatabaseCount('certificados_firma', 0);
+    }
+
+    public function test_asignar_con_contrasena_del_p12_incorrecta_muestra_el_error(): void
+    {
+        $this->fakeFirmador();
+
+        Livewire::test(ListCertificadosFirma::class)
+            ->callAction('asignar', [
+                'usuario_id' => $this->titular()->id,
+                'p12' => UploadedFile::fake()->createWithContent('firma.p12', self::CONTENIDO_P12),
+                'contrasena_p12' => 'otra',
+                'nombre_en_sello' => 'X',
+            ])
+            ->assertNotified('No se pudo cargar la firma');
+
+        $this->assertDatabaseCount('certificados_firma', 0);
+    }
+
+    public function test_asignar_exige_la_contrasena_del_p12(): void
+    {
+        $this->fakeFirmador();
+
+        Livewire::test(ListCertificadosFirma::class)
+            ->callAction('asignar', [
+                'usuario_id' => $this->titular()->id,
+                'p12' => UploadedFile::fake()->createWithContent('firma.p12', self::CONTENIDO_P12),
+                'nombre_en_sello' => 'X',
+            ])
+            ->assertHasFormErrors(['contrasena_p12' => 'required']);
     }
 
     public function test_exige_extension_p12_o_pfx(): void
@@ -131,19 +164,36 @@ class CertificadoFirmaResourceTest extends TestCase
         $this->assertSame(1, $conFirma->certificadosFirma()->count());
     }
 
-    public function test_renovar_sube_un_nuevo_p12_sin_desactivar_el_actual(): void
+    public function test_renovar_activa_el_nuevo_p12_y_reemplaza_al_actual(): void
     {
         $this->fakeFirmador();
-        $actual = $this->certificadoActivo($this->titular());
+        $actual = $this->certificadoActivo($this->titular(), ['huella_sha256' => str_repeat('b', 64)]);
 
         Livewire::test(ListCertificadosFirma::class)
             ->callAction(TestAction::make('renovar')->table($actual), [
                 'p12' => UploadedFile::fake()->createWithContent('nuevo.p12', 'p12-2027'),
+                'contrasena_p12' => self::CONTRASENA_P12,
             ])
-            ->assertNotified('Nuevo .p12 cargado');
+            ->assertNotified('Firma renovada');
 
-        $this->assertSame(EstadoCertificadoFirma::Activo, $actual->refresh()->estado);
-        $this->assertSame($actual->id, CertificadoFirma::query()->where('estado', EstadoCertificadoFirma::PendienteActivacion)->sole()->reemplaza_a_id);
+        $this->assertSame(EstadoCertificadoFirma::Reemplazado, $actual->refresh()->estado);
+        $this->assertSame($actual->id, CertificadoFirma::query()->where('estado', EstadoCertificadoFirma::Activo)->sole()->reemplaza_a_id);
+    }
+
+    public function test_activar_solo_aparece_para_firmas_sin_contrasena_en_custodia(): void
+    {
+        $this->fakeFirmador();
+        $pendiente = $this->certificadoPendiente($this->titular());
+        $activo = $this->certificadoActivo($this->titular(), ['huella_sha256' => str_repeat('b', 64)]);
+
+        Livewire::test(ListCertificadosFirma::class)
+            ->assertActionHidden(TestAction::make('activar')->table($activo))
+            ->assertActionVisible(TestAction::make('activar')->table($pendiente))
+            ->callAction(TestAction::make('activar')->table($pendiente), ['contrasena_p12' => self::CONTRASENA_P12])
+            ->assertNotified('Firma activada');
+
+        $this->assertTrue($pendiente->refresh()->estaPendienteDeVincular());
+        Notification::assertSentTo($pendiente->usuario, FirmaAsignadaNotification::class);
     }
 
     public function test_editar_los_datos_del_sello(): void
@@ -172,12 +222,13 @@ class CertificadoFirmaResourceTest extends TestCase
         $certificado->refresh();
         $this->assertSame(EstadoCertificadoFirma::Revocado, $certificado->estado);
         $this->assertNull($certificado->contrasena_p12_envuelta);
+        $this->assertNull($certificado->contrasena_p12_custodia);
         Storage::disk('local')->assertMissing($archivo);
     }
 
-    public function test_reenviar_aviso_solo_para_pendientes(): void
+    public function test_reenviar_aviso_solo_para_firmas_sin_vincular(): void
     {
-        $pendiente = $this->certificadoPendiente($this->titular());
+        $pendiente = $this->certificadoPendienteDeVincular($this->titular());
         $activo = $this->certificadoActivo($this->titular());
 
         Livewire::test(ListCertificadosFirma::class)
@@ -185,7 +236,7 @@ class CertificadoFirmaResourceTest extends TestCase
             ->assertActionHidden(TestAction::make('reenviarAviso')->table($activo))
             ->callAction(TestAction::make('reenviarAviso')->table($pendiente));
 
-        Notification::assertSentTo($pendiente->usuario, FirmaActivacionPendienteNotification::class);
+        Notification::assertSentTo($pendiente->usuario, FirmaAsignadaNotification::class);
     }
 
     public function test_guardar_ajustes_de_firma_digital(): void

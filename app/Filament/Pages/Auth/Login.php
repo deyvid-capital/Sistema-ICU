@@ -3,12 +3,15 @@
 namespace App\Filament\Pages\Auth;
 
 use App\Models\User;
+use App\Services\Firma\VincularCertificadoFirma;
 use App\Support\Auditoria\AuditorSeguridad;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Auth\Pages\Login as BaseLogin;
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 /**
  * Login del panel con bloqueo por intentos fallidos persistido por cuenta y
@@ -17,6 +20,9 @@ use Illuminate\Validation\ValidationException;
  * Se distingue entre "credenciales incorrectas" (suma intento y avisa cuántos
  * quedan) y "credenciales correctas pero sin acceso al panel" (no suma intento,
  * explica el motivo: deshabilitado, vencido, sin rol...).
+ *
+ * Tras un ingreso correcto vincula la firma digital con la contraseña escrita
+ * (activada por el admin o en pausa tras restablecer la contraseña).
  */
 class Login extends BaseLogin
 {
@@ -50,7 +56,31 @@ class Login extends BaseLogin
             throw ValidationException::withMessages(['data.email' => $mensaje]);
         }
 
-        return parent::authenticate();
+        $respuesta = parent::authenticate();
+
+        if ($respuesta !== null) {
+            $this->vincularFirmaDigital();
+        }
+
+        return $respuesta;
+    }
+
+    /**
+     * Un fallo aquí nunca impide el ingreso: la firma se vincula al firmar.
+     */
+    protected function vincularFirmaDigital(): void
+    {
+        $usuario = Filament::auth()->user();
+
+        if (! $usuario instanceof User) {
+            return;
+        }
+
+        try {
+            app(VincularCertificadoFirma::class)($usuario, (string) ($this->data['password'] ?? ''));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 
     protected function isUserAllowedToAccessPanel(Authenticatable $user): bool

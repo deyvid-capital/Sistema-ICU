@@ -6,23 +6,20 @@ use App\Enums\EstadoCertificadoFirma;
 use App\Exceptions\FirmaDigitalException;
 use App\Models\CertificadoFirma;
 use App\Models\User;
-use App\Services\Firma\ActivarCertificadoFirma;
 use App\Services\Firma\FirmarDocumentoDePrueba;
+use App\Services\Firma\VincularCertificadoFirma;
 use BackedEnum;
-use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Text;
-use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Cada usuario ve su firma digital, la activa (o reactiva / activa la renovación)
- * y puede probarla. Ver Docs/firma-digital/05-pantallas.md#pantalla-1b-mi-firma-digital-cada-usuario
+ * Cada usuario ve su firma digital y puede probarla. La activa el admin; el usuario
+ * solo la vincula (sola al iniciar sesión, o aquí si ya tenía la sesión abierta).
+ * Ver Docs/firma-digital/05-pantallas.md#pantalla-1b-mi-firma-digital-cada-usuario
  */
 class MiFirmaDigital extends Page
 {
@@ -35,11 +32,6 @@ class MiFirmaDigital extends Page
     protected static ?string $slug = 'mi-firma-digital';
 
     protected static bool $shouldRegisterNavigation = false;
-
-    /**
-     * Resumen del certificado validado en el paso 1 del asistente.
-     */
-    public ?string $resumenCertificado = null;
 
     public static function tieneFirmaAsignada(): bool
     {
@@ -60,7 +52,7 @@ class MiFirmaDigital extends Page
     }
 
     /**
-     * .p12 subido por el admin y aún no activado (asignación o renovación).
+     * .p12 subido con el flujo anterior y aún no activado por el admin.
      */
     public function certificadoPendiente(): ?CertificadoFirma
     {
@@ -71,87 +63,53 @@ class MiFirmaDigital extends Page
     }
 
     /**
-     * La renovación pendiente tiene prioridad sobre reactivar el certificado anterior.
-     */
-    public function certificadoPorActivar(): ?CertificadoFirma
-    {
-        $enUso = $this->certificadoEnUso();
-
-        return $this->certificadoPendiente()
-            ?? ($enUso?->estado === EstadoCertificadoFirma::RequiereReactivacion ? $enUso : null);
-    }
-
-    /**
      * @return array<Action>
      */
     protected function getHeaderActions(): array
     {
         return [
-            $this->activarAction(),
+            $this->vincularAction(),
             $this->probarAction(),
         ];
     }
 
-    protected function activarAction(): Action
+    /**
+     * Normalmente la firma se vincula sola al iniciar sesión; esto cubre al usuario
+     * que ya tenía la sesión abierta cuando el admin la activó o se restableció su contraseña.
+     */
+    protected function vincularAction(): Action
     {
-        return Action::make('activar')
-            ->label(fn (): string => match (true) {
-                $this->certificadoPorActivar()?->estado === EstadoCertificadoFirma::RequiereReactivacion => 'Reactivar mi firma',
-                $this->certificadoPorActivar()?->reemplaza_a_id !== null => 'Activar renovación',
-                default => 'Activar mi firma',
-            })
+        return Action::make('vincular')
+            ->label(fn (): string => $this->certificadoEnUso()?->estado === EstadoCertificadoFirma::RequiereReactivacion
+                ? 'Reactivar mi firma'
+                : 'Vincular mi firma')
             ->icon(Heroicon::OutlinedKey)
-            ->visible(fn (): bool => $this->certificadoPorActivar() !== null)
-            ->modalHeading('Activar mi firma digital')
-            ->modalSubmitActionLabel('Activar')
-            ->steps([
-                Step::make('p12')
-                    ->label('Contraseña del .p12')
-                    ->icon(Heroicon::OutlinedDocumentCheck)
-                    ->schema([
-                        Text::make('🔐 Es la contraseña que definiste al descargar tu firma de Digicert (la misma que usas en Viafirma). NO es tu contraseña del sistema ICU.'),
-                        TextInput::make('contrasena_p12')
-                            ->label('Contraseña de tu archivo de firma (.p12)')
-                            ->password()
-                            ->revealable()
-                            ->required()
-                            ->rule(fn (): Closure => $this->validarContrasenaP12(...)),
-                    ]),
-                Step::make('sistema')
-                    ->label('Contraseña del sistema')
-                    ->icon(Heroicon::OutlinedFingerPrint)
-                    ->schema([
-                        Text::make(fn (): string => '✅ Archivo validado: '.($this->resumenCertificado ?? '')),
-                        Text::make('✍️ Desde ahora firmarás con esta contraseña, la misma con la que entras al sistema.'),
-                        TextInput::make('contrasena_sistema')
-                            ->label('Tu contraseña del sistema ICU')
-                            ->password()
-                            ->revealable()
-                            ->required()
-                            ->rule('current_password')
-                            ->validationMessages(['current_password' => 'La contraseña del sistema no es correcta.']),
-                    ]),
+            ->visible(fn (): bool => (bool) $this->certificadoEnUso()?->puedeVincularse())
+            ->modalHeading('Vincular mi firma digital')
+            ->modalDescription('Desde ahora firmarás con tu contraseña del sistema, la misma con la que entras al Sistema ICU.')
+            ->modalSubmitActionLabel('Vincular')
+            ->schema([
+                TextInput::make('contrasena_sistema')
+                    ->label('Tu contraseña del sistema ICU')
+                    ->password()
+                    ->revealable()
+                    ->required()
+                    ->rule('current_password')
+                    ->validationMessages(['current_password' => 'La contraseña del sistema no es correcta.']),
             ])
             ->action(function (array $data, Action $action): void {
-                try {
-                    $certificado = app(ActivarCertificadoFirma::class)(
-                        $this->certificadoPorActivar() ?? throw FirmaDigitalException::noActivable(),
-                        $this->usuario(),
-                        (string) $data['contrasena_p12'],
-                        (string) $data['contrasena_sistema'],
-                    );
-                } catch (FirmaDigitalException $exception) {
-                    Notification::make()->danger()->title('No se pudo activar la firma')->body($exception->getMessage())->send();
+                $certificado = app(VincularCertificadoFirma::class)($this->usuario(), (string) $data['contrasena_sistema']);
+
+                if ($certificado === null) {
+                    Notification::make()->danger()->title('No se pudo vincular la firma')->body('Tu firma no está pendiente de vincular. Si el problema sigue, comunícate con el administrador.')->send();
 
                     $action->halt();
                 }
 
-                $this->resumenCertificado = null;
-
                 Notification::make()
                     ->success()
-                    ->title('Firma digital activada')
-                    ->body('Vigente hasta el '.$certificado->vigente_hasta?->format('d/m/Y').'. Desde ahora firmas con tu contraseña del sistema.')
+                    ->title('Firma digital lista')
+                    ->body('Vigente hasta el '.$certificado->vigente_hasta?->format('d/m/Y').'. Firmas con tu contraseña del sistema.')
                     ->send();
             });
     }
@@ -194,35 +152,6 @@ class MiFirmaDigital extends Page
                     'Content-Type' => 'application/pdf',
                 ]);
             });
-    }
-
-    /**
-     * Regla del paso 1: abre el .p12 en el firmador y muestra el error bajo el campo.
-     */
-    private function validarContrasenaP12(string $attribute, mixed $value, Closure $fail): void
-    {
-        $certificado = $this->certificadoPorActivar();
-
-        if ($certificado === null) {
-            $fail(FirmaDigitalException::noActivable()->getMessage());
-
-            return;
-        }
-
-        try {
-            $datos = app(ActivarCertificadoFirma::class)->validarContrasenaP12($certificado, $this->usuario(), (string) $value);
-        } catch (FirmaDigitalException $exception) {
-            $fail($exception->getMessage());
-
-            return;
-        }
-
-        $this->resumenCertificado = sprintf(
-            '%s · %s · vigente hasta %s',
-            $datos['titular']['cn'] ?? 'Titular',
-            $datos['emisor']['cn'] ?? 'Emisor',
-            Carbon::parse($datos['vigente_hasta'])->format('d/m/Y'),
-        );
     }
 
     private function usuario(): User

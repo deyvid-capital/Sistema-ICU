@@ -54,64 +54,62 @@ class MiFirmaDigitalPageTest extends TestCase
         $this->assertFalse(MiFirmaDigital::tieneFirmaAsignada());
     }
 
-    public function test_activar_la_firma_con_el_asistente_de_dos_pasos(): void
+    public function test_un_p12_pendiente_del_flujo_anterior_espera_al_admin(): void
     {
-        $this->fakeFirmador();
         $titular = $this->titular();
-        $certificado = $this->certificadoPendiente($titular);
+        $this->certificadoPendiente($titular);
         $this->entrarComo($titular);
 
         Livewire::test(MiFirmaDigital::class)
-            ->assertSee('Tienes una firma digital pendiente de activar')
-            ->assertActionVisible('activar')
-            ->assertActionHidden('probar')
-            ->callAction('activar', [
-                'contrasena_p12' => self::CONTRASENA_P12,
-                'contrasena_sistema' => self::CONTRASENA_SISTEMA,
-            ])
+            ->assertSee('Tu firma digital está pendiente de activación')
+            ->assertActionHidden('vincular')
+            ->assertActionHidden('probar');
+    }
+
+    public function test_una_firma_activada_por_el_admin_se_vincula_con_la_contrasena_del_sistema(): void
+    {
+        $titular = $this->titular();
+        $certificado = $this->certificadoPendienteDeVincular($titular);
+        $this->entrarComo($titular);
+
+        Livewire::test(MiFirmaDigital::class)
+            ->assertSee('Tu firma está lista')
+            ->assertActionHasLabel('vincular', 'Vincular mi firma')
+            ->assertActionVisible('probar')
+            ->callAction('vincular', ['contrasena_sistema' => self::CONTRASENA_SISTEMA])
             ->assertHasNoFormErrors()
-            ->assertNotified('Firma digital activada');
+            ->assertNotified('Firma digital lista');
 
-        $this->assertTrue($certificado->refresh()->puedeFirmar());
+        $this->assertFalse($certificado->refresh()->estaPendienteDeVincular());
+        $this->assertTrue($certificado->puedeFirmar());
     }
 
-    public function test_el_paso_del_p12_detecta_que_escribio_la_contrasena_del_sistema(): void
+    public function test_vincular_valida_la_contrasena_actual(): void
     {
-        $this->fakeFirmador();
         $titular = $this->titular();
-        $this->certificadoPendiente($titular);
+        $certificado = $this->certificadoPendienteDeVincular($titular);
         $this->entrarComo($titular);
 
         Livewire::test(MiFirmaDigital::class)
-            ->callAction('activar', [
-                'contrasena_p12' => self::CONTRASENA_SISTEMA,
-                'contrasena_sistema' => self::CONTRASENA_SISTEMA,
-            ])
-            ->assertHasFormErrors(['contrasena_p12']);
-
-        $this->assertSame(EstadoCertificadoFirma::PendienteActivacion, $titular->certificadosFirma()->sole()->estado);
-    }
-
-    public function test_el_paso_del_sistema_valida_la_contrasena_actual(): void
-    {
-        $this->fakeFirmador();
-        $titular = $this->titular();
-        $this->certificadoPendiente($titular);
-        $this->entrarComo($titular);
-
-        Livewire::test(MiFirmaDigital::class)
-            ->callAction('activar', [
-                'contrasena_p12' => self::CONTRASENA_P12,
-                'contrasena_sistema' => 'no-es-la-mia',
-            ])
+            ->callAction('vincular', ['contrasena_sistema' => 'no-es-la-mia'])
             ->assertHasFormErrors(['contrasena_sistema']);
+
+        $this->assertTrue($certificado->refresh()->estaPendienteDeVincular());
     }
 
-    public function test_una_firma_en_pausa_muestra_reactivar(): void
+    public function test_una_firma_ya_vinculada_no_muestra_vincular(): void
     {
-        $this->fakeFirmador();
         $titular = $this->titular();
-        $this->certificadoActivo($titular, [
+        $this->certificadoActivo($titular);
+        $this->entrarComo($titular);
+
+        Livewire::test(MiFirmaDigital::class)->assertActionHidden('vincular');
+    }
+
+    public function test_una_firma_en_pausa_se_reactiva_solo_con_la_nueva_contrasena(): void
+    {
+        $titular = $this->titular();
+        $certificado = $this->certificadoActivo($titular, [
             'estado' => EstadoCertificadoFirma::RequiereReactivacion,
             'contrasena_p12_envuelta' => null,
         ]);
@@ -119,32 +117,40 @@ class MiFirmaDigitalPageTest extends TestCase
 
         Livewire::test(MiFirmaDigital::class)
             ->assertSee('Tu firma está en pausa')
-            ->assertActionHasLabel('activar', 'Reactivar mi firma')
-            ->callAction('activar', [
-                'contrasena_p12' => self::CONTRASENA_P12,
-                'contrasena_sistema' => self::CONTRASENA_SISTEMA,
-            ])
-            ->assertNotified('Firma digital activada');
+            ->assertActionHasLabel('vincular', 'Reactivar mi firma')
+            ->callAction('vincular', ['contrasena_sistema' => self::CONTRASENA_SISTEMA])
+            ->assertNotified('Firma digital lista');
+
+        $this->assertSame(EstadoCertificadoFirma::Activo, $certificado->refresh()->estado);
     }
 
-    public function test_la_renovacion_pendiente_se_activa_aunque_la_actual_siga_activa(): void
+    public function test_una_firma_en_pausa_sin_custodia_la_reactiva_el_admin(): void
     {
-        $this->fakeFirmador();
         $titular = $this->titular();
-        $actual = $this->certificadoActivo($titular, ['huella_sha256' => str_repeat('b', 64)]);
-        $renovacion = $this->certificadoPendiente($titular, ['reemplaza_a_id' => $actual->id]);
+        $this->certificadoActivo($titular, [
+            'estado' => EstadoCertificadoFirma::RequiereReactivacion,
+            'contrasena_p12_envuelta' => null,
+            'contrasena_p12_custodia' => null,
+        ]);
         $this->entrarComo($titular);
 
         Livewire::test(MiFirmaDigital::class)
-            ->assertActionHasLabel('activar', 'Activar renovación')
-            ->assertActionVisible('probar')
-            ->callAction('activar', [
-                'contrasena_p12' => self::CONTRASENA_P12,
-                'contrasena_sistema' => self::CONTRASENA_SISTEMA,
-            ]);
+            ->assertSee('Un administrador debe reactivar tu firma')
+            ->assertActionHidden('vincular');
+    }
 
-        $this->assertSame(EstadoCertificadoFirma::Activo, $renovacion->refresh()->estado);
-        $this->assertSame(EstadoCertificadoFirma::Reemplazado, $actual->refresh()->estado);
+    public function test_probar_mi_firma_vincula_una_firma_recien_activada(): void
+    {
+        $this->fakeFirmador();
+        $titular = $this->titular();
+        $certificado = $this->certificadoPendienteDeVincular($titular);
+        $this->entrarComo($titular);
+
+        Livewire::test(MiFirmaDigital::class)
+            ->callAction('probar', ['contrasena_sistema' => self::CONTRASENA_SISTEMA])
+            ->assertFileDownloaded('prueba-firma-digital.pdf');
+
+        $this->assertFalse($certificado->refresh()->estaPendienteDeVincular());
     }
 
     public function test_probar_mi_firma_descarga_un_pdf_firmado_con_la_contrasena_del_sistema(): void

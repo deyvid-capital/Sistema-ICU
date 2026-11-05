@@ -16,7 +16,8 @@ use SensitiveParameter;
 /**
  * Antes de firmar: firma activa y vigente, no bloqueada, código 2FA (si la
  * configuración lo exige) y contraseña del sistema. Con eso se desenvuelve la
- * contraseña del .p12 y se lee el archivo, una sola vez por petición.
+ * contraseña del .p12 y se lee el archivo, una sola vez por petición. Si el admin
+ * la activó y el titular aún no inició sesión desde entonces, aquí se vincula.
  */
 class AbrirCredencialesFirma
 {
@@ -24,6 +25,7 @@ class AbrirCredencialesFirma
         private BovedaCertificados $boveda,
         private EnvolturaContrasena $envoltura,
         private AuditorSeguridad $auditor,
+        private VincularCertificadoFirma $vincular,
     ) {}
 
     /**
@@ -33,7 +35,7 @@ class AbrirCredencialesFirma
     {
         $certificado = $usuario->certificadoFirmaActivo()->first();
 
-        if ($certificado === null || blank($certificado->contrasena_p12_envuelta)) {
+        if ($certificado === null || (blank($certificado->contrasena_p12_envuelta) && ! $certificado->puedeVincularse())) {
             throw FirmaDigitalException::sinFirmaActiva();
         }
 
@@ -55,6 +57,10 @@ class AbrirCredencialesFirma
 
         if ($certificado->intentos_fallidos > 0) {
             $certificado->update(['intentos_fallidos' => 0]);
+        }
+
+        if (blank($certificado->contrasena_p12_envuelta)) {
+            $certificado = ($this->vincular)($usuario, $contrasenaSistema) ?? throw FirmaDigitalException::sinFirmaActiva();
         }
 
         return new CredencialesFirma(

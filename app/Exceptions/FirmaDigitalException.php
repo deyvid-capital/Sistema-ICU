@@ -20,11 +20,6 @@ class FirmaDigitalException extends Exception
         return new self('La contraseña del archivo .p12 no es correcta.');
     }
 
-    public static function escribioContrasenaDelSistema(): self
-    {
-        return new self('Escribiste tu contraseña del sistema ICU. Aquí va la contraseña de tu archivo .p12 (la de Digicert/Viafirma).');
-    }
-
     public static function contrasenaSistemaIncorrecta(): self
     {
         return new self('La contraseña del sistema no es correcta.');

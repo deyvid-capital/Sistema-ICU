@@ -2,28 +2,27 @@
 
 namespace App\Services\Firma;
 
-use App\Enums\EstadoCertificadoFirma;
 use App\Exceptions\FirmaDigitalException;
-use App\Exceptions\FirmadorException;
 use App\Models\CertificadoFirma;
 use App\Models\User;
-use App\Notifications\Firma\FirmaActivacionPendienteNotification;
+use App\Notifications\Firma\FirmaAsignadaNotification;
+use App\Support\Auditoria\AuditorSeguridad;
 use Illuminate\Support\Facades\DB;
 use SensitiveParameter;
 use Throwable;
 
 /**
- * El admin sube el .p12 de un usuario (asignación inicial o renovación anual).
- *
- * Sin la contraseña solo se puede comprobar que el archivo sea un PKCS#12 válido;
- * los datos del certificado se leen cuando el titular lo activa. Si el usuario ya
- * tiene una firma activa, esta sigue funcionando hasta que active la nueva.
+ * El admin sube el .p12 de un usuario con su contraseña (asignación inicial o
+ * renovación anual) y la firma queda activa en ese momento. La firma anterior, si
+ * la había, pasa a historial. El titular solo tiene que iniciar sesión para que la
+ * firma quede vinculada con su contraseña del sistema.
  */
 class AsignarCertificadoFirma
 {
     public function __construct(
-        private FirmadorClient $firmador,
+        private ActivarCertificadoFirma $activar,
         private BovedaCertificados $boveda,
+        private AuditorSeguridad $auditor,
     ) {}
 
     /**
@@ -32,29 +31,29 @@ class AsignarCertificadoFirma
     public function __invoke(
         User $titular,
         #[SensitiveParameter] string $contenidoP12,
+        #[SensitiveParameter] string $contrasenaP12,
         string $nombreEnSello,
         ?string $cargoEnSello,
         ?User $administrador = null,
     ): CertificadoFirma {
-        $this->validarEstructura($contenidoP12);
+        $datos = $this->activar->validar($titular, $contenidoP12, $contrasenaP12);
 
         $ruta = $this->boveda->guardar($titular, $contenidoP12);
 
         try {
-            [$certificado, $esRenovacion] = DB::transaction(function () use ($titular, $ruta, $nombreEnSello, $cargoEnSello, $administrador): array {
-                $this->descartarPendientes($titular);
-
+            [$certificado, $esRenovacion] = DB::transaction(function () use ($titular, $ruta, $nombreEnSello, $cargoEnSello, $administrador, $datos, $contrasenaP12): array {
                 $activo = $titular->certificadoFirmaActivo()->first();
 
-                $certificado = CertificadoFirma::query()->create([
+                $certificado = new CertificadoFirma([
                     'usuario_id' => $titular->getKey(),
                     'archivo' => $ruta,
                     'nombre_en_sello' => $nombreEnSello,
                     'cargo_en_sello' => $cargoEnSello,
-                    'estado' => EstadoCertificadoFirma::PendienteActivacion,
                     'reemplaza_a_id' => $activo?->getKey(),
                     'cargado_por' => $administrador?->getKey(),
                 ]);
+
+                $this->activar->aplicar($certificado, $datos, $contrasenaP12);
 
                 return [$certificado, $activo !== null];
             });
@@ -64,48 +63,10 @@ class AsignarCertificadoFirma
             throw $exception;
         }
 
-        $titular->notify(new FirmaActivacionPendienteNotification($esRenovacion));
+        $this->auditor->firmaDigitalActivada($titular, $administrador);
 
-        return $certificado;
-    }
+        $titular->notify(new FirmaAsignadaNotification($esRenovacion));
 
-    /**
-     * Con contraseña vacía el firmador distingue "no es un .p12" de "contraseña incorrecta".
-     *
-     * @throws FirmaDigitalException
-     */
-    private function validarEstructura(#[SensitiveParameter] string $contenidoP12): void
-    {
-        try {
-            $this->firmador->inspeccionarCertificado($contenidoP12, '');
-        } catch (FirmadorException $exception) {
-            if ($exception->esContrasenaIncorrecta()) {
-                return;
-            }
-
-            throw $exception->codigo === FirmadorException::NO_DISPONIBLE
-                ? FirmaDigitalException::firmadorNoDisponible()
-                : FirmaDigitalException::archivoInvalido();
-        }
-    }
-
-    /**
-     * Un archivo subido antes y nunca activado se reemplaza por el nuevo.
-     */
-    private function descartarPendientes(User $titular): void
-    {
-        $titular->certificadosFirma()
-            ->where('estado', EstadoCertificadoFirma::PendienteActivacion)
-            ->get()
-            ->each(function (CertificadoFirma $pendiente): void {
-                $archivo = $pendiente->archivo;
-
-                $pendiente->update([
-                    'estado' => EstadoCertificadoFirma::Revocado,
-                    'archivo' => null,
-                ]);
-
-                DB::afterCommit(fn () => $this->boveda->eliminar($archivo));
-            });
+        return $certificado->refresh();
     }
 }

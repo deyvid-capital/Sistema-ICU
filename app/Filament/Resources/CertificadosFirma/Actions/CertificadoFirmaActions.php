@@ -7,7 +7,8 @@ use App\Exceptions\FirmaDigitalException;
 use App\Filament\Resources\CertificadosFirma\CertificadoFirmaResource;
 use App\Models\CertificadoFirma;
 use App\Models\User;
-use App\Notifications\Firma\FirmaActivacionPendienteNotification;
+use App\Notifications\Firma\FirmaAsignadaNotification;
+use App\Services\Firma\ActivarCertificadoFirma;
 use App\Services\Firma\AsignarCertificadoFirma;
 use App\Services\Firma\RevocarCertificadoFirma;
 use Filament\Actions\Action;
@@ -33,7 +34,7 @@ class CertificadoFirmaActions
             ->icon(Heroicon::OutlinedPlus)
             ->authorize(fn (): bool => CertificadoFirmaResource::canCreate())
             ->modalHeading('Asignar firma digital')
-            ->modalDescription('Sube el .p12 del usuario. Después, el titular debe activarlo con la contraseña del .p12 y su contraseña del sistema.')
+            ->modalDescription('Sube el .p12 del usuario y escribe su contraseña. La firma queda activa y el usuario firmará con su contraseña del sistema, sin activar nada.')
             ->modalSubmitActionLabel('Asignar')
             ->schema([
                 Select::make('usuario_id')
@@ -54,6 +55,7 @@ class CertificadoFirmaActions
                         $set('cargo_en_sello', $usuario?->cargo?->cargo);
                     }),
                 self::campoArchivo(),
+                self::campoContrasena(),
                 ...self::camposSello(),
             ])
             ->action(function (array $data, Action $action): void {
@@ -62,6 +64,7 @@ class CertificadoFirmaActions
                 self::ejecutar($action, $data['p12'], fn (string $contenido): CertificadoFirma => app(AsignarCertificadoFirma::class)(
                     $titular,
                     $contenido,
+                    (string) $data['contrasena_p12'],
                     $data['nombre_en_sello'],
                     $data['cargo_en_sello'] ?? null,
                     self::administrador(),
@@ -69,8 +72,8 @@ class CertificadoFirmaActions
 
                 Notification::make()
                     ->success()
-                    ->title('Firma asignada')
-                    ->body("Se avisó a {$titular->name} para que active su firma.")
+                    ->title('Firma asignada y activada')
+                    ->body("Se avisó a {$titular->name}. La firma se vincula con su contraseña cuando inicie sesión.")
                     ->send();
             });
     }
@@ -81,20 +84,21 @@ class CertificadoFirmaActions
             ->label(fn (CertificadoFirma $record): string => $record->estado === EstadoCertificadoFirma::PendienteActivacion
                 ? 'Reemplazar archivo .p12'
                 : 'Renovar (nuevo .p12)')
-            ->icon(Heroicon::OutlinedArrowPath)
             ->color('primary')
+            ->icon(Heroicon::OutlinedArrowPath)
             ->visible(fn (CertificadoFirma $record): bool => in_array($record->estado, EstadoCertificadoFirma::vigentes(), true)
                 && CertificadoFirmaResource::canCreate())
             ->modalHeading('Subir nuevo .p12')
-            ->modalDescription('Si la firma está activa, sigue funcionando hasta que el titular active la nueva.')
-            ->modalSubmitActionLabel('Subir')
-            ->schema([self::campoArchivo()])
+            ->modalDescription('El nuevo archivo queda activo al guardar y reemplaza a la firma actual.')
+            ->modalSubmitActionLabel('Subir y activar')
+            ->schema([self::campoArchivo(), self::campoContrasena()])
             ->action(function (CertificadoFirma $record, array $data, Action $action): void {
                 $titular = $record->usuario;
 
                 self::ejecutar($action, $data['p12'], fn (string $contenido): CertificadoFirma => app(AsignarCertificadoFirma::class)(
                     $titular,
                     $contenido,
+                    (string) $data['contrasena_p12'],
                     $record->nombre_en_sello,
                     $record->cargo_en_sello,
                     self::administrador(),
@@ -102,8 +106,46 @@ class CertificadoFirmaActions
 
                 Notification::make()
                     ->success()
-                    ->title('Nuevo .p12 cargado')
-                    ->body("Se avisó a {$titular->name} para que lo active.")
+                    ->title('Firma renovada')
+                    ->body("Se avisó a {$titular->name}. La nueva firma se vincula cuando inicie sesión.")
+                    ->send();
+            });
+    }
+
+    /**
+     * Firmas sin contraseña en custodia: subidas con el flujo anterior y aún sin
+     * activar, o en pausa tras restablecer la contraseña del titular.
+     */
+    public static function activar(): Action
+    {
+        return Action::make('activar')
+            ->label(fn (CertificadoFirma $record): string => $record->estado === EstadoCertificadoFirma::RequiereReactivacion
+                ? 'Reactivar firma'
+                : 'Activar firma')
+            ->icon(Heroicon::OutlinedKey)
+            ->color('primary')
+            ->visible(fn (CertificadoFirma $record): bool => in_array($record->estado, [EstadoCertificadoFirma::PendienteActivacion, EstadoCertificadoFirma::RequiereReactivacion], true)
+                && blank($record->contrasena_p12_custodia)
+                && CertificadoFirmaResource::canEdit($record))
+            ->modalHeading('Activar firma digital')
+            ->modalDescription('Escribe la contraseña del .p12. El usuario firmará con su contraseña del sistema, sin activar nada.')
+            ->modalSubmitActionLabel('Activar')
+            ->schema([self::campoContrasena()])
+            ->action(function (CertificadoFirma $record, array $data, Action $action): void {
+                try {
+                    app(ActivarCertificadoFirma::class)($record, (string) $data['contrasena_p12'], self::administrador());
+                } catch (FirmaDigitalException $exception) {
+                    Notification::make()->danger()->title('No se pudo activar la firma')->body($exception->getMessage())->send();
+
+                    $action->halt();
+                }
+
+                $record->usuario->notify(new FirmaAsignadaNotification);
+
+                Notification::make()
+                    ->success()
+                    ->title('Firma activada')
+                    ->body("Se avisó a {$record->usuario->name}. La firma se vincula con su contraseña cuando inicie sesión.")
                     ->send();
             });
     }
@@ -135,14 +177,15 @@ class CertificadoFirmaActions
     public static function reenviarAviso(): Action
     {
         return Action::make('reenviarAviso')
-            ->label('Reenviar aviso de activación')
+            ->label('Reenviar aviso')
             ->icon(Heroicon::OutlinedEnvelope)
-            ->visible(fn (CertificadoFirma $record): bool => $record->estado === EstadoCertificadoFirma::PendienteActivacion
+            ->visible(fn (CertificadoFirma $record): bool => $record->estaPendienteDeVincular()
                 && CertificadoFirmaResource::canEdit($record))
             ->requiresConfirmation()
-            ->modalHeading('Reenviar aviso de activación')
+            ->modalHeading('Reenviar aviso de firma lista')
+            ->modalDescription('El usuario aún no inició sesión desde que se activó su firma.')
             ->action(function (CertificadoFirma $record): void {
-                $record->usuario->notify(new FirmaActivacionPendienteNotification($record->reemplaza_a_id !== null));
+                $record->usuario->notify(new FirmaAsignadaNotification($record->reemplaza_a_id !== null));
 
                 Notification::make()->success()->title('Aviso reenviado')->send();
             });
@@ -171,10 +214,23 @@ class CertificadoFirmaActions
     {
         return FileUpload::make('p12')
             ->label('Archivo .p12 / .pfx')
-            ->helperText('El archivo se guarda cifrado. No se pide la contraseña: la escribe el titular al activar.')
+            ->helperText('El archivo se guarda cifrado.')
             ->storeFiles(false)
             ->maxSize(self::MAX_P12_KB)
             ->rules(['extensions:p12,pfx'])
+            ->required();
+    }
+
+    /**
+     * Se valida contra el .p12 al guardar (carnet, vigencia, uso de firma y duplicados).
+     */
+    private static function campoContrasena(): TextInput
+    {
+        return TextInput::make('contrasena_p12')
+            ->label('Contraseña del .p12')
+            ->helperText('La de Digicert/Viafirma. Se guarda cifrada; nunca se muestra.')
+            ->password()
+            ->revealable()
             ->required();
     }
 

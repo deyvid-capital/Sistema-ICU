@@ -13,9 +13,9 @@ Principios guía: **escalabilidad, seguridad, simplicidad y buena experiencia de
 | Tema | Decisión |
 |---|---|
 | Motor de firma | Servicio propio `firmador` (pyHanko), sin Viafirma |
-| Carga de `.p12` | **Solo el admin** sube las firmas de todos, incluida la suya. **Cada titular la activa** con la contraseña de su `.p12` |
-| Contraseña para firmar | **La contraseña del sistema.** La del `.p12` se pide solo al activar o renovar |
-| Cambio de contraseña del sistema | Desde el perfil, la firma se actualiza sola. Si un admin la restablece o se recupera por correo, la firma pasa a **requiere reactivación** y se avisa por correo al usuario, a los admins y a los super admins |
+| Carga de `.p12` | **Solo el admin** sube las firmas de todos, incluida la suya, **y escribe la contraseña del `.p12`**. La firma queda activa al instante y se guarda esa contraseña en custodia (cifrada) |
+| Contraseña para firmar | **La contraseña del sistema.** El titular nunca necesita la del `.p12`: la firma se vincula sola a su contraseña al iniciar sesión o al firmar |
+| Cambio de contraseña del sistema | Desde el perfil, la firma se actualiza sola. Si un admin la restablece o se recupera por correo, la firma pasa a **requiere reactivación** y el titular la reactiva solo con su **nueva** contraseña (al iniciar sesión). Se avisa al usuario, a los admins y a los super admins |
 | Orden de firma | **Libre por defecto:** firma quien esté disponible. Opcional: **"Exigir orden"**, con el orden elegido por quien envía |
 | Documentos por envío | **Uno o varios.** El firmante puede firmar **todos de una vez** (una sola contraseña) o **uno por uno** |
 | 2FA al firmar | Desactivado por defecto. Se puede activar en *Configuración → Firma digital* |
@@ -30,7 +30,7 @@ Principios guía: **escalabilidad, seguridad, simplicidad y buena experiencia de
 
 ```mermaid
 flowchart LR
-    A[Admin sube .p12<br/>admin/configuracion] --> B[Titular activa:<br/>1. contraseña del .p12<br/>2. contraseña del sistema]
+    A[Admin sube .p12 + contraseña<br/>admin/configuracion] --> B[Al iniciar sesión, la firma<br/>se vincula a la contraseña del sistema]
     B --> C[Se preparan uno o varios<br/>documentos y firmantes]
     C --> D[Canvas: se ubican<br/>los recuadros de firma]
     D --> E[PDFs listos para firmar<br/>con campos vacíos]

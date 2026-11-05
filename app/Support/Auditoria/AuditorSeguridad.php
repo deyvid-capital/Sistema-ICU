@@ -173,9 +173,17 @@ class AuditorSeguridad
         );
     }
 
-    public function firmaDigitalActivada(User $usuario): void
+    /**
+     * El sujeto es el titular; el causante, el admin que escribió la contraseña del .p12.
+     */
+    public function firmaDigitalActivada(User $usuario, ?User $administrador = null): void
     {
-        $this->registrar(EventoSeguridad::FirmaDigitalActivada, sujeto: $usuario);
+        $this->registrar(EventoSeguridad::FirmaDigitalActivada, sujeto: $usuario, causante: $administrador);
+    }
+
+    public function firmaDigitalVinculada(User $usuario): void
+    {
+        $this->registrar(EventoSeguridad::FirmaDigitalVinculada, sujeto: $usuario);
     }
 
     public function firmaDigitalContrasenaIncorrecta(User $usuario): void

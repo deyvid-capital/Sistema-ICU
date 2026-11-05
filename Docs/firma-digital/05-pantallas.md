@@ -11,17 +11,19 @@ Todas se construyen en el panel Filament existente (`/admin`) y siguen las conve
 | Usuario | Titular (CN) | CI | Cargo en sello | Emisor | Vence | Estado |
 |---|---|---|---|---|---|---|
 
-- **Estado** como badge: 🟢 Activo · 🟡 Por vencer (< 30 días) · 🔴 Vencido · ⚪ Pendiente de activación · 🟠 Requiere reactivación · Reemplazado.
+- **Estado** como badge: 🟢 Activo · 🟡 Por vencer (< 30 días) · 🔴 Vencido · ⚪ Pendiente de activación (solo heredadas) · 🟠 Requiere reactivación · Reemplazado.
+- **Descripción bajo el estado:** *"Se vincula al iniciar sesión"* si la firma está pendiente de vincular, y *"La reactiva el titular al iniciar sesión"* si requiere reactivación y tiene la contraseña en custodia.
 - **Filtros:** estado, vence en los próximos N días, área.
 
 **Acciones**
 
 | Acción | Qué hace |
 |---|---|
-| **Asignar firma** (cabecera) | `Select` de usuarios del módulo Usuarios **sin** firma activa, `FileUpload` del `.p12`, nombre y cargo en sello (prellenados desde el usuario). Queda en `pendiente_activacion` y se notifica al titular |
-| **Renovar** | Sube el `.p12` del nuevo año. El actual sigue activo hasta que el titular active el nuevo |
+| **Asignar firma** (cabecera) | `Select` de usuarios del módulo Usuarios **sin** firma activa, `FileUpload` del `.p12`, **contraseña del `.p12`**, nombre y cargo en sello (prellenados desde el usuario). Se valida todo en el momento y la firma queda **`activo`** (pendiente de vincular). Se notifica al titular |
+| **Renovar (nuevo .p12)** | Sube el `.p12` del nuevo año con su contraseña. La nueva queda activa **en el acto** y la anterior pasa a `reemplazado` (una heredada `pendiente_activacion`, a `revocado`) |
+| **Activar firma / Reactivar firma** | Solo firmas heredadas **sin** contraseña en custodia, en `pendiente_activacion` o `requiere_reactivacion`. Pide solo la contraseña del `.p12` |
 | **Editar sello** | Cambia nombre y cargo en sello, con una vista previa del sello |
-| **Reenviar aviso de activación** | Para firmas pendientes o que requieren reactivación |
+| **Reenviar aviso** | Solo para firmas pendientes de vincular |
 | **Eliminar asignación** | Confirma, borra el archivo y deja el registro como `revocado`. Si el usuario tiene firmas pendientes, lo avisa antes |
 
 **Página de ajustes: *Configuración → Firma digital*** (`FirmaSetting`, igual que la página Correo)
@@ -35,30 +37,9 @@ Todas se construyen en el panel Filament existente (`/admin`) y siguen las conve
 **Ruta:** `/admin/mi-firma-digital`, desde el menú de usuario. Si hay algo pendiente, también aparece un banner en el dashboard.
 
 - **Muestra:** estado, titular, emisor, vigencia y una vista previa de su sello.
-- **Activar / Reactivar / Activar renovación:** asistente de 2 pasos ([ver seguridad](03-seguridad.md#activación-y-renovación-contraseña-del-p12)):
-
-```
-┌─ Activar mi firma digital ─────────────────────────────────────┐
-│ Paso 1 de 2 · Contraseña de tu archivo de firma (.p12)         │
-│                                                                │
-│ 🔐 Es la contraseña que definiste al descargar tu firma de     │
-│    Digicert (la misma que usas en Viafirma).                   │
-│    NO es tu contraseña del sistema ICU.                        │
-│                                                                │
-│ [••••••••••••]                                [Validar →]      │
-└────────────────────────────────────────────────────────────────┘
-┌─ Activar mi firma digital ─────────────────────────────────────┐
-│ ✅ Archivo validado: VLADIMIR ADALID CALDERON SARMIENTO         │
-│    Digicert · vigente hasta 15/10/2027                         │
-│                                                                │
-│ Paso 2 de 2 · Confirma tu contraseña del sistema ICU           │
-│ ✍️ Desde ahora firmarás con esta contraseña, la misma con la    │
-│    que entras al sistema.                                      │
-│                                                                │
-│ [••••••••••••]                                [Activar]        │
-└────────────────────────────────────────────────────────────────┘
-```
-
+- **No hay que activar nada:** la firma la activa el admin y se **vincula sola** con la contraseña del sistema al iniciar sesión o la primera vez que el titular firma o la prueba ([ver seguridad](03-seguridad.md#activación-y-renovación-contraseña-del-p12)). El titular nunca escribe la contraseña del `.p12`.
+- **Vincular mi firma / Reactivar mi firma:** botón para hacerlo a mano si la firma está pendiente de vincular o en `requiere_reactivacion` con custodia. Pide **solo la contraseña del sistema** (la nueva, si fue restablecida).
+- **Firma heredada sin custodia** (pendiente de activación o en pausa): la pantalla indica que debe activarla o reactivarla un admin.
 - **Probar mi firma:** firma un PDF de ejemplo y lo descarga, para ver cómo queda el sello.
 
 ## Pantalla 2: Preparar envío a firmar

@@ -17,7 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * `archivo` apunta al .p12 cifrado (BovedaCertificados) y `contrasena_p12_envuelta`
  * guarda la contraseña del .p12 cifrada con una llave derivada de la contraseña del
- * sistema del titular (EnvolturaContrasena). Ninguno de los dos se expone ni se audita.
+ * sistema del titular (EnvolturaContrasena). `contrasena_p12_custodia` es la copia que
+ * escribió el admin al activar, cifrada con FIRMA_ENCRYPTION_KEY, y sirve para vincular
+ * o reactivar la firma con la contraseña del sistema. Nada de esto se expone ni se audita.
  */
 class CertificadoFirma extends Model
 {
@@ -35,6 +37,7 @@ class CertificadoFirma extends Model
         'usuario_id',
         'archivo',
         'contrasena_p12_envuelta',
+        'contrasena_p12_custodia',
         'contrasena_usuario_huella',
         'huella_sha256',
         'titular_cn',
@@ -62,6 +65,7 @@ class CertificadoFirma extends Model
     protected $hidden = [
         'archivo',
         'contrasena_p12_envuelta',
+        'contrasena_p12_custodia',
         'contrasena_usuario_huella',
     ];
 
@@ -112,12 +116,32 @@ class CertificadoFirma extends Model
             && $this->vigente_hasta->isFuture();
     }
 
+    /**
+     * Una firma activa aún sin vincular también puede firmar: se vincula al
+     * escribir la contraseña del sistema (AbrirCredencialesFirma).
+     */
     public function puedeFirmar(): bool
     {
         return $this->estaActivo()
             && $this->estaVigente()
-            && filled($this->contrasena_p12_envuelta)
+            && (filled($this->contrasena_p12_envuelta) || $this->puedeVincularse())
             && ! $this->estaBloqueado();
+    }
+
+    /**
+     * Activada por el admin (o en pausa) y con la copia en custodia: basta la
+     * contraseña del sistema del titular para dejarla lista.
+     */
+    public function puedeVincularse(): bool
+    {
+        return in_array($this->estado, [EstadoCertificadoFirma::Activo, EstadoCertificadoFirma::RequiereReactivacion], true)
+            && blank($this->contrasena_p12_envuelta)
+            && filled($this->contrasena_p12_custodia);
+    }
+
+    public function estaPendienteDeVincular(): bool
+    {
+        return $this->estaActivo() && $this->puedeVincularse();
     }
 
     public function estaBloqueado(): bool
@@ -156,6 +180,7 @@ class CertificadoFirma extends Model
         return [
             'archivo',
             'contrasena_p12_envuelta',
+            'contrasena_p12_custodia',
             'contrasena_usuario_huella',
             'password',
             'remember_token',

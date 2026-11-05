@@ -12,10 +12,11 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Aviso al titular de que el admin cargó (o renovó) su .p12 y debe activarlo.
+ * Aviso al titular de que el admin activó (o renovó) su firma. No tiene que hacer
+ * nada: la firma se vincula con su contraseña del sistema al iniciar sesión.
  * Por campana y correo, según la preferencia "Firma digital" del usuario.
  */
-class FirmaActivacionPendienteNotification extends Notification implements ShouldQueue
+class FirmaAsignadaNotification extends Notification implements ShouldQueue
 {
     use Queueable;
     use RespetaPreferenciaFirma;
@@ -42,10 +43,10 @@ class FirmaActivacionPendienteNotification extends Notification implements Shoul
             ->title($this->titulo())
             ->body($this->cuerpo())
             ->icon('heroicon-o-finger-print')
-            ->iconColor('info')
+            ->iconColor('success')
             ->actions([
-                Action::make('activar')
-                    ->label('Activar mi firma')
+                Action::make('ver')
+                    ->label('Ver mi firma digital')
                     ->button()
                     ->url(MiFirmaDigital::getUrl(panel: 'admin'))
                     ->markAsRead(),
@@ -59,25 +60,23 @@ class FirmaActivacionPendienteNotification extends Notification implements Shoul
             ->subject('[Sistema ICU] '.$this->titulo())
             ->greeting($this->titulo())
             ->line($this->cuerpo())
-            ->line('**Cómo activarla (2 minutos):**')
-            ->line('1. Entra al sistema y ve a **Menú de usuario → Mi firma digital**.')
-            ->line('2. Paso 1: escribe la contraseña de tu archivo **.p12** (la de Digicert/Viafirma, **no** la del sistema).')
-            ->line('3. Paso 2: confirma tu **contraseña del sistema ICU**. Desde ese momento firmarás con ella.')
-            ->action('Activar mi firma', MiFirmaDigital::getUrl(panel: 'admin'))
+            ->line('**No tienes que activar nada.** Firmarás con la misma contraseña con la que entras al Sistema ICU.')
+            ->line('La firma queda vinculada a tu contraseña la próxima vez que inicies sesión (o la primera vez que firmes, si ya tienes la sesión abierta).')
+            ->action('Ver mi firma digital', MiFirmaDigital::getUrl(panel: 'admin'))
             ->line('Este es un aviso automático del Sistema ICU.');
     }
 
     private function titulo(): string
     {
         return $this->esRenovacion
-            ? 'Activa la renovación de tu firma digital'
-            : 'Activa tu firma digital';
+            ? 'Tu firma digital fue renovada'
+            : 'Tu firma digital está lista';
     }
 
     private function cuerpo(): string
     {
         return $this->esRenovacion
-            ? 'Se cargó el nuevo archivo .p12 de tu firma digital. Tu firma actual sigue funcionando hasta que actives la nueva.'
-            : 'Un administrador cargó tu firma digital (.p12). Debes activarla para poder firmar documentos en el sistema.';
+            ? 'Un administrador cargó y activó el nuevo archivo .p12 de tu firma digital. Reemplaza al anterior.'
+            : 'Un administrador cargó y activó tu firma digital. Ya puedes firmar documentos en el sistema.';
     }
 }

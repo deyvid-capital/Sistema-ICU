@@ -9,6 +9,7 @@ use App\Livewire\Profile\UpdatePassword;
 use App\Models\User;
 use App\Notifications\Firma\FirmaRequiereReactivacionNotification;
 use App\Services\Firma\EnvolturaContrasena;
+use App\Services\Firma\VincularCertificadoFirma;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -96,9 +97,11 @@ class CambioContrasenaFirmaTest extends TestCase
         $certificado->refresh();
         $this->assertSame(EstadoCertificadoFirma::RequiereReactivacion, $certificado->estado);
         $this->assertNull($certificado->contrasena_p12_envuelta);
+        $this->assertNotNull($certificado->contrasena_p12_custodia);
 
         Notification::assertSentTo($titular, FirmaRequiereReactivacionNotification::class,
             fn (FirmaRequiereReactivacionNotification $n): bool => ! $n->paraAdministrador
+                && $n->reactivaElTitular
                 && $n->motivo === 'restablecida por el administrador María Gómez');
 
         foreach ([$admin, $superAdmin] as $administrador) {
@@ -109,6 +112,19 @@ class CambioContrasenaFirmaTest extends TestCase
 
         $evento = Activity::query()->where('event', EventoSeguridad::FirmaDigitalSuspendida->value)->sole();
         $this->assertSame((string) $admin->id, (string) $evento->causer_id);
+    }
+
+    public function test_tras_el_restablecimiento_el_titular_la_reactiva_con_su_nueva_contrasena(): void
+    {
+        $titular = $this->titular();
+        $certificado = $this->certificadoActivo($titular);
+
+        $titular->update(['password' => 'Temporal123']);
+        app(VincularCertificadoFirma::class)($titular->refresh(), 'Temporal123');
+
+        $certificado->refresh();
+        $this->assertSame(EstadoCertificadoFirma::Activo, $certificado->estado);
+        $this->assertSame(self::CONTRASENA_P12, app(EnvolturaContrasena::class)->desenvolver($certificado->contrasena_p12_envuelta, 'Temporal123'));
     }
 
     public function test_si_se_recupera_por_correo_la_firma_requiere_reactivacion(): void
@@ -163,7 +179,19 @@ class CambioContrasenaFirmaTest extends TestCase
 
         $texto = implode("\n", $correo->introLines);
 
-        $this->assertStringContainsString('Mi firma digital → Reactivar', $texto);
-        $this->assertStringContainsString('**no** la del sistema', $texto);
+        $this->assertStringContainsString('inicia sesión con tu **nueva contraseña**', $texto);
+        $this->assertStringContainsString('Mi firma digital → Reactivar mi firma', $texto);
+        $this->assertStringNotContainsString('.p12', $texto);
+    }
+
+    public function test_sin_copia_en_custodia_el_correo_dice_que_la_reactiva_el_admin(): void
+    {
+        $paraTitular = implode("\n", FirmaRequiereReactivacionNotification::paraTitular('X', reactivaElTitular: false)
+            ->toMail(User::factory()->make())->introLines);
+        $paraAdmin = implode("\n", FirmaRequiereReactivacionNotification::paraAdministrador(User::factory()->make(), 'X', reactivaElTitular: false)
+            ->toMail(User::factory()->make())->introLines);
+
+        $this->assertStringContainsString('Un administrador debe reactivarla', $paraTitular);
+        $this->assertStringContainsString('Reactivar firma', $paraAdmin);
     }
 }

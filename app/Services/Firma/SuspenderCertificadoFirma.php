@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Notification;
 /**
  * La contraseña del sistema cambió sin pasar por Mi perfil (admin, recuperación por
  * correo, importación): la contraseña del .p12 ya no se puede abrir y la firma pasa
- * a "requiere reactivación". Se avisa al titular y a los administradores.
+ * a "requiere reactivación". La copia en custodia se conserva, así que el titular la
+ * reactiva con su nueva contraseña (sola al iniciar sesión). Las firmas activadas con
+ * el flujo anterior no tienen copia y las reactiva el admin. Se avisa a todos.
  *
  * Ver Docs/firma-digital/03-seguridad.md#cambios-de-contraseña-del-sistema
  */
@@ -49,11 +51,13 @@ class SuspenderCertificadoFirma
 
         $this->auditor->firmaDigitalSuspendida($usuario, $motivo, $actor);
 
-        $usuario->notify(FirmaRequiereReactivacionNotification::paraTitular($motivo));
+        $reactivaElTitular = filled($certificado->contrasena_p12_custodia);
+
+        $usuario->notify(FirmaRequiereReactivacionNotification::paraTitular($motivo, $reactivaElTitular));
 
         Notification::send(
             AdminRecipients::all($usuario),
-            FirmaRequiereReactivacionNotification::paraAdministrador($usuario, $motivo),
+            FirmaRequiereReactivacionNotification::paraAdministrador($usuario, $motivo, $reactivaElTitular),
         );
     }
 

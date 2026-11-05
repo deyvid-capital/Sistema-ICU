@@ -31,6 +31,7 @@ enum EventoSeguridad: string implements HasColor, HasLabel
     case DosFactoresCodigoIncorrecto = 'dos_factores_codigo_incorrecto';
     case DosFactoresReseteado = 'dos_factores_reseteado';
     case FirmaDigitalActivada = 'firma_digital_activada';
+    case FirmaDigitalVinculada = 'firma_digital_vinculada';
     case FirmaDigitalContrasenaIncorrecta = 'firma_digital_contrasena_incorrecta';
     case FirmaDigitalSuspendida = 'firma_digital_suspendida';
     case FirmaDigitalIntentoFallido = 'firma_digital_intento_fallido';
@@ -53,7 +54,8 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::DosFactoresConfirmado => 'Confirmó la verificación en dos pasos',
             self::DosFactoresCodigoIncorrecto => 'Código de dos pasos incorrecto',
             self::DosFactoresReseteado => 'Verificación en dos pasos reiniciada por un administrador',
-            self::FirmaDigitalActivada => 'Activó su firma digital',
+            self::FirmaDigitalActivada => 'Firma digital activada',
+            self::FirmaDigitalVinculada => 'Vinculó su firma digital con su contraseña',
             self::FirmaDigitalContrasenaIncorrecta => 'Contraseña del .p12 incorrecta',
             self::FirmaDigitalSuspendida => 'Firma digital suspendida por cambio de contraseña',
             self::FirmaDigitalIntentoFallido => 'Contraseña incorrecta al firmar',
@@ -82,6 +84,7 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::DosFactoresCodigoIncorrecto => Heroicon::OutlinedShieldExclamation,
             self::DosFactoresReseteado => Heroicon::OutlinedArrowPath,
             self::FirmaDigitalActivada => Heroicon::OutlinedFingerPrint,
+            self::FirmaDigitalVinculada => Heroicon::OutlinedLink,
             self::FirmaDigitalContrasenaIncorrecta => Heroicon::OutlinedExclamationTriangle,
             self::FirmaDigitalSuspendida => Heroicon::OutlinedPauseCircle,
             self::FirmaDigitalIntentoFallido => Heroicon::OutlinedExclamationTriangle,
@@ -97,7 +100,8 @@ enum EventoSeguridad: string implements HasColor, HasLabel
             self::OtpSolicitado,
             self::PasswordRestablecida,
             self::DosFactoresConfirmado,
-            self::FirmaDigitalActivada => ResultadoSeguridad::Exito,
+            self::FirmaDigitalActivada,
+            self::FirmaDigitalVinculada => ResultadoSeguridad::Exito,
 
             self::PasswordIncorrecta,
             self::CorreoDesconocido,

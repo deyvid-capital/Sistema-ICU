@@ -5,21 +5,25 @@ Quien tenga el `.p12` **y** su contraseña puede firmar en nombre de esa persona
 ## Custodia de los `.p12`
 
 1. **Cifrado en reposo.** El archivo `.p12` original se guarda cifrado con una **clave dedicada** (`FIRMA_ENCRYPTION_KEY`, distinta de `APP_KEY`), usando `Illuminate\Encryption\Encrypter` con AES-256-GCM. Así, rotar `APP_KEY` no deja inutilizables las firmas.
-2. **Disco privado** (`local`), sin URL pública. Se descifra **solo en memoria**, en el momento de firmar o activar.
-3. **Triple protección:** para firmar hace falta el archivo, la clave del servidor **y** la contraseña del sistema del titular. Esta última solo la conoce el titular.
-4. **Al eliminar o reemplazar** una firma, el archivo `.p12` se **borra físicamente**. Se conservan solo los metadatos para la auditoría.
-5. **Respaldos:** los backups de `storage/app/private` y de `FIRMA_ENCRYPTION_KEY` se guardan **por separado**.
+2. **Disco privado** (`local`), sin URL pública. Se descifra **solo en memoria**, en el momento de firmar, activar o vincular.
+3. **Contraseña del `.p12` en custodia.** El admin la escribe al asignar o renovar la firma y se guarda en `contrasena_p12_custodia`, cifrada con la misma `FIRMA_ENCRYPTION_KEY` (`BovedaCertificados::cifrar`). Se conserva mientras la firma está vigente y se borra al revocarla o reemplazarla. Sirve para vincular (y reactivar) la firma con la contraseña del sistema sin pedirle al titular la del `.p12`.
+4. **Para firmar desde el sistema** hace falta el archivo, la clave del servidor **y** la contraseña del sistema del titular (más el 2FA si está activado). Ver la [contrapartida de la custodia](#contrapartida-de-la-custodia).
+5. **Al eliminar o reemplazar** una firma, el archivo `.p12` se **borra físicamente** y se vacía la custodia. Se conservan solo los metadatos para la auditoría.
+6. **Respaldos:** los backups de `storage/app/private`, de la base de datos y de `FIRMA_ENCRYPTION_KEY` se guardan **por separado**. Proteger `FIRMA_ENCRYPTION_KEY` es **crítico** (ver abajo).
 
 ## Contraseña única: firmar con la contraseña del sistema
 
-El titular firma con **la misma contraseña con la que entra al sistema**. El `.p12` conserva su contraseña original de Digicert: el archivo no se modifica. Esa contraseña se guarda **envuelta** (cifrada) con una llave que solo se obtiene a partir de la contraseña del sistema del titular.
+El titular firma con **la misma contraseña con la que entra al sistema** y nunca necesita la del `.p12`. El `.p12` conserva su contraseña original de Digicert: el archivo no se modifica. Además de la copia en custodia, esa contraseña se guarda **envuelta** (cifrada) con una llave que solo se obtiene a partir de la contraseña del sistema del titular; es la que se usa al firmar.
 
 ```mermaid
 flowchart LR
-    subgraph Activación["Activación / renovación (una vez al año)"]
+    subgraph Activación["Activación / renovación (admin, una vez al año)"]
         P1[Contraseña del .p12] --> V{firmador:<br/>¿abre el .p12?}
+        V -->|sí| C[(contrasena_p12_custodia<br/>FIRMA_ENCRYPTION_KEY)]
+    end
+    subgraph Vincular["Vinculación (titular, al iniciar sesión o al firmar)"]
         P2[Contraseña del sistema] --> K1[Argon2id + sal<br/>= llave del titular]
-        V -->|sí| W[Cifrar contraseña del .p12<br/>con la llave del titular]
+        C --> W[Cifrar contraseña del .p12<br/>con la llave del titular]
         K1 --> W
         W --> DB[(contrasena_p12_envuelta)]
     end
@@ -32,8 +36,8 @@ flowchart LR
     end
 ```
 
-- **No se guarda ninguna contraseña en texto plano.** La del sistema sigue siendo solo un hash (como hoy) y la del `.p12` queda cifrada con una llave que el servidor **no puede** calcular sin la contraseña del titular.
-- **El admin no puede firmar por nadie:** aunque tenga acceso al servidor y a la base de datos, le falta la contraseña del titular.
+- **No se guarda ninguna contraseña en texto plano.** La del sistema sigue siendo solo un hash (como hoy). La del `.p12` queda en dos copias cifradas: la custodia (con `FIRMA_ENCRYPTION_KEY`) y la envuelta (con la llave del titular).
+- **Firmar desde la aplicación** exige siempre la contraseña del sistema del titular (y el 2FA si está activado): el admin no puede firmar por nadie desde las pantallas.
 - **Argon2id** (memoria 64 MB, 3 iteraciones) hace muy costoso adivinar la contraseña por fuerza bruta. La contraseña del sistema debe cumplir la política de contraseñas fuertes que ya existe.
 - **La contraseña nunca se encola** ni se guarda en sesión, caché o logs. La firma se ejecuta de forma **síncrona** en la misma petición.
 - En Livewire, la contraseña va en el formulario del modal (`TextInput::make('password')->password()`), **no** como propiedad pública del componente. Se descarta apenas se usa.
@@ -41,64 +45,73 @@ flowchart LR
 
 ## Activación y renovación (contraseña del `.p12`)
 
-El admin sube el `.p12`, pero **no conoce ninguna contraseña**. El titular lo activa en **Mi firma digital** con un asistente de dos pasos claramente diferenciados:
+> **Cambio (2026-10-30):** antes el admin subía el `.p12` sin contraseña (`pendiente_activacion`) y el titular lo activaba en *Mi firma digital* con un asistente de dos pasos (contraseña del `.p12` + contraseña del sistema). Los dueños decidieron que **el admin escribe la contraseña del `.p12`** y el titular solo usa su contraseña del sistema.
 
-**Paso 1: Contraseña de tu archivo de firma (`.p12`)**
+**Activación (admin).** En *Configuración → Firmas digitales → Asignar firma* el admin sube el `.p12` **y** escribe su contraseña. Todas las [validaciones](#validaciones-del-p12) se hacen en ese momento. Si pasan, la firma queda **`activo`** de inmediato, con la contraseña en custodia y `contrasena_p12_envuelta = null` (**pendiente de vincular**). Se registra `firma_digital_activada` (causante: el admin; sujeto: el titular) y se avisa al titular.
 
-> 🔐 *Es la contraseña que definiste al descargar tu firma de **Digicert** (la misma que usas en **Viafirma**). **No** es tu contraseña del sistema ICU.*
+**Vinculación (titular, automática).** `App\Services\Firma\VincularCertificadoFirma` descifra la custodia, la envuelve con la contraseña del sistema del titular (Argon2id, `EnvolturaContrasena`) y guarda `contrasena_usuario_huella`. Ocurre:
 
-- Se valida **en el momento** contra el `firmador`.
-- Si falla **y** lo escrito coincide con la contraseña del sistema (`Hash::check`), el mensaje es específico: *"Escribiste tu contraseña del sistema ICU. Aquí va la contraseña de tu archivo .p12 (la de Digicert/Viafirma)"*.
-- Si falla por otro motivo: *"La contraseña del archivo .p12 no es correcta"*.
+1. Al **iniciar sesión** correctamente (`App\Filament\Pages\Auth\Login::authenticate`). Si falla, **nunca** impide el inicio de sesión.
+2. La primera vez que el titular **firma** o usa **"Probar mi firma"** (`AbrirCredencialesFirma` / `FirmarDocumentoDePrueba`), después de las comprobaciones normales de contraseña, 2FA e intentos.
+3. A mano, con el botón **"Vincular mi firma"** en *Mi firma digital* (pide solo la contraseña del sistema).
 
-**Paso 2: Confirma tu contraseña del sistema ICU**
-
-> ✍️ *Desde ahora firmarás tus documentos con esta contraseña, la misma con la que entras al sistema.*
-
-Si ambos pasos salen bien, se envuelve la contraseña del `.p12` y la firma queda **activa**.
+El titular **nunca** necesita la contraseña del `.p12` ni "activa" nada. Se registra `firma_digital_vinculada`.
 
 **Renovación anual:**
 
-1. El admin sube el nuevo `.p12` y se crea un registro `pendiente_activacion`.
-2. El certificado anterior **sigue activo** hasta que el titular active el nuevo, para que no quede sin poder firmar.
-3. El titular repite los dos pasos. El paso 1 pide la contraseña del **nuevo** `.p12`.
-4. Al activarse, el anterior pasa a `reemplazado` y su archivo se borra.
+1. El admin usa **Renovar (nuevo .p12)**: sube el archivo nuevo y escribe su contraseña. Se valida igual que al asignar.
+2. La nueva firma queda `activo` (pendiente de vincular) **en el acto**, y la anterior pasa a `reemplazado`: se borran su archivo y su custodia. Si había una firma heredada `pendiente_activacion`, pasa a `revocado`.
+3. El titular no hace nada: la nueva se vincula en su próximo inicio de sesión o firma.
+
+**Firmas heredadas sin custodia** (activadas con el flujo anterior, o `pendiente_activacion` subidas sin contraseña): el admin las activa o reactiva con la acción **"Activar firma" / "Reactivar firma"** de la tabla, que pide solo la contraseña del `.p12`. Solo aparece en `pendiente_activacion` o `requiere_reactivacion` y sin custodia.
 
 Solo las firmas **activas y vigentes** aparecen en el selector de firmantes.
+
+### Contrapartida de la custodia
+
+Con la copia en custodia, **quien tenga la base de datos y `FIRMA_ENCRYPTION_KEY`** puede recuperar la contraseña del `.p12`, y el `.p12` cifrado está en el mismo servidor. Técnicamente, entonces, el servidor **podría firmar sin el titular**; con el flujo anterior no podía. Fue una **decisión explícita de los dueños** a cambio de comodidad: una sola contraseña, el titular no necesita la del `.p12` y puede reactivar su firma por sí mismo.
+
+En consecuencia:
+
+- `FIRMA_ENCRYPTION_KEY` pasa a ser **crítica**: fuera del repositorio, con acceso mínimo y respaldada aparte de la base de datos y de `storage/app/private`.
+- Firmar **desde la aplicación** sigue exigiendo siempre la contraseña del sistema del titular (más el 2FA opcional), con contador de intentos y auditoría.
 
 ## Cambios de contraseña del sistema
 
 | Cómo cambia | ¿Se actualiza la firma sola? | Qué pasa |
 |---|---|---|
 | El usuario la cambia en **Mi perfil** (`App\Livewire\Profile\UpdatePassword`) | ✅ **Sí** | Se tienen la contraseña actual y la nueva, así que se descifra con la anterior y se vuelve a cifrar con la nueva, en la misma transacción. No hace falta reactivar |
-| Recuperación **por correo** (`App\Filament\Pages\Auth\ResetPassword` / `RecuperacionPassword`) | ❌ No | No se conoce la contraseña anterior y no hay forma de recuperar la del `.p12` |
-| Restablecida por un **admin** (`UserForm`, `ManageUserSeguridad`) | ❌ No | Ídem |
-| Importación de usuarios (`UserImporter`) | ❌ No | Ídem |
+| Recuperación **por correo** (`App\Filament\Pages\Auth\ResetPassword` / `RecuperacionPassword`) | ⏸️ Pasa a `requiere_reactivacion` | No se conoce la contraseña anterior. Con custodia, el titular la reactiva solo con su **nueva** contraseña del sistema |
+| Restablecida por un **admin** (`UserForm`, `ManageUserSeguridad`) | ⏸️ Ídem | Ídem |
+| Importación de usuarios (`UserImporter`) | ⏸️ Ídem | Ídem |
 
-**Por qué no se puede automatizar el restablecimiento:** para hacerlo, el servidor tendría que guardar una copia de la contraseña del `.p12` que pueda abrir **sin** la contraseña del titular. En ese caso cualquiera con acceso al servidor podría firmar en nombre de todos, y se perdería la garantía de que solo el titular firma.
+**Por qué no se recifra en el acto:** la envoltura se hizo con la contraseña anterior, que no se conoce. La custodia sí se conserva, así que basta con que el titular entre con la nueva contraseña para volver a envolverla.
 
 **Cómo se detecta** (cubre los casos ❌ sin depender de cada pantalla):
 
 - Un `UserObserver` en el evento `updated` revisa `wasChanged('password')`.
-- Al activar o recifrar se guarda `contrasena_usuario_huella`, una huella del hash de contraseña con el que se envolvió. El flujo de perfil la actualiza **antes** de guardar el nuevo hash. Si el hash cambió y la huella ya no coincide (el cambio no vino de Mi perfil) y el usuario tiene una firma `activo`:
-  1. La firma pasa a `requiere_reactivacion` y se borra `contrasena_p12_envuelta`, que ya no sirve.
+- Al vincular o recifrar se guarda `contrasena_usuario_huella`, una huella del hash de contraseña con el que se envolvió. El flujo de perfil la actualiza **antes** de guardar el nuevo hash. Si el hash cambió y la huella ya no coincide (el cambio no vino de Mi perfil) y el usuario tiene una firma `activo`:
+  1. La firma pasa a `requiere_reactivacion` y se borra `contrasena_p12_envuelta`, que ya no sirve. La **custodia se conserva**.
   2. Se notifica por **correo y campana** a:
-     - **El usuario**, con instrucciones: *"Tu contraseña del sistema fue restablecida. Para volver a firmar, entra a Mi firma digital → Reactivar. Necesitarás la contraseña de tu archivo .p12 (la de Digicert/Viafirma) y tu nueva contraseña del sistema."*
-     - **Admins y super admins** (`AdminRecipients::all()`), con el nombre del usuario, cuándo y cómo cambió la contraseña (correo o admin, y quién lo hizo), y los pasos para guiarlo.
+     - **El usuario**: su firma quedó en pausa y se reactiva sola al **iniciar sesión con la nueva contraseña**; si ya tiene la sesión abierta, con **"Reactivar mi firma"** en *Mi firma digital* (pide solo la nueva contraseña del sistema).
+     - **Admins y super admins** (`AdminRecipients::all()`), con el nombre del usuario, cuándo y cómo cambió la contraseña, y que **no tienen que hacer nada**.
   3. Queda registrado en la auditoría (`AuditorSeguridad`).
-- Si el usuario **olvidó también** la contraseña del `.p12`, debe pedir a Digicert una nueva emisión o reposición. El admin sube el archivo nuevo, como en una renovación.
+- **Firma heredada sin custodia:** los avisos dicen que debe reactivarla un admin (acción **"Reactivar firma"**, con la contraseña del `.p12`).
+- Si se pierde la contraseña del `.p12` de una firma sin custodia, hay que pedir a Digicert una nueva emisión o reposición. El admin sube el archivo nuevo, como en una renovación.
 
 ## Validaciones del `.p12`
 
 | Validación | Cuándo |
 |---|---|
 | Extensión `.p12`/`.pfx`, tamaño ≤ 100 KB, estructura PKCS#12 | Al subir (admin) |
-| Huella no asignada a otro usuario | Al activar (antes no se puede leer el certificado) |
-| Abre con la contraseña del `.p12` | Al activar (paso 1) |
-| La clave privada corresponde al certificado | Al activar |
-| Vigencia: `vigente_desde ≤ hoy < vigente_hasta` | Al activar y antes de **cada** firma |
-| `keyUsage` incluye `digitalSignature` o `nonRepudiation` | Al activar |
-| Nº de documento del certificado (`titular_documento`) = `users.carnet` del usuario asignado | Al activar. Si no coincide, se bloquea con un mensaje claro |
+| Abre con la contraseña del `.p12` | Al asignar o renovar (admin escribe la contraseña) |
+| Huella no asignada a otro usuario | Al asignar o renovar |
+| La clave privada corresponde al certificado | Al asignar o renovar |
+| Vigencia: `vigente_desde ≤ hoy < vigente_hasta` | Al asignar o renovar, y antes de **cada** firma |
+| `keyUsage` incluye `digitalSignature` o `nonRepudiation` | Al asignar o renovar |
+| Nº de documento del certificado (`titular_documento`) = `users.carnet` del usuario asignado | Al asignar o renovar. Si no coincide, se bloquea con un mensaje claro |
+
+Las mismas validaciones corren en la acción **"Activar / Reactivar firma"** de las firmas heredadas.
 
 ## Intentos de contraseña al firmar
 
@@ -135,9 +148,10 @@ Solo las firmas **activas y vigentes** aparecen en el selector de firmantes.
 
 - Los modelos nuevos usan `LogsIcuActivity` (log `firma_digital` en `DominioActividad`).
 - Eventos explícitos:
-  - Certificado: cargado, activado, reactivado, renovado o revocado.
+  - Certificado: cargado, activado (`firma_digital_activada`, causante el admin y sujeto el titular), renovado o revocado.
+  - Vinculado con la contraseña del sistema, también al reactivar (`firma_digital_vinculada`: *"Vinculó su firma digital con su contraseña"*).
   - Firma pasada a `requiere_reactivacion`, indicando el motivo.
   - Envío: creado, enviado o cancelado.
   - Firma: realizada, rechazada o con contraseña incorrecta.
   - Descarga del documento final.
-- **Nunca** se registran contraseñas ni el contenido del `.p12`.
+- **Nunca** se registran contraseñas (ni la custodia ni la envuelta) ni el contenido del `.p12`.

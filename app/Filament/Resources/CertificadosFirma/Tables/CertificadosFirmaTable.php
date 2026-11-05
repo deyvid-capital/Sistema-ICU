@@ -61,7 +61,12 @@ class CertificadosFirmaTable
                     ->description(fn (CertificadoFirma $record): ?string => self::descripcionVencimiento($record)),
                 TextColumn::make('estado')
                     ->label('Estado')
-                    ->badge(),
+                    ->badge()
+                    ->description(fn (CertificadoFirma $record): ?string => match (true) {
+                        $record->estaPendienteDeVincular() => 'Se vincula al iniciar sesión',
+                        $record->estado === EstadoCertificadoFirma::RequiereReactivacion && $record->puedeVincularse() => 'La reactiva el titular al iniciar sesión',
+                        default => null,
+                    }),
                 TextColumn::make('created_at')
                     ->label('Cargado')
                     ->dateTime('d/m/Y H:i')
@@ -86,6 +91,7 @@ class CertificadosFirmaTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    CertificadoFirmaActions::activar(),
                     CertificadoFirmaActions::renovar(),
                     CertificadoFirmaActions::editarSello(),
                     CertificadoFirmaActions::reenviarAviso(),
