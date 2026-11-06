@@ -14,6 +14,7 @@ use App\Filament\Resources\Equipos\RelationManagers\AsignacionesUsuarioRelationM
 use App\Filament\Resources\Users\Pages\ManageUserRecursos;
 use App\Filament\Resources\Users\RelationManagers\AsignacionesEquipoRelationManager;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\AsignacionCargador;
 use App\Models\Cargador;
 use App\Models\Equipo;
 use App\Models\User;
@@ -62,27 +63,21 @@ class EquipoCargadorRelationManagersTest extends TestCase
         $this->assertSame(EstadoEquipo::Asignado, $equipo->fresh()->estado);
     }
 
-    public function test_creating_an_asignacion_through_equipo_cargador_relation_manager_sets_service_tag_and_syncs_estado(): void
+    /**
+     * Desde el equipo los cargadores solo se consultan: se asignan desde el cargador
+     * (ver el test siguiente), que aplica el flujo de préstamo o cesión.
+     */
+    public function test_equipo_cargador_relation_manager_lists_assignments_but_does_not_create_them(): void
     {
         $equipo = Equipo::factory()->create(['estado' => EstadoEquipo::SinAsignar]);
-        $cargador = Cargador::factory()->create(['estado' => EstadoCargador::Disponible]);
+        $asignacion = AsignacionCargador::factory()->create(['service_tag' => $equipo->service_tag]);
 
         Livewire::test(AsignacionesCargadorRelationManager::class, [
             'ownerRecord' => $equipo,
             'pageClass' => EditEquipo::class,
         ])
-            ->callTableAction('create', data: [
-                'serial_cargador' => $cargador->serial,
-                'fecha_inicio' => now()->toDateString(),
-            ])
-            ->assertHasNoTableActionErrors();
-
-        $this->assertDatabaseHas('asignaciones_cargadores', [
-            'service_tag' => $equipo->service_tag,
-            'serial_cargador' => $cargador->serial,
-        ]);
-
-        $this->assertSame(EstadoCargador::Asignado, $cargador->fresh()->estado);
+            ->assertCanSeeTableRecords([$asignacion])
+            ->assertTableActionDoesNotExist('create');
     }
 
     public function test_creating_an_asignacion_through_cargador_relation_manager_sets_serial_cargador_and_syncs_estado(): void

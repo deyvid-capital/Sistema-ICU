@@ -89,7 +89,7 @@ class SeguridadPageTest extends TestCase
 
     public function test_seeder_asigna_manage_security_al_super_admin(): void
     {
-        $admin = User::factory()->create(['email' => 'admin@admin.com']);
+        $admin = User::factory()->create(['email' => 'ti@capitalsafi.com']);
 
         $this->seed(RolesPermissionsSeeder::class);
 

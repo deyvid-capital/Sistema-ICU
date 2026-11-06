@@ -13,6 +13,9 @@ use App\Models\Cargo;
 use App\Models\Movimiento;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
+use Filament\Notifications\Livewire\Notifications;
+use Filament\Notifications\Notification;
+use Filament\Notifications\NotificationMailbox;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -32,18 +35,21 @@ class BajaDesdeUsuarioDesactivaAccesosTest extends TestCase
     }
 
     /**
-     * Se lee la sesión en vez de usar assertNotified() porque ese helper hace
-     * `session()->pull('filament.claimed_notifications')` primero, y una clave
-     * residual de otro test del suite deja la aserción ciega.
+     * Cuenta las notificaciones enviadas con ese título. assertNotified() solo dice
+     * si hubo al menos una; aquí importa que sea exactamente una. Se leen del buzón
+     * de Filament (caché por sesión), igual que hace assertNotified().
      */
     private function notificacionesConTitulo(string $titulo): int
     {
-        $notificaciones = session('filament.notifications') ?? [];
+        app(NotificationMailbox::class)->flush();
 
-        return count(array_filter(
-            $notificaciones,
-            fn (array $notificacion): bool => ($notificacion['title'] ?? null) === $titulo,
-        ));
+        $componente = new Notifications;
+        $componente->mount();
+        $componente->pullNotificationsFromSession();
+
+        return $componente->notifications
+            ->filter(fn (Notification $notificacion): bool => $notificacion->getTitle() === $titulo)
+            ->count();
     }
 
     /**

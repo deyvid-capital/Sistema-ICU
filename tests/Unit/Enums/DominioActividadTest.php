@@ -7,6 +7,7 @@ use App\Models\AppearanceSetting;
 use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Equipo;
 use App\Models\User;
+use App\Models\UsuarioFortitoken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use SplFileInfo;
@@ -70,13 +71,17 @@ class DominioActividadTest extends TestCase
 
     public function test_los_dominios_transversales_no_estan_en_el_mapa_de_modelos(): void
     {
-        $dominios = array_values(DominioActividad::mapaDeModelos());
+        $mapa = DominioActividad::mapaDeModelos();
 
         // Seguridad y Configuración se escriben a mano desde App\Support\Auditoria:
         // mapearlos obligaría a poner LogsIcuActivity en los modelos de settings, y
         // Marca::mount() crea su fila en un GET, generando registros espurios.
-        $this->assertNotContains(DominioActividad::Seguridad, $dominios);
-        $this->assertNotContains(DominioActividad::Configuracion, $dominios);
+        // Única excepción: los FortiToken, credenciales que se gestionan en Seguridad.
+        $this->assertNotContains(DominioActividad::Configuracion, array_values($mapa));
+        $this->assertSame(
+            [UsuarioFortitoken::class],
+            array_keys(array_filter($mapa, fn (DominioActividad $dominio): bool => $dominio === DominioActividad::Seguridad)),
+        );
     }
 
     public function test_cada_dominio_tiene_etiqueta_y_color(): void
