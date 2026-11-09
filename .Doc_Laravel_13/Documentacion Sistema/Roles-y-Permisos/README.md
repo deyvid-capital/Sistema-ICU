@@ -68,7 +68,7 @@ debajo las pestañas de permisos:
 |---|---|---|
 | **Recursos** | 48 secciones colapsables, una por recurso (badge: 481 permisos) | visible |
 | **Páginas** | 13 permisos `View:*` de páginas y clusters | visible |
-| Widgets | — | oculta (la app no tiene widgets propios) |
+| **Widgets** | 7 permisos `View:*` de los widgets del dashboard (ver [Dashboard y widgets](../Dashboard-y-Widgets/README.md)) | visible |
 | Personalizados | — | oculta (`custom_permissions` está vacío) |
 
 ---
@@ -546,7 +546,8 @@ Cubren, entre otros:
 | No puedo quitarme `super_admin` | Es el único super admin con acceso vigente | Dar `super_admin` a otro usuario primero |
 | Guardé y no cambió nada | El formulario no guarda al marcar: hay que pulsar **Guardar** | Volver a marcar y guardar |
 | Un rol tiene el permiso del cluster pero no ve nada dentro | Lo que oculta el contenido son los `ViewAny:*` de los recursos, no el permiso del cluster (§8) | Asignar los `ViewAny:` de los recursos |
-| La pestaña Widgets o Personalizados no aparece | No hay widgets propios ni `custom_permissions` definidos; Shield oculta las pestañas vacías | Es lo esperado |
+| La pestaña Personalizados no aparece | No hay `custom_permissions` definidos; Shield oculta las pestañas vacías | Es lo esperado |
+| Un widget nuevo del dashboard no aparece, ni siendo super_admin | Su permiso `View:*` no existe o no está asignado | `db:seed --class=RolesPermissionsSeeder` |
 
 ---
 

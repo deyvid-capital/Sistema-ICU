@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\Roles\RoleResource;
 use App\Filament\Resources\SolicitudesFirma\SolicitudFirmaResource;
 use App\Filament\Resources\Users\UserResource;
-use Filament\Pages\Dashboard;
+use App\Filament\Widgets\MisFirmasPendientesTable;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 
@@ -227,6 +228,8 @@ return [
         'exclude' => [
             AccountWidget::class,
             FilamentInfoWidget::class,
+            // Personal: lo ve quien firma, no depende de un rol.
+            MisFirmasPendientesTable::class,
         ],
     ],
 
