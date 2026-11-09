@@ -19,6 +19,7 @@ use App\Models\Software;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
+use App\Support\SiglasArea;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -256,7 +257,7 @@ class MovimientoFormularioPdfData
             return '-';
         }
 
-        return $area.' ('.$this->siglasArea($area).')';
+        return SiglasArea::conNombre($area);
     }
 
     private function mapMfa(?User $usuario): string
@@ -405,22 +406,6 @@ class MovimientoFormularioPdfData
         $filtered = array_values(array_filter($items, fn ($item): bool => filled($item)));
 
         return $filtered === [] ? '-' : implode(' | ', $filtered);
-    }
-
-    private function siglasArea(string $area): string
-    {
-        $parts = preg_split('/\s+/u', trim($area)) ?: [];
-
-        $siglas = collect($parts)
-            ->filter(fn (string $part): bool => mb_strlen($part) > 2 || ctype_upper($part))
-            ->map(fn (string $part): string => mb_strtoupper(mb_substr($part, 0, 1)))
-            ->implode('');
-
-        if ($siglas === '') {
-            $siglas = mb_strtoupper(mb_substr(preg_replace('/\s+/u', '', $area) ?? $area, 0, 2));
-        }
-
-        return $siglas;
     }
 
     /**

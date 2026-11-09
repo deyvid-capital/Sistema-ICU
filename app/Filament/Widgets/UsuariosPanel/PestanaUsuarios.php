@@ -4,6 +4,8 @@ namespace App\Filament\Widgets\UsuariosPanel;
 
 use App\Filament\Widgets\UsuariosPanelWidget;
 use App\Models\User;
+use App\Support\MatrizPerfiles\ExportadorMatrizPerfilesXlsx;
+use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\TextColumn;
@@ -13,6 +15,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Base de cada pestaña del panel de usuarios del dashboard.
@@ -112,6 +115,9 @@ abstract class PestanaUsuarios extends TableWidget
                 $this->filtroDeMovimiento(),
                 ...$this->filtrosPropios(),
             ])
+            ->headerActions([
+                $this->matrizDePerfilesAction(),
+            ])
             ->filtersFormColumns(2)
             ->defaultSort('name')
             ->paginated([10, 25, 50])
@@ -119,6 +125,19 @@ abstract class PestanaUsuarios extends TableWidget
             ->striped()
             ->emptyStateHeading('Sin usuarios que coincidan')
             ->emptyStateIcon(Heroicon::OutlinedUsers);
+    }
+
+    /**
+     * Excel con una fila por cargo y sus accesos y software (ver MatrizPerfiles).
+     * No depende de los filtros de la tabla: siempre resume todos los cargos.
+     */
+    protected function matrizDePerfilesAction(): Action
+    {
+        return Action::make('matrizDePerfiles')
+            ->label('Matriz de perfiles')
+            ->icon(Heroicon::OutlinedTableCells)
+            ->color('gray')
+            ->action(fn (): StreamedResponse => app(ExportadorMatrizPerfilesXlsx::class)->descargar());
     }
 
     protected function columnaUsuario(): TextColumn

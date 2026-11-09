@@ -171,6 +171,45 @@ ColumnaDeBadges::make(
 De esa línea salen la carga anticipada, la columna, su búsqueda y su opción en el filtro
 *Tiene acceso a*.
 
+### 5.5 Matriz de perfiles (Excel)
+
+El botón **Matriz de perfiles**, arriba de la tabla en todas las pestañas, descarga un
+`.xlsx` con **una fila por cargo**: qué accesos y software tienen hoy las personas de cada
+cargo.
+
+| Columna | De dónde sale | Formato |
+|---|---|---|
+| Cargo | `cargos.cargo` | — |
+| Sistemas | Accesos a sistemas | `Viafirma - Usuario` (sistema - nivel) |
+| Sitios SharePoint | Accesos a SharePoint | nombre del sitio |
+| Internet | Acceso a internet/Wi-Fi activo | perfil del área con siglas: `Inversiones Alternativas (IA)` |
+| Escritorio remoto | Accesos virtuales | máquina virtual |
+| Unidad compartida | Unidades compartidas | ruta |
+| VPN | Accesos virtuales con VPN | recurso VPN |
+| Una por categoría de software | Software asignado a la persona + software de su área. Las **excepciones no cuentan** (son personales) | nombre del software |
+
+Reglas:
+
+- **Cargos únicos.** Si varias personas tienen el mismo cargo, sus accesos se unen en una
+  sola fila y cada valor aparece una vez.
+- Varios valores van en la misma celda separados por ` | `, en orden alfabético. Una celda
+  sin datos muestra `-`.
+- Solo cuentan las asignaciones activas y el software activo. Las personas **de baja** no
+  cuentan, y un cargo sin nadie activo no sale.
+- Solo salen las categorías de software que tienen al menos un valor, en el orden de
+  `CategoriasSoftware`.
+- Internet usa la misma regla de siglas que el formulario de alta/baja (`App\Support\SiglasArea`).
+- Igual que en el formulario de alta/baja: las **licencias** van en *Microsoft*, el MFA de
+  Azure AD suma *Microsoft Authenticator* en *Autenticación multifactor*, y la categoría
+  *VPN* de software va dentro de *Software VPN* (la columna *VPN* es la del acceso).
+- No depende de los filtros de la tabla: siempre resume todos los cargos.
+- Filas ordenadas por área y luego por cargo. La cabecera y la columna Cargo quedan fijas al
+  desplazarse.
+
+Código: `App\Support\MatrizPerfiles\MatrizPerfiles` (arma cabeceras y filas) y
+`ExportadorMatrizPerfilesXlsx` (escribe el Excel con OpenSpout, que ya viene con Filament).
+Tests en `tests/Feature/Filament/MatrizPerfilesTest.php`.
+
 ---
 
 ## 6. Permisos
