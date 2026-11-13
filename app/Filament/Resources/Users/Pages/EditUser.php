@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\Actions\ReasignarTrasReingresoAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Movimiento;
 use App\Models\User;
@@ -112,6 +113,7 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ReasignarTrasReingresoAction::make(),
             ActionGroup::make([
                 DeleteAction::make()
                     ->label('Eliminar')

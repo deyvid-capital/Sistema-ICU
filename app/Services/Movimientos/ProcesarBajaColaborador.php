@@ -28,7 +28,8 @@ use Illuminate\Support\Facades\DB;
  * Da de baja todo lo que un colaborador tiene asignado: desactiva sus accesos
  * y cierra con `fecha_fin` sus asignaciones de equipo, celular y cargador.
  *
- * La cascada es unidireccional: un Alta posterior no reactiva nada, y eliminar
+ * La cascada es unidireccional: un Alta posterior no reactiva nada por sí sola
+ * (existe la acción manual «Reasignar todo», ver ReasignarTrasReingreso), y eliminar
  * el movimiento de Baja tampoco la revierte. Es idempotente, así que puede
  * ejecutarse más de una vez sobre el mismo colaborador sin efectos adicionales.
  */
@@ -39,7 +40,7 @@ class ProcesarBajaColaborador
      *
      * @var list<class-string<Model>>
      */
-    private const MODELOS_CON_ESTADO = [
+    public const MODELOS_CON_ESTADO = [
         SoftwareUsuario::class,
         LicenciaUsuario::class,
         AccesoSharepoint::class,

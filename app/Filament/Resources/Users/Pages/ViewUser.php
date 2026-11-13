@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Users\Actions\ReasignarTrasReingresoAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Actions\EditAction;
@@ -53,6 +54,7 @@ class ViewUser extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            ReasignarTrasReingresoAction::make(),
             EditAction::make()
                 ->label('Editar usuario')
                 ->visible(fn (User $record): bool => ! $record->trashed()
