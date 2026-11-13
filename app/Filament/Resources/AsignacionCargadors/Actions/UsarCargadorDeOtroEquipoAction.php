@@ -4,6 +4,7 @@ namespace App\Filament\Resources\AsignacionCargadors\Actions;
 
 use App\Enums\ModoAsignacionCargador;
 use App\Exceptions\EquipoOrigenConUsuarioException;
+use App\Filament\Resources\AsignacionCargadors\AsignacionCargadorResource;
 use App\Models\Cargador;
 use App\Models\Equipo;
 use App\Models\User;
@@ -16,12 +17,17 @@ use Filament\Support\Icons\Heroicon;
 use RuntimeException;
 use Throwable;
 
+/**
+ * Mueve a un equipo el cargador que hoy tiene otro (prestado o cedido).
+ * Crea una asignación de cargador, así que exige el mismo permiso que crearla.
+ */
 class UsarCargadorDeOtroEquipoAction
 {
     public static function make(): Action
     {
         return Action::make('usarCargadorDeOtroEquipo')
             ->label('Usar cargador de otro equipo')
+            ->authorize(fn (): bool => AsignacionCargadorResource::canCreate())
             ->icon(Heroicon::OutlinedArrowsRightLeft)
             ->color('warning')
             ->modalHeading('Usar cargador de otro equipo')

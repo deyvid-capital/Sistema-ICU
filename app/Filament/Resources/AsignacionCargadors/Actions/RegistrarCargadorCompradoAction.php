@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AsignacionCargadors\Actions;
 
 use App\Enums\EstadoCargador;
+use App\Filament\Resources\AsignacionCargadors\AsignacionCargadorResource;
 use App\Models\AsignacionCargador;
 use App\Models\Cargador;
 use App\Services\MovimientoCargador;
@@ -13,6 +14,10 @@ use Filament\Support\Icons\Heroicon;
 use RuntimeException;
 use Throwable;
 
+/**
+ * Registra el cargador comprado para una asignación prestada o cedida.
+ * Cierra y crea asignaciones, así que exige el permiso de editar la asignación.
+ */
 class RegistrarCargadorCompradoAction
 {
     public static function make(): Action
@@ -21,6 +26,7 @@ class RegistrarCargadorCompradoAction
             ->label('Registrar cargador comprado')
             ->icon(Heroicon::OutlinedCheckCircle)
             ->color('success')
+            ->authorize(fn (AsignacionCargador $record): bool => AsignacionCargadorResource::canEdit($record))
             ->visible(fn (AsignacionCargador $record): bool => static::puedeRegistrar($record))
             ->modalHeading('Registrar cargador comprado')
             ->modalDescription('Si el cargador está prestado, vuelve al equipo origen y el nuevo queda en este equipo. Si está cedido, se queda aquí y el nuevo va al origen.')
