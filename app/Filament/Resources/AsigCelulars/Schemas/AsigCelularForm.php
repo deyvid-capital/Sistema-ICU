@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\AsigCelulars\Schemas;
 
+use App\Models\AsigCelular;
 use App\Models\Celular;
 use App\Models\User;
+use App\Rules\CelularDisponibleParaAsignacion;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -39,7 +42,11 @@ class AsigCelularForm
                                     ->searchable(['id', 'marca', 'modelo'])
                                     ->preload()
                                     ->required()
-                                    ->rule(new NotTrashed(Celular::class)),
+                                    ->rule(new NotTrashed(Celular::class))
+                                    // Solo estorba otra asignación activa si esta también lo va a estar.
+                                    ->rules(fn (Get $get, ?AsigCelular $record): array => blank($get('fecha_fin'))
+                                        ? [new CelularDisponibleParaAsignacion($record)]
+                                        : []),
                                 Select::make('usuario_id')
                                     ->label('Usuario')
                                     ->relationship('usuario', 'name')

@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\AsigCargadorCels\Schemas;
 
+use App\Models\AsigCargadorCel;
 use App\Models\CargadorCel;
 use App\Models\Celular;
+use App\Rules\CargadorCelSinAsignar;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -12,6 +14,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 
 class AsigCargadorCelForm
 {
@@ -43,7 +46,18 @@ class AsigCargadorCelForm
                                     ->rule(new NotTrashed(Celular::class)),
                                 Select::make('cargador_serial')
                                     ->label('Cargador')
-                                    ->relationship('cargador', 'serial')
+                                    ->relationship(
+                                        'cargador',
+                                        'serial',
+                                        // Solo los cargadores libres, más el de la asignación que se edita.
+                                        fn (Builder $query, ?AsigCargadorCel $record): Builder => $query->whereDoesntHave(
+                                            'asignaciones',
+                                            fn (Builder $asignaciones): Builder => $asignaciones->when(
+                                                $record !== null,
+                                                fn (Builder $otras): Builder => $otras->whereKeyNot($record->getKey()),
+                                            ),
+                                        ),
+                                    )
                                     ->getOptionLabelFromRecordUsing(
                                         fn (CargadorCel $record): string => trim(sprintf(
                                             '%s — %s',
@@ -54,7 +68,9 @@ class AsigCargadorCelForm
                                     ->searchable(['serial', 'modelo'])
                                     ->preload()
                                     ->required()
-                                    ->rule(new NotTrashed(CargadorCel::class)),
+                                    ->rule(new NotTrashed(CargadorCel::class))
+                                    ->rules(fn (?AsigCargadorCel $record): array => [new CargadorCelSinAsignar($record)])
+                                    ->helperText('Solo se listan cargadores que no están asignados a otro celular.'),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')
                                     ->default(now()),

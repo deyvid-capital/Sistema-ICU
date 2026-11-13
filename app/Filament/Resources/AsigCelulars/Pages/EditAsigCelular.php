@@ -4,13 +4,16 @@ namespace App\Filament\Resources\AsigCelulars\Pages;
 
 use App\Filament\Resources\AsigCelulars\AsigCelularResource;
 use App\Models\AsigCelular;
+use App\Rules\CelularDisponibleParaAsignacion;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Validation\ValidationException;
 
 class EditAsigCelular extends EditRecord
 {
@@ -40,5 +43,21 @@ class EditAsigCelular extends EditRecord
                 ->button()
                 ->tooltip('Acciones'),
         ];
+    }
+
+    /**
+     * Además del error bajo el campo, avisa arriba que el celular ya está asignado.
+     */
+    protected function onValidationError(ValidationException $exception): void
+    {
+        parent::onValidationError($exception);
+
+        if (in_array(CelularDisponibleParaAsignacion::MENSAJE, $exception->validator->errors()->all(), true)) {
+            Notification::make()
+                ->danger()
+                ->title('No se puede asignar el celular')
+                ->body(CelularDisponibleParaAsignacion::MENSAJE)
+                ->send();
+        }
     }
 }
