@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee6db2613fc6d2e799f9896d5f0f6e01",
+    "content-hash": "85f8fedad8315f50445d1e47d362473e",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1121,6 +1121,42 @@
                 "source": "https://github.com/DASPRiD/Enum/tree/1.0.7"
             },
             "time": "2025-09-16T12:23:56+00:00"
+        },
+        {
+            "name": "deyvid-capital/documentacion-sistema-icu",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/documentacion-sistema-icu",
+                "reference": "d16dfe47c6f125300b630247e5541cbf5ac16af3"
+            },
+            "require": {
+                "filament/filament": "~5.0",
+                "illuminate/support": "^13.0",
+                "php": "^8.3",
+                "spatie/browsershot": "^5.4"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "SistemaIcu\\Documentacion\\DocumentacionServiceProvider",
+                        "SistemaIcu\\Documentacion\\DocumentacionPanelProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SistemaIcu\\Documentacion\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Guía de usuario del Sistema ICU: panel de Filament en /guia, contenido en Markdown, capturas automáticas y PDF según permisos.",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "dflydev/dot-access-data",
@@ -15157,7 +15193,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "deyvid-capital/documentacion-sistema-icu": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

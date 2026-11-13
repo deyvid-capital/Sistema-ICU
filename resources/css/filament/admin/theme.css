@@ -1,9 +1,12 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../../../vendor/deyvid-capital/documentacion-sistema-icu/resources/css/documentacion.css';
 
 @source '../../../../vendor/jeffgreco13/filament-breezy/resources/**/*';
 @source '../../../../vendor/rmsramos/activitylog/resources/**/*';
 
 @source '../../../../app/Filament/**/*';
+@source '../../../../vendor/deyvid-capital/documentacion-sistema-icu/resources/views/**/*';
+@source '../../../../vendor/deyvid-capital/documentacion-sistema-icu/src/**/*';
 @source '../../../../resources/views/filament/**/*';
 
 @theme {

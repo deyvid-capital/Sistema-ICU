@@ -11,6 +11,9 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <testsuite name="Documentacion">
+            <directory>vendor/deyvid-capital/documentacion-sistema-icu/tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

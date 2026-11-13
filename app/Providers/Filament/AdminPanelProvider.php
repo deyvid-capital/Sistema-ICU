@@ -57,6 +57,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 use Rmsramos\Activitylog\ActivitylogPlugin;
+use SistemaIcu\Documentacion\Filament\Pages\Inicio as GuiaInicio;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -108,6 +109,10 @@ class AdminPanelProvider extends PanelProvider
                     ->url(fn (): string => RoleResource::getUrl())
                     ->icon(Heroicon::OutlinedKey)
                     ->visible(fn (): bool => RoleResource::canViewAny()),
+                Action::make('guia_usuario')
+                    ->label('Guía de usuario')
+                    ->url(fn (): string => GuiaInicio::getUrl(panel: 'guia'))
+                    ->icon(Heroicon::OutlinedBookOpen),
                 Action::make('registro_actividad')
                     ->label('Registro de actividad')
                     ->url(fn (): string => ActivitylogResource::getUrl())
