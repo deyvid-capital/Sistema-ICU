@@ -6,8 +6,13 @@
 .phpactor.json
 .phpunit.result.cache
 /.codex
-/.cursor/
-/.claude/
+# De .cursor y .claude solo se versionan las skills y la memoria del proyecto.
+# La configuración local (settings.local.json, mcp.json) puede llevar credenciales.
+/.cursor/*
+!/.cursor/skills/
+/.claude/*
+!/.claude/skills/
+!/.claude/memory/
 /.idea
 /.nova
 /.phpunit.cache

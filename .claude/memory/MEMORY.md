@@ -1,0 +1,12 @@
+- [Use pnpm not npm](use-pnpm-not-npm.md) — always use pnpm for Node commands, never npm
+- [Pendientes: validación de catálogos](pendientes-validacion-catalogos.md) — lista viva de pendientes sobre catálogos inactivos y cascada de desactivación; consultar cuando el usuario pregunte "¿qué pendientes hay?"
+- [Control de acceso y seguridad de usuarios](control-acceso-seguridad-usuarios.md) — cómo está montado login/2FA/sesiones/notificaciones/roles para el super-admin
+- [Suite completa verde](suite-completa-verde.md) — 781/781 al 2026-11-11, todo fallo es regresión; correr con memory_limit=1G (si no, exit 137)
+- [Trampas de tests y listeners](trampas-tests-y-listeners.md) — listeners duplicados por autodescubrimiento y skipAuthorization global de Filament
+- [Permisos memorizados en User](permisos-memorizados-en-user.md) — memo de hasPermissionTo por instancia; reglas anti-escalada al modificarlo
+- [Firma digital: avance](firma-digital-avance.md) — fases 1-7 hechas (7 sin commit), decisiones, almacenamiento público/confidencial y pendientes
+- [Dashboard y widgets](dashboard-widgets.md) — 8 widgets del dashboard; super_admin no salta Shield: re-correr RolesPermissionsSeeder tras crear widgets
+- [Matriz de perfiles (Excel)](matriz-perfiles-excel.md) — reglas por cargo: internet con siglas del área, software usuario+área sin excepciones, descarga síncrona
+- [Guía de usuario: avance](guia-usuario-avance.md) — paquete aparte en packages/documentacion-sistema-icu; otro IDE hace las tareas y yo reviso en .avance/revision; estado y pendientes
+- [Cambios del sistema 2026-11-13](cambios-sistema-2026-11-13.md) — permisos de cargadores, celulares sin doble asignación y «Reasignar todo» al reingresar; decisiones y límites
+- [Memoria y skills en el repo](memoria-y-skills-en-el-repo.md) — dos equipos: copiar la memoria a .claude/memory y versionar skills de .claude y .cursor; el push lo hace el usuario
