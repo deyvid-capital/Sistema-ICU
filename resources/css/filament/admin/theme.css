@@ -10,13 +10,13 @@
 @source '../../../../resources/views/filament/**/*';
 
 @theme {
-    --text-sm: 13px;
+    --text-sm: 0.8125rem;
 }
 
 .fi-fo-field-wrp-label,
 .fi-fo-field-label,
 .fi-fo-field-label-content {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 
 /* Tablas: tamaño de letra compacto en todo el componente */
@@ -25,45 +25,45 @@
 .fi-ta-header-group-cell,
 .fi-ta-cell.fi-ta-summary-row-heading-cell,
 .fi-ta-cell.fi-ta-summary-header-cell {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 
 .fi-ta-text-item.fi-size-xs {
-    @apply text-[11px] leading-4;
+    @apply text-[0.6875rem] leading-4;
 }
 .fi-ta-text-item.fi-size-sm,
 .fi-ta-text-item.fi-size-md {
-    @apply text-[13px] leading-5;
+    @apply text-[0.8125rem] leading-5;
 }
 .fi-ta-text-item.fi-size-lg {
-    @apply text-[14px] leading-5;
+    @apply text-[0.875rem] leading-5;
 }
 
 .fi-ta-text > .fi-ta-text-description,
 .fi-ta-text > .fi-ta-text-list-limited-message {
-    @apply text-[12px] leading-4;
+    @apply text-[0.75rem] leading-4;
 }
 
 .fi-ta-cell .fi-ta-placeholder {
-    @apply text-[13px] leading-5;
+    @apply text-[0.8125rem] leading-5;
 }
 
 .fi-ta-header-heading,
 .fi-ta-filters-heading,
 .fi-ta-col-manager-heading {
-    @apply text-[13px] leading-5;
+    @apply text-[0.8125rem] leading-5;
 }
 .fi-ta-header-description {
-    @apply text-[12px];
+    @apply text-[0.75rem];
 }
 .fi-ta-col-manager-label {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 
 .fi-ta-filter-indicators-label,
 .fi-ta-reorder-indicator,
 .fi-ta-selection-indicator > :nth-child(1) {
-    @apply text-[13px] leading-5;
+    @apply text-[0.8125rem] leading-5;
 }
 
 .fi-ta-search-field .fi-input,
@@ -71,33 +71,33 @@
 .fi-ta-filters .fi-select-input,
 .fi-ta-filters .fi-select-input-value-label,
 .fi-ta-filters .fi-select-input-placeholder {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 
 .fi-ta-ctn .fi-btn,
 .fi-ta-ctn .fi-link {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 
 /* Badges: más compactos en todo el panel 
 .fi-badge {
-    @apply min-w-5 px-1.5 py-0.5 text-[11px] leading-4;
+    @apply min-w-5 px-1.5 py-0.5 text-[0.6875rem] leading-4;
 }
 .fi-badge.fi-size-xs {
-    @apply min-w-4 px-0.5 py-0 text-[10px] leading-3 tracking-tighter;
+    @apply min-w-4 px-0.5 py-0 text-[0.625rem] leading-3 tracking-tighter;
 }
 .fi-badge.fi-size-sm {
-    @apply min-w-5 px-1 py-0.5 text-[11px] leading-4 tracking-tight;
+    @apply min-w-5 px-1 py-0.5 text-[0.6875rem] leading-4 tracking-tight;
 }
 .fi-badge.fi-size-md,
 .fi-badge.fi-size-lg {
-    @apply px-1.5 py-0.5 text-[11px] leading-4;
+    @apply px-1.5 py-0.5 text-[0.6875rem] leading-4;
 }
 .fi-badge-label {
-    @apply text-[11px];
+    @apply text-[0.6875rem];
 }
 .fi-badge.fi-size-xs .fi-badge-label {
-    @apply text-[10px];
+    @apply text-[0.625rem];
 }
 .fi-badge > .fi-icon.fi-size-sm,
 .fi-badge > .fi-icon.fi-size-md {
@@ -111,16 +111,16 @@
 .fi-ta-ctn .fi-pagination-item-label,
 .fi-ta-ctn .fi-pagination .fi-select-input,
 .fi-ta-ctn .fi-pagination .fi-input-wrp-label {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 */
 
 /* Secciones: título, descripción e iconos más compactos */
 .fi-section-header-heading {
-    @apply text-[15px] leading-5;
+    @apply text-[0.9375rem] leading-5;
 }
 .fi-section-header-description {
-    @apply text-[13px] leading-4;
+    @apply text-[0.8125rem] leading-4;
 }
 .fi-section-header > .fi-icon {
     @apply size-5.5;
@@ -142,15 +142,15 @@
 
 /* Sidebar: reducir tamaño de letra */
 .fi-sidebar-item-label {
-    @apply text-[12px];
+    @apply text-[0.75rem];
 }
 .fi-sidebar-group-label {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 
 /* Dropdown: reducir tamaño de letra */
 .fi-dropdown-list-item-label {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 
 /* Sidebar: ocultar la barra de scroll pero mantener el desplazamiento */
@@ -168,10 +168,10 @@
     scrollbar-color: transparent transparent;
 }
 .fi-tabs:hover {
-    scrollbar-color: rgb(156 163 175 / 0.45) transparent;
+    scrollbar-color: color-mix(in oklab, var(--gray-400) 45%, transparent) transparent;
 }
 .dark .fi-tabs:hover {
-    scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+    scrollbar-color: color-mix(in oklab, var(--gray-400) 40%, transparent) transparent;
 }
 
 .fi-tabs::-webkit-scrollbar {
@@ -185,24 +185,24 @@
     border-radius: 9999px;
 }
 .fi-tabs:hover::-webkit-scrollbar-thumb {
-    background-color: rgb(156 163 175 / 0.45);
+    background-color: color-mix(in oklab, var(--gray-400) 45%, transparent);
 }
 .fi-tabs:hover::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(107 114 128 / 0.7);
+    background-color: color-mix(in oklab, var(--gray-500) 70%, transparent);
 }
 .dark .fi-tabs:hover::-webkit-scrollbar-thumb {
-    background-color: rgb(255 255 255 / 0.2);
+    background-color: color-mix(in oklab, var(--gray-400) 40%, transparent);
 }
 .dark .fi-tabs:hover::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(255 255 255 / 0.35);
+    background-color: color-mix(in oklab, var(--gray-400) 55%, transparent);
 }
 
 /* Tabs de subnavegación: reducir tamaño de letra e iconos */
 .fi-tabs-item {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 .fi-tabs-item-label {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 .fi-tabs-item > .fi-icon {
     @apply size-4;
@@ -213,13 +213,13 @@
     @apply max-w-xs;
 }
 .fi-global-search .fi-input {
-    @apply text-[13px];
+    @apply text-[0.8125rem];
 }
 .fi-global-search .fi-input-wrp-icon {
     @apply size-4;
 }
 .fi-global-search .fi-input-wrp-suffix {
-    @apply text-[11px];
+    @apply text-[0.6875rem];
 }
 
 /* Header de página: título y breadcrumbs más compactos */
@@ -236,7 +236,7 @@
     @apply mb-1;
 }
 .fi-header .fi-breadcrumbs ol li {
-    @apply text-[12px];
+    @apply text-[0.75rem];
 }
 .fi-header .fi-breadcrumbs .fi-icon {
     @apply size-3.5;
@@ -268,15 +268,17 @@
 }
 
 .icu-2fa-setup__lead {
-    @apply text-sm leading-6 text-gray-600 dark:text-gray-300 sm:text-[15px];
+    @apply text-sm leading-6 text-gray-600 dark:text-gray-300 sm:text-[0.9375rem];
 }
 
 .icu-2fa-setup__step {
-    @apply space-y-4 rounded-2xl border border-gray-200 bg-white/80 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900/60 sm:p-6;
+    @apply space-y-4 rounded-2xl border p-5 shadow-sm sm:p-6;
+    border-color: var(--studio-border, var(--gray-200));
+    background-color: var(--studio-surface, #fff);
 }
 
 .icu-2fa-setup__step-badge {
-    @apply inline-flex rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-700 ring-1 ring-inset ring-primary-600/15 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/20;
+    @apply inline-flex rounded-full bg-primary-50 px-2.5 py-1 text-[0.6875rem] font-semibold uppercase tracking-wide text-primary-700 ring-1 ring-inset ring-primary-600/15 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/20;
 }
 
 .icu-2fa-setup__step-badge--next {
@@ -362,7 +364,8 @@
 }
 
 .icu-2fa-setup__footer {
-    @apply flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700;
+    @apply flex justify-center border-t pt-4;
+    border-color: var(--studio-border, var(--gray-200));
 }
 
 .icu-2fa-setup__logout {

@@ -270,7 +270,7 @@ La pestaña **Páginas** tiene 13 permisos:
 
 | Permiso | Se aplica de verdad |
 |---|---|
-| `View:TemaColores`, `View:Marca`, `View:Archivos`, `View:Correo` | **Sí** — esas páginas usan el trait `HasPageShield` |
+| `View:Archivos`, `View:Correo` | **Sí** — esas páginas usan el trait `HasPageShield` |
 | `View:AccesosCluster`, `View:AsignacionCluster`, `View:CelularesCluster`, `View:EquiposCluster`, `View:InventarioCluster`, `View:RecursosCluster`, `View:SoftwareCluster`, `View:UsuariosCluster` | **No** — hoy son decorativos |
 | `View:MyProfilePage` | **No** — página de perfil de Breezy |
 

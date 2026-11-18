@@ -34,7 +34,7 @@ class UserFactory extends Factory
             'id_area' => Area::factory(),
             'id_cargo' => Cargo::factory(),
             'email' => fake()->unique()->safeEmail(),
-            'telefono' => fake()->phoneNumber(),
+            'telefono' => fake()->numerify('7###-####'),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('12345678'),
             'remember_token' => Str::random(10),

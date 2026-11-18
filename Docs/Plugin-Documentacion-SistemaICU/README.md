@@ -130,7 +130,7 @@ una pieza configurable:
 | Hoy usa | En el plugin | Lo aporta el Sistema ICU |
 |---|---|---|
 | `App\Models\User` | `config('documentacion-icu.modelo_usuario')` | El nombre de la clase |
-| `TemaService` (logo, colores, favicon) | Contrato `Contracts\Tema` | Adaptador sobre `TemaService` |
+| Logo, colores, favicon | Contrato `Contracts\Anfitrion` / plugin de apariencia | `AnfitrionIcu` + `AparienciaPlugin` (solo lectura) y `StudioBrand` |
 | `ArchivosService::disco()` | `config('documentacion-icu.disco')` | El nombre del disco confidencial |
 | `BrowsershotPdfFactory` | Generador propio en el plugin | Nada (solo la ruta de Chrome) |
 | `CriticalEventNotification` | Contrato `Contracts\Avisos` | Adaptador que envía a la campana |
@@ -138,7 +138,7 @@ una pieza configurable:
 | Rol `super_admin` | `config('documentacion-icu.puede_editar')` | Un permiso o una función |
 | `DominioActividad`, `LogsIcuActivity` | Evento `SeccionEditada`, `CapturaReemplazada` | Un listener que registra la actividad |
 | `GuiaDemoSeeder`, base `guia_demo` | `config('documentacion-icu.demo')` | El seeder y el nombre de la base |
-| Logo fijo en la plantilla PDF | Lo entrega el contrato `Tema` | — |
+| Logo en la plantilla PDF | `Anfitrion::logoParaPdf()` | `StudioBrand::logoPath()` con PNG fijo de respaldo |
 
 En el Sistema ICU quedan, entonces, cuatro cosas: la línea de Composer, el archivo de
 configuración, dos o tres adaptadores cortos y el seeder de demostración.

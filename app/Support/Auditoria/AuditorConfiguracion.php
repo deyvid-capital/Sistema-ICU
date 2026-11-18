@@ -82,6 +82,54 @@ class AuditorConfiguracion
     }
 
     /**
+     * Registra una configuración que no vive en un modelo propio (los ajustes
+     * del plugin de apariencia): no hay sujeto, y el diff sale de comparar el
+     * estado anterior con el posterior.
+     *
+     * @param  array<string, mixed>  $antes
+     * @param  array<string, mixed>  $despues
+     * @param  array<string, mixed>  $extra
+     */
+    public function cambiado(
+        SeccionConfiguracion $seccion,
+        bool $restaurado,
+        array $antes,
+        array $despues,
+        array $extra = [],
+    ): void {
+        $ignorar = self::IGNORADOS;
+        $cambios = [];
+        $anteriores = [];
+
+        foreach (Arr::except($despues, $ignorar) as $clave => $valor) {
+            $anterior = $antes[$clave] ?? null;
+
+            if ($anterior === $valor) {
+                continue;
+            }
+
+            $cambios[$clave] = $valor;
+            $anteriores[$clave] = $anterior;
+        }
+
+        if ($cambios === [] && $extra === []) {
+            return;
+        }
+
+        activity(DominioActividad::Configuracion->value)
+            ->event($restaurado ? 'restored' : 'updated')
+            ->causedBy($this->usuarioAutenticado())
+            ->withChanges([
+                'old' => $anteriores,
+                'attributes' => $cambios,
+            ])
+            ->withProperties(array_merge($this->contextoPeticion(), [
+                'seccion' => $seccion->value,
+            ], $extra))
+            ->log($restaurado ? $seccion->descripcionRestaurado() : $seccion->descripcionActualizado());
+    }
+
+    /**
      * @param  array<string, mixed>  $original
      * @param  list<string>  $excepto
      * @param  array<string, mixed>  $extra

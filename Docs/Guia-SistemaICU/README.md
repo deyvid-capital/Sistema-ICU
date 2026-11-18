@@ -285,8 +285,9 @@ Usuario pulsa Descargar
 | Edición | Migración y modelo `GuiaEdicion`, acción Editar en `VerCapitulo` |
 | Tests | `tests/Feature/Guia/` |
 
-Tema, colores, logo y fuente del panel nuevo salen de la misma configuración que el panel
-admin (`TemaService`), para que se vean idénticos.
+Tema, colores, logo, favicon y fuente del panel nuevo salen de la misma configuración que el
+panel admin: `AnfitrionIcu` registra `AparienciaPlugin` en solo lectura (`settingsPage(false)`,
+`personalAppearance(false)`), para que se vean idénticos.
 
 ---
 
