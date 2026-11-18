@@ -6,12 +6,9 @@ use App\Enums\DominioActividad;
 use App\Enums\SeccionConfiguracion;
 use App\Filament\Clusters\Configuracion\Pages\Archivos;
 use App\Filament\Clusters\Configuracion\Pages\Correo;
-use App\Filament\Clusters\Configuracion\Pages\Marca;
-use App\Filament\Clusters\Configuracion\Pages\TemaColores;
-use App\Models\AppearanceSetting;
 use App\Models\User;
+use CapitalSafi\Apariencia\Events\AparienciaActualizada;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -56,110 +53,108 @@ class AuditoriaConfiguracionTest extends TestCase
             );
     }
 
-    public function test_guardar_tema_registra_solo_los_campos_cambiados(): void
-    {
-        Livewire::test(TemaColores::class)
-            ->fillForm(['tema' => 'personalizado', 'color_primario' => '#112233'])
-            ->call('guardar');
+    /**
+     * @param  array<string, mixed>  $antes
+     * @param  array<string, mixed>  $despues
+     * @param  array{subidos: array<string, string>, eliminados: array<string, string>}  $archivos
+     */
+    private function lanzarApariencia(
+        array $antes = [],
+        array $despues = [],
+        array $archivos = ['subidos' => [], 'eliminados' => []],
+        string $alcance = 'global',
+        string $accion = 'guardado',
+    ): void {
+        AparienciaActualizada::dispatch($alcance, $antes, $despues, $archivos, $accion);
+    }
 
-        $registros = $this->registros(SeccionConfiguracion::TemaColores);
+    public function test_guardar_apariencia_registra_solo_los_campos_cambiados(): void
+    {
+        $this->lanzarApariencia(
+            antes: ['primary' => '#003973', 'success' => '#13A538'],
+            despues: ['primary' => '#112233', 'success' => '#13A538'],
+        );
+
+        $registros = $this->registros(SeccionConfiguracion::Apariencia);
 
         $this->assertCount(1, $registros);
 
         $registro = $registros->first();
 
         $this->assertSame('updated', $registro->event);
-        $this->assertSame('#112233', $registro->attribute_changes['attributes']['color_primario']);
+        $this->assertSame('Apariencia actualizada', $registro->description);
+        $this->assertSame(['primary' => '#112233'], $registro->attribute_changes['attributes']);
+        $this->assertSame(['primary' => '#003973'], $registro->attribute_changes['old']);
         $this->assertSame((string) $this->usuario->id, (string) $registro->causer_id);
-        $this->assertArrayNotHasKey('updated_at', $registro->attribute_changes['attributes']);
     }
 
-    public function test_guardar_sin_cambios_no_registra_nada(): void
+    public function test_guardar_apariencia_sin_cambios_no_registra_nada(): void
     {
-        Livewire::test(TemaColores::class)->call('guardar');
+        $this->lanzarApariencia(
+            antes: ['primary' => '#003973'],
+            despues: ['primary' => '#003973'],
+        );
 
-        $this->assertCount(1, $this->registros(SeccionConfiguracion::TemaColores));
-
-        Livewire::test(TemaColores::class)->call('guardar');
-
-        // El segundo guardado no altera nada, así que no debe dejar rastro.
-        $this->assertCount(1, $this->registros(SeccionConfiguracion::TemaColores));
-    }
-
-    public function test_restaurar_tema_se_registra_como_restored(): void
-    {
-        Livewire::test(TemaColores::class)
-            ->fillForm(['tema' => 'personalizado', 'color_primario' => '#112233'])
-            ->call('guardar');
-
-        Livewire::test(TemaColores::class)->call('restaurar');
-
-        $registros = $this->registros(SeccionConfiguracion::TemaColores);
-
-        $this->assertCount(2, $registros);
-        $this->assertSame('restored', $registros->last()->event);
-        $this->assertSame('#112233', $registros->last()->attribute_changes['old']['color_primario']);
-    }
-
-    public function test_visitar_marca_no_genera_ningun_registro(): void
-    {
-        $this->get(Marca::getUrl(panel: 'admin'))->assertSuccessful();
-
-        // mount() crea la fila appearance_settings en un GET: si el modelo
-        // usara LogsIcuActivity, esto dejaría un "created" espurio.
-        $this->assertTrue(AppearanceSetting::query()->exists());
         $this->assertCount(0, $this->registros());
+    }
+
+    public function test_restablecer_apariencia_se_registra_como_restored(): void
+    {
+        $this->lanzarApariencia(
+            antes: ['primary' => '#112233'],
+            despues: ['primary' => '#003973'],
+            accion: 'restablecido',
+        );
+
+        $registros = $this->registros(SeccionConfiguracion::Apariencia);
+
+        $this->assertCount(1, $registros);
+        $this->assertSame('restored', $registros->first()->event);
+        $this->assertSame('Apariencia restaurada', $registros->first()->description);
+        $this->assertSame('#112233', $registros->first()->attribute_changes['old']['primary']);
     }
 
     public function test_subir_logo_registra_el_archivo_subido(): void
     {
-        Livewire::test(Marca::class)
-            ->fillForm([
-                'logo_claro' => [UploadedFile::fake()->image('logo.png')],
-                'alto_logo' => '3rem',
-            ])
-            ->call('guardar')
-            ->assertHasNoFormErrors();
+        $this->lanzarApariencia(
+            antes: ['logo_height' => '2.5rem'],
+            despues: ['logo_height' => '3rem'],
+            archivos: ['subidos' => ['logo_light' => 'apariencia/marca/logo-01ABC.webp'], 'eliminados' => []],
+        );
 
-        $registros = $this->registros(SeccionConfiguracion::Marca);
+        $registros = $this->registros(SeccionConfiguracion::Apariencia);
 
         $this->assertCount(1, $registros);
 
         $propiedades = $registros->first()->properties;
 
-        $this->assertArrayHasKey('logo_claro', $propiedades['archivos']['subidos']);
+        $this->assertSame('logo-01ABC.webp', $propiedades['archivos']['subidos']['logo_light']);
         $this->assertArrayNotHasKey('eliminados', $propiedades['archivos']);
-        $this->assertSame('3rem', $registros->first()->attribute_changes['attributes']['alto_logo']);
+        $this->assertSame('3rem', $registros->first()->attribute_changes['attributes']['logo_height']);
     }
 
-    public function test_quitar_logo_registra_el_archivo_eliminado(): void
+    public function test_quitar_logo_registra_el_archivo_eliminado_aunque_no_cambien_otros_ajustes(): void
     {
-        Livewire::test(Marca::class)
-            ->fillForm(['logo_claro' => [UploadedFile::fake()->image('logo.png')]])
-            ->call('guardar');
+        $this->lanzarApariencia(
+            archivos: ['subidos' => [], 'eliminados' => ['logo_light' => 'apariencia/marca/logo-01ABC.webp']],
+        );
 
-        Livewire::test(Marca::class)
-            ->fillForm(['logo_claro' => []])
-            ->call('guardar');
+        $registros = $this->registros(SeccionConfiguracion::Apariencia);
 
-        $registros = $this->registros(SeccionConfiguracion::Marca);
-
-        $this->assertCount(2, $registros);
-        $this->assertArrayHasKey('logo_claro', $registros->last()->properties['archivos']['eliminados']);
+        $this->assertCount(1, $registros);
+        $this->assertSame('logo-01ABC.webp', $registros->first()->properties['archivos']['eliminados']['logo_light']);
+        $this->assertArrayNotHasKey('subidos', $registros->first()->properties['archivos']);
     }
 
-    public function test_restaurar_marca_registra_los_archivos_eliminados(): void
+    public function test_la_apariencia_personal_no_se_audita(): void
     {
-        Livewire::test(Marca::class)
-            ->fillForm(['logo_claro' => [UploadedFile::fake()->image('logo.png')]])
-            ->call('guardar');
+        $this->lanzarApariencia(
+            antes: ['primary' => '#003973'],
+            despues: ['primary' => '#112233'],
+            alcance: 'personal',
+        );
 
-        Livewire::test(Marca::class)->call('restaurar');
-
-        $registros = $this->registros(SeccionConfiguracion::Marca);
-
-        $this->assertSame('restored', $registros->last()->event);
-        $this->assertArrayHasKey('logo_claro', $registros->last()->properties['archivos']['eliminados']);
+        $this->assertCount(0, $this->registros());
     }
 
     public function test_guardar_archivos_registra_los_cambios(): void
@@ -206,10 +201,9 @@ class AuditoriaConfiguracionTest extends TestCase
         $this->assertSame('smtp.example.com', $cambios['attributes']['host']);
     }
 
-    public function test_las_cuatro_paginas_usan_el_dominio_de_configuracion(): void
+    public function test_las_paginas_y_la_apariencia_usan_el_dominio_de_configuracion(): void
     {
-        Livewire::test(TemaColores::class)->fillForm(['tema' => 'personalizado'])->call('guardar');
-        Livewire::test(Marca::class)->fillForm(['alto_logo' => '4rem'])->call('guardar');
+        $this->lanzarApariencia(antes: ['primary' => '#003973'], despues: ['primary' => '#112233']);
         Livewire::test(Archivos::class)->fillForm(['prefijo' => 'otro'])->call('guardar');
         Livewire::test(Correo::class)->fillForm(['host' => 'smtp.example.org'])->call('guardar');
 
@@ -221,8 +215,14 @@ class AuditoriaConfiguracionTest extends TestCase
             ->all();
 
         $this->assertSame(
-            ['archivos', 'correo', 'marca', 'tema_colores'],
+            ['apariencia', 'archivos', 'correo'],
             $secciones,
         );
+    }
+
+    public function test_las_secciones_retiradas_siguen_disponibles_para_filas_antiguas(): void
+    {
+        $this->assertSame('Tema y colores', SeccionConfiguracion::from('tema_colores')->getLabel());
+        $this->assertSame('Marca e identidad', SeccionConfiguracion::from('marca')->getLabel());
     }
 }

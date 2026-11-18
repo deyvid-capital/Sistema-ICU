@@ -5,7 +5,6 @@ namespace App\Providers;
 use App\Filament\Pages\Auth\TwoFactorChallenge;
 use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Media\IcuPathGenerator;
-use App\Models\AppearanceSetting;
 use App\Models\AsigCelular;
 use App\Models\AsignacionCargador;
 use App\Models\AsignacionEquipo;
@@ -17,7 +16,6 @@ use App\Models\Movimiento;
 use App\Models\PdfEquipo;
 use App\Models\SoftwareExc;
 use App\Models\User;
-use App\Observers\AppearanceSettingObserver;
 use App\Observers\AsigCelularObserver;
 use App\Observers\AsignacionCargadorObserver;
 use App\Observers\AsignacionEquipoObserver;
@@ -33,7 +31,6 @@ use App\Observers\UserObserver;
 use App\Policies\ActivityPolicy;
 use App\Services\Archivos\ArchivosService;
 use App\Services\Configuracion\MailConfigService;
-use App\Services\Configuracion\TemaService;
 use App\Support\Auditoria\AuditorConfiguracion;
 use App\Support\Auditoria\AuditorSeguridad;
 use Filament\Forms\Components\DatePicker;
@@ -53,7 +50,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(TemaService::class);
         $this->app->singleton(ArchivosService::class);
         $this->app->singleton(MailConfigService::class);
         $this->app->singleton(AuditorSeguridad::class);
@@ -74,7 +70,6 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Activity::class, ActivityPolicy::class);
 
-        AppearanceSetting::observe(AppearanceSettingObserver::class);
         MediaSetting::observe(MediaSettingObserver::class);
         MailSetting::observe(MailSettingObserver::class);
         BreezySession::observe(BreezySessionObserver::class);

@@ -59,8 +59,6 @@ La sub-navegación izquierda lista:
 
 | Página | Ruta | Contenido |
 |---|---|---|
-| Tema y colores | `/admin/configuracion/tema-colores` | Temas y colores |
-| Marca e identidad | `/admin/configuracion/marca` | Logos y favicon (Media Library) |
 | **Archivos** | `/admin/configuracion/archivos` | Disco, prefijo, optimización, límites, catálogo |
 | Correo | `/admin/configuracion/correo` | SMTP cifrado ([guía](../Correo-SMTP/README.md)) |
 
@@ -302,8 +300,6 @@ app/Models/MantenimientoEquipo.php            # HasMedia + colecciones
 app/Models/AppearanceSetting.php              # HasMedia + colecciones + clearBrandMedia()
 app/Filament/.../MantenimientoEquipoForm.php  # SpatieMediaLibraryFileUpload
 app/Filament/.../MantenimientoEquipoInfolist.php
-app/Filament/Clusters/Configuracion/Pages/Marca.php
-app/Services/Configuracion/TemaService.php # URLs desde media
 app/Models/PdfEquipo.php | PdfCelular.php | PdfMovimiento.php | ReciboEquipo.php
 app/Filament/.../Pdf*Form.php | ReciboEquipoForm.php
 .env.example                                  # ARCHIVOS_DISK, ARCHIVOS_PREFIJO
@@ -318,12 +314,10 @@ phpunit.xml                                   # ARCHIVOS_DISK=public
 vendor/bin/sail artisan test --compact \
   tests/Feature/Filament/MantenimientoEquipoCapturaUploadTest.php \
   tests/Feature/Models/MantenimientoEquipoDeletesStoredImagesTest.php \
-  tests/Feature/Filament/MarcaPageTest.php \
   tests/Feature/Filament/ArchivosPageTest.php \
   tests/Feature/Console/MigrarImagenesAMediaCommandTest.php \
   tests/Feature/Media/ImageConversionTest.php \
-  tests/Unit/Services/ArchivosServiceTest.php \
-  tests/Unit/Services/TemaServiceTest.php
+  tests/Unit/Services/ArchivosServiceTest.php
 ```
 
 Cubren: subida a media con nombres esperados, soft/force delete, reemplazo `singleFile`,

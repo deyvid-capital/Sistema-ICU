@@ -8,8 +8,6 @@ use App\Filament\Clusters\Celulares\CelularesCluster;
 use App\Filament\Clusters\Configuracion\Pages\Archivos;
 use App\Filament\Clusters\Configuracion\Pages\Correo;
 use App\Filament\Clusters\Configuracion\Pages\FirmaDigital;
-use App\Filament\Clusters\Configuracion\Pages\Marca;
-use App\Filament\Clusters\Configuracion\Pages\TemaColores;
 use App\Filament\Clusters\Equipos\EquiposCluster;
 use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Clusters\Recursos\RecursosCluster;
@@ -28,8 +26,8 @@ use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Livewire\Profile\PersonalInfo;
 use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Livewire\Profile\UpdatePassword as ProfileUpdatePassword;
-use App\Services\Configuracion\TemaService;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use CapitalSafi\Apariencia\AparienciaPlugin;
 use Filament\Actions\Action;
 use Filament\Enums\UserMenuPosition;
 use Filament\FontProviders\LocalFontProvider;
@@ -76,17 +74,17 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->brandLogo(fn (): ?string => app(TemaService::class)->logoClaro())
-            ->darkModeBrandLogo(fn (): ?string => app(TemaService::class)->logoOscuro())
-            ->brandLogoHeight(fn (): string => app(TemaService::class)->altoLogo())
-            ->favicon(fn (): ?string => app(TemaService::class)->favicon())
+            // Respaldos fijos: el plugin de apariencia los reemplaza por la marca subida.
+            ->brandLogo(fn (): string => asset('images/Capital-Safi-SA-logo-.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(fn (): string => asset('favicon.ico'))
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->topbar(false)
             ->userMenuItems([
                 Action::make('configuraciones')
                     ->label('Configuraciones')
                     ->url(function (): string {
-                        foreach ([TemaColores::class, Marca::class, Archivos::class, Correo::class, FirmaDigital::class] as $pagina) {
+                        foreach ([Archivos::class, Correo::class, FirmaDigital::class] as $pagina) {
                             if ($pagina::canAccess()) {
                                 return $pagina::getUrl();
                             }
@@ -94,10 +92,10 @@ class AdminPanelProvider extends PanelProvider
 
                         return CertificadoFirmaResource::canViewAny()
                             ? CertificadoFirmaResource::getUrl()
-                            : TemaColores::getUrl();
+                            : Archivos::getUrl();
                     })
                     ->icon(Heroicon::OutlinedCog6Tooth)
-                    ->visible(fn (): bool => TemaColores::canAccess() || Marca::canAccess() || Archivos::canAccess() || Correo::canAccess()
+                    ->visible(fn (): bool => Archivos::canAccess() || Correo::canAccess()
                         || FirmaDigital::canAccess() || CertificadoFirmaResource::canViewAny()),
                 Action::make('mi_firma_digital')
                     ->label('Mi firma digital')
@@ -140,14 +138,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Equipos'),
             ])
             ->databaseNotifications()
-            ->colors(fn (): array => app(TemaService::class)->coloresDelPanel())
             ->renderHook(
                 PanelsRenderHook::STYLES_BEFORE,
                 fn (): View => view('filament.fonts'),
-            )
-            ->renderHook(
-                PanelsRenderHook::STYLES_AFTER,
-                fn (): View => view('filament.configuracion.estilos', app(TemaService::class)->variablesCss()),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -177,6 +170,9 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
+                // Por ahora solo el super administrador elige la apariencia global.
+                AparienciaPlugin::make()
+                    ->canCustomize(fn (): bool => (bool) auth()->user()?->hasRole(config('filament-shield.super_admin.name'))),
                 FilamentShieldPlugin::make()
                     ->registerNavigation(false)
                     ->gridColumns(['default' => 1, 'lg' => 2])

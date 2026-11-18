@@ -1,0 +1,1130 @@
+/* Preserve Filament/Tailwind's order even when this asset loads first. */
+@layer properties, theme, base, components, utilities;
+
+/*
+ * Apariencia skins.
+ *
+ * Every rule is scoped under an attribute on <html>, set by the plugin:
+ *   data-studio-skin     classic | soft
+ *   data-studio-sidebar  classic | collapsible
+ *   data-studio-backdrop none | image
+ *
+ * Tunable variables (written by the styles view and the live preview):
+  *
+ * Filament draws card and input borders as rings, so --tw-ring-color is the border.
+ * Logical properties only, so RTL mirrors correctly.
+ */
+
+/* Text colors change foregrounds only. Keep gray surfaces and semantic colors
+ * independent, including primary actions, links, badges and validation states. */
+html[data-studio-skin] .fi-body {
+    color: var(--studio-text-color);
+}
+
+html[data-studio-skin] :is(
+    .fi-header-heading, .fi-simple-header-heading, .fi-section-header-heading,
+    .fi-modal-heading, .fi-fo-field-label-content, .fi-input, .fi-textarea,
+    .fi-fo-textarea textarea, .fi-ta-empty-state-heading,
+    .fi-select-input, .fi-select-input-btn, .fi-select-input-value-label, .fi-select-option-label,
+    .fi-ta-text-item, .fi-ta-header-cell-label, .fi-ta-heading,
+    .fi-in-text-item, .fi-in-entry-label,
+    .fi-wi-stats-overview-stat-value, .fi-wi-stats-overview-stat-label,
+    .fi-fo-repeater-item-header-label, .fi-fo-builder-item-header-label,
+    .fi-fo-radio-label, .fi-sc-wizard-step-label
+):not(.fi-color:not(.fi-color-gray), .fi-color:not(.fi-color-gray) *, .fi-invalid, .fi-invalid *) {
+    color: var(--studio-text-color);
+}
+
+html[data-studio-skin] .fi-sidebar-item .fi-sidebar-item-label,
+html[data-studio-skin] .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label,
+html[data-studio-skin] .fi-sidebar-database-notifications-btn-label,
+html[data-studio-skin] .fi-btn.fi-color-gray {
+    color: var(--studio-text-color);
+}
+
+html[data-studio-skin] :is(
+    .fi-header-subheading, .fi-simple-header-subheading, .fi-section-header-description,
+    .fi-modal-description, .fi-fo-field-helper-text, .fi-fo-field-hint,
+    .fi-sc-text, .fi-in-entry-helper-text, .fi-in-entry-hint,
+    .fi-ta-text-description, .fi-ta-text-list-limited-message,
+    .fi-in-text-description, .fi-in-text-list-limited-message,
+    .fi-wi-stats-overview-stat-description, .fi-sidebar-group-label,
+    .fi-select-input-placeholder, .fi-select-input-message, .fi-input-wrp-label,
+    .fi-select-input-option-group .fi-dropdown-header, .fi-ta-empty-state-description
+):not(.fi-color:not(.fi-color-gray), .fi-color:not(.fi-color-gray) *) {
+    color: var(--studio-muted-text-color);
+}
+
+html[data-studio-skin] :is(.fi-input, .fi-textarea, .fi-fo-textarea textarea)::placeholder {
+    color: var(--studio-muted-text-color);
+    opacity: 1;
+}
+
+/* FilePond's label colors are important declarations in Filament's components
+ * layer. Override them in that same layer; an unlayered important rule loses.
+ * Browse keeps its own primary color, and upload/error states are untouched. */
+@layer components {
+    html[data-studio-skin] .fi-fo-file-upload :is(.filepond--drop-label, .filepond--drop-label label) {
+        color: var(--studio-muted-text-color) !important;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Backdrop                                                            */
+/* ------------------------------------------------------------------ */
+
+html[data-studio-backdrop='image'] .fi-body,
+.fi-studio-mini-canvas[data-studio-backdrop='image'] {
+    background-image: var(--studio-backdrop-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* ------------------------------------------------------------------ */
+/* Soft                                                                */
+/* ------------------------------------------------------------------ */
+
+html[data-studio-skin='soft'] {
+    --studio-soft-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 14px 34px -16px rgb(0 0 0 / 0.2);
+}
+
+html[data-studio-skin='soft'].dark {
+    --studio-soft-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 14px 34px -16px rgb(0 0 0 / 0.7);
+}
+
+html[data-studio-skin='soft'] :is(
+    .fi-section:not(.fi-section-not-contained):not(.fi-aside),
+    .fi-ta-ctn,
+    .fi-wi-stats-overview-stat,
+    .fi-modal-window,
+    .fi-simple-main,
+    .fi-dropdown-panel
+) {
+    box-shadow: var(--studio-soft-shadow);
+}
+
+html[data-studio-skin='soft'] .fi-topbar {
+    box-shadow: 0 8px 24px -18px rgb(0 0 0 / 0.35);
+}
+
+html[data-studio-skin='soft'] .fi-input-wrp:not(.fi-disabled):not(.fi-invalid):not(:focus-within) {
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06);
+}
+
+html[data-studio-skin='soft'] .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background-color: color-mix(in oklab, var(--primary-500) 14%, transparent);
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Botón primario: tono 700 / hover 800 (OBS-001, contraste AA)        */
+/* ------------------------------------------------------------------ */
+
+/* No aplicar a ToggleButtons: en Filament 5 el modo no-required usa <button>, no <label>. */
+html[data-studio-skin] .fi-btn.fi-color:not(label):not(.fi-btn-group-btn):not(.fi-outlined):not(.fi-disabled):not(.fi-color-warning):not(.fi-color-gray) {
+    background-color: var(--color-700);
+    color: #fff;
+}
+
+html[data-studio-skin] .fi-btn.fi-color:not(label):not(.fi-btn-group-btn):not(.fi-outlined):not(.fi-disabled):not(.fi-color-warning):not(.fi-color-gray):hover {
+    background-color: var(--color-800);
+    color: #fff;
+}
+
+html[data-studio-skin] .fi-fo-toggle-buttons .fi-btn.fi-color {
+    background-color: var(--studio-surface, #fff);
+    color: var(--studio-text-color, inherit);
+    box-shadow: inset 0 0 0 1px var(--studio-border, var(--gray-200));
+}
+
+html[data-studio-skin] .fi-fo-toggle-buttons .fi-btn.fi-color[aria-pressed='true'],
+html[data-studio-skin] .fi-fo-toggle-buttons .fi-fo-toggle-buttons-input:checked + .fi-btn {
+    background: #eaf1ff;
+    color: #17449c;
+    box-shadow: inset 0 0 0 2px #4779ce;
+}
+
+html.dark[data-studio-skin] .fi-fo-toggle-buttons .fi-btn.fi-color {
+    background-color: var(--studio-surface, #122130);
+    color: var(--studio-text-color, #e8eef3);
+    box-shadow: inset 0 0 0 1px var(--studio-border, var(--gray-700));
+}
+
+html.dark[data-studio-skin] .fi-fo-toggle-buttons .fi-btn.fi-color[aria-pressed='true'],
+html.dark[data-studio-skin] .fi-fo-toggle-buttons .fi-fo-toggle-buttons-input:checked + .fi-btn {
+    background: #263c5f;
+    color: #e0ebff;
+    box-shadow: inset 0 0 0 2px #7ca5ec;
+}
+
+/* ------------------------------------------------------------------ */
+/* Lienzo unificado: sidebar = fondo (D1)                              */
+/* ------------------------------------------------------------------ */
+
+html[data-studio-skin] .fi-sidebar,
+html[data-studio-skin] .fi-sidebar-header {
+    background-color: var(--studio-background) !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Editor UI (live preview notice and contrast warnings)               */
+/* ------------------------------------------------------------------ */
+
+.fi-studio-preview {
+    display: grid;
+    row-gap: 0.5rem;
+}
+
+.fi-studio-notice,
+.fi-studio-warning {
+    display: flex;
+    align-items: flex-start;
+    column-gap: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.fi-studio-notice {
+    color: var(--gray-500);
+}
+
+.fi-studio-warning {
+    border-radius: var(--radius-lg);
+    padding: 0.5rem 0.75rem;
+    background-color: color-mix(in oklab, var(--warning-500) 12%, transparent);
+    color: var(--warning-700);
+}
+
+.dark .fi-studio-warning {
+    color: var(--warning-400);
+}
+
+/* Diagnostics change continuously during color drags. Their popup must not
+ * resize the editor and move the picker while the pointer is held down. */
+.fi-studio-checks {
+    position: relative;
+    justify-self: start;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.fi-studio-checks[open] {
+    z-index: 5;
+}
+
+.fi-studio-checks > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    list-style: none;
+    color: var(--gray-600);
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--gray-200);
+}
+
+.fi-studio-checks > summary::-webkit-details-marker {
+    display: none;
+}
+
+.fi-studio-checks > summary:focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+.fi-studio-checks-count {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.375rem;
+    font-variant-numeric: tabular-nums;
+    background: var(--gray-100);
+}
+
+.fi-studio-checks[data-has-warnings='true'] .fi-studio-checks-count {
+    color: var(--warning-700);
+    background: color-mix(in oklab, var(--warning-500) 18%, white);
+}
+
+.fi-studio-checks-panel {
+    position: absolute;
+    inset-inline-start: 0;
+    top: calc(100% + 0.5rem);
+    display: grid;
+    gap: 0.5rem;
+    width: min(24rem, calc(100vw - 3rem));
+    max-height: min(50vh, 20rem);
+    overflow-y: auto;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--gray-200), 0 12px 32px rgb(0 0 0 / 0.16);
+}
+
+.dark .fi-studio-checks > summary,
+.dark .fi-studio-checks-panel {
+    color: var(--gray-300);
+    background: var(--gray-900);
+    box-shadow: 0 0 0 1px var(--gray-700), 0 12px 32px rgb(0 0 0 / 0.16);
+}
+
+.dark .fi-studio-checks-count {
+    background: var(--gray-800);
+}
+
+.dark .fi-studio-checks[data-has-warnings='true'] .fi-studio-checks-count {
+    color: var(--warning-300);
+    background: color-mix(in oklab, var(--warning-500) 18%, var(--gray-900));
+}
+
+.fi-studio-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Appearance profiles                                                 */
+/* ------------------------------------------------------------------ */
+
+.fi-studio-profiles {
+    display: grid;
+    row-gap: 0.625rem;
+}
+
+.fi-studio-profiles-empty {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    text-align: center;
+    color: var(--gray-400);
+    border: 1px dashed color-mix(in oklab, var(--gray-500) 30%, transparent);
+    border-radius: var(--radius-md);
+}
+
+.fi-studio-profile-delete {
+    display: inline-flex;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    color: var(--gray-500);
+}
+
+.fi-studio-profile-delete:hover {
+    color: var(--danger-600);
+    background-color: color-mix(in oklab, var(--danger-500) 10%, transparent);
+}
+
+.fi-studio-profile-delete svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
+.fi-studio-profiles-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+}
+
+.fi-studio-profile-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+
+.fi-studio-profile {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
+    border-radius: var(--radius-lg);
+    padding: 0.25rem;
+    background-color: color-mix(in oklab, var(--gray-500) 6%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--gray-500) 18%, transparent);
+}
+
+.fi-studio-profile:hover {
+    box-shadow: 0 0 0 2px var(--primary-500);
+}
+
+.fi-studio-profile-apply {
+    display: grid;
+    row-gap: 0.25rem;
+    min-width: 9rem;
+    padding: 0.375rem 0.5rem;
+    text-align: start;
+}
+
+.fi-studio-profile-swatches {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.fi-studio-profile-swatch {
+    width: 0.875rem;
+    height: 0.875rem;
+    border-radius: 9999px;
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--gray-500) 30%, transparent);
+}
+
+.fi-studio-profile-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-950);
+}
+
+.dark .fi-studio-profile-name {
+    color: #fff;
+}
+
+.fi-studio-profile-meta {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+/* ------------------------------------------------------------------ */
+/* Mini dashboard preview (drawn with the theme being edited)          */
+/* ------------------------------------------------------------------ */
+
+/* Keep the editor legible while the page and the miniature show effects. */
+.fi-studio-editor-controls {
+    --studio-text-color: #172033;
+    --studio-muted-text-color: #526178;
+    --studio-surface: #fff;
+    --studio-input: #fff;
+    --studio-border: var(--gray-200);
+}
+
+.dark .fi-studio-editor-controls {
+    --studio-text-color: #fff;
+    --studio-muted-text-color: #a8b5c9;
+    --studio-surface: #18212f;
+    --studio-input: #18212f;
+    --studio-border: #364152;
+}
+
+html[data-studio-skin] .fi-studio-editor-controls .fi-section:not(.fi-section-not-contained),
+html[data-studio-skin] .fi-studio-profile-section {
+    isolation: auto;
+    background-color: var(--studio-surface);
+    box-shadow: 0 0 0 1px var(--studio-border);
+}
+
+html[data-studio-skin] .fi-studio-editor-controls .fi-section:not(.fi-section-not-contained)::before,
+html[data-studio-skin] .fi-studio-editor-controls .fi-section:not(.fi-section-not-contained)::after,
+html[data-studio-skin] .fi-studio-profile-section::before,
+html[data-studio-skin] .fi-studio-profile-section::after {
+    display: none;
+}
+
+html[data-studio-skin] .fi-studio-editor-controls .fi-input-wrp:not(.fi-disabled) {
+    background-color: var(--studio-input);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.fi-studio-backdrop-options label[for],
+.fi-studio-backdrop-presets label[for] {
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 5rem;
+}
+
+.fi-studio-backdrop-options label[for]::before,
+.fi-studio-backdrop-presets label[for]::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    background: var(--studio-background);
+}
+
+
+.fi-studio-backdrop-presets label[for$='-sunset']::before {
+    background: linear-gradient(135deg, #f4a76a, #9976d5);
+}
+
+.fi-studio-backdrop-presets label[for$='-gold']::before {
+    background: linear-gradient(135deg, #4f46e5, #f1d9bd);
+}
+
+.fi-studio-mini-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-950);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dark .fi-studio-mini-title {
+    color: #fff;
+}
+
+.fi-studio-mini {
+    display: grid;
+    row-gap: 0.5rem;
+}
+
+/* Pin the grid column, not the view inside its short component wrapper. */
+.fi-studio-editor-grid > .fi-sc > .fi-grid-col:has(.fi-studio-mini),
+.fi-studio-editor-grid > .fi-sc > .fi-grid-col:has(.fi-studio-preview-pane) {
+    position: sticky;
+    top: 5rem;
+    align-self: start;
+    z-index: 2;
+    padding: 0.75rem;
+    border-radius: 0.875rem;
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--gray-200);
+}
+
+.dark .fi-studio-editor-grid > .fi-sc > .fi-grid-col:has(.fi-studio-mini),
+.dark .fi-studio-editor-grid > .fi-sc > .fi-grid-col:has(.fi-studio-preview-pane) {
+    background: var(--gray-900);
+    box-shadow: 0 0 0 1px var(--gray-700);
+}
+
+@media (max-width: 63.999rem) {
+    .fi-studio-editor-grid > .fi-sc {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fi-studio-editor-grid > .fi-sc > .fi-grid-col {
+        width: 100%;
+    }
+
+    /* En pantallas angostas la vista previa va debajo de las pestañas (REV-T5). */
+    .fi-studio-editor-grid > .fi-sc > .fi-grid-col:has(.fi-studio-mini),
+    .fi-studio-editor-grid > .fi-sc > .fi-grid-col:has(.fi-studio-preview-pane) {
+        order: 2;
+        position: static;
+        top: auto;
+    }
+
+    .fi-studio-editor-grid > .fi-sc > .fi-grid-col:has(.fi-studio-editor-tabs) {
+        order: 1;
+    }
+
+    .fi-studio-mini,
+    .fi-studio-preview-pane {
+        max-width: 28rem;
+        margin-inline: auto;
+    }
+}
+
+.fi-studio-mini-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 2rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.fi-studio-mini-canvas {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    row-gap: 0.5rem;
+    padding: 0.625rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--gray-500) 25%, transparent);
+    transition: background-color 200ms ease;
+}
+
+.fi-studio-mini-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.fi-studio-mini-logo {
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    font-size: 0.625rem;
+}
+
+.fi-studio-mini-search {
+    width: 40%;
+    height: 0.875rem;
+    border-radius: 9999px;
+}
+
+.fi-studio-mini-body {
+    display: grid;
+    grid-template-columns: 34% minmax(0, 1fr);
+    gap: 0.5rem;
+}
+
+.fi-studio-mini-sidebar {
+    display: grid;
+    align-content: start;
+    row-gap: 0.25rem;
+    padding: 0.375rem;
+    border-radius: 0.5rem;
+    min-height: 9rem;
+}
+
+.fi-studio-mini-nav {
+    padding: 0.3rem 0.4rem;
+    border-radius: 0.375rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fi-studio-mini-main {
+    display: grid;
+    align-content: start;
+    row-gap: 0.5rem;
+}
+
+.fi-studio-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.fi-studio-mini-card {
+    display: grid;
+    row-gap: 0.3rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.fi-studio-mini-card strong {
+    font-size: 0.9375rem;
+}
+
+.fi-studio-mini-line {
+    height: 0.1875rem;
+    border-radius: 9999px;
+    opacity: 0.85;
+}
+
+.fi-studio-mini-field {
+    height: 1.125rem;
+    border-radius: 0.375rem;
+}
+
+.fi-studio-mini-button {
+    display: inline-block;
+    justify-self: start;
+    padding: 0.3rem 0.75rem;
+    border-radius: 0.375rem;
+    color: #fff;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* The editor has a quiet, stable frame; the preview carries the chosen look. */
+.fi-studio-editor-controls {
+    min-width: 0;
+}
+
+.fi-studio-editor-context .fi-section-header,
+.fi-studio-profile-section .fi-section-header {
+    align-items: center;
+}
+
+.fi-studio-fine-tuning {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--studio-border);
+}
+
+.fi-studio-skin-options label[for] {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 4.75rem;
+    padding: 0.5rem;
+}
+
+.fi-studio-skin-options label[for] > .fi-icon {
+    display: none;
+}
+
+.fi-studio-skin-options label[for]::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 2.5rem;
+    border-radius: 0.3rem;
+    background: linear-gradient(#e2e8f0, #e2e8f0) 0.4rem 0.4rem / calc(100% - 0.8rem) 0.3rem no-repeat,
+        linear-gradient(#e2e8f0, #e2e8f0) 0.4rem 1rem / 24% 1.1rem no-repeat,
+        linear-gradient(#dbeafe, #dbeafe) right 0.4rem top 1rem / 52% 1.1rem no-repeat, #f8fafc;
+    box-shadow: inset 0 0 0 1px #cbd5e1;
+}
+
+.fi-studio-skin-options label[for$='-glass']::before {
+    background: linear-gradient(#ffffffa8, #ffffffa8) 0.4rem 0.4rem / calc(100% - 0.8rem) 0.3rem no-repeat,
+        linear-gradient(#ffffff8f, #ffffff8f) 0.4rem 1rem / 24% 1.1rem no-repeat,
+        linear-gradient(#ffffff8f, #ffffff8f) right 0.4rem top 1rem / 52% 1.1rem no-repeat,
+        linear-gradient(135deg, #69aabf, #cad5e9, #c3a5bf);
+    box-shadow: inset 0 0 0 1px #ffffffb3;
+}
+
+.fi-studio-skin-options label[for$='-neon']::before {
+    background: linear-gradient(#65e1b7, #65e1b7) 0.4rem 0.4rem / calc(100% - 0.8rem) 0.2rem no-repeat,
+        linear-gradient(#244039, #244039) 0.4rem 1rem / 24% 1.1rem no-repeat,
+        linear-gradient(#295547, #295547) right 0.4rem top 1rem / 52% 1.1rem no-repeat, #132323;
+    box-shadow: inset 0 0 0 1px #65e1b7, inset 0 0 10px #65e1b755;
+}
+
+.fi-studio-skin-options label[for$='-soft']::before {
+    box-shadow: inset 0 0 0 1px #e2e8f0, 0 4px 6px -2px #64748b50;
+    border-radius: 0.6rem;
+}
+
+.fi-studio-skin-options label[for$='-minimal']::before {
+    background: linear-gradient(#cbd5e1, #cbd5e1) 0.4rem 0.7rem / calc(100% - 0.8rem) 1px no-repeat,
+        linear-gradient(#e2e8f0, #e2e8f0) 0.4rem 1.1rem / 1px 1rem no-repeat,
+        linear-gradient(#cbd5e1, #cbd5e1) right 0.4rem top 1.1rem / 52% 1px no-repeat, #fff;
+    border-radius: 0;
+}
+
+.fi-studio-profile-palette-groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 0.375rem;
+}
+
+.fi-studio-profile-palette {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 4rem;
+}
+
+.fi-studio-profile-name {
+    overflow-wrap: anywhere;
+}
+
+.fi-studio-profile-apply {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 0.75rem;
+    min-width: 12rem;
+}
+
+.fi-studio-profile-palette-groups {
+    grid-column: 1 / -1;
+}
+
+.fi-studio-profile-section .fi-studio-profile-meta {
+    color: var(--studio-muted-text-color);
+}
+
+html[data-studio-skin] .fi-studio-editor-controls .fi-btn.fi-color:not(.fi-outlined):not(.fi-disabled),
+html[data-studio-skin] .fi-studio-preview-actions .fi-btn.fi-color:not(.fi-outlined):not(.fi-disabled) {
+    box-shadow: none;
+}
+
+html[data-studio-skin] .fi-studio-editor-controls .fi-fo-toggle-buttons .fi-btn,
+html[data-studio-skin] .fi-studio-editor-controls .fi-fo-toggle-buttons-input + .fi-btn {
+    background: var(--studio-surface);
+    color: var(--studio-text-color);
+    box-shadow: inset 0 0 0 1px var(--studio-border);
+}
+
+html[data-studio-skin] .fi-studio-editor-controls .fi-fo-toggle-buttons .fi-btn[aria-pressed='true'],
+html[data-studio-skin] .fi-studio-editor-controls .fi-fo-toggle-buttons-input:checked + .fi-btn {
+    background: #eaf1ff;
+    color: #17449c;
+    box-shadow: inset 0 0 0 2px #4779ce;
+}
+
+html.dark[data-studio-skin] .fi-studio-editor-controls .fi-fo-toggle-buttons .fi-btn[aria-pressed='true'],
+html.dark[data-studio-skin] .fi-studio-editor-controls .fi-fo-toggle-buttons-input:checked + .fi-btn {
+    background: #263c5f;
+    color: #e0ebff;
+    box-shadow: inset 0 0 0 2px #7ca5ec;
+}
+
+html[data-studio-skin] .fi-studio-editor-controls .fi-fo-toggle-buttons .fi-btn:focus-visible,
+html[data-studio-skin] .fi-studio-editor-controls .fi-fo-toggle-buttons-input:focus-visible + .fi-btn {
+    outline: 2px solid #4779ce;
+    outline-offset: 3px;
+}
+
+html[data-studio-skin] .fi-studio-preview-actions .fi-btn.fi-color {
+    background: #2458ae;
+    color: #fff;
+}
+
+html[data-studio-skin] .fi-studio-preview-actions .fi-btn.fi-color:hover {
+    background: #1c4790;
+}
+
+.dark .fi-studio-mini .fi-studio-profile-meta {
+    color: #a8b5c9;
+}
+
+.fi-studio-profile-apply:focus-visible,
+.fi-studio-mini-head:focus-visible {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 3px;
+    border-radius: 0.375rem;
+}
+
+.fi-studio-mini-head::-webkit-details-marker {
+    display: none;
+}
+
+.fi-studio-mini-head .fi-studio-profile-meta {
+    margin-inline-start: auto;
+}
+
+.fi-studio-mini-toggle-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: #64748b;
+}
+
+.fi-studio-mini-details[open] .fi-studio-mini-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.fi-studio-mini-content {
+    padding-top: 0.75rem;
+}
+
+.fi-studio-preview-actions {
+    display: grid;
+    gap: 0.5rem;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 0.875rem;
+    margin-top: 0.375rem;
+}
+
+.dark .fi-studio-preview-actions {
+    border-color: #364152;
+}
+
+.fi-studio-preview-save-note {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: #526178;
+    text-align: center;
+}
+
+.dark .fi-studio-preview-save-note {
+    color: #a8b5c9;
+}
+
+@media (max-width: 639px) {
+    .fi-studio-editor-grid > .fi-sc > .fi-grid-col:has(.fi-studio-mini) {
+        top: 4rem;
+        padding: 0.625rem;
+    }
+
+    .fi-studio-profile-section .fi-section-header {
+        flex-wrap: wrap;
+    }
+
+    .fi-studio-profile-list {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0.25rem;
+        scroll-snap-type: inline proximity;
+    }
+
+    .fi-studio-profile {
+        flex-shrink: 0;
+        scroll-snap-align: start;
+    }
+
+    .fi-studio-profile-apply {
+        min-width: 8rem;
+        max-width: 12rem;
+    }
+
+    .fi-studio-skin-options label[for],
+    .fi-studio-backdrop-options label[for],
+    .fi-studio-backdrop-presets label[for] {
+        min-width: 4.25rem;
+    }
+}
+
+/* —— T5: barra de guardar, pestañas, tarjetas de tema, vista previa —— */
+
+.fi-studio-save-bar.fi-sc-actions,
+.fi-studio-save-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem 1.25rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.875rem;
+    background: color-mix(in oklab, var(--studio-surface, #fff) 92%, transparent);
+    box-shadow: 0 0 0 1px var(--studio-border, var(--gray-200));
+}
+
+.dark .fi-studio-save-bar.fi-sc-actions,
+.dark .fi-studio-save-bar {
+    background: color-mix(in oklab, var(--studio-surface, #122130) 92%, transparent);
+    box-shadow: 0 0 0 1px var(--studio-border, var(--gray-700));
+}
+
+.fi-studio-save-bar > .fi-ac {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.fi-studio-save-bar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.fi-studio-save-bar__hint {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--studio-muted-text-color, var(--gray-500));
+}
+
+@media (max-width: 48rem) {
+    .fi-studio-save-bar.fi-sc-actions,
+    .fi-studio-save-bar {
+        position: sticky;
+        bottom: 0.75rem;
+        z-index: 30;
+        order: 99;
+    }
+}
+
+.fi-studio-editor-tabs .fi-tabs-header {
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.fi-studio-theme-cards__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.fi-studio-theme-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.75rem;
+    text-align: start;
+    border-radius: 0.875rem;
+    border: 1px solid var(--studio-border, var(--gray-200));
+    background: var(--studio-surface, #fff);
+    color: inherit;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.dark .fi-studio-theme-card {
+    border-color: var(--studio-border, var(--gray-700));
+    background: var(--studio-surface, #122130);
+}
+
+.fi-studio-theme-card:hover {
+    box-shadow: 0 8px 20px -14px rgb(0 0 0 / 0.35);
+}
+
+.fi-studio-theme-card--selected,
+.fi-studio-theme-card[aria-pressed='true'] {
+    border-color: color-mix(in oklab, var(--primary-600, #003973) 70%, var(--studio-border, #D3DDE6));
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary-600, #003973) 55%, transparent);
+}
+
+.fi-studio-theme-card__previews {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+}
+
+.fi-studio-theme-card__mini {
+    position: relative;
+    height: 3.25rem;
+    border-radius: 0.4rem;
+    overflow: hidden;
+}
+
+.fi-studio-theme-card__mini-sidebar {
+    position: absolute;
+    inset-block: 0.35rem;
+    inset-inline-start: 0.3rem;
+    width: 0.55rem;
+    border-inline-start: 2px solid;
+    border-radius: 0.15rem;
+}
+
+.fi-studio-theme-card__mini-card {
+    position: absolute;
+    inset: 0.45rem 0.35rem 0.45rem 1.1rem;
+    border-radius: 0.25rem;
+}
+
+.fi-studio-theme-card__mini-dot {
+    position: absolute;
+    inset-block-end: 0.45rem;
+    inset-inline-end: 0.45rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+}
+
+.fi-studio-theme-card__title {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.fi-studio-theme-card__description {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--studio-muted-text-color, var(--gray-500));
+}
+
+.fi-studio-theme-card__swatches {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 0.4rem;
+}
+
+.fi-studio-theme-card__swatch {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 999px;
+}
+
+.fi-studio-theme-card__badge {
+    position: absolute;
+    inset-block-start: 0.45rem;
+    inset-inline-end: 0.45rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--primary-600, #003973);
+}
+
+.fi-studio-color-row {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.fi-studio-color-row__warning {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--danger-600, #e11d48);
+}
+
+.fi-studio-preview-pane {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.fi-studio-preview-pane__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fi-studio-preview-pane__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.fi-studio-preview-pane__pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.fi-studio-preview-pane__mode-label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--studio-muted-text-color, var(--gray-500));
+}
+
+.fi-studio-preview-pane .fi-studio-mini-canvas {
+    min-height: 9.5rem;
+    border-radius: 0.65rem;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px var(--studio-border, var(--gray-200));
+}
+
+.fi-studio-preview-pane .fi-studio-mini-body {
+    min-height: 6.5rem;
+}
+
+.fi-studio-preview-pane .fi-studio-mini-nav {
+    font-size: 0.55rem;
+}
+
+.fi-studio-preview-pane .fi-studio-mini-label,
+.fi-studio-preview-pane .fi-studio-mini-button {
+    font-size: 0.55rem;
+}
+
+@media (max-width: 63.999rem) {
+    .fi-studio-preview-pane__pair {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* —— T6.1: badges, placeholders, placa de logo (REV-T6 / OBS-005) —— */
+
+.fi-ta-text-item:has(> .fi-icon),
+.fi-in-text-item:has(> .fi-icon) {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.fi-ta-text.fi-ta-text-has-badges > .fi-badge,
+.fi-in-text.fi-in-text-has-badges > .fi-badge {
+    width: fit-content;
+    max-width: 100%;
+}
+
+.fi-in-placeholder,
+.fi-ta-placeholder {
+    color: var(--studio-muted-text-color);
+}
+
+html.dark[data-studio-skin][data-studio-logo-plate='1'] .fi-logo {
+    background-color: #fff;
+    padding: 0.35rem 0.55rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08);
+}

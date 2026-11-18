@@ -33,7 +33,7 @@ class AppearanceSetting extends Model implements HasMedia
     public static function actual(): self
     {
         return static::query()->first() ?? new static([
-            'tema' => config('tema.tema_por_defecto'),
+            'tema' => 'safi',
         ]);
     }
 

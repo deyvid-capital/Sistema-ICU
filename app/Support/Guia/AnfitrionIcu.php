@@ -5,10 +5,9 @@ namespace App\Support\Guia;
 use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Notifications\CriticalEventNotification;
 use App\Services\Archivos\ArchivosService;
-use App\Services\Configuracion\TemaService;
-use Filament\Enums\UserMenuPosition;
+use CapitalSafi\Apariencia\AparienciaPlugin;
+use CapitalSafi\Apariencia\Support\StudioBrand;
 use Filament\Facades\Filament;
-use Filament\FontProviders\LocalFontProvider;
 use Filament\Panel;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
@@ -17,7 +16,7 @@ use SistemaIcu\Documentacion\Contracts\Anfitrion;
 
 /**
  * Conecta la guía de usuario (paquete documentacion-sistema-icu) con el
- * Sistema ICU: le da el mismo tema, logo, colores y 2FA que el panel admin,
+ * Sistema ICU: le da la misma apariencia (plugin en solo lectura) y 2FA que el panel admin,
  * el disco confidencial para sus PDF y los avisos por la campana.
  *
  * Es el único código de la guía que vive en el sistema, junto con
@@ -26,28 +25,28 @@ use SistemaIcu\Documentacion\Contracts\Anfitrion;
 class AnfitrionIcu implements Anfitrion
 {
     public function __construct(
-        private TemaService $tema,
         private ArchivosService $archivos,
     ) {}
 
+    /**
+     * La apariencia (colores, logos, favicon, fuente) la pone el plugin en modo
+     * solo lectura: la edición vive únicamente en el panel admin.
+     */
     public function personalizarPanel(Panel $panel): Panel
     {
         return $panel
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->brandLogo(fn (): ?string => $this->tema->logoClaro())
-            ->darkModeBrandLogo(fn (): ?string => $this->tema->logoOscuro())
-            ->brandLogoHeight(fn (): string => $this->tema->altoLogo())
-            ->favicon(fn (): ?string => $this->tema->favicon())
-            ->colors(fn (): array => $this->tema->coloresDelPanel())
-            ->font('Lato', provider: LocalFontProvider::class)
-            ->userMenu(position: UserMenuPosition::Sidebar)
+            ->brandLogo(fn (): string => asset('images/Capital-Safi-SA-logo-.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(fn (): string => asset('favicon.ico'))
+            ->plugin(
+                AparienciaPlugin::make()
+                    ->settingsPage(false)
+                    ->personalAppearance(false),
+            )
             ->renderHook(
                 PanelsRenderHook::STYLES_BEFORE,
                 fn (): View => view('filament.fonts'),
-            )
-            ->renderHook(
-                PanelsRenderHook::STYLES_AFTER,
-                fn (): View => view('filament.configuracion.estilos', $this->tema->variablesCss()),
             )
             ->authMiddleware([
                 EnsureTwoFactorWhenRequired::class,
@@ -66,7 +65,7 @@ class AnfitrionIcu implements Anfitrion
 
     public function logoParaPdf(): ?string
     {
-        return public_path('images/Capital-Safi-SA-logo-.png');
+        return StudioBrand::logoPath() ?? public_path('images/Capital-Safi-SA-logo-.png');
     }
 
     public function avisar(User $usuario, string $titulo, string $cuerpo, ?string $url = null, bool $exito = true): void
