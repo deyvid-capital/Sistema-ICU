@@ -97,7 +97,7 @@
     "prefer-stable": true,
     "repositories": [
         {
-            "name": "apariencia",
+            "name": "capitalsafi-filament-apariencia",
             "type": "path",
             "url": "packages/capitalsafi/filament-apariencia",
             "options": {
@@ -105,9 +105,12 @@
             }
         },
         {
-            "name": "documentacion-sistema-icu",
+            "name": "capitalsafi-documentacion-sistema-icu",
             "type": "path",
-            "url": "packages/*"
+            "url": "packages/capitalsafi/documentacion-sistema-icu",
+            "options": {
+                "symlink": true
+            }
         }
     ]
 }

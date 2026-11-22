@@ -1,30 +1,47 @@
 ---
 name: plugin-apariencia
-description: "Plugin de apariencia (capitalsafi/filament-apariencia) en packages/capitalsafi/: fork de filamizer, temas SAFI, decisiones del usuario, roles y estado"
+description: "Plugin de apariencia (capitalsafi/filament-apariencia) en packages/capitalsafi/: temas SAFI, instalación path/vcs, API StudioBrand, roles y trampas"
 metadata:
   type: project
 ---
 
-El panel usa el plugin propio **`capitalsafi/filament-apariencia`** (fork de `filamizer/filamizer`, MIT), en `packages/capitalsafi/filament-apariencia/` con git propio. Remoto: `https://github.com/deyvid-capital/filament-apariencia.git`; `upstream` (filamizer) solo para traer mejoras, con el push bloqueado (`NO_PUSH`). Se instala por repositorio `path` (symlink, `@dev`). Rutas `/admin/apariencia` (solo `super_admin`) y `/admin/mi-apariencia`.
+El panel usa el plugin propio **`capitalsafi/filament-apariencia`** (MIT; atribución al autor original), en `packages/capitalsafi/filament-apariencia/` con git propio. Remoto: `https://github.com/deyvid-capital/filament-apariencia.git`. En Sistema ICU se instala por repositorio `path` (symlink, `@dev`) bajo `packages/capitalsafi/`. En producción: `vcs` + tag (`^1.0`). Namespace: `CapitalSafi\Apariencia\`.
 
-Estado al 2026-11-15: PLAN-001 cerrado (T1–T7). Falta el tag `v1.0.0` y pasar la app de `path` a `vcs` con versión fija antes de producción. Detalle en `.agente/` (especificación, CAMBIOS, planes) y `.avance/` (tablero, revisiones `REV-*`, observaciones `OBS-*`) del paquete: leerlos primero.
+Estado (README + CHANGELOG, 2026-11): hay tag **`v1.1.0`**. En la app ya se retiraron «Tema y colores» y «Marca e identidad»; el control lo toma el plugin. Rutas: `/admin/apariencia` (global, con `canCustomize`) y `/admin/mi-apariencia` (personal). Detalle de planes/revisiones en `.agente/` y `.avance/` del paquete.
 
-Decisiones del usuario (vigentes):
-- Sidebar **siempre** del color del fondo (lienzo `#F4F7FA` / `#0B1620`).
-- Solo estilos Clásico y Suave; sin presets genéricos ni organizador del sidebar.
-- 6 temas SAFI (safi por defecto, confianza, cielo, turquesa, naturaleza, neutro); cada uno rellena claro y oscuro.
+## Instalación (resumen del README)
+
+- Path (dev): `packages/capitalsafi/filament-apariencia` + `@dev` + `symlink: true`.
+- VCS (prod): GitHub + versión por tags.
+- Tras instalar: `php artisan apariencia:install --migrate` y `storage:link`.
+- Requisitos: Filament 5, `spatie/laravel-settings` (tabla `settings`), disco público.
+
+## Registro en paneles
+
+- Admin: `AparienciaPlugin::make()->canCustomize(fn => auth()->user()?->hasRole(super_admin))` en `AdminPanelProvider` (obligatorio `canCustomize` o nadie edita lo global).
+- Guía / solo lectura: `->settingsPage(false)->personalAppearance(false)` (hereda marca/colores sin editor). Ver `AnfitrionIcu`.
+- API de marca: `CapitalSafi\Apariencia\Support\StudioBrand` (`logoUrl`, `logoPath`, `logoHeight`, `faviconUrl`, `touchIconUrl`).
+
+Opciones: `settingsPage` (default true), `settingsNavigation` (false), `personalAppearance` (true). El plugin toma colores, fuente, modo oscuro, topbar, menú de usuario, sidebar, logos y favicon; lo del panel queda de **respaldo**.
+
+## Qué hace (producto)
+
+- 6 temas SAFI (claro+oscuro de un clic); estilos **Clásico** / **Suave**; fondos sólido o imagen.
 - Editor en pestañas: Tema · Colores · Texto y diseño · Marca · Perfiles.
-- Lato embebida por defecto; Google Fonts como opción.
-- La marca (favicon, logos) debe centralizarse en el plugin y retirarse «Tema y colores» y «Marca e identidad» de la app (plan en curso, PLAN-002).
+- Lato local embebida (default); Google Fonts opcionales (CSP: fonts.googleapis.com / gstatic).
+- Marca: logos WebP ≤1024, alto 1–6 rem/em o 16–96 px, placa detrás del logo, favicon PNG/WebP ≥180 (genera 32 + apple-touch 180; **sin SVG/ICO**).
+- Sidebar al color del fondo; íconos e ítem activo configurables.
+- Perfiles: no guardan marca (logos/favicon/barra); los del admin son compartidos.
+- Imágenes: `StudioImageProcessor` (tipo por contenido, megapíxeles, recodifica, limpia al reemplazar/quitar/restablecer). Comando `apariencia:limpiar`.
+- Datos: `settings` grupo `studio`; tablas `studio_user_preferences`, `studio_profiles` (nombres conservados a propósito).
 
-Roles: el usuario y otro IDE implementan; Claude Code revisa (tests, diffs, capturas Puppeteer en `storage/app/ui-shots/`), escribe `REV-*`/`OBS-*` y actualiza `.avance/AVANCE.md` y `.agente/CAMBIOS.md`.
+## Trampas
 
-Trampas conocidas:
-- `@js()` dentro de atributos de una etiqueta `<x-componente>` no se compila: poner los `x-bind` en la vista del propio componente.
-- La vista previa en vivo debe generar la escala 50–950 igual que `Color::generatePalette()` (OKLCH, solo el tono), no mezclando con negro.
-- Tras cambiar `resources/dist/*.css` del paquete: `sail artisan filament:assets` (copia a `public/css/capitalsafi/`; no editar esa copia).
-- Tests del paquete: `sail exec -w /var/www/html/packages/capitalsafi/filament-apariencia laravel.test vendor/bin/phpunit`.
+- Tras cambiar CSS del paquete: `sail artisan filament:assets` (copia a `public/css/capitalsafi/`; no editar esa copia).
+- Tests del paquete: `composer test` dentro del paquete, o `sail exec -w /var/www/html/packages/capitalsafi/filament-apariencia laravel.test vendor/bin/phpunit`.
+- Config publicada (`apariencia-config`) se congela: al actualizar, comparar claves nuevas.
+- Cambios de apariencia van en el **paquete**, no en `theme.css` ni en un `TemaService` de la app.
 
-**Why:** el usuario separó la apariencia en un plugin propio para no mezclar código con la app y poder actualizarlo con Composer.
+**Why:** apariencia separada del núcleo ICU para versionar y desplegar con Composer.
 
-**How to apply:** los cambios de apariencia se hacen en el paquete, no en `theme.css` ni en `TemaService`. Relacionado: [[guia-usuario-avance]], [[memoria-y-skills-en-el-repo]], [[use-pnpm-not-npm]].
+**How to apply:** leer primero el README del paquete; tocar código en `packages/capitalsafi/filament-apariencia/`. Relacionado: [[guia-usuario-avance]], [[use-pnpm-not-npm]].
