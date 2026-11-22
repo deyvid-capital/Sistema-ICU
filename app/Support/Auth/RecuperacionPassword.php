@@ -9,7 +9,7 @@ use App\Notifications\CodigoRecuperacionPassword;
 use App\Notifications\CriticalEventNotification;
 use App\Support\Auditoria\AuditorSeguridad;
 use App\Support\Notifications\NotifyAdmins;
-use App\Support\Sessions\UserSessions;
+use CapitalSafi\Breezy\Support\UserSessions;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Carbon;
@@ -133,7 +133,7 @@ class RecuperacionPassword
         ])->save();
 
         $usuario->desbloquear();
-        UserSessions::terminate($usuario);
+        UserSessions::for($usuario)->terminate();
         $desafio->delete();
 
         event(new PasswordReset($usuario));

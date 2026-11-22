@@ -2,15 +2,15 @@
 
 namespace Tests\Feature\Filament;
 
-use App\Livewire\Profile\PersonalInfo;
-use App\Livewire\Profile\TwoFactorAuthentication;
-use App\Livewire\Profile\UpdatePassword;
 use App\Models\User;
+use CapitalSafi\Breezy\Livewire\BrowserSessions;
+use CapitalSafi\Breezy\Livewire\PersonalInfo;
+use CapitalSafi\Breezy\Livewire\TwoFactorAuthentication;
+use CapitalSafi\Breezy\Livewire\UpdatePassword;
+use CapitalSafi\Breezy\Pages\MyProfilePage;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Jeffgreco13\FilamentBreezy\Livewire\BrowserSessions;
-use Jeffgreco13\FilamentBreezy\Pages\MyProfilePage;
 use Livewire\Livewire;
 use Tests\TestCase;
 

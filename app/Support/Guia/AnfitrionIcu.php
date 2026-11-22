@@ -2,11 +2,11 @@
 
 namespace App\Support\Guia;
 
-use App\Http\Middleware\EnsureTwoFactorWhenRequired;
 use App\Notifications\CriticalEventNotification;
 use App\Services\Archivos\ArchivosService;
 use CapitalSafi\Apariencia\AparienciaPlugin;
 use CapitalSafi\Apariencia\Support\StudioBrand;
+use CapitalSafi\Breezy\Middleware\RequireTwoFactorSetup;
 use Filament\Facades\Filament;
 use Filament\Panel;
 use Filament\View\PanelsRenderHook;
@@ -48,8 +48,9 @@ class AnfitrionIcu implements Anfitrion
                 PanelsRenderHook::STYLES_BEFORE,
                 fn (): View => view('filament.fonts'),
             )
+            // La guía no tiene Breezy: exige el 2FA obligatorio y manda al asistente del panel admin.
             ->authMiddleware([
-                EnsureTwoFactorWhenRequired::class,
+                RequireTwoFactorSetup::class.':admin',
             ]);
     }
 

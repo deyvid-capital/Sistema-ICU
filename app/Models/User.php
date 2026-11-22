@@ -8,7 +8,9 @@ use App\Models\Concerns\CascadesDependentSoftDeletes;
 use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\MemoizesPermissionChecks;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
-use App\Support\Sessions\UserSessions;
+use CapitalSafi\Breezy\Contracts\TwoFactorAuthenticatable as TwoFactorAuthenticatableContract;
+use CapitalSafi\Breezy\Support\UserSessions;
+use CapitalSafi\Breezy\Traits\TwoFactorAuthenticatable;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -23,14 +25,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Concerns\CausesActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['id', 'name', 'nombres', 'apellidos', 'carnet', 'id_area', 'id_cargo', 'email', 'telefono', 'password', 'email_verified_at', 'acceso_habilitado', 'acceso_expira_at', 'requiere_2fa'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, TwoFactorAuthenticatableContract
 {
     /** @use HasFactory<UserFactory> */
     use CascadesDependentSoftDeletes,
@@ -189,7 +190,7 @@ class User extends Authenticatable implements FilamentUser
 
         if ($this->intentos_fallidos >= (int) config('acceso.max_intentos_fallidos', 5) && ! $this->estaBloqueado()) {
             $this->forceFill(['bloqueado_at' => now()])->save();
-            UserSessions::terminate($this);
+            UserSessions::for($this)->terminate();
         }
     }
 
@@ -426,46 +427,6 @@ class User extends Authenticatable implements FilamentUser
             ->where('tipo_evento', $tipoEvento)
             ->where('canal', $canal)
             ->value('habilitado') ?? true;
-    }
-
-    /**
-     * Activa TOTP sin generar ni guardar códigos de recuperación.
-     */
-    public function enableTwoFactorAuthentication(): void
-    {
-        $twoFactorData = [
-            'two_factor_secret' => filament('filament-breezy')->getEngine()->generateSecretKey(),
-            'two_factor_recovery_codes' => null,
-        ];
-
-        if ($this->breezySession) {
-            $this->disableTwoFactorAuthentication();
-        }
-
-        $this->breezySessions()->create($twoFactorData);
-        $this->load(['breezySessions', 'breezySession']);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public function generateRecoveryCodes(): array
-    {
-        return [];
-    }
-
-    public function reGenerateRecoveryCodes(): void
-    {
-        $this->breezySession?->forceFill([
-            'two_factor_recovery_codes' => null,
-        ])->save();
-    }
-
-    public function destroyRecoveryCode(string $recoveryCode): void
-    {
-        $this->breezySession?->forceFill([
-            'two_factor_recovery_codes' => null,
-        ])->save();
     }
 
     /**

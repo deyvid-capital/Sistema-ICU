@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Filament\Pages\Auth\SetupTwoFactor;
-use App\Filament\Pages\Auth\TwoFactorChallenge;
-use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Models\User;
+use CapitalSafi\Breezy\Livewire\TwoFactorAuthentication;
+use CapitalSafi\Breezy\Pages\SetupTwoFactorPage;
+use CapitalSafi\Breezy\Pages\TwoFactorPage;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +57,7 @@ class TwoFactorRecoveryCodesDisabledTest extends TestCase
         $user = User::factory()->conRol()->create(['requiere_2fa' => true]);
         $this->actingAs($user);
 
-        Livewire::test(SetupTwoFactor::class)
+        Livewire::test(SetupTwoFactorPage::class)
             ->assertDontSee('códigos de recuperación')
             ->call('empezar')
             ->assertSet('step', 'setup')
@@ -102,7 +102,7 @@ class TwoFactorRecoveryCodesDisabledTest extends TestCase
             ->assertSuccessful()
             ->assertDontSee(__('filament-breezy::default.two_factor.recovery_code_link'));
 
-        Livewire::test(TwoFactorChallenge::class)
+        Livewire::test(TwoFactorPage::class)
             ->set('usingRecoveryCode', true)
             ->assertSet('usingRecoveryCode', false)
             ->set('data.code', 'aaaaaa-bbbbbb')

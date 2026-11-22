@@ -9,7 +9,7 @@ use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Support\Seguridad\ProteccionSuperAdmin;
-use App\Support\Sessions\UserSessions;
+use CapitalSafi\Breezy\Support\UserSessions;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
@@ -250,7 +250,7 @@ class UsersTable
                             $record->forceFill(['acceso_habilitado' => ! $record->acceso_habilitado])->save();
 
                             if (! $record->acceso_habilitado) {
-                                UserSessions::terminate($record);
+                                UserSessions::for($record)->terminate();
                             }
 
                             Notification::make()->success()->title('Acceso actualizado')->send();
@@ -308,7 +308,7 @@ class UsersTable
                         ->action(function (Collection $records): void {
                             $records->each(function (User $user): void {
                                 $user->forceFill(['acceso_habilitado' => false])->save();
-                                UserSessions::terminate($user);
+                                UserSessions::for($user)->terminate();
                             });
 
                             Notification::make()->success()->title('Acceso deshabilitado a los seleccionados')->send();
@@ -321,7 +321,7 @@ class UsersTable
                         ->requiresConfirmation()
                         ->visible(fn (): bool => $puedeGestionarSeguridad)
                         ->action(function (Collection $records): void {
-                            $records->each(fn (User $user): int => UserSessions::terminate($user));
+                            $records->each(fn (User $user): int => UserSessions::for($user)->terminate());
 
                             Notification::make()->success()->title('Sesiones cerradas para los seleccionados')->send();
                         })

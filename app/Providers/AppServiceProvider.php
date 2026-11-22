@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Filament\Pages\Auth\TwoFactorChallenge;
-use App\Livewire\Profile\TwoFactorAuthentication;
 use App\Media\IcuPathGenerator;
 use App\Models\AsigCelular;
 use App\Models\AsignacionCargador;
@@ -19,7 +17,6 @@ use App\Models\User;
 use App\Observers\AsigCelularObserver;
 use App\Observers\AsignacionCargadorObserver;
 use App\Observers\AsignacionEquipoObserver;
-use App\Observers\BreezySessionObserver;
 use App\Observers\CargadorObserver;
 use App\Observers\EquipoObserver;
 use App\Observers\MailSettingObserver;
@@ -39,8 +36,6 @@ use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Jeffgreco13\FilamentBreezy\Models\BreezySession;
-use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 
 class AppServiceProvider extends ServiceProvider
@@ -72,7 +67,6 @@ class AppServiceProvider extends ServiceProvider
 
         MediaSetting::observe(MediaSettingObserver::class);
         MailSetting::observe(MailSettingObserver::class);
-        BreezySession::observe(BreezySessionObserver::class);
         AsignacionEquipo::observe(AsignacionEquipoObserver::class);
         AsignacionCargador::observe(AsignacionCargadorObserver::class);
         AsigCelular::observe(AsigCelularObserver::class);
@@ -86,9 +80,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->booted(function (): void {
             app(MailConfigService::class)->aplicar();
         });
-
-        Livewire::component('two-factor-page', TwoFactorChallenge::class);
-        Livewire::component('two_factor_authentication', TwoFactorAuthentication::class);
 
         // Los listeners de app/Listeners los descubre Laravel por el tipo del
         // argumento de handle(). Registrarlos aquí además los duplicaría.

@@ -16,21 +16,19 @@ use App\Filament\Clusters\Usuarios\UsuariosCluster;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\RequestPasswordReset;
 use App\Filament\Pages\Auth\ResetPassword;
-use App\Filament\Pages\Auth\SetupTwoFactor;
-use App\Filament\Pages\Auth\TwoFactorChallenge;
 use App\Filament\Pages\MiFirmaDigital;
 use App\Filament\Resources\Activitylogs\ActivitylogResource;
 use App\Filament\Resources\CertificadosFirma\CertificadoFirmaResource;
 use App\Filament\Resources\Roles\RoleResource;
-use App\Http\Middleware\EnsureTwoFactorWhenRequired;
-use App\Livewire\Profile\PersonalInfo;
-use App\Livewire\Profile\TwoFactorAuthentication;
-use App\Livewire\Profile\UpdatePassword as ProfileUpdatePassword;
+use App\Models\User;
+use App\Services\Firma\RecifrarCertificadoFirma;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use CapitalSafi\Apariencia\AparienciaPlugin;
+use CapitalSafi\Breezy\BreezyPlugin;
 use Filament\Actions\Action;
 use Filament\Enums\UserMenuPosition;
 use Filament\FontProviders\LocalFontProvider;
+use Filament\Forms\Components\TextInput;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -49,11 +47,8 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Jeffgreco13\FilamentBreezy\BreezyCore;
 use Rmsramos\Activitylog\ActivitylogPlugin;
 use SistemaIcu\Documentacion\Filament\Pages\Inicio as GuiaInicio;
 
@@ -120,10 +115,6 @@ class AdminPanelProvider extends PanelProvider
 
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class, ResetPassword::class)
-            ->authenticatedRoutes(function (): void {
-                Route::get('/configurar-2fa', SetupTwoFactor::class)
-                    ->name('auth.setup-two-factor');
-            })
             ->font('Lato', provider: LocalFontProvider::class)
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->globalSearchFieldSuffix(fn (): ?string => match (Platform::detect()) {
@@ -197,34 +188,84 @@ class AdminPanelProvider extends PanelProvider
                         ? __('activity.keys.'.$label)
                         : Str::headline(str_replace('_', ' ', $label)))
                     ->authorize(fn (): bool => (bool) auth()->user()?->can('ViewAny:Activity')),
-                BreezyCore::make()
-                    ->myProfile(
-                        shouldRegisterUserMenu: true,
-                        userMenuLabel: 'Mi perfil',
-                        shouldRegisterNavigation: false,
-                        navigationGroup: 'Configuración',
-                        hasAvatars: false,
-                        slug: 'mi-perfil'
+                // Perfil, 2FA y sesiones: preset de Capital SAFI + lo propio del ICU.
+                // La ruta /configurar-2fa y el middleware del 2FA obligatorio los registra el plugin.
+                BreezyPlugin::capitalSafi()
+                    ->personalInfo(
+                        fields: fn (User $user): array => self::camposInformacionPersonal($user),
+                        readOnly: ['carnet', 'email'],
+                        saveUsing: function (User $user, array $data): void {
+                            $data['name'] = trim(implode(' ', array_filter(
+                                [$data['nombres'] ?? null, $data['apellidos'] ?? null],
+                                fn (?string $valor): bool => filled($valor),
+                            )));
+
+                            $user->update($data);
+                        },
+                        heading: 'Información personal',
+                        description: 'Correo y carnet no se editan aquí.',
                     )
-                    ->passwordUpdateRules(
-                        rules: [Password::default()],
-                        requiresCurrentPassword: true,
+                    ->password(
+                        // Vuelve a cifrar la contraseña del certificado .p12 en la misma transacción,
+                        // para que la firma digital siga activa.
+                        afterChange: fn (User $user, string $currentPassword, string $newPassword, string $newHash) => app(RecifrarCertificadoFirma::class)($user, $currentPassword, $newPassword, $newHash),
+                        heading: 'Contraseña',
+                        description: 'Mínimo 8 caracteres, con mayúsculas, minúsculas y un número.',
                     )
-                    ->enableTwoFactorAuthentication(
-                        force: false,
-                        action: TwoFactorChallenge::class,
-                        scopeToPanel: true,
+                    ->twoFactor(
+                        required: fn (User $user): bool => (bool) $user->requiere_2fa,
+                        // El resto lo resetea un administrador desde Seguridad del usuario.
+                        canDisable: fn (User $user): bool => $user->hasAnyRole(['super_admin', 'admin_ti', 'admin']),
                     )
-                    ->enableBrowserSessions(condition: true)
-                    ->myProfileComponents([
-                        'personal_info' => PersonalInfo::class,
-                        'update_password' => ProfileUpdatePassword::class,
-                        'two_factor_authentication' => TwoFactorAuthentication::class,
-                    ]),
+                    ->browserSessions(
+                        heading: 'Sesiones del navegador',
+                        description: 'Cierre las sesiones que no reconozca.',
+                    ),
             ])
             ->authMiddleware([
                 Authenticate::class,
-                EnsureTwoFactorWhenRequired::class,
             ]);
+    }
+
+    /**
+     * Campos de «Información personal» en «Mi perfil». Carnet y correo son de solo lectura
+     * (los cambia un administrador); el plugin nunca los guarda.
+     *
+     * @return array<int, TextInput>
+     */
+    protected static function camposInformacionPersonal(User $user): array
+    {
+        return [
+            TextInput::make('nombres')
+                ->label('Nombres')
+                ->placeholder('Ej. Juan Carlos')
+                ->required()
+                ->maxLength(100)
+                ->autocomplete('given-name'),
+            TextInput::make('apellidos')
+                ->label('Apellidos')
+                ->placeholder('Ej. Pérez López')
+                ->required()
+                ->maxLength(100)
+                ->autocomplete('family-name'),
+            TextInput::make('carnet')
+                ->label('Carnet')
+                ->helperText('Si necesita corregirlo, solicite el cambio.'),
+            TextInput::make('email')
+                ->label('Correo electrónico')
+                ->email()
+                ->helperText('Si necesita uno distinto, solicítelo al administrador.')
+                ->prefixIcon(Heroicon::OutlinedEnvelope),
+            TextInput::make('telefono')
+                ->label('Teléfono')
+                ->placeholder('Ej. 7123-4567')
+                ->tel()
+                ->maxLength(30)
+                ->unique(User::class, 'telefono', ignorable: $user)
+                ->nullable()
+                ->dehydrateStateUsing(fn (mixed $state): ?string => filled($state) ? $state : null)
+                ->prefixIcon(Heroicon::OutlinedPhone)
+                ->columnSpanFull(),
+        ];
     }
 }

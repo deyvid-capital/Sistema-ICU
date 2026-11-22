@@ -7,10 +7,13 @@ use App\Enums\TipoAcceso;
 use App\Enums\TipoEventoNotificacion;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
-use App\Support\Auditoria\AuditorSeguridad;
 use App\Support\Seguridad\ProteccionSuperAdmin;
-use App\Support\Sessions\UserSessions;
 use BackedEnum;
+use CapitalSafi\Breezy\Filament\Actions\ResetTwoFactorAction;
+use CapitalSafi\Breezy\Filament\Actions\TerminateSessionsAction;
+use CapitalSafi\Breezy\Filament\Schemas\ActiveSessionsEntry;
+use CapitalSafi\Breezy\Filament\Schemas\TwoFactorStatusEntry;
+use CapitalSafi\Breezy\Support\UserSessions;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
@@ -31,8 +34,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\HtmlString;
 
 class ManageUserSeguridad extends EditRecord
 {
@@ -174,34 +175,15 @@ class ManageUserSeguridad extends EditRecord
         return Tab::make('2FA')
             ->icon(Heroicon::OutlinedShieldCheck)
             ->schema([
-                Placeholder::make('estado_2fa')
-                    ->label('Estado de la verificación en dos pasos')
-                    ->content(fn (): string => match (true) {
-                        $this->record->hasConfirmedTwoFactor() => 'Activa y confirmada.',
-                        $this->record->hasEnabledTwoFactor() => 'Iniciada pero sin confirmar.',
-                        default => 'No configurada.',
-                    }),
+                TwoFactorStatusEntry::make(),
                 Toggle::make('requiere_2fa')
                     ->label('Exigir 2FA a este usuario')
                     ->onColor('success')
                     ->helperText('Si se activa, el usuario deberá configurar el 2FA antes de poder usar el sistema.'),
                 Actions::make([
-                    Action::make('resetear2fa')
-                        ->label('Resetear / quitar 2FA')
-                        ->icon(Heroicon::OutlinedExclamationTriangle)
-                        ->color('danger')
-                        ->visible(fn (): bool => $this->record->hasEnabledTwoFactor() || $this->record->hasConfirmedTwoFactor())
-                        ->requiresConfirmation()
-                        ->modalHeading('Resetear autenticación de dos factores')
-                        ->modalDescription('Elimina el 2FA del usuario. Úsalo si perdió el acceso a su app de autenticación o dejó la organización. Deberá volver a configurarlo.')
-                        ->action(function (): void {
-                            $this->record->breezySessions()->withoutGlobalScopes()->delete();
-                            $this->record->refresh();
-
-                            app(AuditorSeguridad::class)->dosFactoresReseteado($this->record);
-
-                            Notification::make()->success()->title('2FA restablecido')->send();
-                        }),
+                    // La auditoría la registra el listener AuditarDosFactores (evento TwoFactorDisabled).
+                    ResetTwoFactorAction::make()
+                        ->record(fn (): User => $this->record),
                 ]),
             ]);
     }
@@ -211,62 +193,15 @@ class ManageUserSeguridad extends EditRecord
         return Tab::make('Sesiones')
             ->icon(Heroicon::OutlinedComputerDesktop)
             ->schema([
-                Placeholder::make('sesiones_activas')
-                    ->label('Sesiones activas')
-                    ->content(function (): HtmlString|string {
-                        $sesiones = UserSessions::active($this->record);
-
-                        if ($sesiones->isEmpty()) {
-                            return 'El usuario no tiene sesiones activas.';
-                        }
-
-                        $items = $sesiones->map(function (array $s): string {
-                            $dispositivo = trim(($s['browser'] ?? 'Navegador desconocido').' · '.($s['platform'] ?? 'Plataforma desconocida'), ' ·');
-                            $ip = $s['ip_address'] ?? 'IP desconocida';
-                            $activo = Carbon::createFromTimestamp($s['last_active'])->diffForHumans();
-
-                            return '<li>'.e($dispositivo).' — '.e($ip).' — '.e($activo).'</li>';
-                        })->implode('');
-
-                        return new HtmlString('<ul class="list-disc ps-4 space-y-1">'.$items.'</ul>');
-                    }),
+                ActiveSessionsEntry::make(),
                 Actions::make([
-                    Action::make('cerrarSesiones')
-                        ->label('Cerrar todas las sesiones')
-                        ->icon(Heroicon::OutlinedArrowRightStartOnRectangle)
-                        ->color('danger')
-                        ->visible(fn (): bool => ProteccionSuperAdmin::puedeCerrarSesiones($this->record)
-                            && UserSessions::active($this->record)->isNotEmpty())
-                        ->requiresConfirmation()
-                        ->modalHeading('Cerrar todas las sesiones')
-                        ->modalDescription('El usuario será desconectado de todos sus dispositivos.')
-                        ->action(function (): void {
-                            if (! ProteccionSuperAdmin::puedeCerrarSesiones($this->record)) {
-                                Notification::make()
-                                    ->title('Acción no permitida')
-                                    ->body('No puedes cerrar tus propias sesiones desde aquí.')
-                                    ->danger()
-                                    ->send();
-
-                                return;
-                            }
-
-                            $cerradas = UserSessions::terminate($this->record);
-
-                            Notification::make()
-                                ->success()
-                                ->title('Sesiones cerradas')
-                                ->body("Se cerraron {$cerradas} sesión(es).")
-                                ->send();
-                        }),
+                    TerminateSessionsAction::make()
+                        ->record(fn (): User => $this->record)
+                        ->authorize(fn (): bool => ProteccionSuperAdmin::puedeCerrarSesiones($this->record)),
                 ]),
             ]);
     }
 
-    /**
-     * Varios FortiToken por colaborador (producción, contingencia...). El repeater
-     * guarda la relación al guardar la página; quitar un token lo da de baja.
-     */
     protected function tabFortitoken(): Tab
     {
         return Tab::make('FortiToken')
@@ -407,7 +342,7 @@ class ManageUserSeguridad extends EditRecord
     {
         // Cierra sesiones si el acceso quedó deshabilitado.
         if (! $this->record->acceso_habilitado) {
-            UserSessions::terminate($this->record);
+            UserSessions::for($this->record)->terminate();
         }
 
         // Persiste la matriz de preferencias de notificación.

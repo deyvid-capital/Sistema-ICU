@@ -4,9 +4,9 @@ namespace Tests\Feature\Auth;
 
 use App\Enums\DominioActividad;
 use App\Enums\EventoSeguridad;
-use App\Filament\Pages\Auth\SetupTwoFactor;
 use App\Models\User;
 use App\Support\Auditoria\AuditorSeguridad;
+use CapitalSafi\Breezy\Pages\SetupTwoFactorPage;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
@@ -53,7 +53,7 @@ class AuditoriaDosFactoresTest extends TestCase
         $usuario = User::factory()->conRol()->create(['requiere_2fa' => true]);
         $this->actingAs($usuario);
 
-        $componente = Livewire::test(SetupTwoFactor::class);
+        $componente = Livewire::test(SetupTwoFactorPage::class);
         $componente->call('empezar');
 
         $usuario->refresh();
@@ -71,7 +71,7 @@ class AuditoriaDosFactoresTest extends TestCase
         $usuario = User::factory()->conRol()->create(['requiere_2fa' => true]);
         $this->actingAs($usuario);
 
-        $componente = Livewire::test(SetupTwoFactor::class);
+        $componente = Livewire::test(SetupTwoFactorPage::class);
         $componente->call('empezar');
 
         $componente

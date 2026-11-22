@@ -77,18 +77,10 @@ class UsuariosTab extends PestanaUsuarios
                 ->trueLabel('Activado')
                 ->falseLabel('Sin activar')
                 ->queries(
-                    true: fn (Builder $query): Builder => $query->whereHas('breezySessions', $this->dosFactoresConfirmado(...)),
-                    false: fn (Builder $query): Builder => $query->whereDoesntHave('breezySessions', $this->dosFactoresConfirmado(...)),
+                    true: fn (Builder $query): Builder => $query->whereTwoFactorConfirmed(),
+                    false: fn (Builder $query): Builder => $query->whereTwoFactorNotConfirmed(),
                     blank: fn (Builder $query): Builder => $query,
                 ),
         ];
-    }
-
-    /**
-     * Mismo criterio que BreezySession::isConfirmed: secreto generado y confirmado.
-     */
-    private function dosFactoresConfirmado(Builder $query): Builder
-    {
-        return $query->whereNotNull('two_factor_secret')->whereNotNull('two_factor_confirmed_at');
     }
 }

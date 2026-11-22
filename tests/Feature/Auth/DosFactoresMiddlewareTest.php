@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Filament\Pages\Auth\SetupTwoFactor;
 use App\Models\User;
+use CapitalSafi\Breezy\Pages\MyProfilePage;
+use CapitalSafi\Breezy\Pages\SetupTwoFactorPage;
 use Filament\Facades\Filament;
 use Filament\Pages\Dashboard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Jeffgreco13\FilamentBreezy\Pages\MyProfilePage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -21,7 +21,7 @@ class DosFactoresMiddlewareTest extends TestCase
 
         $this->actingAs($user)
             ->get(Dashboard::getUrl(panel: 'admin'))
-            ->assertRedirect(SetupTwoFactor::getUrl());
+            ->assertRedirect(SetupTwoFactorPage::getUrl());
     }
 
     public function test_no_redirige_la_propia_pagina_de_enrolamiento(): void
@@ -29,7 +29,7 @@ class DosFactoresMiddlewareTest extends TestCase
         $user = User::factory()->conRol('super_admin')->create(['requiere_2fa' => true]);
 
         $this->actingAs($user)
-            ->get(SetupTwoFactor::getUrl())
+            ->get(SetupTwoFactorPage::getUrl())
             ->assertSuccessful()
             ->assertSee('Protege tu cuenta')
             ->assertSee('Microsoft Authenticator')
@@ -43,7 +43,7 @@ class DosFactoresMiddlewareTest extends TestCase
 
         $this->actingAs($user)
             ->get(MyProfilePage::getUrl(panel: 'admin'))
-            ->assertRedirect(SetupTwoFactor::getUrl());
+            ->assertRedirect(SetupTwoFactorPage::getUrl());
     }
 
     public function test_usuario_sin_requerimiento_de_2fa_entra_normal(): void
@@ -64,7 +64,7 @@ class DosFactoresMiddlewareTest extends TestCase
         Filament::setCurrentPanel(Filament::getPanel('admin'));
         Filament::bootCurrentPanel();
 
-        Livewire::test(SetupTwoFactor::class)
+        Livewire::test(SetupTwoFactorPage::class)
             ->assertSet('step', 'install')
             ->call('empezar')
             ->assertSet('step', 'setup')

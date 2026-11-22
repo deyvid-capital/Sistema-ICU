@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d533b42cb50e326677f424efa0bb346",
+    "content-hash": "b764bcb0a815546641977b7da4e27ab0",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -587,6 +587,111 @@
                 "filament",
                 "filament-plugin",
                 "theme"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "capitalsafi/filament-breezy",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/capitalsafi/filament-breezy",
+                "reference": "fcfdea5b32759e9d25390e67e7fe00aaae5462b5"
+            },
+            "require": {
+                "bacon/bacon-qr-code": "^3.0",
+                "filament/filament": "^5.0",
+                "illuminate/contracts": "^13.0",
+                "mobiledetect/mobiledetectlib": "^4.8",
+                "php": "^8.4",
+                "pragmarx/google2fa": "^7.0|^8.0|^9.0",
+                "spatie/laravel-package-tools": "^1.93.0",
+                "web-auth/webauthn-lib": "^5.0|5.3.x-dev as 5.3.0"
+            },
+            "replace": {
+                "jeffgreco13/filament-breezy": "self.version"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.0",
+                "laravel/sanctum": "^4.0",
+                "orchestra/testbench": "^11.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "^12.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "CapitalSafi\\Breezy\\BreezyServiceProvider"
+                    ],
+                    "aliases": {
+                        "FilamentBreezy": "CapitalSafi\\Breezy\\Facades\\FilamentBreezy"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "CapitalSafi\\Breezy\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "CapitalSafi\\Breezy\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "post-autoload-dump": [
+                    "@composer run prepare"
+                ],
+                "clear": [
+                    "@php vendor/bin/testbench package:purge-skeleton --ansi"
+                ],
+                "prepare": [
+                    "@php vendor/bin/testbench package:discover --ansi"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse"
+                ],
+                "test": [
+                    "vendor/bin/phpunit"
+                ],
+                "format": [
+                    "vendor/bin/pint"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Capital SAFI S.A.",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Jeff Greco",
+                    "email": "jeff@jeffpgreco.com",
+                    "role": "Original author"
+                },
+                {
+                    "name": "Jacobtims",
+                    "email": "jacobtimmer04@gmail.com",
+                    "role": "Original author"
+                }
+            ],
+            "description": "Perfil, 2FA y sesiones para paneles Filament de Capital SAFI. Fork de jeffgreco13/filament-breezy (MIT).",
+            "homepage": "https://github.com/deyvid-capital/filament-breezy",
+            "keywords": [
+                "2fa",
+                "capitalsafi",
+                "filament",
+                "filament-breezy",
+                "laravel",
+                "mfa"
             ],
             "transport-options": {
                 "symlink": true,
@@ -2783,87 +2888,6 @@
                 }
             ],
             "time": "2026-08-24T17:13:02+00:00"
-        },
-        {
-            "name": "jeffgreco13/filament-breezy",
-            "version": "v3.2.8",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Jacobtims/filament-breezy.git",
-                "reference": "638e2c9fc56ce22b53d176d19851cc800a227c78"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Jacobtims/filament-breezy/zipball/638e2c9fc56ce22b53d176d19851cc800a227c78",
-                "reference": "638e2c9fc56ce22b53d176d19851cc800a227c78",
-                "shasum": ""
-            },
-            "require": {
-                "bacon/bacon-qr-code": "^3.0",
-                "filament/filament": "^4.0|^5.0",
-                "illuminate/contracts": "^12.0|^13.0",
-                "mobiledetect/mobiledetectlib": "^4.8",
-                "php": "^8.2|^8.3|^8.4",
-                "pragmarx/google2fa": "^7.0|^8.0|^9.0",
-                "spatie/laravel-package-tools": "^1.93.0",
-                "web-auth/webauthn-lib": "^5.0|5.3.x-dev as 5.3.0"
-            },
-            "require-dev": {
-                "larastan/larastan": "^3.0",
-                "laravel/pint": "^1.0",
-                "laravel/sanctum": "^4.0",
-                "orchestra/testbench": "^10.0|^11.0",
-                "pestphp/pest": "^3.0|^4.4",
-                "pestphp/pest-plugin-arch": "^3.0|^v4.0",
-                "pestphp/pest-plugin-laravel": "^3.0|^4.0",
-                "pestphp/pest-plugin-livewire": "^3.0|^4.0",
-                "phpstan/phpstan-deprecation-rules": "^2.0",
-                "phpstan/phpstan-phpunit": "^2.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "FilamentBreezy": "Jeffgreco13\\FilamentBreezy\\Facades\\FilamentBreezy"
-                    },
-                    "providers": [
-                        "Jeffgreco13\\FilamentBreezy\\FilamentBreezyServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Jeffgreco13\\FilamentBreezy\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jeff Greco",
-                    "email": "jeff@jeffpgreco.com",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Jacobtims",
-                    "email": "jacobtimmer04@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A custom package for Filament with login flow, profile and teams support.",
-            "homepage": "https://github.com/jeffgreco13/filament-breezy",
-            "keywords": [
-                "filament-breezy",
-                "jeffgreco13",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/Jacobtims/filament-breezy/issues",
-                "source": "https://github.com/Jacobtims/filament-breezy/tree/v3.2.8"
-            },
-            "time": "2026-08-04T09:04:18+00:00"
         },
         {
             "name": "kirschbaum-development/eloquent-power-joins",
@@ -15410,6 +15434,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "capitalsafi/filament-apariencia": 20,
+        "capitalsafi/filament-breezy": 20,
         "deyvid-capital/documentacion-sistema-icu": 20
     },
     "prefer-stable": true,
@@ -15418,5 +15443,5 @@
         "php": "^8.3"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }
