@@ -11,3 +11,4 @@
 - [Cambios del sistema 2026-11-13](cambios-sistema-2026-11-13.md) — permisos de cargadores, celulares sin doble asignación y «Reasignar todo» al reingresar; decisiones y límites
 - [Memoria y skills en el repo](memoria-y-skills-en-el-repo.md) — dos equipos: copiar la memoria a .claude/memory y versionar skills de .claude y .cursor; el push lo hace el usuario
 - [Plugin de apariencia](plugin-apariencia.md) — capitalsafi/filament-apariencia en packages/capitalsafi; temas SAFI, decisiones, roles y trampas; detalle en .agente/.avance del paquete
+- [Plugin Breezy](plugin-breezy.md) — fork capitalsafi/filament-breezy en packages/capitalsafi; PLAN-001 para portar perfil/2FA/sesiones del ICU y reutilizarlo; solo plan, decisiones D1–D9 pendientes
