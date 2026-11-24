@@ -8,7 +8,7 @@ metadata:
   modified: 2026-11-13T18:14:54.737Z
 ---
 
-La guía de usuario del Sistema ICU es un **paquete Composer aparte**: `deyvid-capital/documentacion-sistema-icu`, namespace `SistemaIcu\Documentacion`, en `packages/documentacion-sistema-icu/` (git propio; `/packages/` está en el .gitignore del sistema). Remoto: `https://github.com/deyvid-capital/documentacion-sistema-icu-.git` (con guion final). El entorno del agente no tiene credenciales de GitHub: el push lo hace el usuario.
+La guía de usuario del Sistema ICU es un **paquete Composer aparte**: `deyvid-capital/documentacion-sistema-icu`, namespace `SistemaIcu\Documentacion`, en `packages/capitalsafi/documentacion-sistema-icu/` (git propio; antes en `packages/documentacion-sistema-icu/`; `/packages/` está en el .gitignore del sistema). Remoto: `https://github.com/deyvid-capital/documentacion-sistema-icu-.git` (con guion final). El entorno del agente no tiene credenciales de GitHub: el push lo hace el usuario.
 
 Decisiones del usuario (2026-11-13):
 - Separar la guía del sistema para "no mezclar las cosas"; contenido organizado como la documentación de Filament; cada versión del sistema lleva su versión del paquete.
@@ -24,7 +24,8 @@ Estado al 2026-11-13 (fin del día):
 - Paquete: hechas T1 (formato numerado con frontmatter), T2 (pantalla nueva + menú lateral propio plegable, componente `documentacion-icu::menu` con `Contenido\Menu`), T4 (PDF/capturas) y los capítulos Primeros pasos, Equipos (+Recibos), Inventario, Asignación de equipos, Celulares y Usuarios. Faltan C5 Accesos, C6 Software, C7 Recursos, C8 Firma digital, C9 Documentos PDF, C10 Panel de inicio, C11 Administración, y T5 (versiones/producción).
 - Reparto de trabajo: **otro IDE (Cursor) hace las tareas del paquete; yo reviso.** Él anota el avance en `packages/documentacion-sistema-icu/.avance/<tarea>.md` y yo dejo observaciones en `.avance/revision/` (códigos R/V/C, prioridad, "listo cuando"; decisiones del usuario en `2026-11-13-decisiones-del-usuario.md`). `.avance/` está ignorada y no se sube. Un commit por tarea en el paquete (regla en `.avance/revision/COMMITS.md` y `AGENTS.md`); el push lo hace el usuario.
 - Decisiones del usuario sobre contenido: se documentan **todos** los módulos (dashboard incluido); eliminar y restaurar se explica como texto, sin capturas.
-- Observaciones abiertas al cerrar el día: C4-1 (decir qué hace una baja y que se revierte con «Reasignar todo»), C4-2 (commits pendientes en el paquete) y D4 (reflejar en la guía los cambios del sistema en Celulares y Usuarios).
+- Al 2026-11-24: C4 (Usuarios) y D4 cerrados y con commit (`cce4c2b`, `8a38117`, `5e4072c` en el paquete; seeder `GuiaDemoSeeder` en el sistema). Abierta **G1**: las capturas de Primeros pasos, Equipos, Inventario y Asignación tienen el tema viejo (menú azul) y las de Celulares y Usuarios el nuevo del plugin de apariencia; regenerar todas antes de C5. Siguiente: C5 Accesos.
+- `.avance/` debe seguir en el `.gitignore` del paquete: el otro IDE la quitó una vez y la repuse.
 - Lecciones de revisión que se repiten: mirar cada captura (los tests no ven imágenes); una página por tarea con el permiso de su botón; fechas fijas (el servidor de capturas detiene el reloj en 2026-06-15 con `GUIA_FECHA_FIJA`); citar el mensaje exacto del sistema.
 
 Cómo trabajar:

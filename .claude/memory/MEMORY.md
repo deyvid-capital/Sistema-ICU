@@ -7,7 +7,7 @@
 - [Firma digital: avance](firma-digital-avance.md) — fases 1-7 hechas (7 sin commit), decisiones, almacenamiento público/confidencial y pendientes
 - [Dashboard y widgets](dashboard-widgets.md) — 8 widgets del dashboard; super_admin no salta Shield: re-correr RolesPermissionsSeeder tras crear widgets
 - [Matriz de perfiles (Excel)](matriz-perfiles-excel.md) — reglas por cargo: internet con siglas del área, software usuario+área sin excepciones, descarga síncrona
-- [Guía de usuario: avance](guia-usuario-avance.md) — paquete aparte en packages/documentacion-sistema-icu; otro IDE hace las tareas y yo reviso en .avance/revision; estado y pendientes
+- [Guía de usuario: avance](guia-usuario-avance.md) — paquete aparte en packages/capitalsafi/documentacion-sistema-icu; otro IDE hace las tareas y yo reviso en .avance/revision; estado y pendientes
 - [Cambios del sistema 2026-11-13](cambios-sistema-2026-11-13.md) — permisos de cargadores, celulares sin doble asignación y «Reasignar todo» al reingresar; decisiones y límites
 - [Memoria y skills en el repo](memoria-y-skills-en-el-repo.md) — dos equipos: copiar la memoria a .claude/memory y versionar skills de .claude y .cursor; el push lo hace el usuario
 - [Plugin de apariencia](plugin-apariencia.md) — capitalsafi/filament-apariencia en packages/capitalsafi; temas SAFI, decisiones, roles y trampas; detalle en .agente/.avance del paquete
