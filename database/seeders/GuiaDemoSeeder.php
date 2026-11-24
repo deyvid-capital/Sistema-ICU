@@ -29,6 +29,7 @@ use App\Models\ReciboEquipo;
 use App\Models\TarjetaVideo;
 use App\Models\User;
 use App\Models\UsuarioExterno;
+use App\Services\Movimientos\ProcesarBajaColaborador;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -78,6 +79,7 @@ class GuiaDemoSeeder extends Seeder
         $this->sembrarRecibosDeEquipos();
         $this->sembrarAsignacionDeEquipos();
         $this->sembrarCelulares($usuarios);
+        $this->sembrarReingresoParaGuia($usuarios);
     }
 
     /**
@@ -201,6 +203,34 @@ class GuiaDemoSeeder extends Seeder
                 'cargo_id' => $usuario->id_cargo,
             ]);
         }
+    }
+
+    /**
+     * Colaborador con Baja + Alta posterior para capturar «Reasignar todo».
+     * WithoutModelEvents: la cascada se dispara a mano.
+     *
+     * @param  array<string, User>  $usuarios
+     */
+    private function sembrarReingresoParaGuia(array $usuarios): void
+    {
+        $hoy = Carbon::parse(self::HOY);
+        $martin = $usuarios['Martín Quiroga Paz'];
+
+        $baja = Movimiento::query()->create([
+            'usuario_id' => $martin->getKey(),
+            'tipo' => 'Baja',
+            'fecha' => $hoy->copy()->subMonths(1),
+            'cargo_id' => $martin->id_cargo,
+        ]);
+
+        app(ProcesarBajaColaborador::class)->paraMovimiento($baja);
+
+        Movimiento::query()->create([
+            'usuario_id' => $martin->getKey(),
+            'tipo' => 'Alta',
+            'fecha' => $hoy->copy()->subDays(3),
+            'cargo_id' => $martin->id_cargo,
+        ]);
     }
 
     /**
