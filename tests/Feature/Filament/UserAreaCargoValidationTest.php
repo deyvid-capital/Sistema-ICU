@@ -34,6 +34,7 @@ class UserAreaCargoValidationTest extends TestCase
                 'nombres' => 'Test',
                 'apellidos' => 'User',
                 'email' => 'test.user@example.com',
+                'telefono' => '7123-4567',
                 'password' => 'password123',
                 'id_area' => $area->id_area,
                 'id_cargo' => $cargo->id_cargo,
@@ -46,6 +47,7 @@ class UserAreaCargoValidationTest extends TestCase
             'apellidos' => 'User',
             'name' => 'Test User',
             'email' => 'test.user@example.com',
+            'telefono' => '7123-4567',
             'id_area' => $area->id_area,
             'id_cargo' => $cargo->id_cargo,
         ]);
