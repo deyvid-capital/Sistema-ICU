@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesPermissionsSeeder::class);
 
         $this->call(EquiposSeeder::class);
+        $this->call(CategoriaSoftwareSeeder::class);
         $this->call(InventarioAccesosSeeder::class);
     }
 }

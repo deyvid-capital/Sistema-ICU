@@ -1,53 +1,53 @@
 <?php
 
-namespace App\Filament\Resources\SoftwareAreas;
+namespace App\Filament\Resources\SoftwareCargos;
 
 use App\Filament\Clusters\Software\SoftwareCluster;
-use App\Filament\Resources\SoftwareAreas\Pages\CreateSoftwareArea;
-use App\Filament\Resources\SoftwareAreas\Pages\EditSoftwareArea;
-use App\Filament\Resources\SoftwareAreas\Pages\ListSoftwareAreas;
-use App\Filament\Resources\SoftwareAreas\Pages\ViewSoftwareArea;
-use App\Filament\Resources\SoftwareAreas\Schemas\SoftwareAreaForm;
-use App\Filament\Resources\SoftwareAreas\Schemas\SoftwareAreaInfolist;
-use App\Filament\Resources\SoftwareAreas\Tables\SoftwareAreasTable;
-use App\Models\SoftwareArea;
+use App\Filament\Resources\SoftwareCargos\Pages\CreateSoftwareCargo;
+use App\Filament\Resources\SoftwareCargos\Pages\EditSoftwareCargo;
+use App\Filament\Resources\SoftwareCargos\Pages\ListSoftwareCargos;
+use App\Filament\Resources\SoftwareCargos\Pages\ViewSoftwareCargo;
+use App\Filament\Resources\SoftwareCargos\Schemas\SoftwareCargoForm;
+use App\Filament\Resources\SoftwareCargos\Schemas\SoftwareCargoInfolist;
+use App\Filament\Resources\SoftwareCargos\Tables\SoftwareCargosTable;
+use App\Models\SoftwareCargo;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class SoftwareAreaResource extends Resource
+class SoftwareCargoResource extends Resource
 {
-    protected static ?string $model = SoftwareArea::class;
+    protected static ?string $model = SoftwareCargo::class;
 
     protected static ?string $cluster = SoftwareCluster::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBriefcase;
 
-    protected static ?string $navigationLabel = 'Software por area';
+    protected static ?string $navigationLabel = 'Software por cargo';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
-    protected static ?string $modelLabel = 'software por area';
+    protected static ?string $modelLabel = 'software por cargo';
 
-    protected static ?string $pluralModelLabel = 'software por area';
+    protected static ?string $pluralModelLabel = 'software por cargo';
 
     protected static ?string $recordTitleAttribute = 'id';
 
     public static function form(Schema $schema): Schema
     {
-        return SoftwareAreaForm::configure($schema);
+        return SoftwareCargoForm::configure($schema);
     }
 
     public static function infolist(Schema $schema): Schema
     {
-        return SoftwareAreaInfolist::configure($schema);
+        return SoftwareCargoInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return SoftwareAreasTable::configure($table);
+        return SoftwareCargosTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -62,16 +62,16 @@ class SoftwareAreaResource extends Resource
      */
     public static function getGloballySearchableAttributes(): array
     {
-        return ['software.nombre_software', 'area.area'];
+        return ['software.nombre_software', 'cargo.cargo'];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListSoftwareAreas::route('/'),
-            'create' => CreateSoftwareArea::route('/create'),
-            'view' => ViewSoftwareArea::route('/{record}'),
-            'edit' => EditSoftwareArea::route('/{record}/edit'),
+            'index' => ListSoftwareCargos::route('/'),
+            'create' => CreateSoftwareCargo::route('/create'),
+            'view' => ViewSoftwareCargo::route('/{record}'),
+            'edit' => EditSoftwareCargo::route('/{record}/edit'),
         ];
     }
 }

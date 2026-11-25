@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\SoftwareAreas\Pages;
+namespace App\Filament\Resources\SoftwareCargos\Pages;
 
-use App\Filament\Resources\SoftwareAreas\SoftwareAreaResource;
+use App\Filament\Resources\SoftwareCargos\SoftwareCargoResource;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -10,9 +10,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
 
-class EditSoftwareArea extends EditRecord
+class EditSoftwareCargo extends EditRecord
 {
-    protected static string $resource = SoftwareAreaResource::class;
+    protected static string $resource = SoftwareCargoResource::class;
 
     protected function getSavedNotification(): ?Notification
     {

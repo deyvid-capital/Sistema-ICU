@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Software\Tables;
 
-use App\Enums\CategoriasSoftware;
 use App\Filament\Resources\Software\SoftwareResource;
 use App\Models\Software;
 use Filament\Actions\ActionGroup;
@@ -27,10 +26,10 @@ class SoftwareTable
             ->striped()
             ->paginated([10, 25, 50])
             ->columns([
-                TextColumn::make('categoria')
+                TextColumn::make('categoria.nombre')
                     ->label('Categoria')
                     ->badge()
-                    ->color('info')
+                    ->color(fn (Software $record): string|array => $record->categoria?->color() ?? 'gray')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('nombre_software')
@@ -59,10 +58,11 @@ class SoftwareTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('categoria')
+                SelectFilter::make('categoria_id')
                     ->label('Categoria')
+                    ->relationship('categoria', 'nombre')
                     ->searchable()
-                    ->options(CategoriasSoftware::getOptions()),
+                    ->preload(),
                 SelectFilter::make('estado')
                     ->label('Estado')
                     ->options([

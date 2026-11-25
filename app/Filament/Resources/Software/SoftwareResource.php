@@ -7,7 +7,7 @@ use App\Filament\Resources\Software\Pages\CreateSoftware;
 use App\Filament\Resources\Software\Pages\EditSoftware;
 use App\Filament\Resources\Software\Pages\ListSoftware;
 use App\Filament\Resources\Software\Pages\ViewSoftware;
-use App\Filament\Resources\Software\RelationManagers\AreasRelationManager;
+use App\Filament\Resources\Software\RelationManagers\CargosRelationManager;
 use App\Filament\Resources\Software\RelationManagers\ExcepcionesRelationManager;
 use App\Filament\Resources\Software\RelationManagers\UsuariosRelationManager;
 use App\Filament\Resources\Software\Schemas\SoftwareForm;
@@ -56,7 +56,7 @@ class SoftwareResource extends Resource
     public static function getRelations(): array
     {
         return [
-            AreasRelationManager::class,
+            CargosRelationManager::class,
             UsuariosRelationManager::class,
             ExcepcionesRelationManager::class,
         ];
@@ -67,7 +67,7 @@ class SoftwareResource extends Resource
      */
     public static function getGloballySearchableAttributes(): array
     {
-        return ['nombre_software', 'categoria', 'descripcion'];
+        return ['nombre_software', 'categoria.nombre', 'descripcion'];
     }
 
     public static function getPages(): array

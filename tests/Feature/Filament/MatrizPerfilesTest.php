@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Filament;
 
+use App\Enums\CategoriasSoftware;
 use App\Enums\EstadoAprobacionExcepcion;
 use App\Filament\Widgets\UsuariosPanel\AccesosTab;
 use App\Filament\Widgets\UsuariosPanel\UsuariosTab;
@@ -20,7 +21,7 @@ use App\Models\RecursoVpn;
 use App\Models\Sistema;
 use App\Models\SitioSharepoint;
 use App\Models\Software;
-use App\Models\SoftwareArea;
+use App\Models\SoftwareCargo;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
@@ -129,20 +130,20 @@ class MatrizPerfilesTest extends TestCase
         $this->assertSame('-', $this->filasPorCargo()['Asistente Legal']['Internet']);
     }
 
-    public function test_el_software_sale_del_usuario_y_su_area_sin_las_excepciones(): void
+    public function test_el_software_sale_del_usuario_y_su_cargo_sin_las_excepciones(): void
     {
         $cargo = $this->cargo('Auditor Interno');
         $usuario = $this->usuarioDe($cargo);
 
-        $this->softwareDelArea('Chrome', 'navegadores');
-        $this->softwareDelArea('Firefox', 'navegadores');
-        $this->softwareDelArea('FortiClient', 'vpn');
-        $this->softwareDelArea('Inactivo', 'pdf', activo: false);
+        $this->softwareDelCargo($cargo, 'Chrome', CategoriasSoftware::Navegadores);
+        $this->softwareDelCargo($cargo, 'Firefox', CategoriasSoftware::Navegadores);
+        $this->softwareDelCargo($cargo, 'FortiClient', CategoriasSoftware::VPN);
+        $this->softwareDelCargo($cargo, 'Inactivo', CategoriasSoftware::PDF, activo: false);
 
-        $asignado = Software::factory()->create(['nombre_software' => 'Asignado', 'categoria' => 'navegadores', 'estado' => true]);
+        $asignado = Software::factory()->deCategoria(CategoriasSoftware::Navegadores)->create(['nombre_software' => 'Asignado', 'estado' => true]);
         SoftwareUsuario::factory()->create(['usuario_id' => $usuario->id, 'id_software' => $asignado->id_software, 'estado' => true]);
 
-        $excepcion = Software::factory()->create(['nombre_software' => 'AnyDesk', 'categoria' => 'soporte_remoto', 'estado' => true]);
+        $excepcion = Software::factory()->deCategoria(CategoriasSoftware::SoporteRemoto)->create(['nombre_software' => 'AnyDesk', 'estado' => true]);
         SoftwareExc::factory()->create([
             'usuario_id' => $usuario->id,
             'software_id' => $excepcion->id_software,
@@ -218,11 +219,11 @@ class MatrizPerfilesTest extends TestCase
         ]);
     }
 
-    private function softwareDelArea(string $nombre, string $categoria, bool $activo = true): void
+    private function softwareDelCargo(Cargo $cargo, string $nombre, CategoriasSoftware $categoria, bool $activo = true): void
     {
-        $software = Software::factory()->create(['nombre_software' => $nombre, 'categoria' => $categoria, 'estado' => $activo]);
+        $software = Software::factory()->deCategoria($categoria)->create(['nombre_software' => $nombre, 'estado' => $activo]);
 
-        SoftwareArea::factory()->create(['software_id' => $software->id_software, 'area_id' => $this->area->id_area]);
+        SoftwareCargo::factory()->create(['software_id' => $software->id_software, 'cargo_id' => $cargo->id_cargo]);
     }
 
     /**

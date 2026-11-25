@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Software\RelationManagers;
 
-use App\Models\SoftwareArea;
+use App\Models\SoftwareCargo;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -15,25 +15,25 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Validation\Rules\Unique;
 
-class AreasRelationManager extends RelationManager
+class CargosRelationManager extends RelationManager
 {
-    protected static string $relationship = 'areas';
+    protected static string $relationship = 'cargos';
 
-    protected static ?string $title = 'Software por area';
+    protected static ?string $title = 'Software por cargo';
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Select::make('area_id')
-                    ->label('Area')
-                    ->relationship('area', 'area')
+                Select::make('cargo_id')
+                    ->label('Cargo')
+                    ->relationship('cargo', 'cargo')
                     ->searchable()
                     ->preload()
                     ->required()
                     ->unique(
                         ignoreRecord: true,
-                        modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareArea $record): Unique {
+                        modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareCargo $record): Unique {
                             return $rule
                                 ->where('software_id', $this->ownerRecord->getKey())
                                 ->ignore($record);
@@ -48,8 +48,8 @@ class AreasRelationManager extends RelationManager
             ->recordTitleAttribute('id')
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('area.area')
-                    ->label('Area')
+                TextColumn::make('cargo.cargo')
+                    ->label('Cargo')
                     ->badge()
                     ->color('info')
                     ->searchable()
@@ -65,15 +65,15 @@ class AreasRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('area_id')
-                    ->label('Area')
-                    ->relationship('area', 'area')
+                SelectFilter::make('cargo_id')
+                    ->label('Cargo')
+                    ->relationship('cargo', 'cargo')
                     ->searchable()
                     ->preload(),
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Agregar area')
+                    ->label('Agregar cargo')
                     ->successNotificationTitle('Relacion agregada correctamente'),
             ])
             ->recordActions([

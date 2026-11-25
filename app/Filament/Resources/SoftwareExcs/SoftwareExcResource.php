@@ -33,7 +33,7 @@ class SoftwareExcResource extends Resource
 
     protected static ?string $navigationLabel = 'Excepciones de software';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 7;
 
     protected static ?string $modelLabel = 'excepcion de software';
 

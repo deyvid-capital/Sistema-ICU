@@ -6,6 +6,7 @@ use App\Models\Concerns\LogsIcuActivity;
 use App\Models\Concerns\PreventsForceDeleteWithDependents;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Software extends Model
@@ -14,14 +15,14 @@ class Software extends Model
     use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
 
-    protected static array $forceDeleteGuardedRelations = ['areas', 'usuarios', 'excepciones'];
+    protected static array $forceDeleteGuardedRelations = ['cargos', 'usuarios', 'excepciones'];
 
     protected $primaryKey = 'id_software';
 
     protected $table = 'softwares';
 
     protected $fillable = [
-        'categoria',
+        'categoria_id',
         'nombre_software',
         'estado',
         'fecha_autorizacion',
@@ -36,9 +37,20 @@ class Software extends Model
         ];
     }
 
-    public function areas(): HasMany
+    /**
+     * Categoría del catálogo a la que pertenece el software.
+     */
+    public function categoria(): BelongsTo
     {
-        return $this->hasMany(SoftwareArea::class, 'software_id', 'id_software');
+        return $this->belongsTo(CategoriaSoftware::class, 'categoria_id', 'id_categoria');
+    }
+
+    /**
+     * Cargos que tienen autorizado este software.
+     */
+    public function cargos(): HasMany
+    {
+        return $this->hasMany(SoftwareCargo::class, 'software_id', 'id_software');
     }
 
     public function usuarios(): HasMany

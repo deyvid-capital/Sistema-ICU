@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SoftwareAreas\Schemas;
+namespace App\Filament\Resources\SoftwareCargos\Schemas;
 
 use App\Models\Software;
-use App\Models\SoftwareArea;
+use App\Models\SoftwareCargo;
 use Closure;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
@@ -15,19 +15,19 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\Unique;
 
-class SoftwareAreaForm
+class SoftwareCargoForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Section::make('Asignación de software al área')
-                    ->icon(Heroicon::OutlinedBuildingOffice)
+                Section::make('Asignación de software al cargo')
+                    ->icon(Heroicon::OutlinedBriefcase)
                     ->columnSpanFull()
                     ->schema([
-                        Select::make('area_id')
-                            ->label('Area')
-                            ->relationship('area', 'area')
+                        Select::make('cargo_id')
+                            ->label('Cargo')
+                            ->relationship('cargo', 'cargo')
                             ->searchable()
                             ->preload()
                             ->required()
@@ -35,14 +35,14 @@ class SoftwareAreaForm
                             ->afterStateUpdated(fn (Set $set) => $set('software_ids', [])),
                         Select::make('software_ids')
                             ->label('Software')
-                            ->helperText('Puedes elegir varios. Todos quedan asignados al area seleccionada.')
-                            ->options(fn (Get $get): array => self::softwareDisponibleParaArea($get('area_id')))
+                            ->helperText('Puedes elegir varios. Todos quedan asignados al cargo seleccionado.')
+                            ->options(fn (Get $get): array => self::softwareDisponibleParaCargo($get('cargo_id')))
                             ->multiple()
                             ->searchable()
                             ->preload()
                             ->required()
                             ->visibleOn(Operation::Create)
-                            ->disabled(fn (Get $get): bool => blank($get('area_id')))
+                            ->disabled(fn (Get $get): bool => blank($get('cargo_id')))
                             ->columnSpanFull()
                             ->rule(fn (Get $get): Closure => self::softwareIdsSonAsignables($get)),
                         Select::make('software_id')
@@ -54,9 +54,9 @@ class SoftwareAreaForm
                             ->hiddenOn(Operation::Create)
                             ->unique(
                                 ignoreRecord: true,
-                                modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareArea $record): Unique {
+                                modifyRuleUsing: function (Unique $rule, Get $get, ?SoftwareCargo $record): Unique {
                                     return $rule
-                                        ->where('area_id', $get('area_id'))
+                                        ->where('cargo_id', $get('cargo_id'))
                                         ->ignore($record);
                                 },
                             ),
@@ -67,16 +67,16 @@ class SoftwareAreaForm
     /**
      * @return array<int, string>
      */
-    private static function softwareDisponibleParaArea(mixed $areaId): array
+    private static function softwareDisponibleParaCargo(mixed $cargoId): array
     {
-        if (blank($areaId)) {
+        if (blank($cargoId)) {
             return [];
         }
 
         return Software::query()
             ->whereDoesntHave(
-                'areas',
-                fn (Builder $areas): Builder => $areas->where('area_id', $areaId),
+                'cargos',
+                fn (Builder $cargos): Builder => $cargos->where('cargo_id', $cargoId),
             )
             ->orderBy('nombre_software')
             ->pluck('nombre_software', 'id_software')
@@ -90,10 +90,10 @@ class SoftwareAreaForm
                 return;
             }
 
-            $areaId = $get('area_id');
+            $cargoId = $get('cargo_id');
 
-            if (blank($areaId)) {
-                $fail('Elige un area antes de seleccionar software.');
+            if (blank($cargoId)) {
+                $fail('Elige un cargo antes de seleccionar software.');
 
                 return;
             }
@@ -113,13 +113,13 @@ class SoftwareAreaForm
                 return;
             }
 
-            $yaAsignados = SoftwareArea::query()
-                ->where('area_id', $areaId)
+            $yaAsignados = SoftwareCargo::query()
+                ->where('cargo_id', $cargoId)
                 ->whereIn('software_id', $ids)
                 ->exists();
 
             if ($yaAsignados) {
-                $fail('Algunos software ya estan asignados a esta area.');
+                $fail('Algunos software ya estan asignados a este cargo.');
             }
         };
     }

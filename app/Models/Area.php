@@ -17,7 +17,7 @@ class Area extends Model
     use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
 
-    protected static array $forceDeleteGuardedRelations = ['users', 'cargos', 'softwareAreas'];
+    protected static array $forceDeleteGuardedRelations = ['users', 'cargos'];
 
     protected $primaryKey = 'id_area';
 
@@ -32,14 +32,6 @@ class Area extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'id_area', 'id_area');
-    }
-
-    /**
-     * Get the software areas for the area.
-     */
-    public function softwareAreas(): HasMany
-    {
-        return $this->hasMany(SoftwareArea::class, 'area_id', 'id_area');
     }
 
     /**

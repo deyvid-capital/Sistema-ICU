@@ -12,6 +12,7 @@ use App\Models\AccesoVirtual;
 use App\Models\Area;
 use App\Models\AsignacionEquipo;
 use App\Models\Cargo;
+use App\Models\CategoriaSoftware;
 use App\Models\Equipo;
 use App\Models\Fondo;
 use App\Models\ModeloLaptop;
@@ -78,7 +79,7 @@ class MovimientoFormularioPdfTest extends TestCase
 
         $software = Software::factory()->create([
             'nombre_software' => 'Adobe Acrobat',
-            'categoria' => CategoriasSoftware::PDF->value,
+            'categoria_id' => CategoriaSoftware::deEnum(CategoriasSoftware::PDF)->getKey(),
         ]);
         SoftwareUsuario::factory()->create([
             'usuario_id' => $usuario->id,
@@ -144,7 +145,7 @@ class MovimientoFormularioPdfTest extends TestCase
 
         $software = Software::factory()->create([
             'nombre_software' => 'Adobe Acrobat',
-            'categoria' => CategoriasSoftware::PDF->value,
+            'categoria_id' => CategoriaSoftware::deEnum(CategoriasSoftware::PDF)->getKey(),
         ]);
         SoftwareUsuario::factory()->create([
             'usuario_id' => $usuario->id,
@@ -276,7 +277,7 @@ class MovimientoFormularioPdfTest extends TestCase
             'estado' => true,
             'id_software' => Software::factory()->create([
                 'nombre_software' => 'Adobe Acrobat',
-                'categoria' => CategoriasSoftware::PDF->value,
+                'categoria_id' => CategoriaSoftware::deEnum(CategoriasSoftware::PDF)->getKey(),
             ])->id_software,
         ]);
         $virtual = Virtual::factory()->create(['maquina_virtual' => 'VM-CONTABILIDAD']);
@@ -303,7 +304,7 @@ class MovimientoFormularioPdfTest extends TestCase
             'fecha_fin' => null,
             'software_id' => Software::factory()->create([
                 'nombre_software' => 'AnyDesk',
-                'categoria' => CategoriasSoftware::SoporteRemoto->value,
+                'categoria_id' => CategoriaSoftware::deEnum(CategoriasSoftware::SoporteRemoto)->getKey(),
             ])->id_software,
         ]);
         SoftwareExc::factory()->create([
@@ -312,7 +313,7 @@ class MovimientoFormularioPdfTest extends TestCase
             'fecha_fin' => null,
             'software_id' => Software::factory()->create([
                 'nombre_software' => 'TeamViewer',
-                'categoria' => CategoriasSoftware::SoporteRemoto->value,
+                'categoria_id' => CategoriaSoftware::deEnum(CategoriasSoftware::SoporteRemoto)->getKey(),
             ])->id_software,
         ]);
 

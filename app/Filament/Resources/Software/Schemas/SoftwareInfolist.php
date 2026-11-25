@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Software\Schemas;
 
 use App\Filament\Resources\Concerns\HasRegistroInfolistSection;
+use App\Models\Software;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -30,10 +31,10 @@ class SoftwareInfolist
                             ->icon(Heroicon::OutlinedCube)
                             ->weight(FontWeight::Bold)
                             ->placeholder('—'),
-                        TextEntry::make('categoria')
+                        TextEntry::make('categoria.nombre')
                             ->label('Categoría')
                             ->badge()
-                            ->color('info')
+                            ->color(fn (Software $record): string|array => $record->categoria?->color() ?? 'gray')
                             ->placeholder('—'),
                         IconEntry::make('estado')
                             ->label('Activo')

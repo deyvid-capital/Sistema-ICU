@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SoftwareAreas\Tables;
+namespace App\Filament\Resources\SoftwareCargos\Tables;
 
-use App\Filament\Resources\SoftwareAreas\SoftwareAreaResource;
-use App\Models\SoftwareArea;
+use App\Filament\Resources\SoftwareCargos\SoftwareCargoResource;
+use App\Models\SoftwareCargo;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -15,12 +15,12 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
-class SoftwareAreasTable
+class SoftwareCargosTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->recordUrl(fn (SoftwareArea $record): string => SoftwareAreaResource::getUrl('edit', ['record' => $record]))
+            ->recordUrl(fn (SoftwareCargo $record): string => SoftwareCargoResource::getUrl('edit', ['record' => $record]))
             ->defaultSort('created_at', 'desc')
             ->striped()
             ->paginated([10, 25, 50])
@@ -31,8 +31,8 @@ class SoftwareAreasTable
                     ->sortable()
                     ->weight('medium')
                     ->icon(Heroicon::OutlinedComputerDesktop),
-                TextColumn::make('area.area')
-                    ->label('Area')
+                TextColumn::make('cargo.cargo')
+                    ->label('Cargo')
                     ->searchable()
                     ->sortable()
                     ->badge()
@@ -54,9 +54,9 @@ class SoftwareAreasTable
                     ->relationship('software', 'nombre_software')
                     ->searchable()
                     ->preload(),
-                SelectFilter::make('area_id')
-                    ->label('Area')
-                    ->relationship('area', 'area')
+                SelectFilter::make('cargo_id')
+                    ->label('Cargo')
+                    ->relationship('cargo', 'cargo')
                     ->searchable()
                     ->preload(),
             ])

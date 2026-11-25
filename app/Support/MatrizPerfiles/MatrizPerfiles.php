@@ -9,9 +9,10 @@ use App\Models\AccesoVirtual;
 use App\Models\AccUdCompartida;
 use App\Models\AzureAd;
 use App\Models\Cargo;
+use App\Models\CategoriaSoftware;
 use App\Models\LicenciaUsuario;
 use App\Models\Software;
-use App\Models\SoftwareArea;
+use App\Models\SoftwareCargo;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
 use App\Support\SiglasArea;
@@ -29,9 +30,10 @@ use Illuminate\Support\Collection;
  * - Varios valores van en la misma celda separados por " | "; sin valores, "-".
  * - Internet: si la persona tiene acceso activo, el perfil de su área con
  *   siglas, "Inversiones Alternativas (IA)", como en el formulario de alta/baja.
- * - Software: el asignado a la persona y el de su área. Las excepciones no
- *   cuentan porque son personales, no del perfil del cargo. Una columna por
- *   categoría de CategoriasSoftware con al menos un valor en la matriz.
+ * - Software: el asignado a la persona y el autorizado para su cargo. Las
+ *   excepciones no cuentan porque son personales, no del perfil del cargo. Una
+ *   columna por categoría del catálogo con al menos un valor en la matriz:
+ *   primero las de CategoriasSoftware, en su orden, y luego las demás.
  *
  * El resto de columnas sigue las reglas del formulario de alta/baja
  * (MovimientoFormularioPdfData): "Sistema - nivel", licencias en Microsoft y
@@ -105,7 +107,8 @@ class MatrizPerfiles
     }
 
     /**
-     * Categorías con datos, en el orden del enum.
+     * Categorías con datos: primero las del enum en su orden, luego las demás
+     * del catálogo por nombre. La etiqueta es el nombre del catálogo.
      *
      * @return array<string, string> clave => etiqueta
      */
@@ -116,10 +119,19 @@ class MatrizPerfiles
             ->unique()
             ->flip();
 
+        $catalogo = CategoriaSoftware::query()
+            ->orderBy('nombre')
+            ->pluck('nombre', 'codigo');
+
         return collect(CategoriasSoftware::cases())
-            ->reject(fn (CategoriasSoftware $categoria): bool => isset(self::CATEGORIA_AGRUPADA_EN[$categoria->value]))
-            ->filter(fn (CategoriasSoftware $categoria): bool => $conDatos->has($categoria->value))
-            ->mapWithKeys(fn (CategoriasSoftware $categoria): array => [$categoria->value => $categoria->getLabel()])
+            ->map(fn (CategoriasSoftware $categoria): string => $categoria->value)
+            ->merge($catalogo->keys())
+            ->unique()
+            ->reject(fn (string $codigo): bool => isset(self::CATEGORIA_AGRUPADA_EN[$codigo]))
+            ->filter(fn (string $codigo): bool => $conDatos->has($codigo))
+            ->mapWithKeys(fn (string $codigo): array => [
+                $codigo => $catalogo->get($codigo) ?? CategoriasSoftware::tryFrom($codigo)?->getLabel() ?? $codigo,
+            ])
             ->all();
     }
 
@@ -131,7 +143,7 @@ class MatrizPerfiles
         return $this->perfiles ??= $this->cargos()
             ->map(fn (Cargo $cargo): array => [
                 'cargo' => (string) $cargo->cargo,
-                'valores' => $this->valoresDe($cargo->users),
+                'valores' => $this->valoresDe($cargo->users, $this->softwareDelCargo($cargo)),
             ])
             ->values()
             ->all();
@@ -151,7 +163,7 @@ class MatrizPerfiles
             ->with([
                 'area',
                 'users' => fn (Relation $query): Relation => $this->noEstaDeBaja($query),
-                'users.area.softwareAreas.software',
+                'softwareCargos.software.categoria',
                 'users.accesosSistemas' => $activa,
                 'users.accesosSistemas.sistema',
                 'users.accesosSharepoint' => $activa,
@@ -162,7 +174,7 @@ class MatrizPerfiles
                 'users.accesosVirtual.recursoVpn',
                 'users.unidadesCompartidas' => $activa,
                 'users.softwareUsuarios' => $activa,
-                'users.softwareUsuarios.software',
+                'users.softwareUsuarios.software.categoria',
                 'users.licenciasUsuarios' => $activa,
                 'users.licenciasUsuarios.licencia',
                 'users.azureAd' => $activa,
@@ -189,11 +201,12 @@ class MatrizPerfiles
      * Une los valores de todas las personas del cargo, columna por columna.
      *
      * @param  Collection<int, User>  $usuarios
+     * @param  Collection<int, Software>  $softwareDelCargo
      * @return array<string, list<string>>
      */
-    private function valoresDe(Collection $usuarios): array
+    private function valoresDe(Collection $usuarios, Collection $softwareDelCargo): array
     {
-        $porColumna = $usuarios->map(fn (User $usuario): array => $this->valoresDelUsuario($usuario));
+        $porColumna = $usuarios->map(fn (User $usuario): array => $this->valoresDelUsuario($usuario, $softwareDelCargo));
 
         $claves = $porColumna->flatMap(fn (array $valores): array => array_keys($valores))->unique();
 
@@ -211,9 +224,10 @@ class MatrizPerfiles
     }
 
     /**
+     * @param  Collection<int, Software>  $softwareDelCargo
      * @return array<string, list<string|null>>
      */
-    private function valoresDelUsuario(User $usuario): array
+    private function valoresDelUsuario(User $usuario, Collection $softwareDelCargo): array
     {
         $valores = [
             'sistemas' => $usuario->accesosSistemas
@@ -236,8 +250,8 @@ class MatrizPerfiles
                 ->all(),
         ];
 
-        foreach ($this->softwareDelUsuario($usuario) as $software) {
-            $categoria = (string) $software->categoria;
+        foreach ($this->softwareDelUsuario($usuario, $softwareDelCargo) as $software) {
+            $categoria = (string) $software->categoria?->codigo;
             $categoria = self::CATEGORIA_AGRUPADA_EN[$categoria] ?? $categoria;
 
             $valores[$categoria][] = $software->nombre_software;
@@ -258,15 +272,29 @@ class MatrizPerfiles
     }
 
     /**
-     * Software activo asignado a la persona o a su área (sin excepciones).
+     * Software autorizado para el cargo.
      *
      * @return Collection<int, Software>
      */
-    private function softwareDelUsuario(User $usuario): Collection
+    private function softwareDelCargo(Cargo $cargo): Collection
+    {
+        return $cargo->softwareCargos
+            ->map(fn (SoftwareCargo $asignacion): ?Software => $asignacion->software)
+            ->filter()
+            ->values();
+    }
+
+    /**
+     * Software activo asignado a la persona o a su cargo (sin excepciones).
+     *
+     * @param  Collection<int, Software>  $softwareDelCargo
+     * @return Collection<int, Software>
+     */
+    private function softwareDelUsuario(User $usuario, Collection $softwareDelCargo): Collection
     {
         return collect()
             ->merge($usuario->softwareUsuarios->map(fn (SoftwareUsuario $asignacion): ?Software => $asignacion->software))
-            ->merge($usuario->area?->softwareAreas->map(fn (SoftwareArea $asignacion): ?Software => $asignacion->software) ?? [])
+            ->merge($softwareDelCargo)
             ->filter(fn (?Software $software): bool => $software?->estado === true);
     }
 

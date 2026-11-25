@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Software\Schemas;
 
-use App\Enums\CategoriasSoftware;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -28,10 +27,11 @@ class SoftwareForm
                                     ->required()
                                     ->maxLength(150)
                                     ->unique(ignoreRecord: true),
-                                Select::make('categoria')
+                                Select::make('categoria_id')
                                     ->label('Categoria')
-                                    ->options(CategoriasSoftware::getOptions())
+                                    ->relationship('categoria', 'nombre')
                                     ->searchable()
+                                    ->preload()
                                     ->required(),
                                 Toggle::make('estado')
                                     ->label('Activo')

@@ -56,9 +56,17 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('categorias_software', function (Blueprint $table) {
+            $table->id('id_categoria');
+            $table->string('codigo', 50)->unique();
+            $table->string('nombre', 100)->unique();
+            $table->text('descripcion')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('softwares', function (Blueprint $table) {
             $table->id('id_software');
-            $table->string('categoria', 100)->nullable();
+            $table->foreignId('categoria_id')->nullable()->constrained('categorias_software', 'id_categoria')->restrictOnDelete();
             $table->string('nombre_software', 150);
             $table->boolean('estado');
             $table->date('fecha_autorizacion')->nullable();
@@ -66,13 +74,13 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('software_areas', function (Blueprint $table) {
+        Schema::create('software_cargos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('software_id')->nullable()->constrained('softwares', 'id_software')->restrictOnDelete();
-            $table->foreignId('area_id')->nullable()->constrained('areas', 'id_area')->restrictOnDelete();
+            $table->foreignId('cargo_id')->nullable()->constrained('cargos', 'id_cargo')->restrictOnDelete();
             $table->timestamps();
 
-            $table->unique(['software_id', 'area_id']);
+            $table->unique(['software_id', 'cargo_id']);
         });
 
         Schema::create('usuarios_externos', function (Blueprint $table) {
@@ -89,8 +97,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('usuarios_externos');
-        Schema::dropIfExists('software_areas');
+        Schema::dropIfExists('software_cargos');
         Schema::dropIfExists('softwares');
+        Schema::dropIfExists('categorias_software');
         Schema::dropIfExists('licencias');
         Schema::dropIfExists('virtuales');
         Schema::dropIfExists('recursos_vpn');

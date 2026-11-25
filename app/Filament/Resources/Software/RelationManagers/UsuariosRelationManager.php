@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Software\RelationManagers;
 
-use App\Filament\Actions\AsignarSoftwarePorDefectoAction;
+use App\Filament\Actions\AsignarSoftwarePorCargoAction;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
 use App\Rules\NotTrashed;
@@ -102,7 +102,7 @@ class UsuariosRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Asignar usuario')
                     ->successNotificationTitle('Asignacion registrada correctamente'),
-                AsignarSoftwarePorDefectoAction::make($this),
+                AsignarSoftwarePorCargoAction::make($this),
             ])
             ->recordActions([
                 EditAction::make()

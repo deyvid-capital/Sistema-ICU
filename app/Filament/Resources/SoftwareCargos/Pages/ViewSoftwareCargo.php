@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\SoftwareAreas\Pages;
+namespace App\Filament\Resources\SoftwareCargos\Pages;
 
-use App\Filament\Resources\SoftwareAreas\SoftwareAreaResource;
+use App\Filament\Resources\SoftwareCargos\SoftwareCargoResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
-class ViewSoftwareArea extends ViewRecord
+class ViewSoftwareCargo extends ViewRecord
 {
-    protected static string $resource = SoftwareAreaResource::class;
+    protected static string $resource = SoftwareCargoResource::class;
 
     protected function getHeaderActions(): array
     {

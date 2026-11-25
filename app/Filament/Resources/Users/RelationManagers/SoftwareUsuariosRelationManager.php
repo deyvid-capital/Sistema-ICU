@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Filament\Actions\AsignarSoftwarePorDefectoAction;
+use App\Filament\Actions\AsignarSoftwarePorCargoAction;
+use App\Filament\Actions\AsignarSoftwarePorCategoriaAction;
 use App\Filament\Resources\SoftwareUsuarios\SoftwareUsuarioResource;
 use App\Filament\Resources\Users\RelationManagers\Concerns\HasOwnerRecordCountBadge;
 use Filament\Actions\CreateAction;
@@ -30,7 +31,8 @@ class SoftwareUsuariosRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Asignar software')
                     ->successNotificationTitle('Asignación registrada correctamente'),
-                AsignarSoftwarePorDefectoAction::make($this),
+                AsignarSoftwarePorCargoAction::make($this),
+                AsignarSoftwarePorCategoriaAction::make($this),
             ])
             ->poll('15s');
     }

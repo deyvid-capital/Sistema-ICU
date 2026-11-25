@@ -16,6 +16,7 @@ use App\Models\AzureAd;
 use App\Models\LicenciaUsuario;
 use App\Models\Movimiento;
 use App\Models\Software;
+use App\Models\SoftwareCargo;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
 use App\Models\User;
@@ -57,9 +58,9 @@ class MovimientoFormularioPdfData
             'usuario.licenciasUsuarios.licencia',
             'usuario.unidadesCompartidas',
             'usuario.azureAd',
-            'usuario.softwareUsuarios.software',
-            'usuario.softwareExcepciones.software',
-            'usuario.area.softwareAreas.software',
+            'usuario.softwareUsuarios.software.categoria',
+            'usuario.softwareExcepciones.software.categoria',
+            'usuario.cargo.softwareCargos.software.categoria',
             'usuario.asignacionesEquipos.equipo.modelo',
             'usuario.asignacionesEquipos.entrega',
             'usuario.asignacionesEquipos.recepcion',
@@ -343,8 +344,8 @@ class MovimientoFormularioPdfData
     }
 
     /**
-     * Software asignado al usuario, el de su área y las excepciones aprobadas,
-     * agrupado por el valor de CategoriasSoftware.
+     * Software asignado al usuario, el autorizado para su cargo y las excepciones
+     * aprobadas, agrupado por el código de su categoría (valor de CategoriasSoftware).
      *
      * @return Collection<string, Collection<int, Software>>
      */
@@ -363,16 +364,16 @@ class MovimientoFormularioPdfData
             ->filter(fn (SoftwareExc $item): bool => $this->incluirInactivos || $item->fecha_fin === null)
             ->map(fn (SoftwareExc $item): ?Software => $item->software);
 
-        $fromArea = $usuario->area?->softwareAreas
-            ?->map(fn ($item): ?Software => $item->software) ?? collect();
+        $fromCargo = $usuario->cargo?->softwareCargos
+            ?->map(fn (SoftwareCargo $item): ?Software => $item->software) ?? collect();
 
         return collect()
             ->merge($fromUsuarios)
             ->merge($fromExcepciones)
-            ->merge($fromArea)
+            ->merge($fromCargo)
             ->filter()
             ->unique(fn (Software $software): int => (int) $software->getKey())
-            ->groupBy(fn (Software $software): string => (string) ($software->categoria ?? ''));
+            ->groupBy(fn (Software $software): string => (string) ($software->categoria?->codigo ?? ''));
     }
 
     /**

@@ -18,7 +18,7 @@ class Cargo extends Model
     use LogsIcuActivity;
     use PreventsForceDeleteWithDependents;
 
-    protected static array $forceDeleteGuardedRelations = ['users', 'movimientos'];
+    protected static array $forceDeleteGuardedRelations = ['users', 'movimientos', 'softwareCargos'];
 
     protected $primaryKey = 'id_cargo';
 
@@ -42,6 +42,14 @@ class Cargo extends Model
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class, 'area_id', 'id_area');
+    }
+
+    /**
+     * Software autorizado para el cargo.
+     */
+    public function softwareCargos(): HasMany
+    {
+        return $this->hasMany(SoftwareCargo::class, 'cargo_id', 'id_cargo');
     }
 
     /**

@@ -19,6 +19,7 @@ use App\Models\AzureAd;
 use App\Models\Cargador;
 use App\Models\CargadorCel;
 use App\Models\Cargo;
+use App\Models\CategoriaSoftware;
 use App\Models\Celular;
 use App\Models\CertificadoFirma;
 use App\Models\EntregaCelular;
@@ -45,7 +46,7 @@ use App\Models\RecursoVpn;
 use App\Models\Sistema;
 use App\Models\SitioSharepoint;
 use App\Models\Software;
-use App\Models\SoftwareArea;
+use App\Models\SoftwareCargo;
 use App\Models\SoftwareExc;
 use App\Models\SoftwareUsuario;
 use App\Models\SolicitudFirma;
@@ -174,7 +175,8 @@ enum DominioActividad: string implements HasLabel
             UsuarioFortitoken::class => self::Seguridad,
 
             Software::class => self::Software,
-            SoftwareArea::class => self::Software,
+            SoftwareCargo::class => self::Software,
+            CategoriaSoftware::class => self::Software,
             SoftwareExc::class => self::Software,
             SoftwareUsuario::class => self::Software,
             Licencia::class => self::Software,

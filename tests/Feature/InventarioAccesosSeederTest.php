@@ -47,7 +47,7 @@ class InventarioAccesosSeederTest extends TestCase
         $this->assertSame(0, UsuarioFortitoken::query()->count());
 
         $fortiClient = Software::query()->where('nombre_software', 'FortiClient')->first();
-        $this->assertSame(CategoriasSoftware::SoftwareVPN->value, $fortiClient?->categoria);
+        $this->assertSame(CategoriasSoftware::SoftwareVPN->value, $fortiClient?->categoria?->codigo);
 
         $deyvid = User::query()->where('email', 'deyvid@capitalsafi.com')->first();
         $this->assertNotNull($deyvid);

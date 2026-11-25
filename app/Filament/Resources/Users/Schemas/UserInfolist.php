@@ -8,7 +8,7 @@ use App\Models\AccesoSistema;
 use App\Models\AsigCelular;
 use App\Models\AsignacionEquipo;
 use App\Models\Movimiento;
-use App\Models\SoftwareArea;
+use App\Models\SoftwareCargo;
 use App\Models\User;
 use App\Models\UsuarioFortitoken;
 use Closure;
@@ -386,7 +386,7 @@ class UserInfolist
                                                             ->badge()
                                                             ->color('info')
                                                             ->placeholder('—'),
-                                                        TextEntry::make('software.categoria')
+                                                        TextEntry::make('software.categoria.nombre')
                                                             ->label('Categoría')
                                                             ->badge()
                                                             ->color('gray')
@@ -453,27 +453,27 @@ class UserInfolist
                                         static::emptyNotice('softwareExcepciones', 'El usuario no tiene excepciones de software.'),
                                     ]),
 
-                                Section::make('Software autorizado por su área')
-                                    ->icon(Heroicon::OutlinedBuildingOffice2)
-                                    ->description('Software habilitado para el área del usuario, aunque no esté asignado individualmente.')
+                                Section::make('Software autorizado por su cargo')
+                                    ->icon(Heroicon::OutlinedBriefcase)
+                                    ->description('Software habilitado para el cargo del usuario, aunque no esté asignado individualmente.')
                                     ->collapsed()
                                     ->schema([
-                                        TextEntry::make('software_area')
+                                        TextEntry::make('software_cargo')
                                             ->hiddenLabel()
                                             ->badge()
                                             ->color('gray')
-                                            ->state(fn (User $record): array => $record->id_area === null
+                                            ->state(fn (User $record): array => $record->id_cargo === null
                                                 ? []
-                                                : SoftwareArea::query()
-                                                    ->where('area_id', $record->id_area)
+                                                : SoftwareCargo::query()
+                                                    ->where('cargo_id', $record->id_cargo)
                                                     ->with('software')
                                                     ->get()
-                                                    ->map(fn (SoftwareArea $item): ?string => $item->software?->nombre_software)
+                                                    ->map(fn (SoftwareCargo $item): ?string => $item->software?->nombre_software)
                                                     ->filter()
                                                     ->unique()
                                                     ->values()
                                                     ->all())
-                                            ->placeholder('Sin software autorizado para el área.'),
+                                            ->placeholder('Sin software autorizado para el cargo.'),
                                     ]),
                             ]),
 

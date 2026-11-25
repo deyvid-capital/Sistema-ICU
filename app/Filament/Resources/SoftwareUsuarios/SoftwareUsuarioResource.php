@@ -30,7 +30,7 @@ class SoftwareUsuarioResource extends Resource
 
     protected static ?string $navigationLabel = 'Software de usuarios';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $modelLabel = 'software de usuario';
 

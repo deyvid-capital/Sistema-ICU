@@ -4,61 +4,61 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\SoftwareArea;
+use App\Models\SoftwareCargo;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-class SoftwareAreaPolicy
+class SoftwareCargoPolicy
 {
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ViewAny:SoftwareArea');
+        return $authUser->can('ViewAny:SoftwareCargo');
     }
 
-    public function view(AuthUser $authUser, SoftwareArea $softwareArea): bool
+    public function view(AuthUser $authUser, SoftwareCargo $softwareCargo): bool
     {
-        return $authUser->can('View:SoftwareArea');
+        return $authUser->can('View:SoftwareCargo');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:SoftwareArea');
+        return $authUser->can('Create:SoftwareCargo');
     }
 
-    public function update(AuthUser $authUser, SoftwareArea $softwareArea): bool
+    public function update(AuthUser $authUser, SoftwareCargo $softwareCargo): bool
     {
-        return $authUser->can('Update:SoftwareArea');
+        return $authUser->can('Update:SoftwareCargo');
     }
 
-    public function delete(AuthUser $authUser, SoftwareArea $softwareArea): bool
+    public function delete(AuthUser $authUser, SoftwareCargo $softwareCargo): bool
     {
-        return $authUser->can('Delete:SoftwareArea');
+        return $authUser->can('Delete:SoftwareCargo');
     }
 
     public function deleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('DeleteAny:SoftwareArea');
+        return $authUser->can('DeleteAny:SoftwareCargo');
     }
 
-    public function restore(AuthUser $authUser, SoftwareArea $softwareArea): bool
+    public function restore(AuthUser $authUser, SoftwareCargo $softwareCargo): bool
     {
-        return $authUser->can('Restore:SoftwareArea');
+        return $authUser->can('Restore:SoftwareCargo');
     }
 
-    public function forceDelete(AuthUser $authUser, SoftwareArea $softwareArea): bool
+    public function forceDelete(AuthUser $authUser, SoftwareCargo $softwareCargo): bool
     {
-        return $authUser->can('ForceDelete:SoftwareArea');
+        return $authUser->can('ForceDelete:SoftwareCargo');
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:SoftwareArea');
+        return $authUser->can('ForceDeleteAny:SoftwareCargo');
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:SoftwareArea');
+        return $authUser->can('RestoreAny:SoftwareCargo');
     }
 }

@@ -35,7 +35,7 @@ class ViewUser extends ViewRecord
             'accesosSharepoint.sitio',
             'unidadesCompartidas',
             'azureAd',
-            'softwareUsuarios.software',
+            'softwareUsuarios.software.categoria',
             'softwareExcepciones.software',
             'softwareExcepciones.aprobador',
             'softwareExcepciones.areaAprobadora',

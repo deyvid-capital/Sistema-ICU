@@ -8,6 +8,7 @@ use App\Models\AccesoSistema;
 use App\Models\AccesoVirtual;
 use App\Models\AccUdCompartida;
 use App\Models\Area;
+use App\Models\CategoriaSoftware;
 use App\Models\Licencia;
 use App\Models\LicenciaUsuario;
 use App\Models\RecursoVpn;
@@ -97,7 +98,7 @@ class InventarioAccesosSeeder extends Seeder
             $software = Software::query()->updateOrCreate(
                 ['nombre_software' => $nombre],
                 [
-                    'categoria' => $this->categoriaSoftware($nombre, $subcategorias),
+                    'categoria_id' => CategoriaSoftware::deEnum($this->categoriaSoftware($nombre, $subcategorias))->getKey(),
                     'estado' => true,
                 ],
             );
@@ -394,26 +395,26 @@ class InventarioAccesosSeeder extends Seeder
     /**
      * @param  list<string>  $subcategorias
      */
-    private function categoriaSoftware(string $nombre, array $subcategorias): string
+    private function categoriaSoftware(string $nombre, array $subcategorias): CategoriasSoftware
     {
         if ($nombre === 'FortiClient' || in_array('Software VPN', $subcategorias, true)) {
-            return CategoriasSoftware::SoftwareVPN->value;
+            return CategoriasSoftware::SoftwareVPN;
         }
 
         $subcategoria = $subcategorias[0];
 
         return match ($subcategoria) {
-            'Antivirus y VPN' => CategoriasSoftware::Antivirus->value,
-            'Compresión' => CategoriasSoftware::Compresion->value,
-            'Doble autenticación' => CategoriasSoftware::AutenticacionMultifactor->value,
+            'Antivirus y VPN' => CategoriasSoftware::Antivirus,
+            'Compresión' => CategoriasSoftware::Compresion,
+            'Doble autenticación' => CategoriasSoftware::AutenticacionMultifactor,
             'Impresora y escáner' => str_contains(mb_strtolower($nombre), 'scan')
-                ? CategoriasSoftware::Scanner->value
-                : CategoriasSoftware::Impresora->value,
-            'Navegadores' => CategoriasSoftware::Navegadores->value,
-            'PDF' => CategoriasSoftware::PDF->value,
-            'Software de escáner' => CategoriasSoftware::SoftwareEscaner->value,
-            'Soporte remoto' => CategoriasSoftware::SoporteRemoto->value,
-            default => CategoriasSoftware::Otro->value,
+                ? CategoriasSoftware::Scanner
+                : CategoriasSoftware::Impresora,
+            'Navegadores' => CategoriasSoftware::Navegadores,
+            'PDF' => CategoriasSoftware::PDF,
+            'Software de escáner' => CategoriasSoftware::SoftwareEscaner,
+            'Soporte remoto' => CategoriasSoftware::SoporteRemoto,
+            default => CategoriasSoftware::Otro,
         };
     }
 
