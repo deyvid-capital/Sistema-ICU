@@ -4,11 +4,18 @@ namespace Database\Seeders;
 
 use App\Enums\EstadoCargador;
 use App\Enums\EstadoEquipo;
+use App\Models\AccesoDaza;
+use App\Models\AccesoInternet;
+use App\Models\AccesoSharepoint;
+use App\Models\AccesoSistema;
+use App\Models\AccesoVirtual;
+use App\Models\AccUdCompartida;
 use App\Models\Area;
 use App\Models\AsigCargadorCel;
 use App\Models\AsigCelular;
 use App\Models\AsignacionCargador;
 use App\Models\AsignacionEquipo;
+use App\Models\AzureAd;
 use App\Models\Cargador;
 use App\Models\CargadorCel;
 use App\Models\Cargo;
@@ -16,6 +23,7 @@ use App\Models\Celular;
 use App\Models\EntregaCelular;
 use App\Models\EntregaEquipo;
 use App\Models\Equipo;
+use App\Models\Fondo;
 use App\Models\MantenimientoEquipo;
 use App\Models\MemoriaRam;
 use App\Models\Microprocesador;
@@ -26,9 +34,13 @@ use App\Models\NotaSalidaEquipo;
 use App\Models\RecepcionCelular;
 use App\Models\RecepcionEquipo;
 use App\Models\ReciboEquipo;
+use App\Models\RecursoVpn;
+use App\Models\Sistema;
+use App\Models\SitioSharepoint;
 use App\Models\TarjetaVideo;
 use App\Models\User;
 use App\Models\UsuarioExterno;
+use App\Models\Virtual;
 use App\Services\Movimientos\ProcesarBajaColaborador;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -80,6 +92,7 @@ class GuiaDemoSeeder extends Seeder
         $this->sembrarAsignacionDeEquipos();
         $this->sembrarCelulares($usuarios);
         $this->sembrarReingresoParaGuia($usuarios);
+        $this->sembrarAccesos($usuarios);
     }
 
     /**
@@ -581,6 +594,180 @@ class GuiaDemoSeeder extends Seeder
             'numero' => '001-2026',
             'fecha' => $hoy->copy()->subMonths(1),
             'nota' => 'Devuelto en buen estado.',
+        ]);
+    }
+
+    /**
+     * Catálogo mínimo + accesos de demostración para el capítulo Accesos.
+     * Los catálogos completos se documentan en Recursos compartidos (C7).
+     *
+     * @param  array<string, User>  $usuarios
+     */
+    private function sembrarAccesos(array $usuarios): void
+    {
+        $hoy = Carbon::parse(self::HOY);
+        $lucia = $usuarios['Lucía Fernández Rojas'];
+        $diego = $usuarios['Diego Salvatierra Luna'];
+        $camila = $usuarios['Camila Arce Villarroel'];
+
+        $sistemaContabilidad = Sistema::query()->create([
+            'nombre_sistema' => 'Contabilidad Demo',
+            'descripcion' => 'Sistema de contabilidad de demostración.',
+        ]);
+        $sistemaNomina = Sistema::query()->create([
+            'nombre_sistema' => 'Nómina Demo',
+            'descripcion' => 'Sistema de nómina de demostración.',
+        ]);
+
+        $sitioTi = SitioSharepoint::query()->create([
+            'nombre_sitio' => 'Documentos TI',
+            'url' => 'https://sharepoint.example.com/sites/ti-demo',
+            'descripcion' => 'Sitio de documentación de TI.',
+            'estado' => true,
+        ]);
+        SitioSharepoint::query()->create([
+            'nombre_sitio' => 'Inversiones',
+            'url' => 'https://sharepoint.example.com/sites/inversiones-demo',
+            'descripcion' => 'Sitio del área de inversiones.',
+            'estado' => true,
+        ]);
+
+        $fondoAlfa = Fondo::query()->create([
+            'codigo' => 'F001',
+            'nombre_completo' => 'Fondo Demo Alfa',
+            'descripcion' => 'Fondo de demostración Alfa.',
+        ]);
+        Fondo::query()->create([
+            'codigo' => 'F002',
+            'nombre_completo' => 'Fondo Demo Beta',
+            'descripcion' => 'Fondo de demostración Beta.',
+        ]);
+
+        $vdiUno = Virtual::query()->create([
+            'maquina_virtual' => 'VDI-DEMO-01',
+            'estado' => true,
+        ]);
+        Virtual::query()->create([
+            'maquina_virtual' => 'VDI-DEMO-02',
+            'estado' => true,
+        ]);
+
+        $vpnCorp = RecursoVpn::query()->create([
+            'nombre_vpn' => 'VPN-Corp',
+            'descripcion' => 'VPN corporativa de demostración.',
+            'estado' => true,
+        ]);
+        RecursoVpn::query()->create([
+            'nombre_vpn' => 'VPN-Contingencia',
+            'descripcion' => 'VPN de contingencia de demostración.',
+            'estado' => true,
+        ]);
+
+        AzureAd::query()->create([
+            'usuario_id' => $lucia->getKey(),
+            'iniciales' => 'LFR',
+            'sincronizacion' => 'Local / Nube',
+            'mfa' => true,
+            'estado' => true,
+        ]);
+        AzureAd::query()->create([
+            'usuario_id' => $diego->getKey(),
+            'iniciales' => 'DSL',
+            'sincronizacion' => 'Nube',
+            'mfa' => false,
+            'estado' => true,
+        ]);
+
+        AccesoDaza::query()->create([
+            'usuario_id' => $lucia->getKey(),
+            'usuario_daza' => 'lfernandez',
+            'nivel_acceso' => 'Usuario Estándar',
+            'fondo_id' => $fondoAlfa->getKey(),
+            'ambiente' => 'Producción',
+            'estado' => true,
+            'fecha' => $hoy->copy()->subMonths(5),
+        ]);
+        AccesoDaza::query()->create([
+            'usuario_id' => $camila->getKey(),
+            'usuario_daza' => 'carce',
+            'nivel_acceso' => 'Usuario Administrador',
+            'fondo_id' => $fondoAlfa->getKey(),
+            'ambiente' => 'Producción',
+            'estado' => true,
+            'fecha' => $hoy->copy()->subMonths(3),
+        ]);
+
+        AccesoSharepoint::query()->create([
+            'usuario_id' => $lucia->getKey(),
+            'sitio_id' => $sitioTi->getKey(),
+            'estado' => true,
+        ]);
+        AccesoSharepoint::query()->create([
+            'usuario_id' => $diego->getKey(),
+            'sitio_id' => $sitioTi->getKey(),
+            'estado' => true,
+        ]);
+
+        AccesoSistema::query()->create([
+            'usuario_id' => $lucia->getKey(),
+            'id_sistema' => $sistemaContabilidad->getKey(),
+            'usuario_sistema' => 'lfernandez',
+            'nivel_acceso' => 'Usuario Estándar',
+            'estado' => true,
+            'fecha_inicio' => $hoy->copy()->subMonths(6),
+            'fecha_fin' => null,
+            'observaciones' => null,
+        ]);
+        AccesoSistema::query()->create([
+            'usuario_id' => $diego->getKey(),
+            'id_sistema' => $sistemaNomina->getKey(),
+            'usuario_sistema' => 'dsalvatierra',
+            'nivel_acceso' => 'Usuario de Soporte',
+            'estado' => true,
+            'fecha_inicio' => $hoy->copy()->subMonths(4),
+            'fecha_fin' => null,
+            'observaciones' => null,
+        ]);
+
+        AccesoInternet::query()->create([
+            'usuario_id' => $lucia->getKey(),
+            'usuario_red' => 'lfernandez',
+            'nivel_acceso' => 'Usuario Estándar',
+            'estado' => true,
+            'fecha' => $hoy->copy()->subMonths(6),
+            'observaciones' => null,
+        ]);
+        AccesoInternet::query()->create([
+            'usuario_id' => $diego->getKey(),
+            'usuario_red' => 'dsalvatierra',
+            'nivel_acceso' => 'Usuario Estándar',
+            'estado' => true,
+            'fecha' => $hoy->copy()->subMonths(4),
+            'observaciones' => null,
+        ]);
+
+        AccesoVirtual::query()->create([
+            'usuario_id' => $lucia->getKey(),
+            'virtual_id' => $vdiUno->getKey(),
+            'vpn_id' => $vpnCorp->getKey(),
+            'estado' => true,
+        ]);
+        AccesoVirtual::query()->create([
+            'usuario_id' => $diego->getKey(),
+            'virtual_id' => $vdiUno->getKey(),
+            'vpn_id' => null,
+            'estado' => true,
+        ]);
+
+        AccUdCompartida::query()->create([
+            'usuario_id' => $lucia->getKey(),
+            'unidad_compartida' => 'Daza Producción (P)',
+            'estado' => true,
+        ]);
+        AccUdCompartida::query()->create([
+            'usuario_id' => $diego->getKey(),
+            'unidad_compartida' => 'Daza Contingencia (Q)',
+            'estado' => true,
         ]);
     }
 }

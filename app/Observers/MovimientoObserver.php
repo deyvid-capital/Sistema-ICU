@@ -105,7 +105,7 @@ class MovimientoObserver
         if (true) {
             Notification::make()
                 ->title('Baja procesada')
-                ->body("{$resumen->mensaje()} Revisa la ficha de {$usuario} si necesitas ajustar algo.")
+                ->body("{$resumen->mensaje()} Revisa las asignaciones de {$usuario} si requiere ajustes.")
                 ->warning()
                 ->duration(10000)
                 ->send();

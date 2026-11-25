@@ -137,9 +137,9 @@ class UserForm
                                 ->label('Teléfono')
                                 ->placeholder('Ej. 7123-4567')
                                 ->tel()
+                                ->required()
                                 ->maxLength(30)
                                 ->unique(User::class, 'telefono', ignoreRecord: true)
-                                ->nullable()
                                 ->dehydrateStateUsing(fn ($state) => filled($state) ? $state : null)
                                 ->prefixIcon(Heroicon::OutlinedPhone),
                             TextInput::make('password')

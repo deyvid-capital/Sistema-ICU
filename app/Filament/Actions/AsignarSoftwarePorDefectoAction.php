@@ -28,7 +28,7 @@ class AsignarSoftwarePorDefectoAction
         $esUsuario = $owner instanceof User;
 
         return Action::make('asignarPorDefecto')
-            ->label('Asignar por defecto')
+            ->label('Asignar por Categoría')
             ->icon(Heroicon::UserPlus)
             ->color('success')
             ->modalHeading($esUsuario
