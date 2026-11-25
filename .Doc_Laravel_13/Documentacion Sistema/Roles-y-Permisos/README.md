@@ -132,7 +132,7 @@ Vaciar un control quita ese filtro; los tres vacíos muestran las 48 secciones.
 | Equipos | Cargador, Equipo, NotaRecepcionEquipo, NotaSalidaEquipo, ReciboEquipo |
 | Inventario | MemoriaRam, Microprocesador, ModeloLaptop, TarjetaVideo |
 | Recursos compartidos | Fondo, RecursoVpn, Sistema, SitioSharepoint, Virtual |
-| Software y licencias | Licencia, LicenciaUsuario, Software, SoftwareArea, SoftwareExc, SoftwareUsuario |
+| Software y licencias | Licencia, LicenciaUsuario, CategoriaSoftware, Software, SoftwareCargo, SoftwareExc, SoftwareUsuario |
 | Usuarios | Area, Cargo, Movimiento, User, UsuarioExterno |
 | Sin módulo | Activity, PdfCelular, PdfEquipo, Role |
 
@@ -222,7 +222,7 @@ modelos con `SoftDeletes`. En los **17** que no la usan esos 4 checkboxes se pue
 pero **nunca se evalúan**:
 
 > Activity, Area, Cargo, Fondo, Licencia, MemoriaRam, Microprocesador, ModeloLaptop,
-> PdfCelular, RecursoVpn, Role, Sistema, SitioSharepoint, Software, SoftwareArea,
+> PdfCelular, RecursoVpn, Role, Sistema, SitioSharepoint, Software, SoftwareCargo, CategoriaSoftware,
 > TarjetaVideo, Virtual
 
 Marcarlos no hace daño; no marcarlos tampoco quita nada.

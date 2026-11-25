@@ -12,3 +12,4 @@
 - [Memoria y skills en el repo](memoria-y-skills-en-el-repo.md) — dos equipos: copiar la memoria a .claude/memory y versionar skills de .claude y .cursor; el push lo hace el usuario
 - [Plugin de apariencia](plugin-apariencia.md) — capitalsafi/filament-apariencia en packages/capitalsafi; temas SAFI, decisiones, roles y trampas; detalle en .agente/.avance del paquete
 - [Plugin Breezy](plugin-breezy.md) — fork capitalsafi/filament-breezy en packages/capitalsafi; app conectada y fusionada a main (2026-11-23); los 3 paquetes siguen como path (packages/ clonado en ambas compus); más adelante rama develop; T4–T7 por revisar, tareas fáciles para Cursor en .avance
+- [Software por cargo y categorías](software-por-cargo-y-categorias.md) — 2026-11-25: software_areas→software_cargos, categoría a tabla propia, acciones por categoría/cargo

@@ -14,11 +14,11 @@ Reglas que fijó el usuario (no derivables del código):
 - **Cargo único.** Si varias personas comparten cargo, sus accesos se unen en una sola fila y sin repetidos.
 - **Celdas.** Varios valores en una celda separados por " | "; sistemas como "Viafirma - Usuario".
 - **Internet.** El área con siglas, "Inversiones Alternativas (IA)", igual que el formulario de alta/baja. Usa `App\Support\SiglasArea`, compartido con `MovimientoFormularioPdfData`. No se usa `nivel_acceso`.
-- **Software.** Cuenta el asignado al usuario más el de su área. Las excepciones NO cuentan, porque son personales. Primero se pidió "solo del área", luego se corrigió a esto.
+- **Software.** Cuenta el asignado al usuario más el autorizado para su cargo (`software_cargos`; antes era por área, cambiado el 2026-11-25). Las excepciones NO cuentan, porque son personales. La columna sale del código de la categoría en `categorias_software`.
 - **Descarga.** Síncrona, sin cola ni BD (el usuario lo confirmó).
 
 **Why:** el usuario dio y corrigió estas reglas explícitamente.
 
-**How to apply:** si se toca la matriz o el formulario de alta/baja, mantener estas reglas. En dev `software_areas` está vacío, así que el software visible sale de las asignaciones por usuario.
+**How to apply:** si se toca la matriz o el formulario de alta/baja, mantener estas reglas. En dev `software_cargos` está vacío, así que el software visible sale de las asignaciones por usuario.
 
 Relacionado: [[dashboard-widgets]]
