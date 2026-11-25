@@ -54,7 +54,7 @@ class CargadorsTable
                             'asignado' => 'info',
                             'temporal' => 'warning',
                             'reasignacion' => 'primary',
-                            'danado' => 'danger',
+                            'dañado' => 'danger',
                             'baja' => 'gray',
                             default => 'gray',
                         })
