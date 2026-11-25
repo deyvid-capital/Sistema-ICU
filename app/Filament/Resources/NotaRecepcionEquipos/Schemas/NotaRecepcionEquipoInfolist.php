@@ -18,7 +18,7 @@ class NotaRecepcionEquipoInfolist
             ->columns(1)
             ->components([
                 Section::make('Nota de recepción de equipo')
-                    ->description('Nota asociada a la recepción de un equipo por un usuario externo.')
+                    ->description('Nota asociada a la recepción de un equipo por un usuario externo de soporte técnico.')
                     ->icon(Heroicon::OutlinedClipboardDocumentList)
                     ->columnSpanFull()
                     ->columns(['default' => 1, 'md' => 2])
@@ -27,8 +27,8 @@ class NotaRecepcionEquipoInfolist
                             ->label('Equipo')
                             ->icon(Heroicon::OutlinedComputerDesktop)
                             ->placeholder('—'),
-                        TextEntry::make('usuarioExterno.nombre')
-                            ->label('Usuario externo')
+                        TextEntry::make('usuarioExternoSoporte.nombre')
+                            ->label('Usuario externo de soporte')
                             ->icon(Heroicon::OutlinedUser)
                             ->placeholder('—'),
                         TextEntry::make('numero')

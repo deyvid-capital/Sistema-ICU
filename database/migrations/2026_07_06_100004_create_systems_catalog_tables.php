@@ -83,7 +83,7 @@ return new class extends Migration
             $table->unique(['software_id', 'cargo_id']);
         });
 
-        Schema::create('usuarios_externos', function (Blueprint $table) {
+        Schema::create('usuarios_externos_soporte_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 200);
             $table->string('carnet', 50);
@@ -96,7 +96,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('usuarios_externos');
+        Schema::dropIfExists('usuarios_externos_soporte_equipos');
         Schema::dropIfExists('software_cargos');
         Schema::dropIfExists('softwares');
         Schema::dropIfExists('categorias_software');

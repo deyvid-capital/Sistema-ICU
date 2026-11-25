@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Filament\Resources\UsuarioExternos\Pages;
+namespace App\Filament\Resources\UsuarioExternoSoporteEquipos\Pages;
 
-use App\Filament\Resources\UsuarioExternos\UsuarioExternoResource;
+use App\Filament\Resources\UsuarioExternoSoporteEquipos\UsuarioExternoSoporteEquipoResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditUsuarioExterno extends EditRecord
+class EditUsuarioExternoSoporteEquipo extends EditRecord
 {
-    protected static string $resource = UsuarioExternoResource::class;
+    protected static string $resource = UsuarioExternoSoporteEquipoResource::class;
 
     protected function getHeaderActions(): array
     {

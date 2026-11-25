@@ -18,7 +18,7 @@ class NotaSalidaEquipoInfolist
             ->columns(1)
             ->components([
                 Section::make('Nota de salida de equipo')
-                    ->description('Nota asociada a la salida de un equipo hacia un usuario externo.')
+                    ->description('Nota asociada a la salida de un equipo hacia un usuario externo de soporte técnico.')
                     ->icon(Heroicon::OutlinedArrowRightOnRectangle)
                     ->columnSpanFull()
                     ->columns(['default' => 1, 'md' => 2])
@@ -27,8 +27,8 @@ class NotaSalidaEquipoInfolist
                             ->label('Equipo')
                             ->icon(Heroicon::OutlinedComputerDesktop)
                             ->placeholder('—'),
-                        TextEntry::make('usuarioExterno.nombre')
-                            ->label('Usuario externo')
+                        TextEntry::make('usuarioExternoSoporte.nombre')
+                            ->label('Usuario externo de soporte')
                             ->icon(Heroicon::OutlinedUser)
                             ->placeholder('—'),
                         TextEntry::make('numero')

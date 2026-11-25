@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\UsuarioExternos\Tables;
+namespace App\Filament\Resources\UsuarioExternoSoporteEquipos\Tables;
 
-use App\Filament\Resources\UsuarioExternos\UsuarioExternoResource;
-use App\Models\UsuarioExterno;
+use App\Filament\Resources\UsuarioExternoSoporteEquipos\UsuarioExternoSoporteEquipoResource;
+use App\Models\UsuarioExternoSoporteEquipo;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -19,14 +19,14 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
-class UsuarioExternosTable
+class UsuarioExternoSoporteEquiposTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->recordUrl(fn (UsuarioExterno $record): string => $record->trashed()
-                ? UsuarioExternoResource::getUrl('view', ['record' => $record])
-                : UsuarioExternoResource::getUrl('edit', ['record' => $record]))
+            ->recordUrl(fn (UsuarioExternoSoporteEquipo $record): string => $record->trashed()
+                ? UsuarioExternoSoporteEquipoResource::getUrl('view', ['record' => $record])
+                : UsuarioExternoSoporteEquipoResource::getUrl('edit', ['record' => $record]))
             ->defaultSort('nombre')
             ->striped()
             ->paginated([10, 25, 50])
@@ -68,19 +68,19 @@ class UsuarioExternosTable
                     ViewAction::make()->label('Ver'),
                     EditAction::make()
                         ->label('Editar')
-                        ->visible(fn (UsuarioExterno $record): bool => ! $record->trashed()),
+                        ->visible(fn (UsuarioExternoSoporteEquipo $record): bool => ! $record->trashed()),
                     DeleteAction::make()
                         ->label('Eliminar')
-                        ->visible(fn (UsuarioExterno $record): bool => ! $record->trashed())
-                        ->successNotificationTitle('Usuario externo eliminado correctamente'),
+                        ->visible(fn (UsuarioExternoSoporteEquipo $record): bool => ! $record->trashed())
+                        ->successNotificationTitle('Usuario externo de soporte eliminado correctamente'),
                     ForceDeleteAction::make()
                         ->label('Eliminar permanentemente')
-                        ->visible(fn (UsuarioExterno $record): bool => $record->trashed())
-                        ->successNotificationTitle('Usuario externo eliminado permanentemente'),
+                        ->visible(fn (UsuarioExternoSoporteEquipo $record): bool => $record->trashed())
+                        ->successNotificationTitle('Usuario externo de soporte eliminado permanentemente'),
                     RestoreAction::make()
                         ->label('Restaurar')
-                        ->visible(fn (UsuarioExterno $record): bool => $record->trashed())
-                        ->successNotificationTitle('Usuario externo restaurado correctamente'),
+                        ->visible(fn (UsuarioExternoSoporteEquipo $record): bool => $record->trashed())
+                        ->successNotificationTitle('Usuario externo de soporte restaurado correctamente'),
                 ])
                     ->label('Acciones')
                     ->icon(Heroicon::OutlinedEllipsisVertical)
@@ -92,13 +92,13 @@ class UsuarioExternosTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Eliminar seleccionados')
-                        ->successNotificationTitle('Usuarios externos eliminados correctamente'),
+                        ->successNotificationTitle('Usuarios externos de soporte eliminados correctamente'),
                     ForceDeleteBulkAction::make()
                         ->label('Eliminar permanentemente')
-                        ->successNotificationTitle('Usuarios externos eliminados permanentemente'),
+                        ->successNotificationTitle('Usuarios externos de soporte eliminados permanentemente'),
                     RestoreBulkAction::make()
                         ->label('Restaurar seleccionados')
-                        ->successNotificationTitle('Usuarios externos restaurados correctamente'),
+                        ->successNotificationTitle('Usuarios externos de soporte restaurados correctamente'),
                 ])
                     ->label('Acciones masivas'),
             ]);

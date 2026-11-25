@@ -114,7 +114,7 @@ class EquipoFormularioPdfData
             'equipo.ram',
             'equipo.gpu',
             'equipo.asignacionCargador.cargador',
-            'usuarioExterno',
+            'usuarioExternoSoporte',
             'firmantes.usuario.cargo',
         ]);
 
@@ -122,8 +122,8 @@ class EquipoFormularioPdfData
             $nota->firmantes,
             null,
             fallbackDerecha: [
-                'nombre' => $nota->usuarioExterno?->nombre ?? '—',
-                'cargo' => $nota->usuarioExterno?->cargo,
+                'nombre' => $nota->usuarioExternoSoporte?->nombre ?? '—',
+                'cargo' => $nota->usuarioExternoSoporte?->cargo,
             ],
         );
 
@@ -150,7 +150,7 @@ class EquipoFormularioPdfData
             'equipo.ram',
             'equipo.gpu',
             'equipo.asignacionCargador.cargador',
-            'usuarioExterno',
+            'usuarioExternoSoporte',
             'firmantes.usuario.cargo',
         ]);
 
@@ -161,7 +161,7 @@ class EquipoFormularioPdfData
             $firmas['derecha'] = $firmanteSeleccionado;
         }
 
-        $externo = $nota->usuarioExterno;
+        $externo = $nota->usuarioExternoSoporte;
 
         return [
             'titulo' => 'Nota de Recepción Externa de Equipos',

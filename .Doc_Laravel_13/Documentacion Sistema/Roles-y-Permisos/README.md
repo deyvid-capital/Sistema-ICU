@@ -133,7 +133,7 @@ Vaciar un control quita ese filtro; los tres vacíos muestran las 48 secciones.
 | Inventario | MemoriaRam, Microprocesador, ModeloLaptop, TarjetaVideo |
 | Recursos compartidos | Fondo, RecursoVpn, Sistema, SitioSharepoint, Virtual |
 | Software y licencias | Licencia, LicenciaUsuario, CategoriaSoftware, Software, SoftwareCargo, SoftwareExc, SoftwareUsuario |
-| Usuarios | Area, Cargo, Movimiento, User, UsuarioExterno |
+| Usuarios | Area, Cargo, Movimiento, User, UsuarioExternoSoporteEquipo |
 | Sin módulo | Activity, PdfCelular, PdfEquipo, Role |
 
 ### 4.2 El filtro Estado mira lo guardado, no lo marcado

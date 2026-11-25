@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Equipo;
 use App\Models\NotaSalidaEquipo;
-use App\Models\UsuarioExterno;
+use App\Models\UsuarioExternoSoporteEquipo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +18,7 @@ class NotaSalidaEquipoFactory extends Factory
     {
         return [
             'equipo_id' => Equipo::factory(),
-            'usuario_externo_id' => UsuarioExterno::factory(),
+            'usuario_externo_soporte_id' => UsuarioExternoSoporteEquipo::factory(),
             'numero' => sprintf('%03d-%d', fake()->unique()->numberBetween(1, 99999), (int) now()->format('Y')),
             'fecha' => fake()->date(),
             'nota' => fake()->optional()->sentence(),

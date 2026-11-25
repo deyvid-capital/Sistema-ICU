@@ -7,7 +7,7 @@ use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\Equipos\RelationManagers\NotasRecepcionRelationManager as EquipoNotasRecepcionRelationManager;
 use App\Filament\Resources\NotaRecepcionEquipos\NotaRecepcionEquipoResource;
-use App\Filament\Resources\UsuarioExternos\RelationManagers\NotasRecepcionRelationManager as UsuarioExternoNotasRecepcionRelationManager;
+use App\Filament\Resources\UsuarioExternoSoporteEquipos\RelationManagers\NotasRecepcionRelationManager as UsuarioExternoSoporteEquipoNotasRecepcionRelationManager;
 use App\Models\NotaRecepcionEquipo;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -44,11 +44,11 @@ class NotaRecepcionEquiposTable
                     ->icon(Heroicon::OutlinedComputerDesktop)
                     ->placeholder('—')
                     ->hiddenOn(EquipoNotasRecepcionRelationManager::class),
-                TextColumn::make('usuarioExterno.nombre')
-                    ->label('Usuario externo')
+                TextColumn::make('usuarioExternoSoporte.nombre')
+                    ->label('Usuario externo de soporte')
                     ->searchable()
                     ->placeholder('—')
-                    ->hiddenOn(UsuarioExternoNotasRecepcionRelationManager::class),
+                    ->hiddenOn(UsuarioExternoSoporteEquipoNotasRecepcionRelationManager::class),
                 TextColumn::make('numero')
                     ->label('Número')
                     ->searchable(),

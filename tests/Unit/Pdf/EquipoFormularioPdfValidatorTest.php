@@ -9,7 +9,7 @@ use App\Models\EntregaEquipo;
 use App\Models\Equipo;
 use App\Models\NotaSalidaEquipo;
 use App\Models\User;
-use App\Models\UsuarioExterno;
+use App\Models\UsuarioExternoSoporteEquipo;
 use App\Services\Pdf\EquipoFormularioPdfValidator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -66,7 +66,7 @@ class EquipoFormularioPdfValidatorTest extends TestCase
     {
         $nota = NotaSalidaEquipo::factory()->create([
             'equipo_id' => Equipo::factory(),
-            'usuario_externo_id' => UsuarioExterno::factory(),
+            'usuario_externo_soporte_id' => UsuarioExternoSoporteEquipo::factory(),
         ]);
 
         $errors = app(EquipoFormularioPdfValidator::class)->validate($nota, EquipoFormularioPdfTipo::NotaSalida);
