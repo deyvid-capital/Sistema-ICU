@@ -107,6 +107,10 @@ return [
             'etiqueta' => 'PDF de movimientos',
             'directorio' => 'pdf-movimientos',
         ],
+        'pdf_usuarios_externos' => [
+            'etiqueta' => 'PDF de usuarios externos',
+            'directorio' => 'pdf-usuarios-externos',
+        ],
         'recibo_equipos' => [
             'etiqueta' => 'Recibos de equipo',
             'directorio' => 'recibo-equipos',

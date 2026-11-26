@@ -8,6 +8,7 @@ use App\Filament\Resources\SolicitudesFirma\SolicitudFirmaResource;
 use App\Models\PdfCelular;
 use App\Models\PdfEquipo;
 use App\Models\PdfMovimiento;
+use App\Models\PdfUsuarioExterno;
 use App\Services\Archivos\ArchivosService;
 use App\Services\Firma\DocumentosEnFirma;
 use App\Services\Firma\DocumentosFirmables;
@@ -34,7 +35,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
  * Piezas de firma digital en los módulos de origen de los PDF (entregas, recepciones,
  * notas, celulares, movimientos). Ver Docs/firma-digital/09-documentos-firmados-en-origen.md.
  *
- * Cada pieza recibe un `$resolverPdf`: Closure(Model $registro): PdfEquipo|PdfCelular|PdfMovimiento|null.
+ * Cada pieza recibe un `$resolverPdf`: Closure(Model $registro): PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno|null.
  */
 class FirmaEnOrigenActions
 {
@@ -194,7 +195,7 @@ class FirmaEnOrigenActions
     /**
      * Permiso para subir un firmado a mano: `UploadSigned:PdfEquipo`, etc.
      */
-    public static function permisoSubir(PdfEquipo|PdfCelular|PdfMovimiento $pdf): string
+    public static function permisoSubir(PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno $pdf): string
     {
         return 'UploadSigned:'.class_basename($pdf);
     }
@@ -206,7 +207,7 @@ class FirmaEnOrigenActions
         return $envio !== null ? app(DocumentosEnFirma::class)->mensaje($envio) : null;
     }
 
-    private static function textoFirmas(PdfEquipo|PdfCelular|PdfMovimiento|null $pdf): HtmlString
+    private static function textoFirmas(PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno|null $pdf): HtmlString
     {
         if ($pdf === null) {
             return new HtmlString('');

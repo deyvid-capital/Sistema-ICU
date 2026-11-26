@@ -249,6 +249,7 @@ return [
         'UploadSigned:PdfEquipo' => 'Subir PDF de equipo firmado a mano',
         'UploadSigned:PdfCelular' => 'Subir PDF de celular firmado a mano',
         'UploadSigned:PdfMovimiento' => 'Subir PDF de movimiento firmado a mano',
+        'UploadSigned:PdfUsuarioExterno' => 'Subir PDF de usuario externo firmado a mano',
     ],
 
     /*

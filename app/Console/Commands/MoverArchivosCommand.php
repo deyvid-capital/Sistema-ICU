@@ -7,6 +7,7 @@ use App\Models\MantenimientoEquipo;
 use App\Models\PdfCelular;
 use App\Models\PdfEquipo;
 use App\Models\PdfMovimiento;
+use App\Models\PdfUsuarioExterno;
 use App\Models\ReciboEquipo;
 use App\Services\Archivos\ArchivosService;
 use Illuminate\Console\Command;
@@ -46,7 +47,7 @@ class MoverArchivosCommand extends Command
     /**
      * @var list<class-string<Model>>
      */
-    private const MODELOS_PDF = [PdfEquipo::class, PdfCelular::class, PdfMovimiento::class, ReciboEquipo::class];
+    private const MODELOS_PDF = [PdfEquipo::class, PdfCelular::class, PdfMovimiento::class, PdfUsuarioExterno::class, ReciboEquipo::class];
 
     private int $movidos = 0;
 

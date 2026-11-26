@@ -4,6 +4,7 @@ use App\Http\Controllers\Archivos\DocumentoPdfController;
 use App\Http\Controllers\Firma\DocumentoFirmaController;
 use App\Http\Controllers\MovimientoFormularioPdfController;
 use App\Http\Controllers\PdfPreviewController;
+use App\Http\Controllers\UsuarioExternoFormularioPdfController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -39,6 +40,8 @@ Route::get('/api/ver-lista-usuarios', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/movimientos/{movimiento}/preview-alta-baja', [MovimientoFormularioPdfController::class, 'previewHtml'])
         ->name('movimientos.preview-alta-baja');
+    Route::get('/usuarios-externos/{usuarioExterno}/preview-formulario', [UsuarioExternoFormularioPdfController::class, 'previewHtml'])
+        ->name('usuarios-externos.preview-formulario');
 });
 
 Route::prefix('pdf/preview')->middleware('auth')->name('pdf.preview.')->group(function () {
@@ -47,6 +50,7 @@ Route::prefix('pdf/preview')->middleware('auth')->name('pdf.preview.')->group(fu
     Route::get('/nota-salida', [PdfPreviewController::class, 'notaSalida'])->name('nota-salida');
     Route::get('/recepcion-externa', [PdfPreviewController::class, 'recepcionExterna'])->name('recepcion-externa');
     Route::get('/alta-baja', [MovimientoFormularioPdfController::class, 'previewPdf'])->name('alta-baja');
+    Route::get('/usuario-externo', [UsuarioExternoFormularioPdfController::class, 'previewPdf'])->name('usuario-externo');
 });
 
 Route::prefix('archivos/pdf')->middleware('auth')->name('archivos.pdf.')

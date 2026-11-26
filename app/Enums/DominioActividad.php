@@ -39,6 +39,8 @@ use App\Models\NotaSalidaEquipo;
 use App\Models\PdfCelular;
 use App\Models\PdfEquipo;
 use App\Models\PdfMovimiento;
+use App\Models\PdfUsuarioExterno;
+use App\Models\PersonalExternoSoporteTecnico;
 use App\Models\RecepcionCelular;
 use App\Models\RecepcionEquipo;
 use App\Models\ReciboEquipo;
@@ -53,7 +55,7 @@ use App\Models\SolicitudFirma;
 use App\Models\SolicitudFirmaFirma;
 use App\Models\TarjetaVideo;
 use App\Models\User;
-use App\Models\PersonalExternoSoporteTecnico;
+use App\Models\UsuarioExterno;
 use App\Models\UsuarioFortitoken;
 use App\Models\Virtual;
 use Filament\Support\Contracts\HasLabel;
@@ -141,6 +143,7 @@ enum DominioActividad: string implements HasLabel
         return [
             User::class => self::Usuarios,
             PersonalExternoSoporteTecnico::class => self::Equipos,
+            UsuarioExterno::class => self::Usuarios,
             Area::class => self::Usuarios,
             Cargo::class => self::Usuarios,
             Movimiento::class => self::Usuarios,
@@ -196,6 +199,7 @@ enum DominioActividad: string implements HasLabel
             PdfEquipo::class => self::Documentos,
             PdfCelular::class => self::Documentos,
             PdfMovimiento::class => self::Documentos,
+            PdfUsuarioExterno::class => self::Documentos,
 
             CertificadoFirma::class => self::FirmaDigital,
             SolicitudFirma::class => self::FirmaDigital,

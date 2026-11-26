@@ -17,7 +17,7 @@ return new class extends Migration
     /**
      * @var list<string>
      */
-    private const PERMISOS = ['UploadSigned:PdfEquipo', 'UploadSigned:PdfCelular', 'UploadSigned:PdfMovimiento'];
+    private const PERMISOS = ['UploadSigned:PdfEquipo', 'UploadSigned:PdfCelular', 'UploadSigned:PdfMovimiento', 'UploadSigned:PdfUsuarioExterno'];
 
     public function up(): void
     {

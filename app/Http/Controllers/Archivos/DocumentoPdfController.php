@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PdfCelular;
 use App\Models\PdfEquipo;
 use App\Models\PdfMovimiento;
+use App\Models\PdfUsuarioExterno;
 use App\Models\ReciboEquipo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +26,7 @@ class DocumentoPdfController extends Controller
         'pdf_equipo' => PdfEquipo::class,
         'pdf_celular' => PdfCelular::class,
         'pdf_movimiento' => PdfMovimiento::class,
+        'pdf_usuario_externo' => PdfUsuarioExterno::class,
         'recibo_equipo' => ReciboEquipo::class,
     ];
 
@@ -40,7 +42,7 @@ class DocumentoPdfController extends Controller
 
     private function responder(string $tipo, int $id, string $disposicion): StreamedResponse
     {
-        /** @var PdfEquipo|PdfCelular|PdfMovimiento|ReciboEquipo $documento */
+        /** @var PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno|ReciboEquipo $documento */
         $documento = self::TIPOS[$tipo]::query()->findOrFail($id);
 
         abort_unless($this->puedeVer($documento), 403);
@@ -62,6 +64,7 @@ class DocumentoPdfController extends Controller
 
         $registro = match (true) {
             $documento instanceof PdfMovimiento => $documento->movimiento,
+            $documento instanceof PdfUsuarioExterno => $documento->usuarioExterno,
             $documento instanceof ReciboEquipo => $documento->equipo,
             default => $documento->documento,
         };

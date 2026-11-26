@@ -7,6 +7,7 @@ use App\Exceptions\FirmaDigitalException;
 use App\Models\PdfCelular;
 use App\Models\PdfEquipo;
 use App\Models\PdfMovimiento;
+use App\Models\PdfUsuarioExterno;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -22,7 +23,7 @@ class ReemplazoDocumentoFirmado
     /**
      * Motivo por el que no se puede reemplazar, o null si se puede.
      */
-    public function impedimento(PdfEquipo|PdfCelular|PdfMovimiento|null $pdf, bool $confirmado): ?string
+    public function impedimento(PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno|null $pdf, bool $confirmado): ?string
     {
         if ($pdf === null) {
             return null;
@@ -44,7 +45,7 @@ class ReemplazoDocumentoFirmado
      *
      * @throws FirmaDigitalException
      */
-    public function subirFirmadoManual(PdfEquipo|PdfCelular|PdfMovimiento $pdf, string $contenido, bool $confirmado): void
+    public function subirFirmadoManual(PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno $pdf, string $contenido, bool $confirmado): void
     {
         if (($motivo = $this->impedimento($pdf, $confirmado)) !== null) {
             throw new FirmaDigitalException($motivo);
@@ -60,7 +61,7 @@ class ReemplazoDocumentoFirmado
     /**
      * Después de reemplazar el archivo por uno sin firmas.
      */
-    public function despuesDeRegenerar(PdfEquipo|PdfCelular|PdfMovimiento $pdf): void
+    public function despuesDeRegenerar(PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno $pdf): void
     {
         if ($pdf->estado_firma !== EstadoFirmaOrigen::SinFirma) {
             $pdf->marcarSinFirma();

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 
 /**
- * Estado de firma digital de un PDF de origen (PdfEquipo, PdfCelular, PdfMovimiento).
+ * Estado de firma digital de un PDF de origen (PdfEquipo, PdfCelular, PdfMovimiento, PdfUsuarioExterno).
  * Ver Docs/firma-digital/09-documentos-firmados-en-origen.md.
  *
  * `estado_firma` es fillable para que cada cambio quede en el historial de actividad.

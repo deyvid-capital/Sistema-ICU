@@ -5,17 +5,19 @@ namespace App\Services\Firma;
 use App\Enums\CelularFormularioPdfTipo;
 use App\Enums\EquipoFormularioPdfTipo;
 use App\Enums\EstadoFirmaOrigen;
+use App\Enums\UsuarioExternoFormularioPdfTipo;
 use App\Exceptions\FirmaDigitalException;
 use App\Models\PdfCelular;
 use App\Models\PdfEquipo;
 use App\Models\PdfMovimiento;
+use App\Models\PdfUsuarioExterno;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * Documentos PDF ya generados en el sistema que se pueden enviar a firmar: equipos,
- * celulares y movimientos (los recibos de equipo son facturas escaneadas y no se firman).
+ * celulares, movimientos y usuarios externos (los recibos de equipo son facturas escaneadas y no se firman).
  *
  * Cada documento se identifica con una clave "origen:id" (p. ej. "pdf_equipo:12")
  * para usarla como valor de un Select.
@@ -23,12 +25,13 @@ use Illuminate\Support\Facades\Storage;
 class DocumentosFirmables
 {
     /**
-     * @var array<string, array{0: class-string<PdfEquipo|PdfCelular|PdfMovimiento>, 1: string}> origen => [modelo, etiqueta]
+     * @var array<string, array{0: class-string<PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno>, 1: string}> origen => [modelo, etiqueta]
      */
     private const ORIGENES = [
         'pdf_equipo' => [PdfEquipo::class, 'Equipos'],
         'pdf_celular' => [PdfCelular::class, 'Celulares'],
         'pdf_movimiento' => [PdfMovimiento::class, 'Movimientos'],
+        'pdf_usuario_externo' => [PdfUsuarioExterno::class, 'Usuarios externos'],
     ];
 
     /**
@@ -47,6 +50,7 @@ class DocumentosFirmables
             'celular_'.CelularFormularioPdfTipo::Recepcion->value => 'Celulares · Recepción',
             'movimiento_alta' => 'Movimientos · Alta',
             'movimiento_baja' => 'Movimientos · Baja',
+            'usuarioexterno_formulario' => 'Usuarios externos · Formulario',
         ];
     }
 
@@ -105,7 +109,7 @@ class DocumentosFirmables
         return $etiquetas;
     }
 
-    public function resolver(string $clave): PdfEquipo|PdfCelular|PdfMovimiento|null
+    public function resolver(string $clave): PdfEquipo|PdfCelular|PdfMovimiento|PdfUsuarioExterno|null
     {
         [$origen, $id] = array_pad(explode(':', $clave, 2), 2, null);
         $modelo = self::ORIGENES[$origen][0] ?? null;
@@ -188,6 +192,7 @@ class DocumentosFirmables
             $origen === 'pdf_equipo' && $grupo === 'equipo' => $consulta->where('nombre', EquipoFormularioPdfTipo::from($tipo)->nombreOficial()),
             $origen === 'pdf_celular' && $grupo === 'celular' => $consulta->where('nombre', CelularFormularioPdfTipo::from($tipo)->nombreOficial()),
             $origen === 'pdf_movimiento' && $grupo === 'movimiento' => $consulta->whereHas('movimiento', fn (Builder $query) => $query->where('tipo', ucfirst($tipo))),
+            $origen === 'pdf_usuario_externo' && $grupo === 'usuarioexterno' => $consulta->where('nombre', UsuarioExternoFormularioPdfTipo::from($tipo)->nombreOficial()),
             default => null,
         };
     }
