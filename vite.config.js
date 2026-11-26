@@ -12,6 +12,8 @@ export default defineConfig({
                 'resources/css/filament/admin/theme.css',
                 // Se carga bajo demanda con x-load en el canvas de posiciones de firma.
                 'resources/js/firma/canvas-firmas.js',
+                // Lógica de Alpine del campo CrudSelect, cargada con x-load.
+                'resources/js/filament/forms/crud-select.js',
             ],
             refresh: true,
             fonts: [

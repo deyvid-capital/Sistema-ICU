@@ -1,0 +1,107 @@
+/*
+ * CrudSelect (App\Filament\Forms\Components\CrudSelect).
+ *
+ * El aspecto base sale de las clases del Select de Filament 5 (fi-select-input-*,
+ * fi-dropdown-*, fi-badge). Aquí solo va lo propio del componente: la cabecera con
+ * «+ Crear», el ícono por opción, el check, el botón ⋮ y el panel más amplio.
+ */
+
+.fi-crud-select {
+    /* Panel desplegable: más alto que el del Select nativo (max-h-60). */
+    & .fi-crud-select-panel {
+        @apply z-30 max-h-96 overflow-y-auto;
+    }
+
+    /* Cabecera fija: buscador a la izquierda y «+ Crear» en la esquina superior derecha. */
+    & .fi-crud-select-header {
+        @apply sticky top-0 z-10 flex items-center gap-2 bg-white px-2 pt-2 pb-1 dark:bg-gray-900;
+    }
+
+    & .fi-crud-select-search {
+        @apply static flex-1 bg-transparent;
+
+        & .fi-input {
+            @apply w-full rounded-lg border-none bg-gray-50 px-3 py-1.5 text-sm text-gray-950 ring-1 ring-gray-950/10 placeholder:text-gray-400 focus:ring-2 focus:ring-primary-600 dark:bg-white/5 dark:text-white dark:ring-white/20 dark:placeholder:text-gray-500 dark:focus:ring-primary-500;
+        }
+    }
+
+    & .fi-crud-select-header-spacer {
+        @apply flex-1;
+    }
+
+    & .fi-crud-select-create-btn {
+        @apply inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-primary-600 transition duration-75 hover:bg-primary-50 focus-visible:bg-primary-50 focus-visible:outline-none dark:text-primary-400 dark:hover:bg-primary-400/10 dark:focus-visible:bg-primary-400/10;
+    }
+
+    & .fi-crud-select-create-btn-icon {
+        @apply size-4;
+    }
+
+    & .fi-crud-select-list {
+        @apply p-1;
+    }
+
+    /* Opción: [ícono] etiqueta ··· [check] [⋮] */
+    & .fi-crud-select-option {
+        @apply cursor-pointer gap-2 whitespace-normal;
+    }
+
+    & .fi-crud-select-option-checked .fi-dropdown-list-item-label {
+        @apply font-medium text-gray-950 dark:text-white;
+    }
+
+    & .fi-crud-select-option-icon-ctn,
+    & .fi-crud-select-value-icon,
+    & .fi-crud-select-badge-icon {
+        @apply flex shrink-0 items-center text-gray-400 dark:text-gray-500;
+    }
+
+    & .fi-crud-select-option-icon,
+    & .fi-crud-select-value-icon .fi-icon,
+    & .fi-crud-select-badge-icon .fi-icon {
+        @apply size-4;
+    }
+
+    & .fi-crud-select-badge-icon {
+        @apply text-current;
+    }
+
+    & .fi-crud-select-value {
+        @apply flex min-w-0 flex-1 items-center gap-2;
+    }
+
+    & .fi-crud-select-check {
+        @apply flex shrink-0 items-center text-primary-600 dark:text-primary-400;
+
+        & .fi-icon {
+            @apply size-4;
+        }
+    }
+
+    & .fi-crud-select-menu-btn {
+        @apply -my-1 flex shrink-0 items-center rounded-md p-1 text-gray-400 transition duration-75 hover:bg-gray-100 hover:text-gray-600 focus-visible:bg-gray-100 focus-visible:outline-none dark:text-gray-500 dark:hover:bg-white/10 dark:hover:text-gray-300;
+
+        & .fi-icon {
+            @apply size-4;
+        }
+    }
+
+    /* Menú ⋮ de cada opción. */
+    & .fi-crud-select-menu {
+        @apply z-40 w-40! max-w-40! p-1;
+
+        & .fi-dropdown-list-item .fi-icon {
+            @apply size-4;
+        }
+
+        & .fi-color-danger,
+        & .fi-color-danger .fi-dropdown-list-item-label,
+        & .fi-color-danger .fi-icon {
+            @apply text-danger-600 dark:text-danger-400;
+        }
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
