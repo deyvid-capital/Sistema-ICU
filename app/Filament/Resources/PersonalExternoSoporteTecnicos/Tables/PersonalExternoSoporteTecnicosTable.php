@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\UsuarioExternoSoporteEquipos\Tables;
+namespace App\Filament\Resources\PersonalExternoSoporteTecnicos\Tables;
 
-use App\Filament\Resources\UsuarioExternoSoporteEquipos\UsuarioExternoSoporteEquipoResource;
-use App\Models\UsuarioExternoSoporteEquipo;
+use App\Filament\Resources\PersonalExternoSoporteTecnicos\PersonalExternoSoporteTecnicoResource;
+use App\Models\PersonalExternoSoporteTecnico;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -19,14 +19,14 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
-class UsuarioExternoSoporteEquiposTable
+class PersonalExternoSoporteTecnicosTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->recordUrl(fn (UsuarioExternoSoporteEquipo $record): string => $record->trashed()
-                ? UsuarioExternoSoporteEquipoResource::getUrl('view', ['record' => $record])
-                : UsuarioExternoSoporteEquipoResource::getUrl('edit', ['record' => $record]))
+            ->recordUrl(fn (PersonalExternoSoporteTecnico $record): string => $record->trashed()
+                ? PersonalExternoSoporteTecnicoResource::getUrl('view', ['record' => $record])
+                : PersonalExternoSoporteTecnicoResource::getUrl('edit', ['record' => $record]))
             ->defaultSort('nombre')
             ->striped()
             ->paginated([10, 25, 50])
@@ -68,19 +68,19 @@ class UsuarioExternoSoporteEquiposTable
                     ViewAction::make()->label('Ver'),
                     EditAction::make()
                         ->label('Editar')
-                        ->visible(fn (UsuarioExternoSoporteEquipo $record): bool => ! $record->trashed()),
+                        ->visible(fn (PersonalExternoSoporteTecnico $record): bool => ! $record->trashed()),
                     DeleteAction::make()
                         ->label('Eliminar')
-                        ->visible(fn (UsuarioExternoSoporteEquipo $record): bool => ! $record->trashed())
-                        ->successNotificationTitle('Usuario externo de soporte eliminado correctamente'),
+                        ->visible(fn (PersonalExternoSoporteTecnico $record): bool => ! $record->trashed())
+                        ->successNotificationTitle('Soporte externo eliminado correctamente'),
                     ForceDeleteAction::make()
                         ->label('Eliminar permanentemente')
-                        ->visible(fn (UsuarioExternoSoporteEquipo $record): bool => $record->trashed())
-                        ->successNotificationTitle('Usuario externo de soporte eliminado permanentemente'),
+                        ->visible(fn (PersonalExternoSoporteTecnico $record): bool => $record->trashed())
+                        ->successNotificationTitle('Soporte externo eliminado permanentemente'),
                     RestoreAction::make()
                         ->label('Restaurar')
-                        ->visible(fn (UsuarioExternoSoporteEquipo $record): bool => $record->trashed())
-                        ->successNotificationTitle('Usuario externo de soporte restaurado correctamente'),
+                        ->visible(fn (PersonalExternoSoporteTecnico $record): bool => $record->trashed())
+                        ->successNotificationTitle('Soporte externo restaurado correctamente'),
                 ])
                     ->label('Acciones')
                     ->icon(Heroicon::OutlinedEllipsisVertical)
@@ -92,13 +92,13 @@ class UsuarioExternoSoporteEquiposTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Eliminar seleccionados')
-                        ->successNotificationTitle('Usuarios externos de soporte eliminados correctamente'),
+                        ->successNotificationTitle('Soportes externos eliminados correctamente'),
                     ForceDeleteBulkAction::make()
                         ->label('Eliminar permanentemente')
-                        ->successNotificationTitle('Usuarios externos de soporte eliminados permanentemente'),
+                        ->successNotificationTitle('Soportes externos eliminados permanentemente'),
                     RestoreBulkAction::make()
                         ->label('Restaurar seleccionados')
-                        ->successNotificationTitle('Usuarios externos de soporte restaurados correctamente'),
+                        ->successNotificationTitle('Soportes externos restaurados correctamente'),
                 ])
                     ->label('Acciones masivas'),
             ]);

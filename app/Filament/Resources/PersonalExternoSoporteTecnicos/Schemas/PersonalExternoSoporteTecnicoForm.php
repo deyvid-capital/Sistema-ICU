@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\UsuarioExternoSoporteEquipos\Schemas;
+namespace App\Filament\Resources\PersonalExternoSoporteTecnicos\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
@@ -9,13 +9,13 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\Rules\Unique;
 
-class UsuarioExternoSoporteEquipoForm
+class PersonalExternoSoporteTecnicoForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Section::make('Usuario externo de soporte técnico')
+                Section::make('Soporte externo')
                     ->description('Personas externas a la organización que reciben o entregan equipos.')
                     ->icon(Heroicon::OutlinedUser)
                     ->columnSpanFull()
@@ -31,7 +31,7 @@ class UsuarioExternoSoporteEquipoForm
                                     ->required()
                                     ->maxLength(50)
                                     ->unique(
-                                        table: 'usuarios_externos_soporte_equipos',
+                                        table: 'personal_externo_soporte_tecnico',
                                         column: 'carnet',
                                         ignoreRecord: true,
                                         modifyRuleUsing: fn (Unique $rule): Unique => $rule->whereNull('deleted_at'),

@@ -22,6 +22,7 @@ use App\Filament\Resources\NotaRecepcionEquipos\NotaRecepcionEquipoResource;
 use App\Filament\Resources\NotaSalidaEquipos\NotaSalidaEquipoResource;
 use App\Filament\Resources\PdfCelulars\PdfCelularResource;
 use App\Filament\Resources\PdfEquipos\PdfEquipoResource;
+use App\Filament\Resources\PersonalExternoSoporteTecnicos\PersonalExternoSoporteTecnicoResource;
 use App\Filament\Resources\RecepcionEquipos\RecepcionEquipoResource;
 use App\Filament\Resources\ReciboEquipos\ReciboEquipoResource;
 use App\Filament\Resources\TarjetaVideos\TarjetaVideoResource;
@@ -60,6 +61,7 @@ class EquiposNavigationClustersTest extends TestCase
         $this->assertSame(EquiposCluster::class, ReciboEquipoResource::getCluster());
         $this->assertSame(EquiposCluster::class, NotaSalidaEquipoResource::getCluster());
         $this->assertSame(EquiposCluster::class, NotaRecepcionEquipoResource::getCluster());
+        $this->assertSame(EquiposCluster::class, PersonalExternoSoporteTecnicoResource::getCluster());
 
         $this->assertSame(AsignacionCluster::class, AsignacionEquipoResource::getCluster());
         $this->assertSame(AsignacionCluster::class, AsignacionCargadorResource::getCluster());

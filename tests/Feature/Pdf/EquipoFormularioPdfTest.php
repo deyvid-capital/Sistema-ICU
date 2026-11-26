@@ -10,8 +10,8 @@ use App\Models\Equipo;
 use App\Models\NotaRecepcionEquipo;
 use App\Models\NotaSalidaEquipo;
 use App\Models\PdfEquipo;
+use App\Models\PersonalExternoSoporteTecnico;
 use App\Models\User;
-use App\Models\UsuarioExternoSoporteEquipo;
 use App\Services\Pdf\BrowsershotPdfFactory;
 use App\Services\Pdf\EquipoFormularioPdfData;
 use App\Services\Pdf\GenerateEquipoFormularioPdf;
@@ -118,7 +118,7 @@ class EquipoFormularioPdfTest extends TestCase
     {
         $nota = NotaSalidaEquipo::factory()->create([
             'equipo_id' => Equipo::factory(),
-            'usuario_externo_soporte_id' => UsuarioExternoSoporteEquipo::factory(),
+            'personal_externo_soporte_id' => PersonalExternoSoporteTecnico::factory(),
             'numero' => '003-2024',
             'fecha' => '2024-06-01',
         ]);
@@ -165,7 +165,7 @@ class EquipoFormularioPdfTest extends TestCase
 
         $nota = NotaRecepcionEquipo::factory()->create([
             'equipo_id' => Equipo::factory(),
-            'usuario_externo_soporte_id' => UsuarioExternoSoporteEquipo::factory(),
+            'personal_externo_soporte_id' => PersonalExternoSoporteTecnico::factory(),
         ]);
 
         $payload = app(EquipoFormularioPdfData::class)
@@ -179,7 +179,7 @@ class EquipoFormularioPdfTest extends TestCase
     {
         $nota = NotaRecepcionEquipo::factory()->create([
             'equipo_id' => Equipo::factory(),
-            'usuario_externo_soporte_id' => UsuarioExternoSoporteEquipo::factory(),
+            'personal_externo_soporte_id' => PersonalExternoSoporteTecnico::factory(),
         ]);
 
         $payload = app(EquipoFormularioPdfData::class)

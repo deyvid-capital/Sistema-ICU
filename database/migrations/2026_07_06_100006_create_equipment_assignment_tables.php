@@ -64,7 +64,7 @@ return new class extends Migration
         Schema::create('notas_salida_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('equipo_id', 50);
-            $table->foreignId('usuario_externo_soporte_id')->constrained('usuarios_externos_soporte_equipos')->restrictOnDelete();
+            $table->foreignId('personal_externo_soporte_id')->constrained('personal_externo_soporte_tecnico')->restrictOnDelete();
             $table->string('numero', 20)->unique();
             $table->date('fecha');
             $table->text('nota')->nullable();
@@ -77,7 +77,7 @@ return new class extends Migration
         Schema::create('notas_recepcion_equipos', function (Blueprint $table) {
             $table->id();
             $table->string('equipo_id', 50);
-            $table->foreignId('usuario_externo_soporte_id')->constrained('usuarios_externos_soporte_equipos')->restrictOnDelete();
+            $table->foreignId('personal_externo_soporte_id')->constrained('personal_externo_soporte_tecnico')->restrictOnDelete();
             $table->string('numero', 20)->unique();
             $table->date('fecha');
             $table->text('nota')->nullable();

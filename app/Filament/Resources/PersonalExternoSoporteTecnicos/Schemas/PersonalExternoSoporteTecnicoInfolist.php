@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\UsuarioExternoSoporteEquipos\Schemas;
+namespace App\Filament\Resources\PersonalExternoSoporteTecnicos\Schemas;
 
 use App\Filament\Resources\Concerns\HasRegistroInfolistSection;
 use Filament\Infolists\Components\TextEntry;
@@ -9,7 +9,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Icons\Heroicon;
 
-class UsuarioExternoSoporteEquipoInfolist
+class PersonalExternoSoporteTecnicoInfolist
 {
     use HasRegistroInfolistSection;
 
@@ -18,7 +18,7 @@ class UsuarioExternoSoporteEquipoInfolist
         return $schema
             ->columns(1)
             ->components([
-                Section::make('Datos del usuario externo de soporte técnico')
+                Section::make('Datos del soporte externo')
                     ->description('Persona externa relacionada con notas de recepción o salida de equipos.')
                     ->icon(Heroicon::OutlinedUser)
                     ->columnSpanFull()

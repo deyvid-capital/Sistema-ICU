@@ -5,8 +5,8 @@ namespace Tests\Feature\Filament;
 use App\Filament\Resources\Equipos\Pages\EditEquipo;
 use App\Filament\Resources\Equipos\RelationManagers\NotasSalidaRelationManager;
 use App\Models\Equipo;
+use App\Models\PersonalExternoSoporteTecnico;
 use App\Models\User;
-use App\Models\UsuarioExternoSoporteEquipo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
@@ -29,14 +29,14 @@ class NotasSalidaHiddenOwnerFieldTest extends TestCase
     public function test_creating_nota_salida_through_equipo_relation_manager_succeeds(): void
     {
         $equipo = Equipo::factory()->create();
-        $usuarioExternoSoporte = UsuarioExternoSoporteEquipo::factory()->create();
+        $personalExternoSoporte = PersonalExternoSoporteTecnico::factory()->create();
 
         Livewire::test(NotasSalidaRelationManager::class, [
             'ownerRecord' => $equipo,
             'pageClass' => EditEquipo::class,
         ])
             ->callTableAction('create', data: [
-                'usuario_externo_soporte_id' => $usuarioExternoSoporte->id,
+                'personal_externo_soporte_id' => $personalExternoSoporte->id,
                 'numero' => '901-2026',
                 'fecha' => now()->toDateString(),
                 'nota' => 'Salida de prueba',
@@ -45,7 +45,7 @@ class NotasSalidaHiddenOwnerFieldTest extends TestCase
 
         $this->assertDatabaseHas('notas_salida_equipos', [
             'equipo_id' => $equipo->service_tag,
-            'usuario_externo_soporte_id' => $usuarioExternoSoporte->id,
+            'personal_externo_soporte_id' => $personalExternoSoporte->id,
             'numero' => '901-2026',
         ]);
     }

@@ -23,13 +23,13 @@ class NotaSalidaEquipo extends Model
     use LogsIcuActivity;
     use SoftDeletes;
 
-    protected static array $trashGuardedRelations = ['equipo', 'usuarioExternoSoporte'];
+    protected static array $trashGuardedRelations = ['equipo', 'personalExternoSoporte'];
 
     protected $table = 'notas_salida_equipos';
 
     protected $fillable = [
         'equipo_id',
-        'usuario_externo_soporte_id',
+        'personal_externo_soporte_id',
         'numero',
         'fecha',
         'nota',
@@ -47,9 +47,9 @@ class NotaSalidaEquipo extends Model
         return $this->belongsTo(Equipo::class, 'equipo_id', 'service_tag')->withTrashed();
     }
 
-    public function usuarioExternoSoporte(): BelongsTo
+    public function personalExternoSoporte(): BelongsTo
     {
-        return $this->belongsTo(UsuarioExternoSoporteEquipo::class, 'usuario_externo_soporte_id')->withTrashed();
+        return $this->belongsTo(PersonalExternoSoporteTecnico::class, 'personal_externo_soporte_id')->withTrashed();
     }
 
     public function firmantes(): MorphMany

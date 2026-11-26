@@ -68,7 +68,7 @@ class NotaSalidaEquipoResource extends Resource
      */
     public static function getGloballySearchableAttributes(): array
     {
-        return ['numero', 'nota', 'usuarioExternoSoporte.nombre'];
+        return ['numero', 'nota', 'personalExternoSoporte.nombre'];
     }
 
     public static function getPages(): array

@@ -31,6 +31,7 @@ use App\Models\ModeloLaptop;
 use App\Models\Movimiento;
 use App\Models\NotaRecepcionEquipo;
 use App\Models\NotaSalidaEquipo;
+use App\Models\PersonalExternoSoporteTecnico;
 use App\Models\RecepcionCelular;
 use App\Models\RecepcionEquipo;
 use App\Models\ReciboEquipo;
@@ -39,7 +40,6 @@ use App\Models\Sistema;
 use App\Models\SitioSharepoint;
 use App\Models\TarjetaVideo;
 use App\Models\User;
-use App\Models\UsuarioExternoSoporteEquipo;
 use App\Models\Virtual;
 use App\Services\Movimientos\ProcesarBajaColaborador;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -449,14 +449,14 @@ class GuiaDemoSeeder extends Seeder
             'observaciones' => null,
         ]);
 
-        $externo = UsuarioExternoSoporteEquipo::query()->create([
+        $externo = PersonalExternoSoporteTecnico::query()->create([
             'nombre' => 'Patricia Mendoza Cruz',
             'carnet' => '7894561',
             'empresa' => 'Consultora Andina S.R.L.',
             'cargo' => 'Auditora',
         ]);
 
-        $externo2 = UsuarioExternoSoporteEquipo::query()->create([
+        $externo2 = PersonalExternoSoporteTecnico::query()->create([
             'nombre' => 'Jorge Ríos Almanza',
             'carnet' => '6543210',
             'empresa' => 'Servicios del Altiplano',
@@ -472,7 +472,7 @@ class GuiaDemoSeeder extends Seeder
         ] as [$equipoId, $quien, $numero, $diasAtras, $nota]) {
             NotaSalidaEquipo::query()->create([
                 'equipo_id' => $equipoId,
-                'usuario_externo_soporte_id' => $quien->getKey(),
+                'personal_externo_soporte_id' => $quien->getKey(),
                 'numero' => $numero,
                 'fecha' => $hoy->copy()->subDays($diasAtras),
                 'nota' => $nota,
@@ -487,7 +487,7 @@ class GuiaDemoSeeder extends Seeder
         ] as [$equipoId, $quien, $numero, $diasAtras, $nota]) {
             NotaRecepcionEquipo::query()->create([
                 'equipo_id' => $equipoId,
-                'usuario_externo_soporte_id' => $quien->getKey(),
+                'personal_externo_soporte_id' => $quien->getKey(),
                 'numero' => $numero,
                 'fecha' => $hoy->copy()->subDays($diasAtras),
                 'nota' => $nota,

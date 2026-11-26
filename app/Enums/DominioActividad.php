@@ -53,7 +53,7 @@ use App\Models\SolicitudFirma;
 use App\Models\SolicitudFirmaFirma;
 use App\Models\TarjetaVideo;
 use App\Models\User;
-use App\Models\UsuarioExternoSoporteEquipo;
+use App\Models\PersonalExternoSoporteTecnico;
 use App\Models\UsuarioFortitoken;
 use App\Models\Virtual;
 use Filament\Support\Contracts\HasLabel;
@@ -140,7 +140,7 @@ enum DominioActividad: string implements HasLabel
     {
         return [
             User::class => self::Usuarios,
-            UsuarioExternoSoporteEquipo::class => self::Usuarios,
+            PersonalExternoSoporteTecnico::class => self::Equipos,
             Area::class => self::Usuarios,
             Cargo::class => self::Usuarios,
             Movimiento::class => self::Usuarios,

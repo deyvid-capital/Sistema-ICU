@@ -4,10 +4,10 @@ namespace App\Filament\Resources\NotaSalidaEquipos\Schemas;
 
 use App\Filament\Resources\Concerns\ConfiguresFormularioEquipoNumeroField;
 use App\Filament\Resources\Equipos\RelationManagers\NotasSalidaRelationManager as EquipoNotasSalidaRelationManager;
-use App\Filament\Resources\UsuarioExternoSoporteEquipos\RelationManagers\NotasSalidaRelationManager as UsuarioExternoSoporteEquipoNotasSalidaRelationManager;
+use App\Filament\Resources\PersonalExternoSoporteTecnicos\RelationManagers\NotasSalidaRelationManager as PersonalExternoSoporteTecnicoNotasSalidaRelationManager;
 use App\Models\Equipo;
 use App\Models\NotaSalidaEquipo;
-use App\Models\UsuarioExternoSoporteEquipo;
+use App\Models\PersonalExternoSoporteTecnico;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -26,7 +26,7 @@ class NotaSalidaEquipoForm
         return $schema
             ->components([
                 Section::make('Nota de salida')
-                    ->description('Registra la salida de un equipo hacia un usuario externo de soporte técnico.')
+                    ->description('Registra la salida de un equipo hacia un soporte técnico externo.')
                     ->icon(Heroicon::OutlinedArrowRightStartOnRectangle)
                     ->columnSpanFull()
                     ->schema([
@@ -43,17 +43,17 @@ class NotaSalidaEquipoForm
                                     ->required()
                                     ->rule(new NotTrashed(Equipo::class))
                                     ->hiddenOn(EquipoNotasSalidaRelationManager::class),
-                                Select::make('usuario_externo_soporte_id')
-                                    ->label('Usuario externo de soporte')
-                                    ->relationship('usuarioExternoSoporte', 'nombre')
+                                Select::make('personal_externo_soporte_id')
+                                    ->label('Soporte externo')
+                                    ->relationship('personalExternoSoporte', 'nombre')
                                     ->getOptionLabelFromRecordUsing(
-                                        fn (UsuarioExternoSoporteEquipo $record): string => trim("{$record->nombre} — {$record->carnet}")
+                                        fn (PersonalExternoSoporteTecnico $record): string => trim("{$record->nombre} — {$record->carnet}")
                                     )
                                     ->searchable(['nombre', 'carnet', 'empresa'])
                                     ->preload()
                                     ->required()
-                                    ->rule(new NotTrashed(UsuarioExternoSoporteEquipo::class))
-                                    ->hiddenOn(UsuarioExternoSoporteEquipoNotasSalidaRelationManager::class),
+                                    ->rule(new NotTrashed(PersonalExternoSoporteTecnico::class))
+                                    ->hiddenOn(PersonalExternoSoporteTecnicoNotasSalidaRelationManager::class),
                                 static::formularioEquipoNumeroField(NotaSalidaEquipo::class, 'notas_salida_equipos'),
                                 DatePicker::make('fecha')
                                     ->label('Fecha')

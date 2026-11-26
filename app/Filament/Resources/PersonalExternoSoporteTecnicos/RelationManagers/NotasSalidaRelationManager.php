@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\UsuarioExternoSoporteEquipos\RelationManagers;
+namespace App\Filament\Resources\PersonalExternoSoporteTecnicos\RelationManagers;
 
 use App\Filament\Resources\NotaSalidaEquipos\NotaSalidaEquipoResource;
 use App\Filament\Resources\Users\RelationManagers\Concerns\HasOwnerRecordCountBadge;

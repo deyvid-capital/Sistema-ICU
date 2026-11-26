@@ -7,7 +7,7 @@ use App\Filament\Resources\Concerns\EquipoFormularioPdfActions;
 use App\Filament\Resources\Concerns\FirmaEnOrigenActions;
 use App\Filament\Resources\Equipos\RelationManagers\NotasSalidaRelationManager as EquipoNotasSalidaRelationManager;
 use App\Filament\Resources\NotaSalidaEquipos\NotaSalidaEquipoResource;
-use App\Filament\Resources\UsuarioExternoSoporteEquipos\RelationManagers\NotasSalidaRelationManager as UsuarioExternoSoporteEquipoNotasSalidaRelationManager;
+use App\Filament\Resources\PersonalExternoSoporteTecnicos\RelationManagers\NotasSalidaRelationManager as PersonalExternoSoporteTecnicoNotasSalidaRelationManager;
 use App\Models\NotaSalidaEquipo;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -44,11 +44,11 @@ class NotaSalidaEquiposTable
                     ->icon(Heroicon::OutlinedComputerDesktop)
                     ->placeholder('—')
                     ->hiddenOn(EquipoNotasSalidaRelationManager::class),
-                TextColumn::make('usuarioExternoSoporte.nombre')
-                    ->label('Usuario externo de soporte')
+                TextColumn::make('personalExternoSoporte.nombre')
+                    ->label('Soporte externo')
                     ->searchable()
                     ->placeholder('—')
-                    ->hiddenOn(UsuarioExternoSoporteEquipoNotasSalidaRelationManager::class),
+                    ->hiddenOn(PersonalExternoSoporteTecnicoNotasSalidaRelationManager::class),
                 TextColumn::make('numero')
                     ->label('Número')
                     ->searchable(),

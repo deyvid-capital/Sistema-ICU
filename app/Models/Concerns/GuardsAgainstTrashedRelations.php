@@ -37,7 +37,7 @@ trait GuardsAgainstTrashedRelations
                 'equipo' => 'El equipo está en la papelera de reciclaje y no se le puede asignar.',
                 'cargador' => 'El cargador está en la papelera de reciclaje y no se le puede asignar.',
                 'asignacion' => 'La asignación está en la papelera de reciclaje y no se le puede asociar un formulario.',
-                'usuarioExternoSoporte' => 'El usuario externo de soporte técnico está en la papelera de reciclaje y no se le puede asignar.',
+                'personalExternoSoporte' => 'El soporte externo está en la papelera de reciclaje y no se le puede asignar.',
                 default => "El registro relacionado \"{$relation}\" está en la papelera de reciclaje y no se puede asignar.",
             };
 

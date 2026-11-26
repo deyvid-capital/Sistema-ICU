@@ -41,7 +41,7 @@ return [
         'virtual' => 'virtual',
         'recurso vpn' => 'recurso VPN',
         'azure ad' => 'Azure AD',
-        'usuario externo soporte equipo' => 'usuario externo de soporte técnico',
+        'personal externo soporte tecnico' => 'soporte externo',
         'firmante' => 'firmante',
         'fondo' => 'fondo',
         'modelo laptop' => 'modelo de laptop',

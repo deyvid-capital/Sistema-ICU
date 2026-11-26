@@ -2,15 +2,15 @@
 
 namespace Database\Factories;
 
-use App\Models\UsuarioExternoSoporteEquipo;
+use App\Models\PersonalExternoSoporteTecnico;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<UsuarioExternoSoporteEquipo>
+ * @extends Factory<PersonalExternoSoporteTecnico>
  */
-class UsuarioExternoSoporteEquipoFactory extends Factory
+class PersonalExternoSoporteTecnicoFactory extends Factory
 {
-    protected $model = UsuarioExternoSoporteEquipo::class;
+    protected $model = PersonalExternoSoporteTecnico::class;
 
     public function definition(): array
     {

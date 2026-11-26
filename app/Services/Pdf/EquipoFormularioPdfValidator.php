@@ -97,8 +97,8 @@ class EquipoFormularioPdfValidator
             $errors[] = 'El equipo no existe o está eliminado.';
         }
 
-        if ($record->usuarioExternoSoporte === null || $this->isTrashed($record->usuarioExternoSoporte)) {
-            $errors[] = 'El usuario externo de soporte técnico no existe o está eliminado.';
+        if ($record->personalExternoSoporte === null || $this->isTrashed($record->personalExternoSoporte)) {
+            $errors[] = 'El soporte externo no existe o está eliminado.';
         }
 
         return $errors;
@@ -115,8 +115,8 @@ class EquipoFormularioPdfValidator
             $errors[] = 'El equipo no existe o está eliminado.';
         }
 
-        if ($record->usuarioExternoSoporte === null || $this->isTrashed($record->usuarioExternoSoporte)) {
-            $errors[] = 'El usuario externo de soporte técnico no existe o está eliminado.';
+        if ($record->personalExternoSoporte === null || $this->isTrashed($record->personalExternoSoporte)) {
+            $errors[] = 'El soporte externo no existe o está eliminado.';
         }
 
         return $errors;
