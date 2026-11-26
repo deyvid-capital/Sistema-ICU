@@ -64,7 +64,6 @@ class AzureAdForm
                                     ->options([
                                         'Nube' => 'Nube',
                                         'Local / Nube' => 'Local / Nube',
-                                        'Local / No sincronizado' => 'Local / No sincronizado',
                                     ])
                                     ->default('Local / No sincronizado')
                                     ->required(),
