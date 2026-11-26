@@ -14,7 +14,8 @@ Reglas de usuarios externos que fijó el usuario:
 - SharePoint y/u OneDrive, al menos uno; fecha fin opcional.
 - Recordatorio por fecha fin a los **administradores por correo**, no al responsable; comando `usuarios-externos:recordar-fin` en el scheduler existente.
 - Formulario PDF: tipo siempre «Alta», cargo obligatorio, firmas solo con rótulos (Gerente de Área / Subgerente de TI), PDF en tabla `pdf_usuarios_externos` (no en columnas del registro).
-- N° correlativo por año, automático y no editable: `UsuarioExterno::crearNumerado()` + `pg_advisory_xact_lock`.
+- N° correlativo por año, automático y no editable: `UsuarioExterno::crearNumerado()` + `pg_advisory_xact_lock`. El 2026-11-26 el usuario quitó el campo N° del formulario (no se muestra al crear/editar; sí en tabla, ficha y PDF).
+- Acciones del PDF (`UsuarioExternoFormularioPdfActions`): vista previa, generar/regenerar en cola, ver, descargar, enviar a firmar, subir firmado a mano. La ficha incrusta el PDF solo si existe.
 
 **Why:** decisiones explícitas del usuario; el mismo nombre «usuario externo» se reutilizó para la entidad nueva.
 

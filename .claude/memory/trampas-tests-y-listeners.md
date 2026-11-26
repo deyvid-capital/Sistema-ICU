@@ -29,4 +29,6 @@ Laravel 11+ **autodescubre** los listeners de `app/Listeners` por el tipo del ar
 
 Relacionado: [[suite-completa-verde]], [[control-acceso-seguridad-usuarios]]
 
+**Factories con valores de enum escritos a mano:** `CargadorFactory` usaba `'danado'` y el enum es `'dañado'`; fallaba 1 de cada 6 corridas. Usar `Enum::cases()` en las factories (arreglado el 2026-11-25).
+
 **Modelo nuevo con `LogsIcuActivity`:** hay que agregarlo a `DominioActividad::mapaDeModelos()`; si no, falla `tests/Unit/Enums/DominioActividadTest` (solo se ve en la suite completa). Pasó con `GuiaEdicion` el 2026-11-11 (quedó en Documentos).

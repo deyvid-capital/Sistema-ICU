@@ -1,6 +1,6 @@
 ---
 name: matriz-perfiles-excel
-description: Reglas de negocio de la Matriz de perfiles (Excel por cargo) decididas por el usuario el 2026-11-09; commit db5a251
+description: Reglas de negocio de la Matriz de perfiles (Excel por cargo) decididas por el usuario el 2026-11-09 (commit db5a251); software por cargo desde 2026-11-25
 metadata:
   node_type: memory
   type: project

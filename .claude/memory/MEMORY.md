@@ -1,17 +1,18 @@
 - [Use pnpm not npm](use-pnpm-not-npm.md) — always use pnpm for Node commands, never npm
 - [Pendientes: validación de catálogos](pendientes-validacion-catalogos.md) — lista viva de pendientes sobre catálogos inactivos y cascada de desactivación; consultar cuando el usuario pregunte "¿qué pendientes hay?"
 - [Control de acceso y seguridad de usuarios](control-acceso-seguridad-usuarios.md) — cómo está montado login/2FA/sesiones/notificaciones/roles para el super-admin
-- [Suite completa verde](suite-completa-verde.md) — 781/781 al 2026-11-11, todo fallo es regresión; correr con memory_limit=1G (si no, exit 137)
+- [Suite completa verde](suite-completa-verde.md) — ~870 tests verdes al 2026-11-26, todo fallo es regresión; memory_limit=1G y nunca dos corridas a la vez
 - [Trampas de tests y listeners](trampas-tests-y-listeners.md) — listeners duplicados por autodescubrimiento y skipAuthorization global de Filament
 - [Permisos memorizados en User](permisos-memorizados-en-user.md) — memo de hasPermissionTo por instancia; reglas anti-escalada al modificarlo
 - [Firma digital: avance](firma-digital-avance.md) — fases 1-7 hechas (7 sin commit), decisiones, almacenamiento público/confidencial y pendientes
 - [Dashboard y widgets](dashboard-widgets.md) — 8 widgets del dashboard; super_admin no salta Shield: re-correr RolesPermissionsSeeder tras crear widgets
-- [Matriz de perfiles (Excel)](matriz-perfiles-excel.md) — reglas por cargo: internet con siglas del área, software usuario+área sin excepciones, descarga síncrona
+- [Matriz de perfiles (Excel)](matriz-perfiles-excel.md) — reglas por cargo: internet con siglas del área, software usuario+cargo sin excepciones, descarga síncrona
 - [Guía de usuario: avance](guia-usuario-avance.md) — paquete aparte en packages/capitalsafi/documentacion-sistema-icu; otro IDE hace las tareas y yo reviso en .avance/revision; estado y pendientes
 - [Cambios del sistema 2026-11-13](cambios-sistema-2026-11-13.md) — permisos de cargadores, celulares sin doble asignación y «Reasignar todo» al reingresar; decisiones y límites
 - [Memoria y skills en el repo](memoria-y-skills-en-el-repo.md) — dos equipos: copiar la memoria a .claude/memory y versionar skills de .claude y .cursor; el push lo hace el usuario
-- [Plugin de apariencia](plugin-apariencia.md) — capitalsafi/filament-apariencia en packages/capitalsafi; temas SAFI, decisiones, roles y trampas; detalle en .agente/.avance del paquete
-- [Plugin Breezy](plugin-breezy.md) — fork capitalsafi/filament-breezy en packages/capitalsafi; app conectada y fusionada a main (2026-11-23); los 3 paquetes siguen como path (packages/ clonado en ambas compus); más adelante rama develop; T4–T7 por revisar, tareas fáciles para Cursor en .avance
 - [Software por cargo y categorías](software-por-cargo-y-categorias.md) — 2026-11-25: software_areas→software_cargos, categoría a tabla propia, acciones por categoría/cargo
 - [Usuarios externos y formulario](usuarios-externos-y-formulario.md) — 2026-11-26: soporte técnico vs usuarios externos, recordatorio a admins, formulario PDF numerado con firma
 - [Commits sin Co-Authored-By](commits-sin-co-authored-by.md) — regla del usuario: nunca agregar «Co-Authored-By: Claude» ni atribución en commits o PRs
+- [Plugin de apariencia](plugin-apariencia.md) — capitalsafi/filament-apariencia en packages/capitalsafi; temas SAFI, decisiones, roles y trampas; detalle en .agente/.avance del paquete
+- [Plugin Breezy](plugin-breezy.md) — fork capitalsafi/filament-breezy en packages/capitalsafi; app conectada y fusionada a main (2026-11-23); los 3 paquetes siguen como path (packages/ clonado en ambas compus); más adelante rama develop; T4–T7 por revisar, tareas fáciles para Cursor en .avance
+- [Bitácora 2026-11-25/26](cambios-sistema-2026-11-25-26.md) — commits de software por cargo, usuarios externos, formulario PDF, DAZA, Azure AD; V2 descartada; pendientes de la guía
