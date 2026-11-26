@@ -333,7 +333,7 @@ class MovimientoFormularioPdfTest extends TestCase
         $this->assertSame('AnyDesk', $documento['software']['soporte_remoto']);
         $this->assertStringContainsString('TeamViewer (Pendiente)', $documento['software']['excepciones']);
         $this->assertStringContainsString('AnyDesk (Aprobada)', $documento['software']['excepciones']);
-        $this->assertSame('cduran - Lectura - Fondo Capital - Produccion', $documento['software']['daza']);
+        $this->assertSame('DazProd-Lectura', $documento['software']['daza']);
         $this->assertArrayNotHasKey('complemento', $documento);
     }
 }

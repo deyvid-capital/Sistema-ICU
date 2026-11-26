@@ -2,6 +2,7 @@
 
 namespace App\Services\Pdf;
 
+use App\Enums\AmbienteDaza;
 use App\Enums\CategoriasSoftware;
 use App\Enums\EstadoAprobacionExcepcion;
 use App\Enums\MovimientoFormularioPdfTipo;
@@ -52,7 +53,7 @@ class MovimientoFormularioPdfData
             'usuario.accesosSistemas.sistema',
             'usuario.accesosSharepoint.sitio',
             'usuario.accesosInternet',
-            'usuario.accesosDaza.fondo',
+            'usuario.accesosDaza',
             'usuario.accesosVirtual.virtual',
             'usuario.accesosVirtual.recursoVpn',
             'usuario.licenciasUsuarios.licencia',
@@ -305,21 +306,23 @@ class MovimientoFormularioPdfData
         return $this->joinList(
             $usuario?->accesosDaza
                 ?->filter(fn (AccesoDaza $acceso): bool => $this->vigente($acceso->estado))
-                ->map(function (AccesoDaza $acceso): string {
-                    $fondo = $acceso->fondo?->nombre_completo ?? $acceso->fondo?->codigo;
-                    $partes = array_filter([
-                        $acceso->usuario_daza,
-                        $acceso->nivel_acceso,
-                        $fondo,
-                        $acceso->ambiente,
-                    ], fn (?string $parte): bool => filled($parte));
-
-                    return implode(' - ', $partes);
-                })
-                ->filter()
+                ->map(fn (AccesoDaza $acceso): string => $this->etiquetaDaza($acceso))
+                ->unique()
                 ->values()
                 ->all() ?? []
         );
+    }
+
+    /**
+     * Rótulo del acceso a DAZA: «DazProd-Nivel», «DazCont-Nivel» o «DazTest-Nivel».
+     * Si el ambiente no es reconocible se usa «Daza» para no perder el acceso.
+     */
+    private function etiquetaDaza(AccesoDaza $acceso): string
+    {
+        $prefijo = AmbienteDaza::tryFromTexto($acceso->ambiente)?->abreviatura() ?? 'Daza';
+        $nivel = trim((string) $acceso->nivel_acceso);
+
+        return $nivel === '' ? $prefijo : $prefijo.'-'.$nivel;
     }
 
     private function mapExcepciones(?User $usuario): string

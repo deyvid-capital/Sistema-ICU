@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AccesoDazas\Schemas;
 
+use App\Enums\AmbienteDaza;
 use App\Filament\Resources\Users\RelationManagers\AccesosDazaRelationManager;
 use App\Models\AccesoDaza;
 use App\Models\Fondo;
@@ -84,10 +85,7 @@ class AccesoDazaForm
                                     ->label('Ambiente')
                                     ->native(false)
                                     ->live()
-                                    ->options([
-                                        'Producción' => 'Producción',
-                                        'Contingencia' => 'Contingencia',
-                                    ])
+                                    ->options(AmbienteDaza::class)
                                     ->required(),
                                 DatePicker::make('fecha')
                                     ->default(now())
