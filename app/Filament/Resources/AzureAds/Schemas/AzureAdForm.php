@@ -65,7 +65,7 @@ class AzureAdForm
                                         'Nube' => 'Nube',
                                         'Local / Nube' => 'Local / Nube',
                                     ])
-                                    ->default('Local / No sincronizado')
+                                    ->default('Local / Nube')
                                     ->required(),
                                 Toggle::make('mfa')
                                     ->label('MFA habilitado')
