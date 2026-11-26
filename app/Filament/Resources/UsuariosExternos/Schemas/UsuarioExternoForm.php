@@ -29,13 +29,6 @@ class UsuarioExternoForm
                     ->schema([
                         Grid::make(['default' => 1, 'md' => 2])
                             ->schema([
-                                TextInput::make('numero')
-                                    ->label('N° de formulario')
-                                    ->placeholder('Se asigna automáticamente al guardar')
-                                    ->helperText('Correlativo por año (001-2026, 002-2026...). No se puede editar.')
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->columnSpanFull(),
                                 TextInput::make('nombre_contacto')
                                     ->label('Nombre del contacto')
                                     ->placeholder('Ej. Juan Pérez')

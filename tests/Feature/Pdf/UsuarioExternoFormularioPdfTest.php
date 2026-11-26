@@ -81,7 +81,6 @@ class UsuarioExternoFormularioPdfTest extends TestCase
         UsuarioExterno::factory()->create();
 
         Livewire::test(CreateUsuarioExterno::class)
-            ->assertSchemaComponentStateNotSet('numero', '999-2026')
             ->fillForm([
                 'numero' => '999-2026',
                 'nombre_contacto' => 'Javier Villegas',
