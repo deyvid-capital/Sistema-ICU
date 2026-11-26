@@ -14,3 +14,4 @@
 - [Plugin Breezy](plugin-breezy.md) — fork capitalsafi/filament-breezy en packages/capitalsafi; app conectada y fusionada a main (2026-11-23); los 3 paquetes siguen como path (packages/ clonado en ambas compus); más adelante rama develop; T4–T7 por revisar, tareas fáciles para Cursor en .avance
 - [Software por cargo y categorías](software-por-cargo-y-categorias.md) — 2026-11-25: software_areas→software_cargos, categoría a tabla propia, acciones por categoría/cargo
 - [Usuarios externos y formulario](usuarios-externos-y-formulario.md) — 2026-11-26: soporte técnico vs usuarios externos, recordatorio a admins, formulario PDF numerado con firma
+- [Commits sin Co-Authored-By](commits-sin-co-authored-by.md) — regla del usuario: nunca agregar «Co-Authored-By: Claude» ni atribución en commits o PRs
