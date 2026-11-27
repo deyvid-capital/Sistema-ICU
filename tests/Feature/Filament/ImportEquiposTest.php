@@ -103,26 +103,34 @@ class ImportEquiposTest extends TestCase
         $this->assertSame(1, Equipo::query()->where('service_tag', 'ABC12345')->count());
     }
 
-    public function test_equipo_import_fails_when_modelo_does_not_exist(): void
+    public function test_equipo_import_creates_missing_catalog_entries_and_reuses_existing_ones_ignoring_case(): void
     {
         $this->seedCatalog();
 
         $import = $this->runImport(EquipoImporter::class, [
             [
                 'service_tag' => 'XYZ99999',
-                'modelo' => 'Inexistente',
-                'microprocesador' => 'Intel Core i7-1365U',
-                'ram' => '16GB DDR4',
+                'modelo' => 'Precision 3581',
+                'microprocesador' => 'intel core i7-1365u',
+                'ram' => '32GB DDR5',
                 'gpu' => 'NVIDIA RTX 4050',
             ],
         ], $this->requiredColumnMap());
 
-        $this->assertSame(0, $import->successful_rows);
-        $this->assertSame(1, $import->getFailedRowsCount());
-        $this->assertDatabaseMissing(Equipo::class, ['service_tag' => 'XYZ99999']);
-        $this->assertTrue(
-            FailedImportRow::query()->where('import_id', $import->id)->exists(),
-        );
+        $this->assertSame(1, $import->successful_rows);
+        $this->assertSame(0, $import->getFailedRowsCount());
+
+        $this->assertSame(2, ModeloLaptop::query()->count());
+        $this->assertSame(1, Microprocesador::query()->count());
+        $this->assertSame(2, MemoriaRam::query()->count());
+        $this->assertSame(1, TarjetaVideo::query()->count());
+
+        $this->assertDatabaseHas(Equipo::class, [
+            'service_tag' => 'XYZ99999',
+            'modelo_id' => ModeloLaptop::query()->where('nombre', 'Precision 3581')->value('id'),
+            'microprocesador_id' => Microprocesador::query()->where('nombre_micro', 'Intel Core i7-1365U')->value('id'),
+            'ram_id' => MemoriaRam::query()->where('tipo_ram', '32GB DDR5')->value('id'),
+        ]);
     }
 
     public function test_equipo_import_fails_when_codigo_activo_is_duplicated(): void

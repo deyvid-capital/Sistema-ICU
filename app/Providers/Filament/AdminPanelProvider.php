@@ -9,7 +9,6 @@ use App\Filament\Clusters\Configuracion\Pages\Archivos;
 use App\Filament\Clusters\Configuracion\Pages\Correo;
 use App\Filament\Clusters\Configuracion\Pages\FirmaDigital;
 use App\Filament\Clusters\Equipos\EquiposCluster;
-use App\Filament\Clusters\Inventario\InventarioCluster;
 use App\Filament\Clusters\Recursos\RecursosCluster;
 use App\Filament\Clusters\Software\SoftwareCluster;
 use App\Filament\Clusters\Usuarios\UsuariosCluster;
@@ -141,7 +140,6 @@ class AdminPanelProvider extends PanelProvider
                 SoftwareCluster::class,
                 AccesosCluster::class,
                 RecursosCluster::class,
-                InventarioCluster::class,
                 EquiposCluster::class,
                 AsignacionCluster::class,
                 CelularesCluster::class,

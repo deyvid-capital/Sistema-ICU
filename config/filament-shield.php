@@ -250,6 +250,20 @@ return [
         'UploadSigned:PdfCelular' => 'Subir PDF de celular firmado a mano',
         'UploadSigned:PdfMovimiento' => 'Subir PDF de movimiento firmado a mano',
         'UploadSigned:PdfUsuarioExterno' => 'Subir PDF de usuario externo firmado a mano',
+
+        // Catálogos de hardware: se gestionan desde los selectores del formulario de equipo.
+        'Create:ModeloLaptop' => 'Crear modelos de laptop',
+        'Update:ModeloLaptop' => 'Editar modelos de laptop',
+        'Delete:ModeloLaptop' => 'Eliminar modelos de laptop',
+        'Create:Microprocesador' => 'Crear microprocesadores',
+        'Update:Microprocesador' => 'Editar microprocesadores',
+        'Delete:Microprocesador' => 'Eliminar microprocesadores',
+        'Create:MemoriaRam' => 'Crear memorias RAM',
+        'Update:MemoriaRam' => 'Editar memorias RAM',
+        'Delete:MemoriaRam' => 'Eliminar memorias RAM',
+        'Create:TarjetaVideo' => 'Crear tarjetas de video',
+        'Update:TarjetaVideo' => 'Editar tarjetas de video',
+        'Delete:TarjetaVideo' => 'Eliminar tarjetas de video',
     ],
 
     /*

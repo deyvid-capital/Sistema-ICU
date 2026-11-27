@@ -5,10 +5,15 @@ namespace App\Filament\Imports;
 use App\Enums\EstadoEquipo;
 use App\Filament\Imports\Concerns\HasImportGuide;
 use App\Models\Equipo;
+use App\Models\MemoriaRam;
+use App\Models\Microprocesador;
+use App\Models\ModeloLaptop;
+use App\Models\TarjetaVideo;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Number;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +25,7 @@ class EquipoImporter extends Importer
 
     public static function getImportGuideSummary(): ?string
     {
-        return 'CSV con coma (,). Máximo 200 filas. Importa el catálogo de inventario antes (modelo, procesador, RAM y GPU). Si el service tag ya existe se actualiza. No se importan campos booleanos (BIOS, etiquetado, usuario admin, litigation hold, BitLocker): quedan los valores por defecto o los ya guardados. Observaciones es opcional.';
+        return 'CSV con coma (,). Máximo 200 filas. Si el modelo, procesador, RAM o GPU no existe, se crea automáticamente. Si el service tag ya existe se actualiza. No se importan campos booleanos (BIOS, etiquetado, usuario admin, litigation hold, BitLocker): quedan los valores por defecto o los ya guardados. Observaciones es opcional.';
     }
 
     public static function getColumns(): array
@@ -56,34 +61,10 @@ class EquipoImporter extends Importer
                 ->castStateUsing(function (?string $state): ?string {
                     return self::normalizarEstado($state)?->value;
                 }),
-            ImportColumn::make('modelo')
-                ->label('Modelo')
-                ->relationship(resolveUsing: 'nombre')
-                ->requiredMapping()
-                ->rules(['required'])
-                ->helperText('Debe coincidir con un modelo de laptop ya cargado.')
-                ->example('Latitude 5540'),
-            ImportColumn::make('microprocesador')
-                ->label('Microprocesador')
-                ->relationship(resolveUsing: 'nombre_micro')
-                ->requiredMapping()
-                ->rules(['required'])
-                ->helperText('Debe coincidir con un procesador ya cargado.')
-                ->example('Intel Core i7-1365U'),
-            ImportColumn::make('ram')
-                ->label('Memoria RAM')
-                ->relationship(resolveUsing: 'tipo_ram')
-                ->requiredMapping()
-                ->rules(['required'])
-                ->helperText('Debe coincidir con un tipo de RAM ya cargado.')
-                ->example('16GB DDR4'),
-            ImportColumn::make('gpu')
-                ->label('Tarjeta de video')
-                ->relationship(resolveUsing: 'nombre_gpu')
-                ->requiredMapping()
-                ->rules(['required'])
-                ->helperText('Debe coincidir con una GPU ya cargada.')
-                ->example('NVIDIA RTX 4050'),
+            self::columnaDeCatalogo('modelo', 'Modelo', ModeloLaptop::class, 'nombre', 'modelo_id', 100, 'Latitude 5540'),
+            self::columnaDeCatalogo('microprocesador', 'Microprocesador', Microprocesador::class, 'nombre_micro', 'microprocesador_id', 100, 'Intel Core i7-1365U'),
+            self::columnaDeCatalogo('ram', 'Memoria RAM', MemoriaRam::class, 'tipo_ram', 'ram_id', 50, '16GB DDR4'),
+            self::columnaDeCatalogo('gpu', 'Tarjeta de video', TarjetaVideo::class, 'nombre_gpu', 'gpu_id', 100, 'NVIDIA RTX 4050'),
             ImportColumn::make('disco_duro')
                 ->label('Disco duro')
                 ->rules(['nullable', 'max:50'])
@@ -191,6 +172,37 @@ class EquipoImporter extends Importer
         }
 
         return $body;
+    }
+
+    /**
+     * Columna de un catálogo de hardware: busca el registro por nombre (sin
+     * distinguir mayúsculas) y, si no existe, lo crea.
+     *
+     * @param  class-string<Model>  $modelo
+     */
+    private static function columnaDeCatalogo(
+        string $nombre,
+        string $etiqueta,
+        string $modelo,
+        string $atributo,
+        string $llaveForanea,
+        int $largoMaximo,
+        string $ejemplo,
+    ): ImportColumn {
+        return ImportColumn::make($nombre)
+            ->label($etiqueta)
+            ->requiredMapping()
+            ->rules(['required', "max:{$largoMaximo}"])
+            ->helperText('Si no existe, se crea en el catálogo.')
+            ->example($ejemplo)
+            ->castStateUsing(self::trimState(...))
+            ->fillRecordUsing(function (Equipo $record, string $state) use ($modelo, $atributo, $llaveForanea): void {
+                $existente = $modelo::query()
+                    ->whereRaw('LOWER('.$atributo.') = ?', [mb_strtolower($state)])
+                    ->first();
+
+                $record->{$llaveForanea} = ($existente ?? $modelo::query()->create([$atributo => $state]))->getKey();
+            });
     }
 
     private static function trimState(?string $state): ?string
