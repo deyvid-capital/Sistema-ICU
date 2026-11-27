@@ -8,6 +8,7 @@ use App\Models\RecepcionEquipo;
 use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -66,15 +67,11 @@ class RecepcionEquipoForm
                                     ->afterStateUpdated(
                                         static::syncFormularioEquipoNumeroOnFechaChange(RecepcionEquipo::class),
                                     ),
-                                RichEditor::make('observaciones')
+                                Textarea::make('observaciones')
                                     ->label('Observaciones')
-                                    ->columnSpanFull()
-                                    ->toolbarButtons([
-                                        ['bold', 'italic', 'underline', 'strike', 'link'],
-                                        ['h2', 'h3'],
-                                        ['bulletList', 'orderedList'],
-                                        ['undo', 'redo'],
-                                    ])
+                                    ->nullable()
+                                    ->rows(3)
+                                    ->maxLength(500)
                                     ->columnSpanFull(),
                             ]),
                     ]),

@@ -30,6 +30,8 @@ class LicenciaUsuarioResource extends Resource
 
     protected static ?string $navigationLabel = 'Licencias de usuarios';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?int $navigationSort = 6;
 
     protected static ?string $modelLabel = 'licencia de usuario';

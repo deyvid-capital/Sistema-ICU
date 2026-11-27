@@ -15,6 +15,7 @@ use App\Rules\NotTrashed;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
@@ -147,15 +148,12 @@ class AsignacionEquipoForm
                                                     ->offColor('danger')
                                                     ->default(false)
                                                     ->inline(false),
-                                                RichEditor::make('observaciones')
+                                                Textarea::make('observaciones')
                                                     ->label('Observaciones')
-                                                    ->columnSpanFull()
-                                                    ->toolbarButtons([
-                                                        ['bold', 'italic', 'underline', 'strike', 'link'],
-                                                        ['h2', 'h3'],
-                                                        ['bulletList', 'orderedList'],
-                                                        ['undo', 'redo'],
-                                                    ])
+                                                    ->nullable()
+                                                    ->rows(3)
+                                                    ->maxLength(500)
+                                                    ->helperText('Máximo 500 caracteres')
                                                     ->columnSpanFull(),
                                                 RichEditor::make('nota')
                                                     ->label('Nota')

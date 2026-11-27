@@ -29,8 +29,6 @@ class UserForm
                 Section::make('Datos personales')
                     ->description('Información básica del usuario.')
                     ->icon(Heroicon::OutlinedUser)
-                    ->collapsible()
-                    ->secondary()
                     ->columns(1)
                     ->schema([
                         Grid::make([
