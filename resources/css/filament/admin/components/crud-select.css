@@ -7,6 +7,11 @@
  */
 
 .fi-crud-select {
+    /* Referencia de la posición absoluta del panel y del menú ⋮. */
+    & .fi-select-input {
+        @apply relative;
+    }
+
     /* Panel desplegable: más alto que el del Select nativo (max-h-60). */
     & .fi-crud-select-panel {
         @apply z-30 max-h-96 overflow-y-auto;

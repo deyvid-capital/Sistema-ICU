@@ -106,7 +106,7 @@
                 <p x-show="cargando" class="mb-2 text-sm text-gray-500">Cargando documento…</p>
                 <p x-show="error" x-text="error" class="mb-2 text-sm text-danger-600"></p>
 
-                <div x-ref="paginas" class="overflow-x-auto rounded-xl bg-gray-100 p-2 dark:bg-white/5">
+                <div x-ref="paginas" class="fi-scrollbar-sutil overflow-x-auto rounded-xl bg-gray-100 p-2 dark:bg-white/5">
                     <template x-for="pagina in paginas" :key="`${documentoActivo}-${pagina.numero}`">
                         <div
                             class="relative mx-auto mb-4 cursor-crosshair bg-white shadow"

@@ -139,16 +139,21 @@
                 ></button>
             </div>
 
-            {{-- Panel desplegable (posición fija para que no lo recorte un modal ni el scroll). --}}
+            {{--
+                Panel desplegable. Va con posición absoluta (como el Select de Filament): así
+                acompaña al scroll de la página por sí solo. Con posición fija había que
+                recalcularlo en cada scroll y llegaba un cuadro tarde, por eso temblaba.
+            --}}
             <div
                 x-show="isOpen"
                 x-cloak
-                x-anchor.bottom-start.offset.4.fixed="$refs.container"
+                x-anchor.bottom-start.offset.4="$refs.container"
                 x-bind:style="isOpen ? { width: Math.max($refs.container.getBoundingClientRect().width, 256) + 'px' } : {}"
                 x-transition:enter="transition ease-out duration-75"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
                 x-on:keydown="onPanelKeydown($event)"
+                x-on:scroll.passive="closeMenu()"
                 class="fi-dropdown-panel fi-scrollable fi-crud-select-panel"
             >
                 {{-- Cabecera: buscador y «+ Crear» en la esquina superior derecha. --}}
@@ -227,7 +232,7 @@
             <div
                 x-show="menuFor !== null"
                 x-cloak
-                x-anchor.bottom-end.offset.4.fixed="menuAnchor"
+                x-anchor.bottom-end.offset.4="menuAnchor"
                 x-on:click.outside="closeMenu()"
                 class="fi-dropdown-panel fi-crud-select-menu"
                 role="menu"

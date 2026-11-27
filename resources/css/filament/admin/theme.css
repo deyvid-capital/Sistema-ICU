@@ -163,6 +163,56 @@
     display: none; /* Chrome, Edge, Safari */
 }
 
+/*
+ * Scrollbar delgado en las zonas con scroll propio: desplegables (Select, CrudSelect,
+ * menús de acciones), resultados de la búsqueda global, modales y slide-overs,
+ * tablas anchas, el buscador de la guía y la vista de páginas al configurar firmas
+ * (.fi-scrollbar-sutil).
+ */
+.fi-dropdown-panel,
+.fi-global-search-results-ctn,
+.fi-modal-window-ctn,
+.fi-modal-slide-over .fi-modal-window,
+.fi-ta-content-ctn,
+.guia-buscador__resultados,
+.fi-scrollbar-sutil {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--gray-400) 55%, transparent) transparent;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: color-mix(in oklab, var(--gray-400) 55%, transparent);
+        border-radius: 9999px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: color-mix(in oklab, var(--gray-500) 75%, transparent);
+    }
+}
+.dark :is(
+        .fi-dropdown-panel,
+        .fi-global-search-results-ctn,
+        .fi-modal-window-ctn,
+        .fi-modal-slide-over .fi-modal-window,
+        .fi-ta-content-ctn,
+        .guia-buscador__resultados,
+        .fi-scrollbar-sutil
+    ) {
+    scrollbar-color: color-mix(in oklab, var(--gray-500) 55%, transparent) transparent;
+
+    &::-webkit-scrollbar-thumb {
+        background-color: color-mix(in oklab, var(--gray-500) 55%, transparent);
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: color-mix(in oklab, var(--gray-400) 70%, transparent);
+    }
+}
+
 /* Tabs: scrollbar sutil, visible solo al hover */
 .fi-tabs {
     scrollbar-width: thin;
