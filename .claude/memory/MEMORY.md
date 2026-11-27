@@ -15,4 +15,5 @@
 - [Commits sin Co-Authored-By](commits-sin-co-authored-by.md) — regla del usuario: nunca agregar «Co-Authored-By: Claude» ni atribución en commits o PRs
 - [Plugin de apariencia](plugin-apariencia.md) — capitalsafi/filament-apariencia en packages/capitalsafi; temas SAFI, decisiones, roles y trampas; detalle en .agente/.avance del paquete
 - [Plugin Breezy](plugin-breezy.md) — fork capitalsafi/filament-breezy en packages/capitalsafi; app conectada y fusionada a main (2026-11-23); los 3 paquetes siguen como path (packages/ clonado en ambas compus); más adelante rama develop; T4–T7 por revisar, tareas fáciles para Cursor en .avance
-- [Bitácora 2026-11-25/26](cambios-sistema-2026-11-25-26.md) — commits de software por cargo, usuarios externos, formulario PDF, DAZA, Azure AD; V2 descartada; pendientes de la guía
+- [Bitácora 2026-11-25/26](cambios-sistema-2026-11-25-26.md) — commits de software por cargo, usuarios externos, formulario PDF, DAZA, Azure AD, CrudSelect y fin de Inventario; V2 descartada; pendientes de la guía
+- [Inventario eliminado → CrudSelect](inventario-eliminado-crudselect.md) — catálogos de hardware se gestionan desde EquipoForm; permisos en custom_permissions
